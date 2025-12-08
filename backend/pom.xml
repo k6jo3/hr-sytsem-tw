@@ -23,6 +23,19 @@
     <modules>
         <module>hrms-common</module>
         <module>hrms-iam</module>
+        <module>hrms-organization</module>
+        <module>hrms-attendance</module>
+        <module>hrms-payroll</module>
+        <module>hrms-insurance</module>
+        <module>hrms-project</module>
+        <module>hrms-timesheet</module>
+        <module>hrms-performance</module>
+        <module>hrms-recruitment</module>
+        <module>hrms-training</module>
+        <module>hrms-workflow</module>
+        <module>hrms-notification</module>
+        <module>hrms-document</module>
+        <module>hrms-reporting</module>
     </modules>
 
     <properties>

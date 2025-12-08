@@ -1,9 +1,9 @@
 spring:
   application:
-    name: hrms-iam
+    name: hrms-organization
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/hrms_iam
+    url: jdbc:postgresql://localhost:5432/hrms_organization
     username: hrms_user
     password: hrms_password
     driver-class-name: org.postgresql.Driver
@@ -20,7 +20,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: hrms-iam-group
+      group-id: hrms-organization-group
       auto-offset-reset: earliest
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -31,7 +31,7 @@ spring:
     port: 6379
 
 server:
-  port: 8081
+  port: 8082
 
 eureka:
   client:
@@ -42,7 +42,7 @@ eureka:
 
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.company.hrms.iam.infrastructure.po
+  type-aliases-package: com.company.hrms.organization.infrastructure.po
   configuration:
     map-underscore-to-camel-case: true
 
@@ -56,11 +56,5 @@ springdoc:
 
 logging:
   level:
-    com.company.hrms.iam: DEBUG
+    com.company.hrms.organization: DEBUG
     org.springframework.web: INFO
-
-# JWT Configuration
-jwt:
-  secret: your-256-bit-secret-key-change-this-in-production
-  expiration: 86400000  # 24 hours
-  refresh-expiration: 604800000  # 7 days
