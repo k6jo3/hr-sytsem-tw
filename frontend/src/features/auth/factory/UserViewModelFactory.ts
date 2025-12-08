@@ -60,7 +60,7 @@ export class UserViewModelFactory {
    */
   private static mapStatusLabel(status: UserDto['status']): string {
     const statusMap: Record<UserDto['status'], string> = {
-      ACTIVE: '啟用',
+      ACTIVE: '在職',
       INACTIVE: '停用',
       LOCKED: '鎖定',
       DELETED: '已刪除',

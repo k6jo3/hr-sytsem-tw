@@ -384,6 +384,130 @@
 - ✅ 成功/錯誤訊息提示（message）
 - ✅ 居中響應式布局設計
 
+### 19. 工時填報功能類型定義
+
+**TimesheetTypes.ts** - 完整的DTO定義
+- TimesheetStatus（工時狀態：DRAFT, SUBMITTED, APPROVED, REJECTED）
+- TimesheetEntryDto
+- WeeklyTimesheetDto
+- CreateTimesheetEntryRequest
+- UpdateTimesheetEntryRequest
+- SubmitTimesheetRequest
+- GetWeeklyTimesheetRequest
+- GetWeeklyTimesheetResponse
+- SubmitTimesheetResponse
+
+**TimesheetViewModel.ts** - ViewModel定義
+- TimesheetEntryViewModel interface
+- WeeklyTimesheetSummary interface
+
+### 20. 工時填報Factory實作
+
+**TimesheetViewModelFactory.ts**
+- ✅ createFromDTO - DTO轉ViewModel
+- ✅ createListFromDTOs - 批量轉換
+- ✅ createWeeklySummary - 建立週工時摘要
+- ✅ groupByDate - 依日期分組工時記錄
+- ✅ mapStatusLabel - 狀態文字對應（草稿、已提交、已核准、已駁回）
+- ✅ mapStatusColor - 狀態顏色對應
+- ✅ formatDateDisplay - 日期格式化（MM/DD）
+- ✅ formatWeekDisplay - 週區間格式化（MM/DD - MM/DD）
+- ✅ canEdit - 編輯權限判斷（DRAFT或REJECTED可編輯）
+- ✅ canDelete - 刪除權限判斷（DRAFT或REJECTED可刪除）
+- ✅ canSubmit - 提交權限判斷（DRAFT可提交）
+
+### 21. 工時填報Factory測試
+
+**TimesheetViewModelFactory.test.ts**
+- ✅ 應該正確轉換工時記錄DTO為ViewModel
+- ✅ 應該包含所有必要欄位
+- ✅ 應該正確對應草稿狀態
+- ✅ 應該正確對應已提交狀態
+- ✅ 應該正確對應已核准狀態
+- ✅ 應該正確對應已駁回狀態
+- ✅ 應該正確處理WBS資訊
+- ✅ 應該正確處理缺少WBS的情況
+- ✅ 應該正確格式化工作日期（MM/DD）
+- ✅ 草稿狀態應該可以編輯
+- ✅ 已提交狀態不應該可以編輯
+- ✅ 已駁回狀態應該可以編輯
+- ✅ 草稿狀態應該可以刪除
+- ✅ 已提交狀態不應該可以刪除
+- ✅ 應該批量轉換DTO列表
+- ✅ 應該正確建立週工時摘要
+- ✅ 應該正確計算總工時
+- ✅ 應該正確格式化週區間顯示（MM/DD - MM/DD）
+- ✅ 草稿狀態的週工時應該可以提交
+- ✅ 已提交狀態的週工時不應該可以提交
+- ✅ 應該依日期分組工時記錄
+
+### 22. 工時填報Hook實作
+
+**useTimesheet.ts**
+- ✅ fetchWeeklyTimesheet - 取得週工時資料
+- ✅ handleSubmit - 提交週工時
+- ✅ refresh函式 - 重新整理資料
+- ✅ 錯誤處理
+- ✅ 載入狀態管理
+- ✅ 提交成功後自動刷新
+
+### 23. 工時填報Hook測試
+
+**useTimesheet.test.ts**
+- ✅ 初始狀態
+  - 應該有正確的初始狀態
+- ✅ 取得週工時
+  - 應該成功取得週工時資料
+  - 應該正確處理API錯誤
+- ✅ 提交工時
+  - 應該成功提交工時
+
+### 24. 工時填報元件實作
+
+**WeeklyTimesheetView.tsx**
+- ✅ 週工時摘要顯示
+- ✅ 週區間顯示（MM/DD - MM/DD）
+- ✅ 總工時顯示
+- ✅ 狀態標籤（Tag）顯示
+- ✅ 工時記錄表格（日期、專案、工時、狀態）
+- ✅ 提交按鈕（依權限禁用）
+- ✅ 載入骨架屏
+- ✅ 空狀態處理
+- ✅ 支援onSubmit、onEdit、onDelete回調
+
+### 25. 工時填報元件測試
+
+**WeeklyTimesheetView.test.tsx**
+- ✅ 顯示週工時摘要
+  - 應該顯示週區間
+  - 應該顯示總工時
+  - 應該顯示工時記錄
+- ✅ 提交按鈕
+  - 可以提交時應該顯示提交按鈕
+  - 不可提交時按鈕應該禁用
+  - 點擊提交按鈕應該呼叫onSubmit
+- ✅ 載入狀態
+  - 載入中時應該顯示骨架屏
+- ✅ 空狀態
+  - 沒有資料時應該顯示空狀態
+
+### 26. 工時填報API實作
+
+**TimesheetApi.ts**
+- ✅ getWeeklyTimesheet - 取得週工時記錄API
+- ✅ submitTimesheet - 提交週工時API
+
+### 27. 工時填報頁面實作
+
+**HR07TimesheetPage.tsx**
+- ✅ 完整的工時填報頁面UI
+- ✅ 整合WeeklyTimesheetView元件
+- ✅ 使用useTimesheet hook
+- ✅ 週工時顯示
+- ✅ 提交工時功能
+- ✅ 成功/錯誤訊息提示（message）
+- ✅ 響應式布局設計
+
 ## 📊 TDD開發流程摘要
 
 ### RED階段 ✅
@@ -408,9 +532,10 @@
 1. ✅ ~~執行測試驗證登入功能~~
 2. ✅ ~~完成員工列表頁面（HR02-P01）~~
 3. ✅ ~~完成考勤打卡頁面（HR03-P01）~~
-4. 執行測試驗證所有功能
-5. 根據測試結果進行重構
-6. 繼續開發其他核心功能頁面
+4. ✅ ~~完成工時填報頁面（HR07-P01）~~
+5. 執行測試驗證所有功能
+6. 根據測試結果進行重構
+7. 繼續開發其他核心功能頁面（建議順序：HR06專案管理、HR04薪資計算）
 
 ## 📝 測試執行指令
 
@@ -429,6 +554,9 @@ npm test AttendanceViewModelFactory
 npm test useAttendance
 npm test CheckInButton
 npm test TodayAttendanceCard
+npm test TimesheetViewModelFactory
+npm test useTimesheet
+npm test WeeklyTimesheetView
 
 # 監看模式
 npm test -- --watch
@@ -452,12 +580,39 @@ npm test -- --coverage
   - Factory測試: 100% 完成
   - 元件測試: 100% 完成（2個元件）
   - Hook測試: 100% 完成
+- **工時填報功能（HR07）**
+  - Factory測試: 100% 完成（20+測試案例）
+  - 元件測試: 100% 完成
+  - Hook測試: 100% 完成
+
+## 📈 開發進度
+
+已完成的前端功能模組：
+- ✅ **HR01** - 身分驗證與存取管理（登入、登出、使用者管理）
+- ✅ **HR02** - 組織與員工管理（員工列表）
+- ✅ **HR03** - 考勤管理（打卡功能）
+- ✅ **HR07** - 工時填報（週工時顯示與提交）
+
+待開發的前端功能模組：
+- ⏳ **HR06** - 專案管理（專案與WBS管理）
+- ⏳ **HR04** - 薪資計算（薪資項目與計算）
+- ⏳ **HR05** - 保險管理
+- ⏳ **HR08** - 績效考核
+- ⏳ **HR09** - 招募管理
+- ⏳ **HR10** - 訓練管理
+- ⏳ **HR11** - 工作流程
+- ⏳ **HR12** - 通知服務
+- ⏳ **HR13** - 文件管理
+- ⏳ **HR14** - 報表分析
+
+**總體進度**: 4/14 功能模組完成（28.6%）
 
 ---
 
 **建立日期**: 2024-12-08
+**最後更新**: 2024-12-08
 **TDD流程**: RED → GREEN → REFACTOR
-**遵循規範**: 
+**遵循規範**:
 - ✅ 強制Factory Pattern
 - ✅ 型別安全（TypeScript）
 - ✅ 命名規範（HR{DD}格式）
