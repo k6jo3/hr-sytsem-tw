@@ -1,7 +1,6 @@
-// Auth Feature Exports
+// Auth Feature (HR01)
 export * from './api';
-export * from './components';
-export { UserViewModelFactory } from './factory/UserViewModelFactory';
+export * from './factory/UserViewModelFactory';
 export * from './hooks';
 export * from './model/UserProfile';
-
+export * from './components';

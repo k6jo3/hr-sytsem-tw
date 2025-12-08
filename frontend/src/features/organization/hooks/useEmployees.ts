@@ -1,46 +1,53 @@
-import { useState } from 'react';
-import { OrganizationApi } from '../api';
+import { useState, useEffect, useCallback } from 'react';
+import * as OrganizationApi from '../api/OrganizationApi';
+import { EmployeeViewModelFactory } from '../factory/EmployeeViewModelFactory';
+import type { EmployeeViewModel } from '../model/EmployeeViewModel';
+import type { GetEmployeeListRequest } from '../api/OrganizationTypes';
 
 /**
- * Employees Hook (員工管理 Hook)
- * 處理員工相關的業務邏輯
+ * useEmployees Hook
+ * 管理員工列表的資料取得與狀態
  */
-export const useEmployees = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+export const useEmployees = (params?: GetEmployeeListRequest) => {
+  const [employees, setEmployees] = useState<EmployeeViewModel[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const getEmployees = async (params?: { department?: string; status?: string }) => {
+  const fetchEmployees = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await OrganizationApi.getEmployees(params);
-      return result;
+      const response = await OrganizationApi.getEmployeeList(params);
+      const viewModels = EmployeeViewModelFactory.createListFromDTOs(
+        response.employees
+      );
+      setEmployees(viewModels);
+      setTotal(response.total);
     } catch (err) {
-      setError(err as Error);
-      throw err;
+      const errorMessage =
+        err instanceof Error ? err.message : '無法取得員工列表';
+      setError(errorMessage);
+      setEmployees([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
-  };
+  }, [params]);
 
-  const getEmployeeById = async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await OrganizationApi.getEmployeeById(id);
-      return result;
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
+
+  const refresh = useCallback(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
 
   return {
+    employees,
+    total,
     loading,
     error,
-    getEmployees,
-    getEmployeeById,
+    refresh,
   };
 };
