@@ -1,4 +1,5 @@
 // Workflow Feature (HR11)
-// TODO: Implement workflow management feature
-export { };
-
+export * from './api';
+export * from './factory/WorkflowViewModelFactory';
+export * from './hooks';
+export * from './model/WorkflowViewModel';

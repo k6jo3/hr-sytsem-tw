@@ -1,4 +1,5 @@
 // Payroll Feature (HR04)
-// TODO: Implement payroll management feature
-export { };
-
+export * from './api';
+export * from './factory/PayrollViewModelFactory';
+export * from './hooks';
+export * from './model/PayrollViewModel';

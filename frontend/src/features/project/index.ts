@@ -1,4 +1,5 @@
 // Project Feature (HR06)
-// TODO: Implement project management feature
-export { };
-
+export * from './api';
+export * from './factory/ProjectViewModelFactory';
+export * from './hooks';
+export * from './model/ProjectViewModel';

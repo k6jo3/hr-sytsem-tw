@@ -1,4 +1,6 @@
 // Attendance Feature (HR03)
-// TODO: Implement attendance management feature
-export { };
+export * from './api';
+export * from './factory/AttendanceViewModelFactory';
+export * from './hooks';
+export * from './model/AttendanceViewModel';
 
