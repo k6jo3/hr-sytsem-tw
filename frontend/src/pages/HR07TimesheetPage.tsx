@@ -1,19 +1,44 @@
 import React from 'react';
-import { Card, Typography } from 'antd';
+import { Layout, message } from 'antd';
+import { WeeklyTimesheetView } from '@features/timesheet/components/WeeklyTimesheetView';
+import { useTimesheet } from '@features/timesheet/hooks/useTimesheet';
 
-const { Title } = Typography;
+const { Content } = Layout;
 
-/**
- * HR07TimesheetPage - 工時填報頁
- * Feature: timesheet
- */
-export const HR07TimesheetPage: React.FC = () => {
+const HR07TimesheetPage: React.FC = () => {
+  const weekStartDate = '2024-12-02';
+  const { summary, loading, error, handleSubmit } = useTimesheet(weekStartDate);
+
+  React.useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
+
+  const onSubmit = async () => {
+    try {
+      await handleSubmit();
+      message.success('工時提交成功！');
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '提交失敗');
+    }
+  };
+
   return (
-    <div style={{ padding: '24px' }}>
-      <Card>
-        <Title level={2}>工時填報頁</Title>
-        <p>TODO: 實作 工時填報頁 功能</p>
-      </Card>
-    </div>
+    <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+      <Content style={{ padding: 24 }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <WeeklyTimesheetView
+            summary={summary}
+            loading={loading}
+            onSubmit={onSubmit}
+            onEdit={() => {}}
+            onDelete={() => {}}
+          />
+        </div>
+      </Content>
+    </Layout>
   );
 };
+
+export default HR07TimesheetPage;
