@@ -1,53 +1,84 @@
-import { useState } from 'react';
-import { AttendanceApi } from '../api';
-import type { CheckInRequest } from '../api/AttendanceTypes';
+import { useState, useEffect, useCallback } from 'react';
+import * as AttendanceApi from '../api/AttendanceApi';
+import { AttendanceViewModelFactory } from '../factory/AttendanceViewModelFactory';
+import type { TodayAttendanceSummary } from '../model/AttendanceRecordViewModel';
+import type { CheckType } from '../api/AttendanceTypes';
 
 /**
- * Attendance Hook (考勤管理 Hook)
- * 處理考勤相關的業務邏輯
+ * useAttendance Hook
+ * 管理考勤打卡的資料取得與狀態
  */
 export const useAttendance = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [summary, setSummary] = useState<TodayAttendanceSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [checkingIn, setCheckingIn] = useState(false);
 
-  /**
-   * 打卡
-   */
-  const checkIn = async (request: CheckInRequest) => {
+  const fetchTodayAttendance = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await AttendanceApi.checkIn(request);
-      return result;
+      const response = await AttendanceApi.getTodayAttendance();
+      const todaySummary = AttendanceViewModelFactory.createTodaySummary(
+        response.records,
+        response.has_checked_in,
+        response.has_checked_out,
+        response.total_work_hours
+      );
+      setSummary(todaySummary);
     } catch (err) {
-      setError(err as Error);
-      throw err;
+      const errorMessage =
+        err instanceof Error ? err.message : '無法取得考勤記錄';
+      setError(errorMessage);
+      setSummary(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  /**
-   * 取得考勤記錄
-   */
-  const getAttendanceList = async (params?: { startDate?: string; endDate?: string }) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await AttendanceApi.getAttendanceList(params);
-      return result;
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    fetchTodayAttendance();
+  }, [fetchTodayAttendance]);
+
+  const handleCheckIn = useCallback(
+    async (
+      checkType: CheckType,
+      location?: {
+        latitude: number;
+        longitude: number;
+        address?: string;
+      }
+    ) => {
+      setCheckingIn(true);
+      try {
+        await AttendanceApi.checkIn({
+          check_type: checkType,
+          latitude: location?.latitude,
+          longitude: location?.longitude,
+          address: location?.address,
+        });
+        
+        // 打卡成功後自動刷新資料
+        await fetchTodayAttendance();
+      } catch (err) {
+        throw err;
+      } finally {
+        setCheckingIn(false);
+      }
+    },
+    [fetchTodayAttendance]
+  );
+
+  const refresh = useCallback(() => {
+    fetchTodayAttendance();
+  }, [fetchTodayAttendance]);
 
   return {
+    summary,
     loading,
     error,
-    checkIn,
-    getAttendanceList,
+    checkingIn,
+    handleCheckIn,
+    refresh,
   };
 };

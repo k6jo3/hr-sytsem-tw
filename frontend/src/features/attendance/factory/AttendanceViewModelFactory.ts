@@ -1,51 +1,114 @@
-import type { AttendanceDto } from '../api/AttendanceTypes';
-import type { AttendanceViewModel } from '../model/AttendanceViewModel';
+import type { AttendanceRecordDto, CheckType, AttendanceStatus } from '../api/AttendanceTypes';
+import type { AttendanceRecordViewModel, TodayAttendanceSummary } from '../model/AttendanceRecordViewModel';
 
 /**
- * Attendance ViewModel Factory (考勤視圖模型工廠)
- * 將 API DTO 轉換為前端顯示用的 ViewModel
+ * Attendance ViewModel Factory
+ * 將 API 回傳的考勤 DTO 轉換為前端 ViewModel
  */
 export class AttendanceViewModelFactory {
   /**
-   * 將 AttendanceDto 轉換為 AttendanceViewModel
+   * 將單一考勤記錄 DTO 轉換為 ViewModel
    */
-  static createFromDTO(dto: AttendanceDto): AttendanceViewModel {
+  static createFromDTO(dto: AttendanceRecordDto): AttendanceRecordViewModel {
     return {
       id: dto.id,
-      employeeId: dto.employee_id,
-      date: dto.date,
-      checkInTime: dto.check_in_time,
-      checkOutTime: dto.check_out_time,
-      workHours: dto.work_hours,
-      statusLabel: this.getStatusLabel(dto.status),
-      statusColor: this.getStatusColor(dto.status),
+      employeeName: dto.employee_name,
+      checkTypeLabel: this.mapCheckTypeLabel(dto.check_type),
+      checkTypeColor: this.mapCheckTypeColor(dto.check_type),
+      checkTime: dto.check_time,
+      checkTimeDisplay: this.formatTimeDisplay(dto.check_time),
+      statusLabel: this.mapStatusLabel(dto.status),
+      statusColor: this.mapStatusColor(dto.status),
+      address: dto.address,
+      isNormal: dto.status === 'NORMAL',
     };
   }
 
   /**
-   * 批量轉換
+   * 批量轉換考勤記錄 DTO 列表
    */
-  static createListFromDTOs(dtos: AttendanceDto[]): AttendanceViewModel[] {
+  static createListFromDTOs(dtos: AttendanceRecordDto[]): AttendanceRecordViewModel[] {
     return dtos.map((dto) => this.createFromDTO(dto));
   }
 
-  private static getStatusLabel(status: string): string {
-    const labels: Record<string, string> = {
+  /**
+   * 建立今日考勤摘要
+   */
+  static createTodaySummary(
+    records: AttendanceRecordDto[],
+    hasCheckedIn: boolean,
+    hasCheckedOut: boolean,
+    totalWorkHours?: number
+  ): TodayAttendanceSummary {
+    return {
+      hasCheckedIn,
+      hasCheckedOut,
+      totalWorkHours,
+      records: this.createListFromDTOs(records),
+      canCheckIn: !hasCheckedIn,
+      canCheckOut: hasCheckedIn && !hasCheckedOut,
+    };
+  }
+
+  /**
+   * 將打卡類型對應為中文標籤
+   */
+  private static mapCheckTypeLabel(checkType: CheckType): string {
+    const labelMap: Record<CheckType, string> = {
+      CHECK_IN: '上班打卡',
+      CHECK_OUT: '下班打卡',
+      BREAK_OUT: '外出',
+      BREAK_IN: '返回',
+    };
+    return labelMap[checkType];
+  }
+
+  /**
+   * 將打卡類型對應為顏色
+   */
+  private static mapCheckTypeColor(checkType: CheckType): string {
+    const colorMap: Record<CheckType, string> = {
+      CHECK_IN: 'blue',
+      CHECK_OUT: 'green',
+      BREAK_OUT: 'orange',
+      BREAK_IN: 'cyan',
+    };
+    return colorMap[checkType];
+  }
+
+  /**
+   * 將考勤狀態對應為中文標籤
+   */
+  private static mapStatusLabel(status: AttendanceStatus): string {
+    const labelMap: Record<AttendanceStatus, string> = {
       NORMAL: '正常',
       LATE: '遲到',
       EARLY_LEAVE: '早退',
-      ABSENT: '缺勤',
+      ABSENT: '曠職',
     };
-    return labels[status] ?? '未知';
+    return labelMap[status];
   }
 
-  private static getStatusColor(status: string): string {
-    const colors: Record<string, string> = {
+  /**
+   * 將考勤狀態對應為顏色
+   */
+  private static mapStatusColor(status: AttendanceStatus): string {
+    const colorMap: Record<AttendanceStatus, string> = {
       NORMAL: 'success',
       LATE: 'warning',
-      EARLY_LEAVE: 'warning',
+      EARLY_LEAVE: 'error',
       ABSENT: 'error',
     };
-    return colors[status] ?? 'default';
+    return colorMap[status];
+  }
+
+  /**
+   * 格式化時間顯示為 HH:mm
+   */
+  private static formatTimeDisplay(isoTime: string): string {
+    const date = new Date(isoTime);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   }
 }

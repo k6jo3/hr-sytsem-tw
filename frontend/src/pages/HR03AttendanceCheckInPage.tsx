@@ -1,0 +1,84 @@
+import React from 'react';
+import { Layout, Row, Col, Space, message, Card, Typography } from 'antd';
+import { CheckInButton } from '@features/attendance/components/CheckInButton';
+import { TodayAttendanceCard } from '@features/attendance/components/TodayAttendanceCard';
+import { useAttendance } from '@features/attendance/hooks/useAttendance';
+
+const { Content } = Layout;
+const { Title } = Typography;
+
+/**
+ * HR03 考勤打卡頁面
+ * 頁面代碼：HR03-P01
+ */
+const HR03AttendanceCheckInPage: React.FC = () => {
+  const { summary, loading, error, checkingIn, handleCheckIn, refresh } = useAttendance();
+
+  // 顯示錯誤訊息
+  React.useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
+
+  // 處理上班打卡
+  const handleCheckInClick = async () => {
+    try {
+      await handleCheckIn('CHECK_IN');
+      message.success('上班打卡成功！');
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '打卡失敗，請稍後再試');
+    }
+  };
+
+  // 處理下班打卡
+  const handleCheckOutClick = async () => {
+    try {
+      await handleCheckIn('CHECK_OUT');
+      message.success('下班打卡成功！');
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '打卡失敗，請稍後再試');
+    }
+  };
+
+  return (
+    <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+      <Content style={{ padding: 24 }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          <Title level={3} style={{ marginBottom: 24 }}>
+            考勤打卡
+          </Title>
+
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            {/* 打卡按鈕卡片 */}
+            <Card>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <CheckInButton
+                    type="CHECK_IN"
+                    disabled={!summary?.canCheckIn || checkingIn}
+                    loading={checkingIn}
+                    onClick={handleCheckInClick}
+                  />
+                </Col>
+                <Col span={12}>
+                  <CheckInButton
+                    type="CHECK_OUT"
+                    disabled={!summary?.canCheckOut || checkingIn}
+                    loading={checkingIn}
+                    onClick={handleCheckOutClick}
+                  />
+                </Col>
+              </Row>
+            </Card>
+
+            {/* 今日考勤卡片 */}
+            <TodayAttendanceCard summary={summary} loading={loading} />
+          </Space>
+        </div>
+      </Content>
+    </Layout>
+  );
+};
+
+export default HR03AttendanceCheckInPage;
