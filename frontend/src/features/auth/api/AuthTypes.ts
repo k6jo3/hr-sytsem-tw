@@ -1,77 +1,47 @@
 /**
- * 登入請求 DTO
+ * Authentication DTOs (認證相關資料傳輸物件)
+ * Domain Code: HR01
+ */
+
+/**
+ * 登入請求
  */
 export interface LoginRequest {
-  /** 使用者帳號 */
   username: string;
-  /** 密碼 */
   password: string;
-  /** 記住我 */
-  rememberMe?: boolean;
+  remember?: boolean;
 }
 
 /**
- * 登入回應 DTO
+ * 登入回應
  */
 export interface LoginResponse {
-  /** JWT Access Token */
-  accessToken: string;
-  /** Refresh Token */
-  refreshToken: string;
-  /** Token 類型 */
-  tokenType: string;
-  /** 過期時間 (秒) */
-  expiresIn: number;
-  /** 使用者資訊 */
+  access_token: string;
+  refresh_token: string;
   user: UserDto;
 }
 
 /**
- * 使用者 DTO (API 回傳格式)
+ * 使用者 DTO
  */
 export interface UserDto {
-  /** 使用者 ID */
   id: string;
-  /** 使用者帳號 */
   username: string;
-  /** 姓 */
-  first_name: string;
-  /** 名 */
-  last_name: string;
-  /** 電子郵件 */
   email: string;
-  /** 狀態 */
+  first_name: string;
+  last_name: string;
   status: 'ACTIVE' | 'INACTIVE' | 'LOCKED' | 'DELETED';
-  /** 角色列表 */
   role_list: string[];
-  /** 頭像 URL */
   avatar_url?: string;
-  /** 建立時間 */
   created_at: string;
-  /** 最後登入時間 */
   last_login_at?: string;
 }
 
 /**
- * 登出請求 DTO
+ * 登入表單資料
  */
-export interface LogoutRequest {
-  /** Refresh Token */
-  refreshToken: string;
-}
-
-/**
- * Token 刷新請求
- */
-export interface RefreshTokenRequest {
-  refreshToken: string;
-}
-
-/**
- * Token 刷新回應
- */
-export interface RefreshTokenResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
+export interface LoginFormData {
+  username: string;
+  password: string;
+  remember: boolean;
 }

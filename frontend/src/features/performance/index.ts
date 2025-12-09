@@ -1,4 +1,5 @@
 // Performance Feature (HR08)
-// TODO: Implement performance management feature
-export { };
-
+export * from './api';
+export * from './factory/PerformanceViewModelFactory';
+export * from './hooks';
+export * from './model/PerformanceViewModel';

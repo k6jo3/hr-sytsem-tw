@@ -1,6 +1,18 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { authSlice } from './authSlice';
 import { organizationSlice } from './organizationSlice';
+import attendanceReducer from './attendanceSlice';
+import payrollReducer from './payrollSlice';
+import insuranceReducer from './insuranceSlice';
+import projectReducer from './projectSlice';
+import timesheetReducer from './timesheetSlice';
+import performanceReducer from './performanceSlice';
+import recruitmentReducer from './recruitmentSlice';
+import trainingReducer from './trainingSlice';
+import workflowReducer from './workflowSlice';
+import notificationReducer from './notificationSlice';
+import documentReducer from './documentSlice';
+import reportReducer from './reportSlice';
 
 /**
  * Redux Store 配置
@@ -10,19 +22,18 @@ export const store = configureStore({
   reducer: {
     auth: authSlice.reducer,
     organization: organizationSlice.reducer,
-    // 未來新增其他 Feature Slices:
-    // attendance: attendanceSlice.reducer,
-    // payroll: payrollSlice.reducer,
-    // insurance: insuranceSlice.reducer,
-    // project: projectSlice.reducer,
-    // timesheet: timesheetSlice.reducer,
-    // performance: performanceSlice.reducer,
-    // recruitment: recruitmentSlice.reducer,
-    // training: trainingSlice.reducer,
-    // workflow: workflowSlice.reducer,
-    // notification: notificationSlice.reducer,
-    // document: documentSlice.reducer,
-    // report: reportSlice.reducer,
+    attendance: attendanceReducer,
+    payroll: payrollReducer,
+    insurance: insuranceReducer,
+    project: projectReducer,
+    timesheet: timesheetReducer,
+    performance: performanceReducer,
+    recruitment: recruitmentReducer,
+    training: trainingReducer,
+    workflow: workflowReducer,
+    notification: notificationReducer,
+    document: documentReducer,
+    report: reportReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

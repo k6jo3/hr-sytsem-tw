@@ -1,4 +1,5 @@
 // Document Feature (HR13)
-// TODO: Implement document management feature
-export { };
-
+export * from './api';
+export * from './factory/DocumentViewModelFactory';
+export * from './hooks';
+export * from './model/DocumentViewModel';

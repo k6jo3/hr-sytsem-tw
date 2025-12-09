@@ -1,22 +1,20 @@
 /**
- * 使用者 ViewModel 介面
- * 用於前端顯示的使用者資料模型
+ * User Profile Model (使用者個人資料)
+ * Frontend domain model for authenticated user
  */
-export interface UserViewModel {
-  /** 使用者 ID */
+export interface UserProfile {
   id: string;
-  /** 使用者帳號 */
   username: string;
-  /** 完整姓名 */
-  fullName: string;
-  /** 電子郵件 */
   email: string;
-  /** 是否為管理員 */
-  isAdmin: boolean;
-  /** 角色列表 (顯示用) */
+  fullName: string;
   roles: string[];
-  /** 狀態文字 (顯示用) */
+  displayRoles: string;
+  isAdmin: boolean;
+  statusLabel: string;
+  statusColor: string;
   displayStatus: string;
-  /** 頭像 URL */
   avatarUrl?: string;
 }
+
+// 為了向後兼容，也export為UserViewModel
+export type UserViewModel = UserProfile;

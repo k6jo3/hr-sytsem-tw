@@ -1,34 +1,50 @@
-server:
-  port: 8081
-
 spring:
   application:
-    name: hrms-iam-service
+    name: hrms-iam
   
   datasource:
     url: jdbc:postgresql://localhost:5432/hrms_iam
-    username: postgres
-    password: postgres
+    username: hrms_user
+    password: hrms_password
     driver-class-name: org.postgresql.Driver
   
-  data:
-    redis:
-      host: localhost
-      port: 6379
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: hrms-iam-group
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  
+  redis:
+    host: localhost
+    port: 6379
 
-mybatis:
-  mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.company.hrms.iam.infrastructure.po
-  configuration:
-    map-underscore-to-camel-case: true
+server:
+  port: 8081
 
 eureka:
   client:
-    enabled: false  # 開發環境暫時停用
     service-url:
       defaultZone: http://localhost:8761/eureka/
   instance:
     prefer-ip-address: true
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.company.hrms.iam.infrastructure.po
+  configuration:
+    map-underscore-to-camel-case: true
 
 springdoc:
   api-docs:
@@ -40,5 +56,11 @@ springdoc:
 
 logging:
   level:
-    com.company.hrms: DEBUG
+    com.company.hrms.iam: DEBUG
     org.springframework.web: INFO
+
+# JWT Configuration
+jwt:
+  secret: your-256-bit-secret-key-change-this-in-production
+  expiration: 86400000  # 24 hours
+  refresh-expiration: 604800000  # 7 days
