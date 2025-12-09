@@ -3,3 +3,4 @@ export * from './api';
 export * from './factory/ProjectViewModelFactory';
 export * from './hooks';
 export * from './model/ProjectViewModel';
+export * from './components/ProjectList';
