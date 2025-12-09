@@ -1,4 +1,5 @@
 // Notification Feature (HR12)
-// TODO: Implement notification service feature
-export { };
-
+export * from './api';
+export * from './factory/NotificationViewModelFactory';
+export * from './hooks';
+export * from './model/NotificationViewModel';

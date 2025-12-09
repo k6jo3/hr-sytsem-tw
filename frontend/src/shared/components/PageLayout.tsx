@@ -1,140 +1,139 @@
+import React, { type ReactNode } from 'react';
+import { Layout, Menu, type MenuProps } from 'antd';
 import {
-    LogoutOutlined,
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-    SettingOutlined,
-    UserOutlined,
+  HomeOutlined,
+  TeamOutlined,
+  ClockCircleOutlined,
+  DollarOutlined,
+  SafetyOutlined,
+  ProjectOutlined,
+  FieldTimeOutlined,
+  TrophyOutlined,
+  UserAddOutlined,
+  BookOutlined,
+  AuditOutlined,
+  BellOutlined,
+  FileOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import { Avatar, Dropdown, Layout, Menu, Space, Typography } from 'antd';
-import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const { Header, Sider, Content } = Layout;
-const { Text } = Typography;
 
-/**
- * PageLayout 元件屬性
- */
 interface PageLayoutProps {
-  /** 子元件 */
-  children: React.ReactNode;
-  /** 使用者名稱 */
-  username?: string;
-  /** 側邊欄選單項目 */
-  menuItems?: MenuProps['items'];
-  /** 當前選中的選單 key */
-  selectedKey?: string;
-  /** 選單點擊回調 */
-  onMenuClick?: (key: string) => void;
-  /** 登出回調 */
-  onLogout?: () => void;
+  children: ReactNode;
 }
 
 /**
- * 頁面佈局共用元件
- * 包含 Header、Sider、Content 三層結構
+ * Page Layout Component
+ * 提供統一的頁面佈局，包含側邊欄導航
  */
-export const PageLayout: React.FC<PageLayoutProps> = ({
-  children,
-  username = '使用者',
-  menuItems = [],
-  selectedKey = '',
-  onMenuClick,
-  onLogout,
-}) => {
-  const [collapsed, setCollapsed] = React.useState(false);
+export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const userMenuItems: MenuProps['items'] = [
+  const menuItems: MenuProps['items'] = [
     {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: '個人設定',
+      key: '/',
+      icon: <HomeOutlined />,
+      label: '首頁',
     },
     {
-      type: 'divider',
+      key: '/employees',
+      icon: <TeamOutlined />,
+      label: '員工管理',
     },
     {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: '登出',
-      onClick: onLogout,
+      key: '/attendance',
+      icon: <ClockCircleOutlined />,
+      label: '考勤管理',
+      children: [
+        { key: '/attendance/check-in', label: '打卡' },
+        { key: '/attendance/leaves', label: '請假管理' },
+      ],
+    },
+    {
+      key: '/payroll',
+      icon: <DollarOutlined />,
+      label: '薪資管理',
+    },
+    {
+      key: '/insurance',
+      icon: <SafetyOutlined />,
+      label: '保險管理',
+    },
+    {
+      key: '/projects',
+      icon: <ProjectOutlined />,
+      label: '專案管理',
+    },
+    {
+      key: '/timesheet',
+      icon: <FieldTimeOutlined />,
+      label: '工時管理',
+    },
+    {
+      key: '/performance',
+      icon: <TrophyOutlined />,
+      label: '績效管理',
+    },
+    {
+      key: '/recruitment',
+      icon: <UserAddOutlined />,
+      label: '招募管理',
+    },
+    {
+      key: '/training',
+      icon: <BookOutlined />,
+      label: '訓練管理',
+    },
+    {
+      key: '/workflow',
+      icon: <AuditOutlined />,
+      label: '簽核流程',
+    },
+    {
+      key: '/notifications',
+      icon: <BellOutlined />,
+      label: '通知',
+    },
+    {
+      key: '/documents',
+      icon: <FileOutlined />,
+      label: '文件管理',
+    },
+    {
+      key: '/reports',
+      icon: <BarChartOutlined />,
+      label: '報表分析',
     },
   ];
 
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    navigate(e.key);
+  };
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
-        style={{
-          overflow: 'auto',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          bottom: 0,
-        }}
-      >
-        <div
-          style={{
-            height: 64,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontSize: collapsed ? 16 : 18,
-            fontWeight: 600,
-          }}
-        >
-          {collapsed ? 'HR' : 'HR System'}
+      <Header style={{ display: 'flex', alignItems: 'center', background: '#fff', padding: '0 24px' }}>
+        <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#667eea' }}>
+          HR System 3.0
         </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          items={menuItems}
-          onClick={({ key }) => onMenuClick?.(key)}
-        />
-      </Sider>
-      <Layout style={{ marginLeft: collapsed ? 80 : 200, transition: 'margin-left 0.2s' }}>
-        <Header
-          style={{
-            padding: '0 24px',
-            background: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-          }}
-        >
-          <Space>
-            {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined, {
-              onClick: () => setCollapsed(!collapsed),
-              style: { fontSize: 18, cursor: 'pointer' },
-            })}
-          </Space>
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Space style={{ cursor: 'pointer' }}>
-              <Avatar icon={<UserOutlined />} />
-              <Text>{username}</Text>
-            </Space>
-          </Dropdown>
-        </Header>
-        <Content
-          style={{
-            margin: 24,
-            padding: 24,
-            background: '#fff',
-            borderRadius: 8,
-            minHeight: 280,
-          }}
-        >
+      </Header>
+      <Layout>
+        <Sider width={250} style={{ background: '#fff' }}>
+          <Menu
+            mode="inline"
+            selectedKeys={[location.pathname]}
+            items={menuItems}
+            onClick={handleMenuClick}
+            style={{ borderRight: 0 }}
+          />
+        </Sider>
+        <Content style={{ padding: '24px', background: '#f0f2f5', minHeight: 280 }}>
           {children}
         </Content>
       </Layout>
     </Layout>
   );
 };
-
-export default PageLayout;

@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: hrms-document
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hrms_document
+    username: hrms_user
+    password: hrms_password
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: hrms-document-group
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  
+  redis:
+    host: localhost
+    port: 6379
+
+server:
+  port: 8093
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.company.hrms.document.infrastructure.po
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+logging:
+  level:
+    com.company.hrms.document: DEBUG
+    org.springframework.web: INFO
