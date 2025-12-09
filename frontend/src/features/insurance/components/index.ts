@@ -1,2 +1,1 @@
-// Insurance components will be added here
-export {};
+export { InsuranceInfo } from './InsuranceInfo';
