@@ -9,6 +9,7 @@ import {
   HR06ProjectListPage,
   HR06ProjectDetailPage,
   HR07TimesheetPage,
+  HR08MyPerformancePage,
   HR08PerformanceListPage,
   HR09RecruitmentPage,
   HR10TrainingListPage,
@@ -65,6 +66,9 @@ const App: React.FC = () => {
 
         {/* HR07 - 我的工時回報 */}
         <Route path="/profile/timesheets" element={<HR07TimesheetPage />} />
+
+        {/* HR08 - 我的考核 */}
+        <Route path="/profile/performance" element={<HR08MyPerformancePage />} />
 
         {/* ========== 後台管理 (Admin) ========== */}
         {/* HR02 - 組織員工管理 */}

@@ -23,6 +23,7 @@ export { HR06ProjectDetailPage } from './HR06ProjectDetailPage';
 export { HR07TimesheetPage } from './HR07TimesheetPage';
 
 // Performance (HR08)
+export { HR08MyPerformancePage } from './HR08MyPerformancePage';
 export { HR08PerformanceListPage } from './HR08PerformanceListPage';
 
 // Recruitment (HR09)

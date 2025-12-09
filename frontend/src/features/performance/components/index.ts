@@ -1,2 +1,2 @@
-// Performance components will be added here
-export {};
+export { SelfEvaluationForm } from './SelfEvaluationForm';
+export type { SelfEvaluationFormProps } from './SelfEvaluationForm';
