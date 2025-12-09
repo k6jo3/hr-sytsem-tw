@@ -1,7 +1,7 @@
 # CLAUDE.md - AI Assistant Guide
 
-**Version:** 3.0
-**Last Updated:** 2025-12-08
+**Version:** 3.1
+**Last Updated:** 2025-12-09
 **Purpose:** This document provides AI assistants with comprehensive guidance for understanding and working with this HR & Project Management System codebase.
 
 ---
@@ -44,8 +44,16 @@ This is an **Enterprise-grade HR & Project Management System** built with micros
 | System Design | ✅ Complete | All 14 microservices designed |
 | Logic Specifications | ✅ Complete | 5 detailed spec documents |
 | Development Standards | ✅ Complete | Frontend & backend guidelines aligned |
-| **Implementation** | ⏳ In Progress | IAM service started |
-| Testing & QA | ⏳ Pending | - |
+| Compliance Reports | ✅ Complete | Implementation & design compliance checks |
+| **Implementation** | ⏳ In Progress | 9 frontend features with TDD, backend scaffolding complete |
+| Testing & QA | ⏳ In Progress | 17 test files, TDD approach, see TEST_SUMMARY.md |
+
+**Implementation Progress:**
+- **Frontend:** 9/14 features implemented (64%)
+  - ✅ HR01-Login, HR02-Employee List, HR03-Attendance, HR04-Payslips
+  - ✅ HR05-Insurance, HR06-Projects, HR07-Timesheet, HR08-Performance, HR09-Recruitment
+- **Backend:** Microservices scaffolding complete, IAM service ~15% implemented
+- **Testing:** TDD approach with Factory pattern tests, component tests, hook tests
 
 ---
 
@@ -69,6 +77,9 @@ hr-system-2/
 ├── spec/                               # System Design documents
 │   ├── 系統架構設計文件.md              # Overall architecture & DDD layers
 │   ├── 系統架構設計文件_命名規範.md      # Naming conventions
+│   ├── 系統實作合規性檢查報告.md        # Implementation compliance check report
+│   ├── 系統設計書與需求分析書合規性檢查報告.md  # Design vs requirements compliance
+│   ├── 系統設計書命名規範合規性檢查.md   # Naming convention compliance check
 │   ├── 01_IAM服務系統設計書*.md         # IAM service design (3 parts)
 │   ├── 02_組織員工服務系統設計書*.md    # Organization service (4 parts)
 │   ├── ... (All 14 microservices)
@@ -90,17 +101,23 @@ hr-system-2/
 │
 └── frontend/                           # React frontend
     ├── 架構說明與開發規範.md
+    ├── TEST_SUMMARY.md                 # TDD test summary and progress
     ├── package.json
     ├── vite.config.ts
     ├── tsconfig.json
     └── src/
         ├── features/                   # Feature-based modules
         │   ├── auth/                   # IAM (HR01)
+        │   │   ├── api/                # API calls
+        │   │   ├── factory/            # DTO transformations (with tests)
+        │   │   ├── components/         # UI components (with tests)
+        │   │   ├── hooks/              # React hooks (with tests)
+        │   │   └── model/              # Frontend domain models
         │   ├── organization/           # ORG (HR02)
         │   ├── attendance/             # ATT (HR03)
         │   ├── payroll/                # PAY (HR04)
         │   └── ... (14 features)
-        ├── pages/                      # Page components
+        ├── pages/                      # Page components (21 pages)
         ├── shared/                     # Shared utilities
         ├── store/                      # Redux state
         └── App.tsx
@@ -114,22 +131,24 @@ hr-system-2/
 
 **14 Microservices** organized by business domain:
 
-| Code | Service | Description | Status |
-|:---:|:---|:---|:---:|
-| **01** | IAM | Auth, RBAC, SSO, Multi-tenancy | ✅ Design Complete |
-| **02** | Organization | Employee lifecycle, org structure, ESS | ✅ Design Complete |
-| **03** | Attendance | Clock in/out, leave, overtime, variable hours | ✅ Design Complete |
-| **04** | Payroll | Salary calculation (Saga), tax, overtime pay | ✅ Design Complete |
-| **05** | Insurance | Labor/health insurance, pension | ✅ Design Complete |
-| **06** | Project | Customer, multi-level WBS, cost tracking | ✅ Design Complete |
-| **07** | Timesheet | Weekly timesheet, PM approval | ✅ Design Complete |
-| **08** | Performance | Review cycles, flexible forms | ✅ Design Complete |
-| **09** | Recruitment | Job posting, Kanban, interview | ✅ Design Complete |
-| **10** | Training | Course management, certifications | ✅ Design Complete |
-| **11** | Workflow | Visual workflow designer, multi-level approval | ✅ Design Complete |
-| **12** | Notification | Email/Push/Teams/LINE, event-driven | ✅ Design Complete |
-| **13** | Document | Storage, versioning, templates, encryption | ✅ Design Complete |
-| **14** | Reporting | CQRS read models, dashboards | ✅ Design Complete |
+| Code | Service | Description | Design | Backend | Frontend |
+|:---:|:---|:---|:---:|:---:|:---:|
+| **01** | IAM | Auth, RBAC, SSO, Multi-tenancy | ✅ | 🟡 15% | ✅ Complete |
+| **02** | Organization | Employee lifecycle, org structure, ESS | ✅ | 🔴 0% | ✅ Complete |
+| **03** | Attendance | Clock in/out, leave, overtime, variable hours | ✅ | 🔴 0% | ✅ Complete |
+| **04** | Payroll | Salary calculation (Saga), tax, overtime pay | ✅ | 🔴 0% | ✅ Complete |
+| **05** | Insurance | Labor/health insurance, pension | ✅ | 🔴 0% | ✅ Complete |
+| **06** | Project | Customer, multi-level WBS, cost tracking | ✅ | 🔴 0% | ✅ Complete |
+| **07** | Timesheet | Weekly timesheet, PM approval | ✅ | 🔴 0% | ✅ Complete |
+| **08** | Performance | Review cycles, flexible forms | ✅ | 🔴 0% | ✅ Complete |
+| **09** | Recruitment | Job posting, Kanban, interview | ✅ | 🔴 0% | ✅ Complete |
+| **10** | Training | Course management, certifications | ✅ | 🔴 0% | 🟡 Skeleton |
+| **11** | Workflow | Visual workflow designer, multi-level approval | ✅ | 🔴 0% | 🟡 Skeleton |
+| **12** | Notification | Email/Push/Teams/LINE, event-driven | ✅ | 🔴 0% | 🟡 Skeleton |
+| **13** | Document | Storage, versioning, templates, encryption | ✅ | 🔴 0% | 🟡 Skeleton |
+| **14** | Reporting | CQRS read models, dashboards | ✅ | 🔴 0% | 🟡 Skeleton |
+
+**Legend:** ✅ Complete | 🟡 Partial | 🔴 Not Started
 
 ### DDD (Domain-Driven Design) Layering
 
@@ -375,18 +394,26 @@ Organization → EmployeeCreatedEvent
 **IMPORTANT:** This project uses feature branches with strict naming:
 
 ```bash
-# Current branch (already created)
-git checkout claude/claude-md-miwsxcjgqmf77mj2-01XKsLpiK83wp8Ud9tkjJW8r
+# Branch naming pattern: claude/claude-md-{random-id}-{session-id}
+# Example current branch: claude/claude-md-miyizlkbnm098nsi-013HYCF3b8wKt6qfwCRYu8qa
+
+# Check current branch
+git branch --show-current
 
 # Make changes, then commit
 git add .
 git commit -m "feat: Implement user management API"
 
-# Push to remote
-git push -u origin claude/claude-md-miwsxcjgqmf77mj2-01XKsLpiK83wp8Ud9tkjJW8r
+# Push to remote (MUST use current branch)
+git push -u origin $(git branch --show-current)
 ```
 
-**Branch naming requirement:** Must start with `claude/` and match session ID, otherwise push will fail with 403.
+**Critical Git Requirements:**
+- ✅ Branch MUST start with `claude/`
+- ✅ Branch MUST match the session ID provided in task context
+- ❌ Push will fail with 403 if branch name doesn't match pattern
+- ⚠️ Always check the task instructions for the correct branch name
+- 🔄 If push fails due to network errors, retry up to 4 times with exponential backoff (2s, 4s, 8s, 16s)
 
 ---
 
@@ -637,16 +664,41 @@ Examples:
 
 ### 7. Test-Driven Development (TDD)
 
+**This project strictly follows TDD approach:** See `frontend/TEST_SUMMARY.md` for detailed test coverage.
+
 **Always follow RED-GREEN-REFACTOR:**
 
-1. **RED:** Write failing test
+1. **RED:** Write failing test first
 2. **GREEN:** Write minimal code to pass
 3. **REFACTOR:** Improve code quality
+
+**Current Test Coverage (Frontend):**
+- ✅ 17 test files implemented
+- ✅ Factory tests: 100% coverage for all implemented features
+- ✅ Component tests: All major UI components tested
+- ✅ Hook tests: All custom hooks tested
+- 🎯 Target: 80%+ code coverage
 
 **Coverage requirements:**
 - Domain logic: 100% (mandatory)
 - API endpoints: Integration tests required
-- Frontend factories: Unit tests required
+- Frontend factories: Unit tests required (mandatory)
+- Frontend components: Component tests required
+- Frontend hooks: Hook tests required
+
+**Test Organization:**
+```
+src/features/{domain}/
+├── factory/
+│   ├── UserViewModelFactory.ts
+│   └── UserViewModelFactory.test.ts     # ✅ Required
+├── components/
+│   ├── LoginForm.tsx
+│   └── LoginForm.test.tsx               # ✅ Required
+└── hooks/
+    ├── useLogin.ts
+    └── useLogin.test.ts                 # ✅ Required
+```
 
 ### 8. Documentation Standards
 
@@ -988,8 +1040,12 @@ describe('LoginForm', () => {
 |:---|:---|:---|
 | `spec/系統架構設計文件.md` | Overall architecture, DDD layers, tech stack | Starting development, architecture questions |
 | `spec/系統架構設計文件_命名規範.md` | Naming conventions for all components | Creating any new files/classes |
+| `spec/系統實作合規性檢查報告.md` | Implementation compliance check against specs | Before starting new features, reviewing progress |
+| `spec/系統設計書與需求分析書合規性檢查報告.md` | Design vs requirements compliance | Validating design decisions |
+| `spec/系統設計書命名規範合規性檢查.md` | Naming convention compliance check | Ensuring consistent naming |
 | `spec/{NN}_{Service}服務系統設計書.md` | Individual service design, API specs, domain models | Implementing features for that service |
 | `spec/logic_spec/*.md` | Complex business logic specifications | Implementing payroll, attendance, insurance features |
+| `frontend/TEST_SUMMARY.md` | TDD test summary, progress tracking | Understanding test coverage, writing new tests |
 
 ### Development Guidelines
 
@@ -1110,7 +1166,7 @@ public class HR01UserCmdController extends CommandBaseController {
 
 **Project Manager:** PM
 **System Analyst:** SA
-**Last Document Update:** 2025-12-08
+**Last Document Update:** 2025-12-09
 
 ---
 
@@ -1118,6 +1174,7 @@ public class HR01UserCmdController extends CommandBaseController {
 
 | Version | Date | Changes |
 |:---|:---|:---|
+| 3.1 | 2025-12-09 | **Major Update:** Updated implementation status (9 frontend features complete), added compliance reports, updated microservices table with actual progress, improved git workflow documentation, added TEST_SUMMARY.md reference |
 | 3.0 | 2025-12-08 | Initial CLAUDE.md creation with comprehensive AI assistant guidance |
 | 2.0 | 2025-12-07 | All 14 services design completed |
 | 1.0 | 2025-12-03 | Initial architecture design |
