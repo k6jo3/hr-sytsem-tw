@@ -19,7 +19,9 @@ export const HR01LoginPage: React.FC = () => {
     try {
       await login(data);
       message.success('登入成功！');
-      navigate('/employees');
+      // 登入後導向打卡頁面（員工自助服務）
+      // TODO: 根據使用者角色導向不同頁面 (admin -> /admin/employees, employee -> /attendance/check-in)
+      navigate('/attendance/check-in');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '登入失敗，請檢查帳號密碼';
       message.error(errorMessage);
