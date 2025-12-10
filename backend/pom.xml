@@ -44,6 +44,7 @@
         <mybatis.version>3.0.3</mybatis.version>
         <springdoc.version>2.2.0</springdoc.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <jjwt.version>0.12.3</jjwt.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -84,6 +85,23 @@
                 <groupId>com.company.hrms</groupId>
                 <artifactId>hrms-common</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+
+            <!-- JJWT -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
