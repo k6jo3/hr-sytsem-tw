@@ -1,11 +1,12 @@
 # CLAUDE.md - AI Assistant Guide
-# 只用繁體中文
+
 **Version:** 3.1
 **Last Updated:** 2025-12-09
 **Purpose:** This document provides AI assistants with comprehensive guidance for understanding and working with this HR & Project Management System codebase.
 
 ---
-
+## 回答語言
+請用繁體中文回答
 ## 📋 Table of Contents
 
 1. [Project Overview](#-project-overview)

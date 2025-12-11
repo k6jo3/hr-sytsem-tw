@@ -29,10 +29,12 @@ public class Email {
         if (value == null || value.isBlank()) {
             throw new DomainException("EMAIL_REQUIRED", "Email 不可為空");
         }
-        if (!EMAIL_PATTERN.matcher(value).matches()) {
-            throw new DomainException("EMAIL_INVALID", "Email 格式無效: " + value);
+        // 先去除前後空白並轉為小寫，再進行驗證
+        String normalized = value.trim().toLowerCase();
+        if (!EMAIL_PATTERN.matcher(normalized).matches()) {
+            throw new DomainException("EMAIL_INVALID", "Email 格式無效: " + normalized);
         }
-        this.value = value.toLowerCase().trim();
+        this.value = normalized;
     }
 
     @Override

@@ -43,6 +43,16 @@ public class UserPO {
     private String displayName;
 
     /**
+     * 員工 ID (關聯組織服務的員工)
+     */
+    private String employeeId;
+
+    /**
+     * 租戶 ID (多租戶隔離)
+     */
+    private String tenantId;
+
+    /**
      * 使用者狀態
      */
     private String status;
@@ -61,6 +71,16 @@ public class UserPO {
      * 最後登入時間
      */
     private Timestamp lastLoginAt;
+
+    /**
+     * 密碼變更時間
+     */
+    private Timestamp passwordChangedAt;
+
+    /**
+     * 是否必須變更密碼 (首次登入強制改密)
+     */
+    private Boolean mustChangePassword;
 
     /**
      * 建立時間

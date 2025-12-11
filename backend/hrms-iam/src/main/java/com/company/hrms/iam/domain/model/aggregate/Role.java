@@ -85,13 +85,15 @@ public class Role {
      * @return 新的 Role 實例
      */
     public static Role create(String roleName, String roleCode, String description, String tenantId) {
-        validateRoleCode(roleCode);
+        // 先轉換為大寫，再進行驗證
+        String normalizedRoleCode = roleCode != null ? roleCode.toUpperCase() : null;
+        validateRoleCode(normalizedRoleCode);
         validateRoleName(roleName);
 
         return Role.builder()
                 .id(RoleId.generate())
                 .roleName(roleName)
-                .roleCode(roleCode.toUpperCase())
+                .roleCode(normalizedRoleCode)
                 .description(description)
                 .tenantId(tenantId)
                 .systemRole(false)

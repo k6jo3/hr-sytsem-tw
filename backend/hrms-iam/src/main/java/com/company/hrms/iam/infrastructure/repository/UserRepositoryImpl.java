@@ -107,12 +107,18 @@ public class UserRepositoryImpl implements IUserRepository {
                 .email(new Email(po.getEmail()))
                 .passwordHash(po.getPasswordHash())
                 .displayName(po.getDisplayName())
+                .employeeId(po.getEmployeeId())
+                .tenantId(po.getTenantId())
                 .status(UserStatus.valueOf(po.getStatus()))
                 .failedLoginAttempts(po.getFailedLoginAttempts() != null
                         ? po.getFailedLoginAttempts()
                         : 0)
                 .lockedUntil(toLocalDateTime(po.getLockedUntil()))
                 .lastLoginAt(toLocalDateTime(po.getLastLoginAt()))
+                .passwordChangedAt(toLocalDateTime(po.getPasswordChangedAt()))
+                .mustChangePassword(po.getMustChangePassword() != null
+                        ? po.getMustChangePassword()
+                        : false)
                 .createdAt(toLocalDateTime(po.getCreatedAt()))
                 .updatedAt(toLocalDateTime(po.getUpdatedAt()))
                 .roles(new ArrayList<>()) // TODO: 從關聯表載入
@@ -129,10 +135,14 @@ public class UserRepositoryImpl implements IUserRepository {
                 .email(user.getEmail().getValue())
                 .passwordHash(user.getPasswordHash())
                 .displayName(user.getDisplayName())
+                .employeeId(user.getEmployeeId())
+                .tenantId(user.getTenantId())
                 .status(user.getStatus().name())
                 .failedLoginAttempts(user.getFailedLoginAttempts())
                 .lockedUntil(toTimestamp(user.getLockedUntil()))
                 .lastLoginAt(toTimestamp(user.getLastLoginAt()))
+                .passwordChangedAt(toTimestamp(user.getPasswordChangedAt()))
+                .mustChangePassword(user.isMustChangePassword())
                 .createdAt(toTimestamp(user.getCreatedAt()))
                 .updatedAt(toTimestamp(user.getUpdatedAt()))
                 .build();

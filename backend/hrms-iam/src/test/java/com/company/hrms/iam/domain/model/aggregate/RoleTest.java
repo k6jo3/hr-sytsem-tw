@@ -96,14 +96,14 @@ class RoleTest {
         @Test
         @DisplayName("無效的角色代碼格式應該拋出例外")
         void shouldThrowExceptionForInvalidRoleCodeFormat() {
-            // 小寫開頭
+            // 包含特殊字元（破折號）
             DomainException ex1 = assertThrows(DomainException.class, () ->
-                    Role.create("角色", "aBC", "描述", "tenant-001"));
+                    Role.create("角色", "ROLE-CODE", "描述", "tenant-001"));
             assertEquals("INVALID_ROLE_CODE", ex1.getErrorCode());
 
-            // 包含特殊字元
+            // 包含特殊字元（空格）
             DomainException ex2 = assertThrows(DomainException.class, () ->
-                    Role.create("角色", "ROLE-CODE", "描述", "tenant-001"));
+                    Role.create("角色", "ROLE CODE", "描述", "tenant-001"));
             assertEquals("INVALID_ROLE_CODE", ex2.getErrorCode());
         }
 

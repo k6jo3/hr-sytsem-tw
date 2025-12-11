@@ -1,0 +1,128 @@
+# Docker Compose - 開發環境
+# 用途：快速啟動開發所需的基礎設施（資料庫、快取、訊息佇列）
+#
+# 使用方式：
+#   啟動：docker-compose -f docker-compose.dev.yml up -d
+#   停止：docker-compose -f docker-compose.dev.yml down
+#   查看：docker-compose -f docker-compose.dev.yml ps
+
+version: '3.8'
+
+services:
+  # ==========================================
+  # PostgreSQL 資料庫
+  # ==========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: hrms-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: hrms_iam
+      POSTGRES_USER: hrms_user
+      POSTGRES_PASSWORD: hrms_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # 自動執行初始化腳本（如果需要）
+      # - ./backend/hrms-iam/src/main/resources/db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hrms_user -d hrms_iam"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # Redis 快取
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: hrms-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # Kafka (可選 - 用於事件驅動)
+  # ==========================================
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:7.5.0
+  #   container_name: hrms-zookeeper
+  #   restart: unless-stopped
+  #   ports:
+  #     - "2181:2181"
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #   networks:
+  #     - hrms-network
+
+  # kafka:
+  #   image: confluentinc/cp-kafka:7.5.0
+  #   container_name: hrms-kafka
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - zookeeper
+  #   ports:
+  #     - "9092:9092"
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #   networks:
+  #     - hrms-network
+
+  # ==========================================
+  # pgAdmin (資料庫管理介面 - 可選)
+  # ==========================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hrms-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@hrms.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - hrms-network
+
+# ==========================================
+# 網路設定
+# ==========================================
+networks:
+  hrms-network:
+    driver: bridge
+
+# ==========================================
+# 資料卷
+# ==========================================
+volumes:
+  postgres_data:
+    name: hrms_postgres_data
+  redis_data:
+    name: hrms_redis_data
+  pgadmin_data:
+    name: hrms_pgadmin_data

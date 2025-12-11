@@ -14,4 +14,16 @@ export default defineConfig({
       '@store': path.resolve(__dirname, './src/store'),
     },
   },
+  server: {
+    port: 5173,
+    proxy: {
+      // 代理所有 /api 請求到後端
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        secure: false,
+        // rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }
 });
