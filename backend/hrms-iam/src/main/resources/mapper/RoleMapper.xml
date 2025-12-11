@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.company.hrms.iam.infrastructure.dao.RoleDAO">
+
+    <resultMap id="RoleResultMap" type="com.company.hrms.iam.infrastructure.po.RolePO">
+        <id property="roleId" column="role_id"/>
+        <result property="roleName" column="role_name"/>
+        <result property="roleCode" column="role_code"/>
+        <result property="description" column="description"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="isSystemRole" column="is_system_role"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="RoleResultMap">
+        SELECT role_id, role_name, role_code, description, tenant_id,
+               is_system_role, status, created_at, updated_at
+        FROM roles
+        WHERE role_id = #{roleId}
+    </select>
+
+    <select id="selectByRoleCode" resultMap="RoleResultMap">
+        SELECT role_id, role_name, role_code, description, tenant_id,
+               is_system_role, status, created_at, updated_at
+        FROM roles
+        WHERE role_code = #{roleCode}
+    </select>
+
+    <select id="selectByRoleCodeAndTenantId" resultMap="RoleResultMap">
+        SELECT role_id, role_name, role_code, description, tenant_id,
+               is_system_role, status, created_at, updated_at
+        FROM roles
+        WHERE role_code = #{roleCode}
+        <choose>
+            <when test="tenantId != null">
+                AND tenant_id = #{tenantId}
+            </when>
+            <otherwise>
+                AND tenant_id IS NULL
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectByStatus" resultMap="RoleResultMap">
+        SELECT role_id, role_name, role_code, description, tenant_id,
+               is_system_role, status, created_at, updated_at
+        FROM roles
+        WHERE status = #{status}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByTenantId" resultMap="RoleResultMap">
+        SELECT role_id, role_name, role_code, description, tenant_id,
+               is_system_role, status, created_at, updated_at
+        FROM roles
+        WHERE tenant_id = #{tenantId}
+        ORDER BY role_code
+    </select>
+
+    <select id="selectSystemRoles" resultMap="RoleResultMap">
+        SELECT role_id, role_name, role_code, description, tenant_id,
+               is_system_role, status, created_at, updated_at
+        FROM roles
+        WHERE is_system_role = TRUE
+        ORDER BY role_code
+    </select>
+
+    <select id="selectAll" resultMap="RoleResultMap">
+        SELECT role_id, role_name, role_code, description, tenant_id,
+               is_system_role, status, created_at, updated_at
+        FROM roles
+        ORDER BY is_system_role DESC, role_code
+    </select>
+
+    <select id="selectByUserId" resultMap="RoleResultMap">
+        SELECT r.role_id, r.role_name, r.role_code, r.description, r.tenant_id,
+               r.is_system_role, r.status, r.created_at, r.updated_at
+        FROM roles r
+        INNER JOIN user_roles ur ON r.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+        ORDER BY r.role_code
+    </select>
+
+    <select id="selectPermissionIdsByRoleId" resultType="java.lang.String">
+        SELECT permission_id
+        FROM role_permissions
+        WHERE role_id = #{roleId}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO roles (role_id, role_name, role_code, description, tenant_id,
+                           is_system_role, status, created_at, updated_at)
+        VALUES (#{roleId}, #{roleName}, #{roleCode}, #{description}, #{tenantId},
+                #{isSystemRole}, #{status}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="update">
+        UPDATE roles
+        SET role_name = #{roleName},
+            description = #{description},
+            status = #{status},
+            updated_at = #{updatedAt}
+        WHERE role_id = #{roleId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM roles WHERE role_id = #{roleId}
+    </delete>
+
+    <select id="existsByRoleCode" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM roles WHERE role_code = #{roleCode})
+    </select>
+
+    <select id="existsByRoleCodeAndTenantId" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1 FROM roles
+            WHERE role_code = #{roleCode}
+            <choose>
+                <when test="tenantId != null">
+                    AND tenant_id = #{tenantId}
+                </when>
+                <otherwise>
+                    AND tenant_id IS NULL
+                </otherwise>
+            </choose>
+        )
+    </select>
+
+    <insert id="insertRolePermission">
+        INSERT INTO role_permissions (role_id, permission_id, granted_at)
+        VALUES (#{roleId}, #{permissionId}, CURRENT_TIMESTAMP)
+        ON CONFLICT (role_id, permission_id) DO NOTHING
+    </insert>
+
+    <delete id="deleteRolePermissions">
+        DELETE FROM role_permissions WHERE role_id = #{roleId}
+    </delete>
+
+</mapper>

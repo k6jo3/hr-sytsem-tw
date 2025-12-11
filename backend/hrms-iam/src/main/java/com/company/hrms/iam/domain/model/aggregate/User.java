@@ -45,6 +45,16 @@ public class User {
     private String displayName;
 
     /**
+     * 關聯員工 ID (來自組織服務)
+     */
+    private String employeeId;
+
+    /**
+     * 租戶 ID (多租戶隔離)
+     */
+    private String tenantId;
+
+    /**
      * 使用者狀態
      */
     private UserStatus status;
@@ -63,6 +73,17 @@ public class User {
      * 最後登入時間
      */
     private LocalDateTime lastLoginAt;
+
+    /**
+     * 密碼變更時間
+     */
+    private LocalDateTime passwordChangedAt;
+
+    /**
+     * 是否需要首次登入變更密碼
+     */
+    @Builder.Default
+    private boolean mustChangePassword = false;
 
     /**
      * 建立時間
@@ -90,7 +111,7 @@ public class User {
      * @param displayName 顯示名稱
      * @return 新的 User 實例
      */
-    public static User create(String username, String email, 
+    public static User create(String username, String email,
                                String passwordHash, String displayName) {
         return User.builder()
                 .id(UserId.generate())
@@ -100,6 +121,39 @@ public class User {
                 .displayName(displayName)
                 .status(UserStatus.PENDING)
                 .failedLoginAttempts(0)
+                .mustChangePassword(true)
+                .passwordChangedAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .roles(new ArrayList<>())
+                .build();
+    }
+
+    /**
+     * 建立新使用者 (完整版)
+     * @param username 使用者名稱
+     * @param email Email
+     * @param passwordHash 密碼雜湊
+     * @param displayName 顯示名稱
+     * @param employeeId 員工 ID
+     * @param tenantId 租戶 ID
+     * @return 新的 User 實例
+     */
+    public static User createWithTenant(String username, String email,
+                                        String passwordHash, String displayName,
+                                        String employeeId, String tenantId) {
+        return User.builder()
+                .id(UserId.generate())
+                .username(username)
+                .email(new Email(email))
+                .passwordHash(passwordHash)
+                .displayName(displayName)
+                .employeeId(employeeId)
+                .tenantId(tenantId)
+                .status(UserStatus.PENDING)
+                .failedLoginAttempts(0)
+                .mustChangePassword(true)
+                .passwordChangedAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .roles(new ArrayList<>())
@@ -193,6 +247,36 @@ public class User {
             throw new DomainException("PASSWORD_REQUIRED", "密碼不可為空");
         }
         this.passwordHash = newPasswordHash;
+        this.passwordChangedAt = LocalDateTime.now();
+        this.mustChangePassword = false;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 管理員重置密碼
+     * @param newPasswordHash 新密碼雜湊
+     */
+    public void resetPassword(String newPasswordHash) {
+        if (newPasswordHash == null || newPasswordHash.isBlank()) {
+            throw new DomainException("PASSWORD_REQUIRED", "密碼不可為空");
+        }
+        this.passwordHash = newPasswordHash;
+        this.passwordChangedAt = LocalDateTime.now();
+        this.mustChangePassword = true; // 強制首次登入變更密碼
+        this.failedLoginAttempts = 0;
+        this.lockedUntil = null;
+        if (this.status == UserStatus.LOCKED) {
+            this.status = UserStatus.ACTIVE;
+        }
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 設定員工 ID
+     * @param employeeId 員工 ID
+     */
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -210,6 +294,18 @@ public class User {
      */
     public boolean isActive() {
         return this.status == UserStatus.ACTIVE;
+    }
+
+    /**
+     * 檢查密碼是否過期 (預設 90 天)
+     * @param maxAgeDays 密碼最大使用天數
+     * @return 是否已過期
+     */
+    public boolean isPasswordExpired(int maxAgeDays) {
+        if (passwordChangedAt == null) {
+            return true;
+        }
+        return passwordChangedAt.plusDays(maxAgeDays).isBefore(LocalDateTime.now());
     }
 
     /**
@@ -231,5 +327,14 @@ public class User {
         if (this.roles.remove(role)) {
             this.updatedAt = LocalDateTime.now();
         }
+    }
+
+    /**
+     * 檢查是否擁有指定角色
+     * @param role 角色名稱
+     * @return 是否擁有
+     */
+    public boolean hasRole(String role) {
+        return this.roles.contains(role);
     }
 }

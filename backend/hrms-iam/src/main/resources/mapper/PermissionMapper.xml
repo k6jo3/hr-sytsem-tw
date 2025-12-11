@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.company.hrms.iam.infrastructure.dao.PermissionDAO">
+
+    <resultMap id="PermissionResultMap" type="com.company.hrms.iam.infrastructure.po.PermissionPO">
+        <id property="permissionId" column="permission_id"/>
+        <result property="permissionCode" column="permission_code"/>
+        <result property="permissionName" column="permission_name"/>
+        <result property="description" column="description"/>
+        <result property="resource" column="resource"/>
+        <result property="action" column="action"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="PermissionResultMap">
+        SELECT permission_id, permission_code, permission_name, description,
+               resource, action, created_at
+        FROM permissions
+        WHERE permission_id = #{permissionId}
+    </select>
+
+    <select id="selectByPermissionCode" resultMap="PermissionResultMap">
+        SELECT permission_id, permission_code, permission_name, description,
+               resource, action, created_at
+        FROM permissions
+        WHERE permission_code = #{permissionCode}
+    </select>
+
+    <select id="selectByResource" resultMap="PermissionResultMap">
+        SELECT permission_id, permission_code, permission_name, description,
+               resource, action, created_at
+        FROM permissions
+        WHERE resource = #{resource}
+        ORDER BY action
+    </select>
+
+    <select id="selectAll" resultMap="PermissionResultMap">
+        SELECT permission_id, permission_code, permission_name, description,
+               resource, action, created_at
+        FROM permissions
+        ORDER BY resource, action
+    </select>
+
+    <select id="selectByRoleId" resultMap="PermissionResultMap">
+        SELECT p.permission_id, p.permission_code, p.permission_name, p.description,
+               p.resource, p.action, p.created_at
+        FROM permissions p
+        INNER JOIN role_permissions rp ON p.permission_id = rp.permission_id
+        WHERE rp.role_id = #{roleId}
+        ORDER BY p.resource, p.action
+    </select>
+
+    <select id="selectByIds" resultMap="PermissionResultMap">
+        SELECT permission_id, permission_code, permission_name, description,
+               resource, action, created_at
+        FROM permissions
+        WHERE permission_id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY resource, action
+    </select>
+
+    <insert id="insert">
+        INSERT INTO permissions (permission_id, permission_code, permission_name,
+                                 description, resource, action, created_at)
+        VALUES (#{permissionId}, #{permissionCode}, #{permissionName},
+                #{description}, #{resource}, #{action}, #{createdAt})
+    </insert>
+
+    <update id="update">
+        UPDATE permissions
+        SET permission_name = #{permissionName},
+            description = #{description}
+        WHERE permission_id = #{permissionId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM permissions WHERE permission_id = #{permissionId}
+    </delete>
+
+    <select id="existsByPermissionCode" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM permissions WHERE permission_code = #{permissionCode})
+    </select>
+
+</mapper>
