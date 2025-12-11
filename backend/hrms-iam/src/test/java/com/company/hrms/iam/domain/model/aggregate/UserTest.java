@@ -110,7 +110,7 @@ class UserTest {
 
             // When & Then
             DomainException exception = assertThrows(DomainException.class, user::activate);
-            assertEquals("USER_DELETED", exception.getErrorCode());
+            assertEquals("USER_DELETED", exception.getCode());
         }
 
         @Test
@@ -281,7 +281,7 @@ class UserTest {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> user.changePassword(null));
-            assertEquals("PASSWORD_REQUIRED", exception.getErrorCode());
+            assertEquals("PASSWORD_REQUIRED", exception.getCode());
         }
 
         @Test
@@ -294,7 +294,7 @@ class UserTest {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> user.changePassword("   "));
-            assertEquals("PASSWORD_REQUIRED", exception.getErrorCode());
+            assertEquals("PASSWORD_REQUIRED", exception.getCode());
         }
     }
 

@@ -68,7 +68,7 @@ class EmailTest {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> new Email(null));
-            assertEquals("EMAIL_REQUIRED", exception.getErrorCode());
+            assertEquals("EMAIL_REQUIRED", exception.getCode());
         }
 
         @Test
@@ -77,7 +77,7 @@ class EmailTest {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> new Email("   "));
-            assertEquals("EMAIL_REQUIRED", exception.getErrorCode());
+            assertEquals("EMAIL_REQUIRED", exception.getCode());
         }
 
         @ParameterizedTest
@@ -93,7 +93,7 @@ class EmailTest {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> new Email(invalidEmail));
-            assertEquals("EMAIL_INVALID", exception.getErrorCode());
+            assertEquals("EMAIL_INVALID", exception.getCode());
         }
     }
 
