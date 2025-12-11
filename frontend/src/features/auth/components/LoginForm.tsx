@@ -1,19 +1,44 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, Checkbox, Alert } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import type { LoginFormData } from '../api/AuthTypes';
+/**
+ * LoginForm - 登入表單元件
+ * Domain Code: HR01
+ * Page Code: HR01-P01
+ */
+
+import React from 'react';
+import { Form, Input, Button, Checkbox, Alert, Divider, Space, Typography } from 'antd';
+import {
+  UserOutlined,
+  LockOutlined,
+  GoogleOutlined,
+  WindowsOutlined,
+} from '@ant-design/icons';
+import type { LoginFormData, SsoProvider } from '../api/AuthTypes';
+
+const { Link } = Typography;
 
 interface LoginFormProps {
   onSubmit: (data: LoginFormData) => void;
+  onSsoLogin?: (provider: SsoProvider) => void;
+  onForgotPassword?: () => void;
   loading?: boolean;
   error?: string | null;
+  showSso?: boolean;
+  showForgotPassword?: boolean;
 }
 
 /**
  * 登入表單元件
- * Domain Code: HR01
+ * 包含帳號密碼登入、SSO 登入、忘記密碼功能
  */
-export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading = false, error }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({
+  onSubmit,
+  onSsoLogin,
+  onForgotPassword,
+  loading = false,
+  error,
+  showSso = true,
+  showForgotPassword = true,
+}) => {
   const [form] = Form.useForm();
 
   const handleSubmit = (values: { username: string; password: string; remember?: boolean }) => {
@@ -22,6 +47,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading = false,
       password: values.password,
       remember: values.remember ?? false,
     });
+  };
+
+  const handleSsoLogin = (provider: SsoProvider) => {
+    if (onSsoLogin) {
+      onSsoLogin(provider);
+    }
   };
 
   return (
@@ -35,7 +66,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading = false,
           style={{ marginBottom: 16 }}
         />
       )}
-      
+
       <Form
         form={form}
         name="login-form"
@@ -45,9 +76,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading = false,
       >
         <Form.Item
           name="username"
-          rules={[
-            { required: true, message: '請輸入帳號' },
-          ]}
+          rules={[{ required: true, message: '請輸入帳號' }]}
         >
           <Input
             prefix={<UserOutlined />}
@@ -73,11 +102,21 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading = false,
         </Form.Item>
 
         <Form.Item>
-          <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox disabled={loading} aria-label="記住我">
-              記住我
-            </Checkbox>
-          </Form.Item>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Checkbox disabled={loading} aria-label="記住我">
+                記住我
+              </Checkbox>
+            </Form.Item>
+            {showForgotPassword && (
+              <Link
+                onClick={onForgotPassword}
+                style={{ cursor: 'pointer' }}
+              >
+                忘記密碼？
+              </Link>
+            )}
+          </div>
         </Form.Item>
 
         <Form.Item>
@@ -93,6 +132,56 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, loading = false,
           </Button>
         </Form.Item>
       </Form>
+
+      {showSso && (
+        <>
+          <Divider plain>
+            <span style={{ color: '#999', fontSize: 12 }}>或使用以下方式登入</span>
+          </Divider>
+
+          <Space direction="vertical" style={{ width: '100%' }} size="middle">
+            <Button
+              block
+              size="large"
+              icon={<GoogleOutlined />}
+              onClick={() => handleSsoLogin('GOOGLE')}
+              disabled={loading}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              使用 Google 帳號登入
+            </Button>
+
+            <Button
+              block
+              size="large"
+              icon={<WindowsOutlined />}
+              onClick={() => handleSsoLogin('MICROSOFT')}
+              disabled={loading}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              使用 Microsoft 帳號登入
+            </Button>
+          </Space>
+        </>
+      )}
+
+      <div style={{ marginTop: 24, textAlign: 'center' }}>
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          © 2025 HR System. All rights reserved.
+        </Typography.Text>
+      </div>
     </div>
   );
 };
+
+export default LoginForm;
