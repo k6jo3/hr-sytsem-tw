@@ -1,5 +1,8 @@
 // IAM (HR01)
 export { HR01LoginPage } from './HR01LoginPage';
+export { HR01UserManagementPage } from './HR01UserManagementPage';
+export { HR01RoleManagementPage } from './HR01RoleManagementPage';
+export { HR01PasswordChangePage } from './HR01PasswordChangePage';
 
 // Organization (HR02)
 export { HR02EmployeeListPage } from './HR02EmployeeListPage';
