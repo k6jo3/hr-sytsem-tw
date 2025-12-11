@@ -1,11 +1,11 @@
 // IAM (HR01)
 export { HR01LoginPage } from './HR01LoginPage';
-export { HR01UserManagementPage } from './HR01UserManagementPage';
-export { HR01RoleManagementPage } from './HR01RoleManagementPage';
-export { HR01PasswordChangePage } from './HR01PasswordChangePage';
+export { default as HR01UserManagementPage } from './HR01UserManagementPage';
+export { default as HR01RoleManagementPage } from './HR01RoleManagementPage';
+export { default as HR01PasswordChangePage } from './HR01PasswordChangePage';
 
 // Organization (HR02)
-export { HR02EmployeeListPage } from './HR02EmployeeListPage';
+export { default as HR02EmployeeListPage } from './HR02EmployeeListPage';
 
 // Attendance (HR03)
 export { HR03CheckInPage } from './HR03CheckInPage';
@@ -23,7 +23,7 @@ export { HR06ProjectListPage } from './HR06ProjectListPage';
 export { HR06ProjectDetailPage } from './HR06ProjectDetailPage';
 
 // Timesheet (HR07)
-export { HR07TimesheetPage } from './HR07TimesheetPage';
+export { default as HR07TimesheetPage } from './HR07TimesheetPage';
 
 // Performance (HR08)
 export { HR08MyPerformancePage } from './HR08MyPerformancePage';
