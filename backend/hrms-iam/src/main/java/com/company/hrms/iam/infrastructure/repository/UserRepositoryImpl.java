@@ -1,15 +1,5 @@
 package com.company.hrms.iam.infrastructure.repository;
 
-import com.company.hrms.iam.domain.model.aggregate.User;
-import com.company.hrms.iam.domain.model.valueobject.Email;
-import com.company.hrms.iam.domain.model.valueobject.UserId;
-import com.company.hrms.iam.domain.model.valueobject.UserStatus;
-import com.company.hrms.iam.domain.repository.IUserRepository;
-import com.company.hrms.iam.infrastructure.dao.UserDAO;
-import com.company.hrms.iam.infrastructure.po.UserPO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,18 +7,29 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Component;
+
+import com.company.hrms.iam.domain.model.aggregate.User;
+import com.company.hrms.iam.domain.model.valueobject.Email;
+import com.company.hrms.iam.domain.model.valueobject.UserId;
+import com.company.hrms.iam.domain.model.valueobject.UserStatus;
+import com.company.hrms.iam.domain.repository.IUserRepository;
+import com.company.hrms.iam.infrastructure.dao.UserDAO;
+import com.company.hrms.iam.infrastructure.po.UserPO;
+
 /**
  * User Repository 實作
  * 實作 Domain 層定義的 IUserRepository 介面
  * 
- * <p>負責 PO 與 Domain Object 之間的轉換</p>
+ * <p>
+ * 負責 PO 與 Domain Object 之間的轉換
+ * </p>
  */
 @Component
 public class UserRepositoryImpl implements IUserRepository {
 
     private final UserDAO userDAO;
 
-    @Autowired
     public UserRepositoryImpl(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
@@ -107,13 +108,14 @@ public class UserRepositoryImpl implements IUserRepository {
                 .passwordHash(po.getPasswordHash())
                 .displayName(po.getDisplayName())
                 .status(UserStatus.valueOf(po.getStatus()))
-                .failedLoginAttempts(po.getFailedLoginAttempts() != null 
-                        ? po.getFailedLoginAttempts() : 0)
+                .failedLoginAttempts(po.getFailedLoginAttempts() != null
+                        ? po.getFailedLoginAttempts()
+                        : 0)
                 .lockedUntil(toLocalDateTime(po.getLockedUntil()))
                 .lastLoginAt(toLocalDateTime(po.getLastLoginAt()))
                 .createdAt(toLocalDateTime(po.getCreatedAt()))
                 .updatedAt(toLocalDateTime(po.getUpdatedAt()))
-                .roles(new ArrayList<>())  // TODO: 從關聯表載入
+                .roles(new ArrayList<>()) // TODO: 從關聯表載入
                 .build();
     }
 

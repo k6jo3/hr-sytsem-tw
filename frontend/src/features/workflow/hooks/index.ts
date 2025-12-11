@@ -1,1 +1,7 @@
-export { useWorkflow } from './useWorkflow';
+export {
+  usePendingTasks,
+  useMyApplications,
+  useWorkflowDefinitions,
+  useDelegations,
+  useWorkflow,
+} from './useWorkflow';

@@ -1,16 +1,16 @@
 package com.company.hrms.iam.infrastructure.mapper;
 
-import com.company.hrms.iam.domain.model.aggregate.Role;
-import com.company.hrms.iam.domain.model.valueobject.PermissionId;
-import com.company.hrms.iam.domain.model.valueobject.RoleId;
-import com.company.hrms.iam.domain.model.valueobject.RoleStatus;
-import com.company.hrms.iam.infrastructure.po.RolePO;
-import org.springframework.stereotype.Component;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.company.hrms.iam.domain.model.aggregate.Role;
+import com.company.hrms.iam.domain.model.valueobject.PermissionId;
+import com.company.hrms.iam.domain.model.valueobject.RoleStatus;
+import com.company.hrms.iam.infrastructure.po.RolePO;
 
 /**
  * Role Mapper
@@ -29,8 +29,8 @@ public class RoleMapper {
 
         List<PermissionId> permissions = permissionIds != null
                 ? permissionIds.stream()
-                    .map(PermissionId::of)
-                    .collect(Collectors.toList())
+                        .map(PermissionId::of)
+                        .collect(Collectors.toList())
                 : List.of();
 
         return Role.reconstitute(
@@ -43,8 +43,7 @@ public class RoleMapper {
                 RoleStatus.valueOf(po.getStatus()),
                 permissions,
                 toLocalDateTime(po.getCreatedAt()),
-                toLocalDateTime(po.getUpdatedAt())
-        );
+                toLocalDateTime(po.getUpdatedAt()));
     }
 
     /**

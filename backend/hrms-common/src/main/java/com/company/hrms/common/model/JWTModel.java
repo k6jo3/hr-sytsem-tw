@@ -1,11 +1,11 @@
 package com.company.hrms.common.model;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * JWT Token 解析後的使用者資訊模型
@@ -67,8 +67,11 @@ public class JWTModel {
      */
     private Long expiresAt;
 
+    private String tenantId;
+
     /**
      * 檢查使用者是否具有指定角色
+     * 
      * @param role 角色名稱
      * @return 是否具有該角色
      */
@@ -78,6 +81,7 @@ public class JWTModel {
 
     /**
      * 檢查使用者是否具有指定權限
+     * 
      * @param permission 權限名稱
      * @return 是否具有該權限
      */

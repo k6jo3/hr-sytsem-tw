@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, Typography, message } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LoginForm } from '@features/auth/components/LoginForm';
 import { useLogin } from '@features/auth/hooks/useLogin';
+import { useAppSelector } from '@store/hooks';
 import type { LoginFormData } from '@features/auth/api/AuthTypes';
 
 const { Title, Text } = Typography;
@@ -13,15 +14,32 @@ const { Title, Text } = Typography;
  */
 export const HR01LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, loading, error } = useLogin();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+
+  // 如果已經登入，重定向到首頁或原本要去的頁面
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = (location.state as any)?.from?.pathname || '/admin/users';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
 
   const handleSubmit = async (data: LoginFormData) => {
     try {
-      await login(data);
+      const user = await login(data);
       message.success('登入成功！');
-      // 登入後導向打卡頁面（員工自助服務）
-      // TODO: 根據使用者角色導向不同頁面 (admin -> /admin/employees, employee -> /attendance/check-in)
-      navigate('/attendance/check-in');
+
+      // 根據保存的路徑或使用者角色導向不同頁面
+      const from = (location.state as any)?.from?.pathname;
+      if (from && from !== '/login') {
+        navigate(from, { replace: true });
+      } else {
+        // 默認導向使用者管理頁面（管理員）或打卡頁面（員工）
+        const defaultPath = user.isAdmin ? '/admin/users' : '/attendance/check-in';
+        navigate(defaultPath, { replace: true });
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '登入失敗，請檢查帳號密碼';
       message.error(errorMessage);

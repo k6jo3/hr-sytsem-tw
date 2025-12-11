@@ -1,18 +1,18 @@
 package com.company.hrms.iam.domain.model.aggregate;
 
-import com.company.hrms.common.exception.DomainException;
-import com.company.hrms.iam.domain.model.entity.Permission;
-import com.company.hrms.iam.domain.model.valueobject.PermissionId;
-import com.company.hrms.iam.domain.model.valueobject.RoleId;
-import com.company.hrms.iam.domain.model.valueobject.RoleStatus;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.iam.domain.model.valueobject.PermissionId;
+import com.company.hrms.iam.domain.model.valueobject.RoleId;
+import com.company.hrms.iam.domain.model.valueobject.RoleStatus;
+
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * Role 聚合根
@@ -77,10 +77,11 @@ public class Role {
 
     /**
      * 建立新角色 (租戶角色)
-     * @param roleName 角色名稱
-     * @param roleCode 角色代碼
+     * 
+     * @param roleName    角色名稱
+     * @param roleCode    角色代碼
      * @param description 描述
-     * @param tenantId 租戶 ID
+     * @param tenantId    租戶 ID
      * @return 新的 Role 實例
      */
     public static Role create(String roleName, String roleCode, String description, String tenantId) {
@@ -103,8 +104,9 @@ public class Role {
 
     /**
      * 建立系統角色
-     * @param roleName 角色名稱
-     * @param roleCode 角色代碼
+     * 
+     * @param roleName    角色名稱
+     * @param roleCode    角色代碼
      * @param description 描述
      * @return 新的系統 Role 實例
      */
@@ -130,9 +132,9 @@ public class Role {
      * 從持久層重建 Role
      */
     public static Role reconstitute(String id, String roleName, String roleCode, String description,
-                                    String tenantId, boolean systemRole, RoleStatus status,
-                                    List<PermissionId> permissionIds,
-                                    LocalDateTime createdAt, LocalDateTime updatedAt) {
+            String tenantId, boolean systemRole, RoleStatus status,
+            List<PermissionId> permissionIds,
+            LocalDateTime createdAt, LocalDateTime updatedAt) {
         return Role.builder()
                 .id(RoleId.of(id))
                 .roleName(roleName)
@@ -151,7 +153,8 @@ public class Role {
 
     /**
      * 更新角色資訊
-     * @param roleName 新的角色名稱
+     * 
+     * @param roleName    新的角色名稱
      * @param description 新的描述
      */
     public void update(String roleName, String description) {
@@ -204,6 +207,7 @@ public class Role {
 
     /**
      * 指派權限
+     * 
      * @param permissionId 權限 ID
      */
     public void assignPermission(PermissionId permissionId) {
@@ -216,6 +220,7 @@ public class Role {
 
     /**
      * 批量指派權限
+     * 
      * @param permissionIds 權限 ID 列表
      */
     public void assignPermissions(List<PermissionId> permissionIds) {
@@ -229,6 +234,7 @@ public class Role {
 
     /**
      * 移除權限
+     * 
      * @param permissionId 權限 ID
      */
     public void removePermission(PermissionId permissionId) {
@@ -249,6 +255,7 @@ public class Role {
 
     /**
      * 檢查是否擁有指定權限
+     * 
      * @param permissionId 權限 ID
      * @return 是否擁有
      */
@@ -258,6 +265,7 @@ public class Role {
 
     /**
      * 檢查角色是否啟用
+     * 
      * @return 是否啟用
      */
     public boolean isActive() {
@@ -266,6 +274,7 @@ public class Role {
 
     /**
      * 取得權限 ID 列表 (不可變)
+     * 
      * @return 權限 ID 列表
      */
     public List<PermissionId> getPermissionIds() {
@@ -274,6 +283,7 @@ public class Role {
 
     /**
      * 取得權限數量
+     * 
      * @return 權限數量
      */
     public int getPermissionCount() {
@@ -305,8 +315,10 @@ public class Role {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Role role = (Role) o;
         return id.equals(role.id);
     }
