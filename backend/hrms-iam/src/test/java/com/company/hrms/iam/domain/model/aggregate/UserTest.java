@@ -1,14 +1,15 @@
 package com.company.hrms.iam.domain.model.aggregate;
 
-import com.company.hrms.common.exception.DomainException;
-import com.company.hrms.iam.domain.model.valueobject.UserStatus;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.iam.domain.model.valueobject.UserStatus;
 
 /**
  * User 聚合根單元測試
@@ -110,7 +111,7 @@ class UserTest {
 
             // When & Then
             DomainException exception = assertThrows(DomainException.class, user::activate);
-            assertEquals("USER_DELETED", exception.getCode());
+            assertEquals("USER_DELETED", exception.getErrorCode());
         }
 
         @Test
@@ -281,7 +282,7 @@ class UserTest {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> user.changePassword(null));
-            assertEquals("PASSWORD_REQUIRED", exception.getCode());
+            assertEquals("PASSWORD_REQUIRED", exception.getErrorCode());
         }
 
         @Test
@@ -294,7 +295,7 @@ class UserTest {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> user.changePassword("   "));
-            assertEquals("PASSWORD_REQUIRED", exception.getCode());
+            assertEquals("PASSWORD_REQUIRED", exception.getErrorCode());
         }
     }
 

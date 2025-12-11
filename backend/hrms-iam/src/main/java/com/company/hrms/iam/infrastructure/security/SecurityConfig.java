@@ -1,6 +1,8 @@
 package com.company.hrms.iam.infrastructure.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,9 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Spring Security 配置
  * 配置 JWT 認證、CORS、權限控制等
@@ -32,9 +31,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    @Autowired
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
+            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     }
@@ -53,56 +51,53 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // 禁用 CSRF (使用 JWT，不需要 CSRF)
-            .csrf(AbstractHttpConfigurer::disable)
+                // 禁用 CSRF (使用 JWT，不需要 CSRF)
+                .csrf(AbstractHttpConfigurer::disable)
 
-            // 啟用 CORS
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // 啟用 CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-            // 禁用 Session (無狀態)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // 禁用 Session (無狀態)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            // 異常處理
-            .exceptionHandling(exception ->
-                exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                // 異常處理
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-            // 路由權限配置
-            .authorizeHttpRequests(auth -> auth
-                // 公開端點 - 不需要認證
-                .requestMatchers(
-                    "/api/v1/auth/login",
-                    "/api/v1/auth/refresh",
-                    "/api/v1/auth/register",
-                    "/api/v1/auth/forgot-password",
-                    "/api/v1/auth/oauth/**",
-                    "/api/v1/auth/sso/**"
-                ).permitAll()
+                // 路由權限配置
+                .authorizeHttpRequests(auth -> auth
+                        // 公開端點 - 不需要認證
+                        .requestMatchers(
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/refresh",
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/forgot-password",
+                                "/api/v1/auth/oauth/**",
+                                "/api/v1/auth/sso/**")
+                        .permitAll()
 
-                // Swagger/OpenAPI 文檔
-                .requestMatchers(
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/api-docs/**",
-                    "/v3/api-docs/**"
-                ).permitAll()
+                        // Swagger/OpenAPI 文檔
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/api-docs/**",
+                                "/v3/api-docs/**")
+                        .permitAll()
 
-                // Actuator 健康檢查
-                .requestMatchers(
-                    "/actuator/health",
-                    "/actuator/info"
-                ).permitAll()
+                        // Actuator 健康檢查
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/info")
+                        .permitAll()
 
-                // OPTIONS 請求 (CORS preflight)
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // OPTIONS 請求 (CORS preflight)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // 其他所有請求需要認證
-                .anyRequest().authenticated()
-            )
+                        // 其他所有請求需要認證
+                        .anyRequest().authenticated())
 
-            // 添加 JWT 過濾器
-            .addFilterBefore(jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class);
+                // 添加 JWT 過濾器
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -116,27 +111,24 @@ public class SecurityConfig {
 
         // 允許的來源
         configuration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173"
-        ));
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:5173"));
 
         // 允許的 HTTP 方法
         configuration.setAllowedMethods(Arrays.asList(
-            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
-        ));
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
         // 允許的請求頭
         configuration.setAllowedHeaders(List.of("*"));
 
         // 暴露的響應頭
         configuration.setExposedHeaders(Arrays.asList(
-            "Authorization",
-            "X-Total-Count",
-            "X-Page-Number",
-            "X-Page-Size"
-        ));
+                "Authorization",
+                "X-Total-Count",
+                "X-Page-Number",
+                "X-Page-Size"));
 
         // 允許攜帶憑證
         configuration.setAllowCredentials(true);

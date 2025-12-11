@@ -1,11 +1,11 @@
 package com.company.hrms.iam.infrastructure.dao;
 
-import com.company.hrms.iam.infrastructure.mapper.UserMapper;
-import com.company.hrms.iam.infrastructure.po.UserPO;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.company.hrms.iam.infrastructure.mapper.UserMapper;
+import com.company.hrms.iam.infrastructure.po.UserPO;
 
 /**
  * User DAO (Data Access Object)
@@ -16,7 +16,6 @@ public class UserDAO {
 
     private final UserMapper userMapper;
 
-    @Autowired
     public UserDAO(UserMapper userMapper) {
         this.userMapper = userMapper;
     }

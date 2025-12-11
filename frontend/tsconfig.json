@@ -40,7 +40,9 @@
             "@store/*": [
                 "src/store/*"
             ]
-        }
+        },
+        "ignoreDeprecations": "6.0",
+        "forceConsistentCasingInFileNames": true
     },
     "include": [
         "src"

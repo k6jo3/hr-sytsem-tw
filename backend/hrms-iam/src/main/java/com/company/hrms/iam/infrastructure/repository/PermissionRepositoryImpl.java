@@ -1,17 +1,17 @@
 package com.company.hrms.iam.infrastructure.repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
 import com.company.hrms.iam.domain.model.entity.Permission;
 import com.company.hrms.iam.domain.model.valueobject.PermissionId;
 import com.company.hrms.iam.domain.repository.IPermissionRepository;
 import com.company.hrms.iam.infrastructure.dao.PermissionDAO;
 import com.company.hrms.iam.infrastructure.mapper.PermissionMapper;
 import com.company.hrms.iam.infrastructure.po.PermissionPO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Permission Repository 實作
@@ -23,7 +23,6 @@ public class PermissionRepositoryImpl implements IPermissionRepository {
     private final PermissionDAO permissionDAO;
     private final PermissionMapper permissionMapper;
 
-    @Autowired
     public PermissionRepositoryImpl(PermissionDAO permissionDAO, PermissionMapper permissionMapper) {
         this.permissionDAO = permissionDAO;
         this.permissionMapper = permissionMapper;

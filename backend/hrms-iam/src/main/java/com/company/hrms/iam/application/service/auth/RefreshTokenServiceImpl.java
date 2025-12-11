@@ -1,5 +1,9 @@
 package com.company.hrms.iam.application.service.auth;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
@@ -9,16 +13,16 @@ import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 import com.company.hrms.iam.domain.service.JwtTokenDomainService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 重新整理 Token Application Service
  *
- * <p>命名規範：{動詞}{名詞}ServiceImpl</p>
- * <p>對應 Controller 方法：refreshToken</p>
+ * <p>
+ * 命名規範：{動詞}{名詞}ServiceImpl
+ * </p>
+ * <p>
+ * 對應 Controller 方法：refreshToken
+ * </p>
  */
 @Service("refreshTokenServiceImpl")
 @Transactional
@@ -31,17 +35,16 @@ public class RefreshTokenServiceImpl
     @Value("${jwt.access-token-expiry:3600000}")
     private long accessTokenExpiry;
 
-    @Autowired
     public RefreshTokenServiceImpl(IUserRepository userRepository,
-                                   JwtTokenDomainService jwtTokenService) {
+            JwtTokenDomainService jwtTokenService) {
         this.userRepository = userRepository;
         this.jwtTokenService = jwtTokenService;
     }
 
     @Override
     public RefreshTokenResponse execCommand(RefreshTokenRequest request,
-                                            JWTModel currentUser,
-                                            String... args) throws Exception {
+            JWTModel currentUser,
+            String... args) throws Exception {
         String refreshToken = request.getRefreshToken();
 
         // 1. 驗證 Refresh Token

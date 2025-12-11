@@ -1,5 +1,11 @@
 package com.company.hrms.iam.infrastructure.repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
 import com.company.hrms.iam.domain.model.aggregate.Role;
 import com.company.hrms.iam.domain.model.valueobject.PermissionId;
 import com.company.hrms.iam.domain.model.valueobject.RoleId;
@@ -8,12 +14,6 @@ import com.company.hrms.iam.domain.repository.IRoleRepository;
 import com.company.hrms.iam.infrastructure.dao.RoleDAO;
 import com.company.hrms.iam.infrastructure.mapper.RoleMapper;
 import com.company.hrms.iam.infrastructure.po.RolePO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Role Repository 實作
@@ -25,7 +25,6 @@ public class RoleRepositoryImpl implements IRoleRepository {
     private final RoleDAO roleDAO;
     private final RoleMapper roleMapper;
 
-    @Autowired
     public RoleRepositoryImpl(RoleDAO roleDAO, RoleMapper roleMapper) {
         this.roleDAO = roleDAO;
         this.roleMapper = roleMapper;

@@ -1,5 +1,9 @@
 package com.company.hrms.iam.application.service.auth;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
@@ -11,16 +15,16 @@ import com.company.hrms.iam.domain.repository.IUserRepository;
 import com.company.hrms.iam.domain.service.AccountLockingDomainService;
 import com.company.hrms.iam.domain.service.JwtTokenDomainService;
 import com.company.hrms.iam.domain.service.PasswordHashingDomainService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 登入 Application Service
  *
- * <p>命名規範：{動詞}{名詞}ServiceImpl</p>
- * <p>對應 Controller 方法：login</p>
+ * <p>
+ * 命名規範：{動詞}{名詞}ServiceImpl
+ * </p>
+ * <p>
+ * 對應 Controller 方法：login
+ * </p>
  */
 @Service("loginServiceImpl")
 @Transactional
@@ -35,11 +39,10 @@ public class LoginServiceImpl
     @Value("${jwt.access-token-expiry:3600000}")
     private long accessTokenExpiry;
 
-    @Autowired
     public LoginServiceImpl(IUserRepository userRepository,
-                            PasswordHashingDomainService passwordHashingService,
-                            JwtTokenDomainService jwtTokenService,
-                            AccountLockingDomainService accountLockingService) {
+            PasswordHashingDomainService passwordHashingService,
+            JwtTokenDomainService jwtTokenService,
+            AccountLockingDomainService accountLockingService) {
         this.userRepository = userRepository;
         this.passwordHashingService = passwordHashingService;
         this.jwtTokenService = jwtTokenService;
@@ -56,8 +59,8 @@ public class LoginServiceImpl
      */
     @Override
     public LoginResponse execCommand(LoginRequest request,
-                                     JWTModel currentUser,
-                                     String... args) throws Exception {
+            JWTModel currentUser,
+            String... args) throws Exception {
         // 1. 查詢使用者
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new DomainException("LOGIN_FAILED", "使用者名稱或密碼錯誤"));

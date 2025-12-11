@@ -1,13 +1,14 @@
 package com.company.hrms.iam.domain.model.valueobject;
 
-import com.company.hrms.common.exception.DomainException;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.company.hrms.common.exception.DomainException;
 
 /**
  * Email 值物件單元測試
@@ -21,11 +22,11 @@ class EmailTest {
 
         @ParameterizedTest
         @ValueSource(strings = {
-            "test@example.com",
-            "user.name@domain.com",
-            "user+tag@example.org",
-            "user_name@sub.domain.com",
-            "TEST@EXAMPLE.COM"
+                "test@example.com",
+                "user.name@domain.com",
+                "user+tag@example.org",
+                "user_name@sub.domain.com",
+                "TEST@EXAMPLE.COM"
         })
         @DisplayName("應接受有效的 Email 格式")
         void shouldAcceptValidEmail(String email) {
@@ -68,7 +69,7 @@ class EmailTest {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> new Email(null));
-            assertEquals("EMAIL_REQUIRED", exception.getCode());
+            assertEquals("EMAIL_REQUIRED", exception.getErrorCode());
         }
 
         @Test
@@ -77,23 +78,23 @@ class EmailTest {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> new Email("   "));
-            assertEquals("EMAIL_REQUIRED", exception.getCode());
+            assertEquals("EMAIL_REQUIRED", exception.getErrorCode());
         }
 
         @ParameterizedTest
         @ValueSource(strings = {
-            "invalid",
-            "invalid@",
-            "@example.com",
-            "test@",
-            "test.example.com"
+                "invalid",
+                "invalid@",
+                "@example.com",
+                "test@",
+                "test.example.com"
         })
         @DisplayName("應拒絕無效的 Email 格式")
         void shouldRejectInvalidEmail(String invalidEmail) {
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
                     () -> new Email(invalidEmail));
-            assertEquals("EMAIL_INVALID", exception.getCode());
+            assertEquals("EMAIL_INVALID", exception.getErrorCode());
         }
     }
 
