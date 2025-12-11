@@ -1,5 +1,10 @@
 package com.company.hrms.iam.application.service.auth;
 
+import java.security.SecureRandom;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
@@ -9,21 +14,21 @@ import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 import com.company.hrms.iam.domain.service.PasswordHashingDomainService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.security.SecureRandom;
 
 /**
  * 管理員重設使用者密碼 Application Service
  *
- * <p>命名規範：{動詞}{名詞}ServiceImpl</p>
- * <p>對應 Controller 方法：adminResetPassword</p>
+ * <p>
+ * 命名規範：{動詞}{名詞}ServiceImpl
+ * </p>
+ * <p>
+ * 對應 Controller 方法：adminResetPassword
+ * </p>
  */
 @Service("adminResetPasswordServiceImpl")
 @Transactional
-public class AdminResetPasswordServiceImpl implements CommandApiService<AdminResetPasswordRequest, ResetPasswordResponse> {
+public class AdminResetPasswordServiceImpl
+        implements CommandApiService<AdminResetPasswordRequest, ResetPasswordResponse> {
 
     private static final String TEMP_PASSWORD_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@$!%*?&";
     private static final int TEMP_PASSWORD_LENGTH = 12;
@@ -31,14 +36,15 @@ public class AdminResetPasswordServiceImpl implements CommandApiService<AdminRes
     private final IUserRepository userRepository;
     private final PasswordHashingDomainService passwordHashingService;
 
-    @Autowired
-    public AdminResetPasswordServiceImpl(IUserRepository userRepository, PasswordHashingDomainService passwordHashingService) {
+    public AdminResetPasswordServiceImpl(IUserRepository userRepository,
+            PasswordHashingDomainService passwordHashingService) {
         this.userRepository = userRepository;
         this.passwordHashingService = passwordHashingService;
     }
 
     @Override
-    public ResetPasswordResponse execCommand(AdminResetPasswordRequest request, JWTModel currentUser, String... args) throws Exception {
+    public ResetPasswordResponse execCommand(AdminResetPasswordRequest request, JWTModel currentUser, String... args)
+            throws Exception {
         String targetUserId = args[0];
 
         // 查詢目標使用者

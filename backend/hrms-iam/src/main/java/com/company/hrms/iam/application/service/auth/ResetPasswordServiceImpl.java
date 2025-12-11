@@ -1,5 +1,8 @@
 package com.company.hrms.iam.application.service.auth;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
@@ -9,15 +12,16 @@ import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 import com.company.hrms.iam.domain.service.PasswordHashingDomainService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 使用者自行重設密碼 Application Service
  *
- * <p>命名規範：{動詞}{名詞}ServiceImpl</p>
- * <p>對應 Controller 方法：resetPassword</p>
+ * <p>
+ * 命名規範：{動詞}{名詞}ServiceImpl
+ * </p>
+ * <p>
+ * 對應 Controller 方法：resetPassword
+ * </p>
  */
 @Service("resetPasswordServiceImpl")
 @Transactional
@@ -26,14 +30,15 @@ public class ResetPasswordServiceImpl implements CommandApiService<ResetPassword
     private final IUserRepository userRepository;
     private final PasswordHashingDomainService passwordHashingService;
 
-    @Autowired
-    public ResetPasswordServiceImpl(IUserRepository userRepository, PasswordHashingDomainService passwordHashingService) {
+    public ResetPasswordServiceImpl(IUserRepository userRepository,
+            PasswordHashingDomainService passwordHashingService) {
         this.userRepository = userRepository;
         this.passwordHashingService = passwordHashingService;
     }
 
     @Override
-    public ResetPasswordResponse execCommand(ResetPasswordRequest request, JWTModel currentUser, String... args) throws Exception {
+    public ResetPasswordResponse execCommand(ResetPasswordRequest request, JWTModel currentUser, String... args)
+            throws Exception {
         // 驗證使用者已登入
         if (currentUser == null || currentUser.getUserId() == null) {
             throw new DomainException("UNAUTHORIZED", "請先登入");
