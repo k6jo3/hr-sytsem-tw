@@ -281,6 +281,15 @@ public class User {
     }
 
     /**
+     * 設定是否需要首次登入變更密碼
+     * @param mustChangePassword 是否需要變更密碼
+     */
+    public void setMustChangePassword(boolean mustChangePassword) {
+        this.mustChangePassword = mustChangePassword;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
      * 檢查使用者是否已鎖定
      * @return 是否已鎖定
      */
