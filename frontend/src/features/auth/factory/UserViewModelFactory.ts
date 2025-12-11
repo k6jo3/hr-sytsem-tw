@@ -143,6 +143,51 @@ export class UserViewModelFactory {
     return dtos.map((dto) => this.createUserViewModelFromDTO(dto));
   }
 
+  /**
+   * Create user list item for table display
+   * Used by useUsers hook
+   */
+  static createUserListItem(dto: UserDto): {
+    id: string;
+    username: string;
+    email: string;
+    displayName: string;
+    fullName: string;
+    employeeId?: string;
+    status: 'ACTIVE' | 'INACTIVE' | 'LOCKED' | 'DELETED';
+    statusLabel: string;
+    statusColor: string;
+    roles: Array<{ id: string; name: string }>;
+    roleLabels: string[];
+    avatarUrl?: string;
+    lastLoginAt?: string;
+    lastLoginDisplay: string;
+    mustChangePassword: boolean;
+    createdAt: string;
+  } {
+    return {
+      id: dto.id,
+      username: dto.username,
+      email: dto.email,
+      displayName: dto.display_name || `${dto.first_name ?? ''} ${dto.last_name ?? ''}`.trim(),
+      fullName: dto.display_name || `${dto.first_name ?? ''} ${dto.last_name ?? ''}`.trim(),
+      employeeId: dto.employee_id,
+      status: dto.status,
+      statusLabel: STATUS_LABELS[dto.status] ?? '未知',
+      statusColor: STATUS_COLORS[dto.status] ?? 'default',
+      roles: dto.role_ids.map((id, index) => ({
+        id,
+        name: dto.role_list[index] || ROLE_LABELS[dto.role_list[index]] || id,
+      })),
+      roleLabels: dto.role_list.map((role) => ROLE_LABELS[role] ?? role),
+      avatarUrl: dto.avatar_url,
+      lastLoginAt: dto.last_login_at,
+      lastLoginDisplay: formatDateTime(dto.last_login_at),
+      mustChangePassword: dto.must_change_password,
+      createdAt: dto.created_at,
+    };
+  }
+
   // Legacy method
   static createListFromDTO(dtos: UserDto[]): UserProfile[] {
     return dtos.map((dto) => this.createFromDTO(dto));
