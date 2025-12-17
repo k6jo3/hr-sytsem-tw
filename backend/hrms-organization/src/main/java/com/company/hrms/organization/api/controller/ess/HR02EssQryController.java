@@ -1,10 +1,16 @@
 package com.company.hrms.organization.api.controller.ess;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.controller.QueryBaseController;
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.common.security.CurrentUser;
 import com.company.hrms.organization.api.response.ess.CertificateRequestResponse;
 import com.company.hrms.organization.api.response.ess.MyProfileResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,8 +18,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 /**
  * 員工自助服務查詢控制器
