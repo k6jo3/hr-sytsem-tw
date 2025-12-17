@@ -110,8 +110,23 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     }
 
     @Override
+    public boolean existsByNationalId(NationalId nationalId) {
+        return employeeDAO.existsByNationalId(nationalId.getValue());
+    }
+
+    @Override
+    public boolean existsByEmail(Email email) {
+        return employeeDAO.existsByEmail(email.getValue());
+    }
+
+    @Override
     public boolean existsById(EmployeeId id) {
         return employeeDAO.existsById(id.getValue());
+    }
+
+    @Override
+    public int findMaxSequenceByPrefix(String prefix) {
+        return employeeDAO.findMaxSequenceByPrefix(prefix);
     }
 
     private Employee toDomain(EmployeePO po) {

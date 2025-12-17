@@ -53,4 +53,12 @@ public class EmployeeContractDAO {
     public boolean existsById(String id) {
         return contractMapper.existsById(id);
     }
+
+    public List<EmployeeContractPO> findByEmployeeIdAndStatus(String employeeId, String status) {
+        return contractMapper.selectByEmployeeIdAndStatus(employeeId, status);
+    }
+
+    public boolean existsByContractNumber(String contractNumber) {
+        return contractMapper.existsByContractNumber(contractNumber);
+    }
 }

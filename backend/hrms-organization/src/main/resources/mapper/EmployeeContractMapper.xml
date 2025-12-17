@@ -92,4 +92,15 @@
         SELECT EXISTS(SELECT 1 FROM employee_contracts WHERE id = #{id})
     </select>
 
+    <select id="selectByEmployeeIdAndStatus" resultMap="EmployeeContractResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employee_contracts
+        WHERE employee_id = #{employeeId} AND status = #{status}
+        ORDER BY start_date DESC
+    </select>
+
+    <select id="existsByContractNumber" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM employee_contracts WHERE contract_number = #{contractNumber})
+    </select>
+
 </mapper>

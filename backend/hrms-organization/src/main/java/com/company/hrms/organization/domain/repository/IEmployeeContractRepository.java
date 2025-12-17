@@ -1,8 +1,9 @@
 package com.company.hrms.organization.domain.repository;
 
-import com.company.hrms.organization.domain.model.aggregate.EmployeeContract;
+import com.company.hrms.organization.domain.model.entity.EmployeeContract;
 import com.company.hrms.organization.domain.model.valueobject.ContractId;
 import com.company.hrms.organization.domain.model.valueobject.ContractStatus;
+import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -51,12 +52,26 @@ public interface IEmployeeContractRepository {
     Optional<EmployeeContract> findActiveByEmployeeId(UUID employeeId);
 
     /**
+     * 查詢員工目前生效的合約 (使用 Value Object)
+     * @param employeeId 員工 ID
+     * @return 合約
+     */
+    Optional<EmployeeContract> findActiveByEmployeeId(EmployeeId employeeId);
+
+    /**
      * 查詢即將到期的合約
      * @param endDateBefore 結束日期在此日期之前
      * @param status 狀態
      * @return 合約列表
      */
     List<EmployeeContract> findExpiringContracts(LocalDate endDateBefore, ContractStatus status);
+
+    /**
+     * 查詢在指定日期前到期的合約
+     * @param expiryDate 到期日期
+     * @return 合約列表
+     */
+    List<EmployeeContract> findExpiringBefore(LocalDate expiryDate);
 
     /**
      * 查詢所有即將到期的合約 (30天內)

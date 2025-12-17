@@ -92,4 +92,14 @@ public class EmployeeDAO {
     public int countByDepartmentId(String departmentId) {
         return employeeMapper.countByDepartmentId(departmentId);
     }
+
+    /**
+     * 查詢特定前綴的最大流水號
+     * @param prefix 員工編號前綴
+     * @return 最大流水號
+     */
+    public int findMaxSequenceByPrefix(String prefix) {
+        Integer maxSeq = employeeMapper.findMaxSequenceByPrefix(prefix);
+        return maxSeq != null ? maxSeq : 0;
+    }
 }
