@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.hrms.organization.infrastructure.mapper.OrganizationMapper">
+
+    <resultMap id="OrganizationResultMap" type="com.company.hrms.organization.infrastructure.po.OrganizationPO">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="name_en" property="nameEn"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="tax_id" property="taxId"/>
+        <result column="phone" property="phone"/>
+        <result column="fax" property="fax"/>
+        <result column="email" property="email"/>
+        <result column="address" property="address"/>
+        <result column="established_date" property="establishedDate"/>
+        <result column="description" property="description"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, code, name, name_en, type, status, parent_id, tax_id, phone, fax, email,
+        address, established_date, description, created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="selectById" resultMap="OrganizationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM organizations
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByCode" resultMap="OrganizationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM organizations
+        WHERE code = #{code}
+    </select>
+
+    <select id="selectAll" resultMap="OrganizationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM organizations
+        ORDER BY code
+    </select>
+
+    <select id="selectByParentId" resultMap="OrganizationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM organizations
+        WHERE parent_id = #{parentId}
+        ORDER BY code
+    </select>
+
+    <select id="selectByStatus" resultMap="OrganizationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM organizations
+        WHERE status = #{status}
+        ORDER BY code
+    </select>
+
+    <insert id="insert">
+        INSERT INTO organizations (
+            id, code, name, name_en, type, status, parent_id, tax_id, phone, fax, email,
+            address, established_date, description, created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{id}, #{code}, #{name}, #{nameEn}, #{type}, #{status}, #{parentId}, #{taxId},
+            #{phone}, #{fax}, #{email}, #{address}, #{establishedDate}, #{description},
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE organizations SET
+            code = #{code},
+            name = #{name},
+            name_en = #{nameEn},
+            type = #{type},
+            status = #{status},
+            parent_id = #{parentId},
+            tax_id = #{taxId},
+            phone = #{phone},
+            fax = #{fax},
+            email = #{email},
+            address = #{address},
+            established_date = #{establishedDate},
+            description = #{description},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        UPDATE organizations SET status = 'INACTIVE', updated_at = NOW()
+        WHERE id = #{id}
+    </delete>
+
+    <select id="existsByCode" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM organizations WHERE code = #{code})
+    </select>
+
+    <select id="existsById" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM organizations WHERE id = #{id})
+    </select>
+
+</mapper>

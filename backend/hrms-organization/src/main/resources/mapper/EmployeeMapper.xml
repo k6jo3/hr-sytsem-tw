@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.hrms.organization.infrastructure.mapper.EmployeeMapper">
+
+    <resultMap id="EmployeeResultMap" type="com.company.hrms.organization.infrastructure.po.EmployeePO">
+        <id column="id" property="id"/>
+        <result column="employee_number" property="employeeNumber"/>
+        <result column="first_name" property="firstName"/>
+        <result column="last_name" property="lastName"/>
+        <result column="english_name" property="englishName"/>
+        <result column="gender" property="gender"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="national_id" property="nationalId"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="marital_status" property="maritalStatus"/>
+        <result column="address_postal_code" property="addressPostalCode"/>
+        <result column="address_city" property="addressCity"/>
+        <result column="address_district" property="addressDistrict"/>
+        <result column="address_street" property="addressStreet"/>
+        <result column="emergency_contact_name" property="emergencyContactName"/>
+        <result column="emergency_contact_relationship" property="emergencyContactRelationship"/>
+        <result column="emergency_contact_phone" property="emergencyContactPhone"/>
+        <result column="bank_code" property="bankCode"/>
+        <result column="bank_branch_code" property="bankBranchCode"/>
+        <result column="bank_account_number" property="bankAccountNumber"/>
+        <result column="bank_account_holder_name" property="bankAccountHolderName"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="job_title" property="jobTitle"/>
+        <result column="job_level" property="jobLevel"/>
+        <result column="employment_type" property="employmentType"/>
+        <result column="employment_status" property="employmentStatus"/>
+        <result column="hire_date" property="hireDate"/>
+        <result column="probation_end_date" property="probationEndDate"/>
+        <result column="termination_date" property="terminationDate"/>
+        <result column="termination_reason" property="terminationReason"/>
+        <result column="supervisor_id" property="supervisorId"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, employee_number, first_name, last_name, english_name, gender, birth_date,
+        national_id, email, phone, marital_status,
+        address_postal_code, address_city, address_district, address_street,
+        emergency_contact_name, emergency_contact_relationship, emergency_contact_phone,
+        bank_code, bank_branch_code, bank_account_number, bank_account_holder_name,
+        department_id, job_title, job_level, employment_type, employment_status,
+        hire_date, probation_end_date, termination_date, termination_reason, supervisor_id,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="selectById" resultMap="EmployeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employees
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByEmployeeNumber" resultMap="EmployeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employees
+        WHERE employee_number = #{employeeNumber}
+    </select>
+
+    <select id="selectByEmail" resultMap="EmployeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employees
+        WHERE email = #{email}
+    </select>
+
+    <select id="selectByNationalId" resultMap="EmployeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employees
+        WHERE national_id = #{nationalId}
+    </select>
+
+    <select id="selectByDepartmentId" resultMap="EmployeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employees
+        WHERE department_id = #{departmentId}
+        ORDER BY employee_number
+    </select>
+
+    <select id="selectBySupervisorId" resultMap="EmployeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employees
+        WHERE supervisor_id = #{supervisorId}
+        ORDER BY employee_number
+    </select>
+
+    <select id="selectByEmploymentStatus" resultMap="EmployeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employees
+        WHERE employment_status = #{employmentStatus}
+        ORDER BY employee_number
+    </select>
+
+    <select id="selectByCriteria" resultMap="EmployeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employees
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (employee_number LIKE CONCAT('%', #{keyword}, '%')
+                    OR first_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR last_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR english_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR email LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="departmentId != null and departmentId != ''">
+                AND department_id = #{departmentId}
+            </if>
+            <if test="employmentStatus != null and employmentStatus != ''">
+                AND employment_status = #{employmentStatus}
+            </if>
+            <if test="employmentType != null and employmentType != ''">
+                AND employment_type = #{employmentType}
+            </if>
+            <if test="hireDateFrom != null">
+                AND hire_date &gt;= #{hireDateFrom}
+            </if>
+            <if test="hireDateTo != null">
+                AND hire_date &lt;= #{hireDateTo}
+            </if>
+        </where>
+        ORDER BY employee_number
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countByCriteria" resultType="long">
+        SELECT COUNT(*)
+        FROM employees
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (employee_number LIKE CONCAT('%', #{keyword}, '%')
+                    OR first_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR last_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR english_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR email LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="departmentId != null and departmentId != ''">
+                AND department_id = #{departmentId}
+            </if>
+            <if test="employmentStatus != null and employmentStatus != ''">
+                AND employment_status = #{employmentStatus}
+            </if>
+            <if test="employmentType != null and employmentType != ''">
+                AND employment_type = #{employmentType}
+            </if>
+            <if test="hireDateFrom != null">
+                AND hire_date &gt;= #{hireDateFrom}
+            </if>
+            <if test="hireDateTo != null">
+                AND hire_date &lt;= #{hireDateTo}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO employees (
+            id, employee_number, first_name, last_name, english_name, gender, birth_date,
+            national_id, email, phone, marital_status,
+            address_postal_code, address_city, address_district, address_street,
+            emergency_contact_name, emergency_contact_relationship, emergency_contact_phone,
+            bank_code, bank_branch_code, bank_account_number, bank_account_holder_name,
+            department_id, job_title, job_level, employment_type, employment_status,
+            hire_date, probation_end_date, termination_date, termination_reason, supervisor_id,
+            created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{id}, #{employeeNumber}, #{firstName}, #{lastName}, #{englishName}, #{gender}, #{birthDate},
+            #{nationalId}, #{email}, #{phone}, #{maritalStatus},
+            #{addressPostalCode}, #{addressCity}, #{addressDistrict}, #{addressStreet},
+            #{emergencyContactName}, #{emergencyContactRelationship}, #{emergencyContactPhone},
+            #{bankCode}, #{bankBranchCode}, #{bankAccountNumber}, #{bankAccountHolderName},
+            #{departmentId}, #{jobTitle}, #{jobLevel}, #{employmentType}, #{employmentStatus},
+            #{hireDate}, #{probationEndDate}, #{terminationDate}, #{terminationReason}, #{supervisorId},
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE employees SET
+            employee_number = #{employeeNumber},
+            first_name = #{firstName},
+            last_name = #{lastName},
+            english_name = #{englishName},
+            gender = #{gender},
+            birth_date = #{birthDate},
+            national_id = #{nationalId},
+            email = #{email},
+            phone = #{phone},
+            marital_status = #{maritalStatus},
+            address_postal_code = #{addressPostalCode},
+            address_city = #{addressCity},
+            address_district = #{addressDistrict},
+            address_street = #{addressStreet},
+            emergency_contact_name = #{emergencyContactName},
+            emergency_contact_relationship = #{emergencyContactRelationship},
+            emergency_contact_phone = #{emergencyContactPhone},
+            bank_code = #{bankCode},
+            bank_branch_code = #{bankBranchCode},
+            bank_account_number = #{bankAccountNumber},
+            bank_account_holder_name = #{bankAccountHolderName},
+            department_id = #{departmentId},
+            job_title = #{jobTitle},
+            job_level = #{jobLevel},
+            employment_type = #{employmentType},
+            employment_status = #{employmentStatus},
+            hire_date = #{hireDate},
+            probation_end_date = #{probationEndDate},
+            termination_date = #{terminationDate},
+            termination_reason = #{terminationReason},
+            supervisor_id = #{supervisorId},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        UPDATE employees SET employment_status = 'TERMINATED', updated_at = NOW()
+        WHERE id = #{id}
+    </delete>
+
+    <select id="existsByEmployeeNumber" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM employees WHERE employee_number = #{employeeNumber})
+    </select>
+
+    <select id="existsByEmail" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM employees WHERE email = #{email})
+    </select>
+
+    <select id="existsByNationalId" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM employees WHERE national_id = #{nationalId})
+    </select>
+
+    <select id="existsById" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM employees WHERE id = #{id})
+    </select>
+
+    <select id="countByDepartmentId" resultType="int">
+        SELECT COUNT(*) FROM employees WHERE department_id = #{departmentId}
+    </select>
+
+</mapper>
