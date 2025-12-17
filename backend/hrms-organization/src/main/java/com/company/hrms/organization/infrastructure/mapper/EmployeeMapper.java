@@ -113,4 +113,12 @@ public interface EmployeeMapper {
      * 計算部門員工數量
      */
     int countByDepartmentId(@Param("departmentId") String departmentId);
+
+    /**
+     * 查詢特定前綴的最大流水號
+     * 用於生成員工編號
+     * @param prefix 員工編號前綴 (例如: EMP202412-)
+     * @return 最大流水號
+     */
+    Integer findMaxSequenceByPrefix(@Param("prefix") String prefix);
 }

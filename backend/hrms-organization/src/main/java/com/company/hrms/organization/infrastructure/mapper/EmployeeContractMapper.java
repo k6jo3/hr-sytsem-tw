@@ -60,4 +60,17 @@ public interface EmployeeContractMapper {
      * 檢查合約 ID 是否存在
      */
     boolean existsById(@Param("id") String id);
+
+    /**
+     * 根據員工 ID 和狀態查詢合約
+     */
+    List<EmployeeContractPO> selectByEmployeeIdAndStatus(
+            @Param("employeeId") String employeeId,
+            @Param("status") String status
+    );
+
+    /**
+     * 檢查合約編號是否存在
+     */
+    boolean existsByContractNumber(@Param("contractNumber") String contractNumber);
 }

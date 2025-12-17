@@ -1,6 +1,6 @@
 package com.company.hrms.organization.infrastructure.repository;
 
-import com.company.hrms.organization.domain.model.aggregate.EmployeeContract;
+import com.company.hrms.organization.domain.model.entity.EmployeeContract;
 import com.company.hrms.organization.domain.model.valueobject.*;
 import com.company.hrms.organization.domain.repository.IEmployeeContractRepository;
 import com.company.hrms.organization.infrastructure.dao.EmployeeContractDAO;
@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -70,6 +71,58 @@ public class EmployeeContractRepositoryImpl implements IEmployeeContractReposito
     @Override
     public boolean existsById(ContractId id) {
         return contractDAO.existsById(id.getValue());
+    }
+
+    @Override
+    public Optional<EmployeeContract> findById(UUID id) {
+        return contractDAO.findById(id.toString())
+                .map(this::toDomain);
+    }
+
+    @Override
+    public List<EmployeeContract> findByEmployeeId(UUID employeeId) {
+        return contractDAO.findByEmployeeId(employeeId.toString()).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EmployeeContract> findByEmployeeIdAndStatus(UUID employeeId, ContractStatus status) {
+        return contractDAO.findByEmployeeIdAndStatus(employeeId.toString(), status.name()).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<EmployeeContract> findActiveByEmployeeId(UUID employeeId) {
+        return contractDAO.findActiveByEmployeeId(employeeId.toString())
+                .map(this::toDomain);
+    }
+
+    @Override
+    public List<EmployeeContract> findExpiringContracts(LocalDate endDateBefore, ContractStatus status) {
+        return contractDAO.findExpiringContracts(LocalDate.now(), endDateBefore).stream()
+                .filter(po -> status.name().equals(po.getStatus()))
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EmployeeContract> findExpiringBefore(LocalDate expiryDate) {
+        return contractDAO.findExpiringContracts(LocalDate.now(), expiryDate).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EmployeeContract> findContractsExpiringSoon() {
+        LocalDate thirtyDaysLater = LocalDate.now().plusDays(30);
+        return findExpiringBefore(thirtyDaysLater);
+    }
+
+    @Override
+    public boolean existsByContractNumber(String contractNumber) {
+        return contractDAO.existsByContractNumber(contractNumber);
     }
 
     private EmployeeContract toDomain(EmployeeContractPO po) {

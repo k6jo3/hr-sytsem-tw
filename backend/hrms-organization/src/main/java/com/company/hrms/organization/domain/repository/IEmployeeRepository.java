@@ -1,8 +1,10 @@
 package com.company.hrms.organization.domain.repository;
 
 import com.company.hrms.organization.domain.model.aggregate.Employee;
+import com.company.hrms.organization.domain.model.valueobject.Email;
 import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
 import com.company.hrms.organization.domain.model.valueobject.EmploymentStatus;
+import com.company.hrms.organization.domain.model.valueobject.NationalId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -106,6 +108,28 @@ public interface IEmployeeRepository {
      * @return 員工數
      */
     int countByDepartmentIdAndStatus(UUID departmentId, EmploymentStatus status);
+
+    /**
+     * 檢查身分證號是否存在 (使用 Value Object)
+     * @param nationalId 身分證號
+     * @return 是否存在
+     */
+    boolean existsByNationalId(NationalId nationalId);
+
+    /**
+     * 檢查 Email 是否存在 (使用 Value Object)
+     * @param email Email
+     * @return 是否存在
+     */
+    boolean existsByEmail(Email email);
+
+    /**
+     * 查詢特定前綴的最大流水號
+     * 用於生成員工編號
+     * @param prefix 員工編號前綴 (例如: EMP202412-)
+     * @return 最大流水號，如果沒有則回傳 0
+     */
+    int findMaxSequenceByPrefix(String prefix);
 
     /**
      * 查詢條件類別

@@ -242,4 +242,11 @@
         SELECT COUNT(*) FROM employees WHERE department_id = #{departmentId}
     </select>
 
+    <!-- 查詢特定前綴的最大流水號 -->
+    <select id="findMaxSequenceByPrefix" resultType="java.lang.Integer">
+        SELECT MAX(CAST(SUBSTRING(employee_number, LENGTH(#{prefix}) + 1) AS INTEGER))
+        FROM employees
+        WHERE employee_number LIKE CONCAT(#{prefix}, '%')
+    </select>
+
 </mapper>
