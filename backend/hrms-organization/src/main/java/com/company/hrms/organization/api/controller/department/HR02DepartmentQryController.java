@@ -1,0 +1,53 @@
+package com.company.hrms.organization.api.controller.department;
+
+import com.company.hrms.common.controller.QueryBaseController;
+import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.security.CurrentUser;
+import com.company.hrms.organization.api.response.department.DepartmentDetailResponse;
+import com.company.hrms.organization.api.response.department.DepartmentManagersResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * 部門管理查詢控制器
+ */
+@RestController
+@RequestMapping("/api/v1/departments")
+@RequiredArgsConstructor
+@Slf4j
+@Tag(name = "HR02-Department-Query", description = "部門管理查詢操作")
+public class HR02DepartmentQryController extends QueryBaseController {
+
+    @GetMapping("/{departmentId}")
+    @Operation(summary = "查詢部門詳情", operationId = "getDepartmentDetail")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "404", description = "部門不存在")
+    })
+    public ResponseEntity<DepartmentDetailResponse> getDepartmentDetail(
+            @PathVariable String departmentId,
+            @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+        log.info("Getting department detail: {}", departmentId);
+        return ResponseEntity.ok(getResponse(null, currentUser, departmentId));
+    }
+
+    @GetMapping("/{departmentId}/managers")
+    @Operation(summary = "查詢部門主管層級", operationId = "getDepartmentManagers")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "404", description = "部門不存在")
+    })
+    public ResponseEntity<DepartmentManagersResponse> getDepartmentManagers(
+            @PathVariable String departmentId,
+            @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+        log.info("Getting department managers: {}", departmentId);
+        return ResponseEntity.ok(getResponse(null, currentUser, departmentId));
+    }
+}
