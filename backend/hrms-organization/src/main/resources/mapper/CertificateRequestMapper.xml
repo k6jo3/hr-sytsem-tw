@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.hrms.organization.infrastructure.mapper.CertificateRequestMapper">
+
+    <resultMap id="CertificateRequestResultMap" type="com.company.hrms.organization.infrastructure.po.CertificateRequestPO">
+        <id column="id" property="id"/>
+        <result column="employee_id" property="employeeId"/>
+        <result column="certificate_type" property="certificateType"/>
+        <result column="copies" property="copies"/>
+        <result column="purpose" property="purpose"/>
+        <result column="status" property="status"/>
+        <result column="request_date" property="requestDate"/>
+        <result column="completed_date" property="completedDate"/>
+        <result column="remarks" property="remarks"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, employee_id, certificate_type, copies, purpose, status, request_date, completed_date,
+        remarks, created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="selectById" resultMap="CertificateRequestResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM certificate_requests
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByEmployeeId" resultMap="CertificateRequestResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM certificate_requests
+        WHERE employee_id = #{employeeId}
+        ORDER BY request_date DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="CertificateRequestResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM certificate_requests
+        WHERE status = #{status}
+        ORDER BY request_date DESC
+    </select>
+
+    <select id="selectByCertificateType" resultMap="CertificateRequestResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM certificate_requests
+        WHERE certificate_type = #{certificateType}
+        ORDER BY request_date DESC
+    </select>
+
+    <select id="selectPendingRequests" resultMap="CertificateRequestResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM certificate_requests
+        WHERE status = 'PENDING'
+        ORDER BY request_date
+    </select>
+
+    <insert id="insert">
+        INSERT INTO certificate_requests (
+            id, employee_id, certificate_type, copies, purpose, status, request_date, completed_date,
+            remarks, created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{id}, #{employeeId}, #{certificateType}, #{copies}, #{purpose}, #{status},
+            #{requestDate}, #{completedDate}, #{remarks}, #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE certificate_requests SET
+            employee_id = #{employeeId},
+            certificate_type = #{certificateType},
+            copies = #{copies},
+            purpose = #{purpose},
+            status = #{status},
+            request_date = #{requestDate},
+            completed_date = #{completedDate},
+            remarks = #{remarks},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM certificate_requests WHERE id = #{id}
+    </delete>
+
+    <select id="existsById" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM certificate_requests WHERE id = #{id})
+    </select>
+
+</mapper>

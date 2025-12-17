@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.hrms.organization.infrastructure.mapper.EducationMapper">
+
+    <resultMap id="EducationResultMap" type="com.company.hrms.organization.infrastructure.po.EducationPO">
+        <id column="id" property="id"/>
+        <result column="employee_id" property="employeeId"/>
+        <result column="school_name" property="schoolName"/>
+        <result column="degree" property="degree"/>
+        <result column="major" property="major"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="is_graduated" property="isGraduated"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, employee_id, school_name, degree, major, start_date, end_date, is_graduated,
+        created_at, updated_at
+    </sql>
+
+    <select id="selectById" resultMap="EducationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM educations
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByEmployeeId" resultMap="EducationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM educations
+        WHERE employee_id = #{employeeId}
+        ORDER BY end_date DESC NULLS LAST, start_date DESC
+    </select>
+
+    <select id="selectByDegree" resultMap="EducationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM educations
+        WHERE degree = #{degree}
+        ORDER BY end_date DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO educations (
+            id, employee_id, school_name, degree, major, start_date, end_date, is_graduated,
+            created_at, updated_at
+        ) VALUES (
+            #{id}, #{employeeId}, #{schoolName}, #{degree}, #{major}, #{startDate}, #{endDate},
+            #{isGraduated}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE educations SET
+            employee_id = #{employeeId},
+            school_name = #{schoolName},
+            degree = #{degree},
+            major = #{major},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            is_graduated = #{isGraduated},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM educations WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByEmployeeId">
+        DELETE FROM educations WHERE employee_id = #{employeeId}
+    </delete>
+
+    <select id="existsById" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM educations WHERE id = #{id})
+    </select>
+
+</mapper>
