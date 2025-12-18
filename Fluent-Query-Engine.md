@@ -298,6 +298,338 @@ public class UltimateQueryEngine<T> {
 }
 ```
 
+### E. 聚合查詢引擎 (GROUP BY 與聚合函數支援)
+
+當需要進行統計查詢（如 SUM、COUNT、AVG）或解決 JOIN 後資料重複問題時，可使用 `AggregateQueryEngine`。
+
+#### 聚合函數枚舉：
+
+```java
+public enum AggregateFunction {
+    COUNT, SUM, AVG, MAX, MIN, COUNT_DISTINCT
+}
+
+@Data
+@AllArgsConstructor
+public class AggregateField {
+    private String field;              // 欄位路徑，如 "amount" 或 "timesheet.hours"
+    private AggregateFunction function; // 聚合函數
+    private String alias;              // 結果別名
+}
+
+@Data
+public class GroupByClause {
+    private List<String> groupByFields = new ArrayList<>();      // GROUP BY 欄位
+    private List<AggregateField> aggregates = new ArrayList<>(); // 聚合欄位
+    private QueryGroup having;                                    // HAVING 條件 (可選)
+}
+```
+
+#### AggregateQueryEngine 實作：
+
+```java
+public class AggregateQueryEngine<T> {
+    private final JPAQueryFactory factory;
+    private final PathBuilder<T> entityPath;
+    private final Map<String, PathBuilder<?>> joinedPaths = new HashMap<>();
+
+    public AggregateQueryEngine(JPAQueryFactory factory, Class<T> entityClass) {
+        this.factory = factory;
+        this.entityPath = new PathBuilder<>(entityClass,
+            Introspector.decapitalize(entityClass.getSimpleName()));
+        this.joinedPaths.put("", entityPath);
+    }
+
+    /**
+     * 執行聚合查詢，返回 Tuple 結果
+     */
+    public List<Tuple> executeAggregate(QueryGroup where, GroupByClause groupBy) {
+        // 建構 SELECT 表達式
+        List<Expression<?>> selectExpressions = new ArrayList<>();
+
+        // 加入 GROUP BY 欄位到 SELECT
+        List<Expression<?>> groupByExpressions = new ArrayList<>();
+        for (String field : groupBy.getGroupByFields()) {
+            PathBuilder<?> path = resolvePath(field);
+            selectExpressions.add(path);
+            groupByExpressions.add(path);
+        }
+
+        // 加入聚合欄位到 SELECT
+        for (AggregateField agg : groupBy.getAggregates()) {
+            Expression<?> aggExp = buildAggregateExpression(agg);
+            selectExpressions.add(aggExp);
+        }
+
+        // 建構查詢
+        JPAQuery<Tuple> query = factory.select(selectExpressions.toArray(new Expression[0]))
+            .from(entityPath);
+
+        // 套用 JOIN (基於 WHERE 和 GROUP BY 中的路徑)
+        applyJoins(query, where, groupBy);
+
+        // 套用 WHERE 條件
+        if (where != null && !where.getConditions().isEmpty()) {
+            BooleanExpression predicate = parseWhereClause(where);
+            query.where(predicate);
+        }
+
+        // 套用 GROUP BY
+        if (!groupByExpressions.isEmpty()) {
+            query.groupBy(groupByExpressions.toArray(new Expression[0]));
+        }
+
+        // 套用 HAVING
+        if (groupBy.getHaving() != null) {
+            BooleanExpression havingPredicate = parseHavingClause(groupBy.getHaving(), groupBy);
+            query.having(havingPredicate);
+        }
+
+        return query.fetch();
+    }
+
+    /**
+     * 建構聚合表達式
+     */
+    @SuppressWarnings("unchecked")
+    private Expression<?> buildAggregateExpression(AggregateField agg) {
+        PathBuilder<?> fieldPath = resolvePath(agg.getField());
+
+        switch (agg.getFunction()) {
+            case COUNT:
+                return fieldPath.count();
+            case COUNT_DISTINCT:
+                return fieldPath.countDistinct();
+            case SUM:
+                return ((NumberPath<Number>) fieldPath).sum();
+            case AVG:
+                return ((NumberPath<Number>) fieldPath).avg();
+            case MAX:
+                return ((ComparablePath<Comparable>) fieldPath).max();
+            case MIN:
+                return ((ComparablePath<Comparable>) fieldPath).min();
+            default:
+                throw new UnsupportedOperationException("不支援的聚合函數: " + agg.getFunction());
+        }
+    }
+
+    /**
+     * 解析欄位路徑，自動處理關聯欄位
+     */
+    private PathBuilder<?> resolvePath(String field) {
+        String[] parts = field.split("\\.");
+        PathBuilder<?> currentPath = entityPath;
+
+        for (int i = 0; i < parts.length - 1; i++) {
+            String part = parts[i];
+            String pathKey = String.join(".", Arrays.copyOfRange(parts, 0, i + 1));
+            if (!joinedPaths.containsKey(pathKey)) {
+                PathBuilder<?> nextPath = new PathBuilder<>(Object.class, part);
+                joinedPaths.put(pathKey, nextPath);
+            }
+            currentPath = joinedPaths.get(pathKey);
+        }
+
+        return currentPath.get(parts[parts.length - 1]);
+    }
+
+    /**
+     * 套用必要的 JOIN
+     */
+    private void applyJoins(JPAQuery<Tuple> query, QueryGroup where, GroupByClause groupBy) {
+        Set<String> requiredJoins = new HashSet<>();
+
+        // 收集 WHERE 中需要的 JOIN
+        if (where != null) {
+            collectJoinPaths(where, requiredJoins);
+        }
+
+        // 收集 GROUP BY 中需要的 JOIN
+        for (String field : groupBy.getGroupByFields()) {
+            if (field.contains(".")) {
+                requiredJoins.add(field.substring(0, field.lastIndexOf(".")));
+            }
+        }
+
+        // 收集聚合欄位中需要的 JOIN
+        for (AggregateField agg : groupBy.getAggregates()) {
+            if (agg.getField().contains(".")) {
+                requiredJoins.add(agg.getField().substring(0, agg.getField().lastIndexOf(".")));
+            }
+        }
+
+        // 執行 JOIN
+        for (String joinPath : requiredJoins) {
+            String[] parts = joinPath.split("\\.");
+            PathBuilder<?> currentPath = entityPath;
+            String pathAcc = "";
+
+            for (String part : parts) {
+                pathAcc = pathAcc.isEmpty() ? part : pathAcc + "." + part;
+                if (!joinedPaths.containsKey(pathAcc)) {
+                    PathBuilder<?> nextPath = new PathBuilder<>(Object.class, part);
+                    query.leftJoin(currentPath.get(part), nextPath);
+                    joinedPaths.put(pathAcc, nextPath);
+                }
+                currentPath = joinedPaths.get(pathAcc);
+            }
+        }
+    }
+
+    // parseWhereClause, parseHavingClause, collectJoinPaths 實作省略 (與 UltimateQueryEngine 類似)
+}
+```
+
+#### 使用 DISTINCT 解決 JOIN 重複問題：
+
+```java
+/**
+ * 在 BaseRepository 中新增 DISTINCT 支援
+ */
+@Override
+public Page<T> findPageDistinct(QueryGroup group, Pageable pageable) {
+    UltimateQueryEngine<T> countEngine = new UltimateQueryEngine<>(factory, clazz);
+    BooleanExpression countPredicate = countEngine.parse(group);
+
+    // 使用 DISTINCT 計算總數
+    long total = countEngine.getQuery()
+        .select(countEngine.getEntityPath().countDistinct())
+        .where(countPredicate)
+        .fetchOne();
+
+    if (total == 0) {
+        return new PageImpl<>(Collections.emptyList(), pageable, 0);
+    }
+
+    UltimateQueryEngine<T> fetchEngine = new UltimateQueryEngine<>(factory, clazz);
+    BooleanExpression fetchPredicate = fetchEngine.parse(group);
+
+    // 使用 DISTINCT 查詢
+    List<T> content = fetchEngine.getQuery()
+        .distinct()
+        .where(fetchPredicate)
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .fetch();
+
+    return new PageImpl<>(content, pageable, total);
+}
+```
+
+#### 聚合查詢使用範例：
+
+```java
+@Service
+public class ProjectCostService {
+    @Autowired private JPAQueryFactory factory;
+
+    /**
+     * 統計各專案的總工時與人數
+     */
+    public List<ProjectCostSummary> getProjectCostSummary(String departmentId) {
+        AggregateQueryEngine<Timesheet> engine =
+            new AggregateQueryEngine<>(factory, Timesheet.class);
+
+        // WHERE 條件
+        QueryGroup where = QueryBuilder.where()
+            .and("employee.departmentId", Operator.EQ, departmentId)
+            .and("status", Operator.EQ, "APPROVED")
+            .build();
+
+        // GROUP BY 與聚合設定
+        GroupByClause groupBy = new GroupByClause();
+        groupBy.getGroupByFields().add("project.id");
+        groupBy.getGroupByFields().add("project.name");
+        groupBy.getAggregates().add(new AggregateField("hours", AggregateFunction.SUM, "totalHours"));
+        groupBy.getAggregates().add(new AggregateField("employeeId", AggregateFunction.COUNT_DISTINCT, "headCount"));
+
+        // 執行查詢
+        List<Tuple> results = engine.executeAggregate(where, groupBy);
+
+        // 轉換結果
+        return results.stream()
+            .map(tuple -> new ProjectCostSummary(
+                tuple.get(0, String.class),        // project.id
+                tuple.get(1, String.class),        // project.name
+                tuple.get(2, BigDecimal.class),    // totalHours
+                tuple.get(3, Long.class)           // headCount
+            ))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 統計各員工的月度工時 (含 HAVING 過濾)
+     */
+    public List<EmployeeMonthlyHours> getEmployeesExceedingHours(
+            YearMonth month, BigDecimal minHours) {
+
+        AggregateQueryEngine<Timesheet> engine =
+            new AggregateQueryEngine<>(factory, Timesheet.class);
+
+        // WHERE: 指定月份
+        QueryGroup where = QueryBuilder.where()
+            .and("workDate", Operator.GOE, month.atDay(1))
+            .and("workDate", Operator.LOE, month.atEndOfMonth())
+            .build();
+
+        // GROUP BY 設定
+        GroupByClause groupBy = new GroupByClause();
+        groupBy.getGroupByFields().add("employee.id");
+        groupBy.getGroupByFields().add("employee.name");
+        groupBy.getAggregates().add(new AggregateField("hours", AggregateFunction.SUM, "totalHours"));
+
+        // HAVING: 總工時 >= minHours
+        groupBy.setHaving(QueryBuilder.where()
+            .and("SUM(hours)", Operator.GOE, minHours)
+            .build());
+
+        List<Tuple> results = engine.executeAggregate(where, groupBy);
+
+        return results.stream()
+            .map(tuple -> new EmployeeMonthlyHours(
+                tuple.get(0, String.class),
+                tuple.get(1, String.class),
+                tuple.get(2, BigDecimal.class)
+            ))
+            .collect(Collectors.toList());
+    }
+}
+```
+
+#### DTO 投影查詢 (避免 N+1 問題)：
+
+```java
+/**
+ * 使用 Projections 直接映射到 DTO，避免載入完整 Entity
+ */
+public List<EmployeeSummaryDto> getEmployeeSummaryByDepartment(String deptId) {
+    QEmployee emp = QEmployee.employee;
+    QTimesheet ts = QTimesheet.timesheet;
+
+    return factory
+        .select(Projections.constructor(EmployeeSummaryDto.class,
+            emp.id,
+            emp.name,
+            ts.hours.sum().coalesce(BigDecimal.ZERO),
+            ts.id.countDistinct()
+        ))
+        .from(emp)
+        .leftJoin(ts).on(ts.employeeId.eq(emp.id))
+        .where(emp.departmentId.eq(deptId))
+        .groupBy(emp.id, emp.name)
+        .fetch();
+}
+
+@Data
+@AllArgsConstructor
+public class EmployeeSummaryDto {
+    private String employeeId;
+    private String employeeName;
+    private BigDecimal totalHours;
+    private Long timesheetCount;
+}
+```
+
 -----
 
 ## 4. 基礎倉庫架構 (BaseRepository)
@@ -586,6 +918,10 @@ public class Employee {
 |:---|:---|:---|
 | **自動化查詢** | Querydsl + `@QueryFilter` Annotations | 減少重複程式碼，提升開發效率 |
 | **自動 JOIN** | `UltimateQueryEngine` 路徑解析 | 支援 `company.name` 等嵌套屬性查詢 |
+| **GROUP BY 聚合** | `AggregateQueryEngine` + `GroupByClause` | 支援 SUM/COUNT/AVG 等統計查詢 |
+| **HAVING 過濾** | `GroupByClause.having` | 聚合結果過濾，如「總工時 > 100」|
+| **DISTINCT 去重** | `findPageDistinct()` | 解決 LEFT JOIN 造成的資料重複 |
+| **DTO 投影** | `Projections.constructor()` | 避免 N+1 問題，直接映射到 DTO |
 | **CQRS 分離** | `IQueryRepository` / `ICommandRepository` | 職責清晰，易於擴展 |
 | **分頁與排序** | 整合 Spring Data `Pageable` | 與 Spring 生態系統無縫整合 |
 | **極速寫入** | Native Multi-values Insert | 大量資料寫入效能提升 10 倍以上 |
@@ -628,7 +964,14 @@ public class Employee {
 ```java
 public interface IQueryRepository<T, ID> {
     Page<T> findPage(QueryGroup group, Pageable pageable);
+    Page<T> findPageDistinct(QueryGroup group, Pageable pageable);
     Optional<T> findOne(QueryGroup group);
+    List<T> findAll(QueryGroup group);
+}
+
+public interface IAggregateRepository<T> {
+    List<Tuple> aggregate(QueryGroup where, GroupByClause groupBy);
+    <R> List<R> aggregateToDto(QueryGroup where, GroupByClause groupBy, Class<R> dtoClass);
 }
 
 public interface ICommandRepository<T, ID> {
@@ -641,3 +984,17 @@ public interface ICommandBatchRepository<T> {
     void saveAllNative(List<T> entities, int batchSize);
 }
 ```
+
+-----
+
+## 附錄 C：常見查詢模式速查表
+
+| 需求 | 方法 | 說明 |
+|:---|:---|:---|
+| 基本分頁查詢 | `findPage(group, pageable)` | 標準分頁 |
+| JOIN 後去重分頁 | `findPageDistinct(group, pageable)` | 避免 LEFT JOIN 重複 |
+| 單筆查詢 | `findOne(group)` | 返回 `Optional<T>` |
+| 統計查詢 | `aggregate(where, groupBy)` | GROUP BY + 聚合函數 |
+| 帶 HAVING 的統計 | `groupBy.setHaving(...)` | 過濾聚合結果 |
+| DTO 投影 | `Projections.constructor(...)` | 直接映射到 DTO |
+| 大量寫入 | `saveAllNative(entities, 1000)` | 每批次 1000 筆 |
