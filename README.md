@@ -60,6 +60,8 @@ hr-system-2/
 ├── README.md                                     # 本文件
 ├── CLAUDE.md                                     # AI 開發輔助指南
 ├── Fluent-Query-Engine.md                        # Querydsl 查詢引擎規範
+├── Generic-Library-Architecture.md               # 泛型程式庫架構規範
+├── 測試架構規範.md                              # 測試方法論與快照測試規範
 ├── 人力資源暨專案管理系統_正式需求規格書.md   # 原始客戶需求
 ├── PM需求審查報告.md                          # PM審查報告
 ├── 系統開發工作計畫書.md                      # 開發工作計畫
@@ -308,6 +310,8 @@ Timesheet → TimesheetApproved事件
 5. 參考各服務系統設計書進行開發
 6. 複雜邏輯請參考 `spec/logic_spec/` 下的邏輯規格書
 7. **新增查詢功能請參考 `Fluent-Query-Engine.md`** (持久層技術選擇指引)
+8. **測試開發請參考 `測試架構規範.md`** (快照測試、三階測試法)
+9. **泛型基類設計請參考 `Generic-Library-Architecture.md`**
 
 ---
 

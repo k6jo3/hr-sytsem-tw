@@ -1077,6 +1077,8 @@ describe('LoginForm', () => {
 | `backend/架構說明與開發規範.md` | Backend quick reference guide |
 | `frontend/架構說明與開發規範.md` | Frontend quick reference guide |
 | `Fluent-Query-Engine.md` | **Querydsl 查詢引擎規範** - 新功能持久層技術選擇指引 |
+| `Generic-Library-Architecture.md` | **泛型程式庫架構規範** - 減少重複程式碼的泛型基類設計 |
+| `測試架構規範.md` | **測試方法論** - 三階測試法、快照測試、測試基類設計 |
 | `SA/人力資源暨專案管理系統_正式需求規格書.md` | Original business requirements |
 | `SA/PM需求審查報告.md` | PM review findings |
 
