@@ -500,7 +500,8 @@ POST   /api/v1/employees/{id}/terminate  # Terminate employee (action)
 | Service Discovery | Eureka | - | Service registry |
 | Auth | Spring Security + OAuth2 + JWT | - | Authentication & authorization |
 | Database | PostgreSQL | 15+ | One DB per service |
-| ORM | MyBatis | 3.5.x | SQL mapping |
+| ORM (Legacy) | MyBatis | 3.5.x | Existing features, complex queries |
+| ORM (New) | Querydsl + JPA | 5.0.0 | New features, see [Fluent-Query-Engine.md](Fluent-Query-Engine.md) |
 | Cache | Redis | 7+ | Session, cache |
 | Message Queue | Kafka | 3+ | Event-driven communication |
 | Distributed Tracing | Sleuth + Zipkin | - | Request tracing |
@@ -1054,6 +1055,7 @@ describe('LoginForm', () => {
 |:---|:---|
 | `backend/架構說明與開發規範.md` | Backend quick reference guide |
 | `frontend/架構說明與開發規範.md` | Frontend quick reference guide |
+| `Fluent-Query-Engine.md` | **Querydsl 查詢引擎規範** - 新功能持久層技術選擇指引 |
 | `SA/人力資源暨專案管理系統_正式需求規格書.md` | Original business requirements |
 | `SA/PM需求審查報告.md` | PM review findings |
 
