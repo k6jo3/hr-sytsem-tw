@@ -4,7 +4,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * 員工持久化對象
@@ -12,34 +11,42 @@ import java.util.UUID;
 @Data
 public class EmployeePO {
 
-    private UUID employeeId;
+    private String id;
     private String employeeNumber;
 
     // 基本資料
     private String firstName;
     private String lastName;
-    private String fullName;
+    private String englishName;
     private String nationalId;  // 加密儲存
-    private LocalDate dateOfBirth;
+    private LocalDate birthDate;
     private String gender;
     private String maritalStatus;
 
     // 聯絡方式
-    private String personalEmail;
-    private String companyEmail;
-    private String mobilePhone;
-    private String homePhone;
+    private String email;  // 公司 Email
+    private String phone;  // 手機
 
-    // 地址 (JSON)
-    private String address;
+    // 地址
+    private String addressPostalCode;
+    private String addressCity;
+    private String addressDistrict;
+    private String addressStreet;
 
-    // 緊急聯絡人 (JSON)
-    private String emergencyContact;
+    // 緊急聯絡人
+    private String emergencyContactName;
+    private String emergencyContactRelationship;
+    private String emergencyContactPhone;
+
+    // 銀行資訊
+    private String bankCode;
+    private String bankBranchCode;
+    private String bankAccountNumber;
+    private String bankAccountHolderName;
 
     // 組織關係
-    private UUID organizationId;
-    private UUID departmentId;
-    private UUID managerId;
+    private String departmentId;
+    private String supervisorId;
 
     // 職務資訊
     private String jobTitle;
@@ -53,13 +60,9 @@ public class EmployeePO {
     private LocalDate terminationDate;
     private String terminationReason;
 
-    // 銀行資訊 (JSON，加密)
-    private String bankAccount;
-
-    // 照片
-    private String photoUrl;
-
     // 審計
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String createdBy;
+    private String updatedBy;
 }

@@ -4,7 +4,6 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * 組織持久化對象
@@ -12,16 +11,20 @@ import java.util.UUID;
 @Data
 public class OrganizationPO {
 
-    private UUID organizationId;
-    private String organizationCode;
-    private String organizationName;
-    private String organizationType;
-    private UUID parentOrganizationId;
-    private String taxId;
-    private String address;
-    private String phoneNumber;
-    private LocalDate establishedDate;
+    private String id;
+    private String code;
+    private String name;
+    private String nameEn;
+    private String type;
     private String status;
+    private String parentId;
+    private String taxId;
+    private String phone;
+    private String fax;
+    private String email;
+    private String address;
+    private LocalDate establishedDate;
+    private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

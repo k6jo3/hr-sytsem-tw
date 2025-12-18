@@ -3,7 +3,6 @@ package com.company.hrms.organization.infrastructure.po;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * 部門持久化對象
@@ -11,15 +10,18 @@ import java.util.UUID;
 @Data
 public class DepartmentPO {
 
-    private UUID departmentId;
-    private String departmentCode;
-    private String departmentName;
-    private UUID organizationId;
-    private UUID parentDepartmentId;
+    private String id;
+    private String code;
+    private String name;
+    private String nameEn;
+    private String organizationId;
+    private String parentId;
     private Integer level;
-    private UUID managerId;
-    private Integer displayOrder;
+    private String path;
+    private String managerId;
     private String status;
+    private Integer sortOrder;
+    private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

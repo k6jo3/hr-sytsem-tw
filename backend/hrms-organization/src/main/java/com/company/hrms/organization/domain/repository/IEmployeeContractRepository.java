@@ -1,6 +1,6 @@
 package com.company.hrms.organization.domain.repository;
 
-import com.company.hrms.organization.domain.model.entity.EmployeeContract;
+import com.company.hrms.organization.domain.model.aggregate.EmployeeContract;
 import com.company.hrms.organization.domain.model.valueobject.ContractId;
 import com.company.hrms.organization.domain.model.valueobject.ContractStatus;
 import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
@@ -17,78 +17,76 @@ public interface IEmployeeContractRepository {
 
     /**
      * 依 ID 查詢
-     * @param id 合約 ID
-     * @return 合約
      */
     Optional<EmployeeContract> findById(ContractId id);
 
     /**
-     * 依 ID 查詢
-     * @param id 合約 ID
-     * @return 合約
+     * 依 ID 查詢 (UUID 版本)
      */
     Optional<EmployeeContract> findById(UUID id);
 
     /**
      * 依員工 ID 查詢合約
-     * @param employeeId 員工 ID
-     * @return 合約列表
+     */
+    List<EmployeeContract> findByEmployeeId(EmployeeId employeeId);
+
+    /**
+     * 依員工 ID 查詢合約 (UUID 版本)
      */
     List<EmployeeContract> findByEmployeeId(UUID employeeId);
 
     /**
      * 依員工 ID 和狀態查詢
-     * @param employeeId 員工 ID
-     * @param status 狀態
-     * @return 合約列表
      */
     List<EmployeeContract> findByEmployeeIdAndStatus(UUID employeeId, ContractStatus status);
 
     /**
      * 查詢員工目前生效的合約
-     * @param employeeId 員工 ID
-     * @return 合約
-     */
-    Optional<EmployeeContract> findActiveByEmployeeId(UUID employeeId);
-
-    /**
-     * 查詢員工目前生效的合約 (使用 Value Object)
-     * @param employeeId 員工 ID
-     * @return 合約
      */
     Optional<EmployeeContract> findActiveByEmployeeId(EmployeeId employeeId);
 
     /**
-     * 查詢即將到期的合約
-     * @param endDateBefore 結束日期在此日期之前
-     * @param status 狀態
-     * @return 合約列表
+     * 查詢員工目前生效的合約 (UUID 版本)
+     */
+    Optional<EmployeeContract> findActiveByEmployeeId(UUID employeeId);
+
+    /**
+     * 查詢即將到期的合約 (指定日期範圍)
+     */
+    List<EmployeeContract> findExpiringContracts(LocalDate startDate, LocalDate endDate);
+
+    /**
+     * 查詢即將到期的合約 (依狀態)
      */
     List<EmployeeContract> findExpiringContracts(LocalDate endDateBefore, ContractStatus status);
 
     /**
      * 查詢在指定日期前到期的合約
-     * @param expiryDate 到期日期
-     * @return 合約列表
      */
     List<EmployeeContract> findExpiringBefore(LocalDate expiryDate);
 
     /**
      * 查詢所有即將到期的合約 (30天內)
-     * @return 合約列表
      */
     List<EmployeeContract> findContractsExpiringSoon();
 
     /**
      * 儲存合約
-     * @param contract 合約
      */
     void save(EmployeeContract contract);
 
     /**
+     * 刪除合約
+     */
+    void delete(ContractId id);
+
+    /**
+     * 檢查合約 ID 是否存在
+     */
+    boolean existsById(ContractId id);
+
+    /**
      * 檢查合約編號是否存在
-     * @param contractNumber 合約編號
-     * @return 是否存在
      */
     boolean existsByContractNumber(String contractNumber);
 }
