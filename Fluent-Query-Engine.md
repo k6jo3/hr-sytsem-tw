@@ -998,3 +998,179 @@ public interface ICommandBatchRepository<T> {
 | 帶 HAVING 的統計 | `groupBy.setHaving(...)` | 過濾聚合結果 |
 | DTO 投影 | `Projections.constructor(...)` | 直接映射到 DTO |
 | 大量寫入 | `saveAllNative(entities, 1000)` | 每批次 1000 筆 |
+
+-----
+
+## 附錄 D：與 MyBatis 共存規範
+
+本專案同時保留 MyBatis（既有功能）與 Fluent-Query-Engine（新功能），為確保程式碼一致性，需遵守以下規範。
+
+### D.1 使用場景劃分
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        持久層技術選擇決策樹                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│   MyBatis (既有 + 複雜查詢)              Fluent-Query-Engine (新功能)    │
+│   ════════════════════════════          ═══════════════════════════     │
+│                                                                         │
+│   ✅ 已完成的功能 (不改動)                ✅ 新增的 CRUD 列表頁            │
+│   ✅ 複雜報表 (多層子查詢、CTE)           ✅ 多條件組合查詢                │
+│   ✅ 效能關鍵的核心交易                   ✅ 標準統計報表 (GROUP BY)       │
+│   ✅ 需要 DBA 審核的 SQL                  ✅ 動態條件篩選                  │
+│   ✅ 跨資料庫相容性要求高                 ✅ 快速原型開發                   │
+│   ✅ Window Function / Recursive CTE    ✅ 簡單~中等複雜度查詢            │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### D.2 套件結構強制隔離
+
+```
+hrms-{service}/
+└── infrastructure/
+    ├── persistence/
+    │   ├── mybatis/               # ← MyBatis 專用 (既有功能)
+    │   │   ├── mapper/            #    Mapper Interface (@Mapper)
+    │   │   ├── xml/               #    XML SQL 檔案
+    │   │   └── dao/               #    DAO 實作
+    │   │
+    │   └── querydsl/              # ← Fluent-Query-Engine 專用 (新功能)
+    │       ├── repository/        #    繼承 BaseRepository
+    │       └── engine/            #    QueryEngine 相關類別
+    │
+    └── repository/                # ← 統一對外的 Repository Interface
+        └── IEmployeeRepository.java
+```
+
+### D.3 技術選擇對照表
+
+| 情境 | 選擇 | 原因 |
+|:---|:---|:---|
+| 既有功能維護 | **MyBatis** | 不改動已穩定的程式碼 |
+| 新增列表查詢 | **Fluent-Query-Engine** | 標準化、減少重複代碼 |
+| 新增統計報表 | **Fluent-Query-Engine** | GROUP BY 支援完善 |
+| 複雜子查詢/CTE | **MyBatis** | 表達能力更強 |
+| 效能關鍵路徑 | **MyBatis** | 可精確調優 SQL |
+| Window Function | **MyBatis** | Querydsl 支援有限 |
+
+### D.4 禁止事項
+
+```java
+// ❌ 禁止：同一個 Service 方法中混用兩種技術
+@Service
+public class BadExampleService {
+    @Autowired private EmployeeMapper mybatisMapper;      // MyBatis
+    @Autowired private EmployeeRepository querydslRepo;   // Querydsl
+
+    public void process() {
+        // ❌ 不允許在同一方法混用
+        List<Employee> list1 = mybatisMapper.selectAll();
+        Page<Employee> list2 = querydslRepo.findPage(...);
+    }
+}
+
+// ❌ 禁止：在 Querydsl Repository 中注入 MyBatis Mapper
+public class EmployeeRepositoryImpl extends BaseRepository<Employee, String> {
+    @Autowired private EmployeeMapper mapper;  // ❌ 不允許
+}
+
+// ❌ 禁止：Service 直接依賴實作類別
+@Service
+public class BadService {
+    @Autowired private EmployeeRepositoryImpl impl;  // ❌ 應依賴 Interface
+}
+```
+
+### D.5 正確做法：統一 Repository Interface
+
+```java
+/**
+ * 統一的 Repository Interface
+ * Service 層只依賴此介面，內部實作對 Service 透明
+ */
+public interface IEmployeeRepository {
+
+    // === 通用方法 ===
+    Optional<Employee> findById(String id);
+    Employee save(Employee entity);
+    void delete(Employee entity);
+
+    // === Fluent-Query-Engine 方法 (新功能使用) ===
+    /** @implNote Fluent-Query-Engine 實作 */
+    Page<Employee> findPage(QueryGroup group, Pageable pageable);
+
+    /** @implNote Fluent-Query-Engine 實作 */
+    List<Tuple> aggregateByDepartment(QueryGroup where, GroupByClause groupBy);
+
+    // === MyBatis 方法 (既有功能/複雜查詢) ===
+    /** @implNote MyBatis XML 實作: EmployeeMapper.xml#getComplexReport */
+    List<EmployeeReportDto> getComplexReport(ReportCriteria criteria);
+
+    /** @implNote MyBatis XML 實作: EmployeeMapper.xml#getPayrollSummary */
+    List<PayrollSummaryDto> getPayrollSummaryWithCTE(String yearMonth);
+}
+```
+
+### D.6 ArchUnit 自動化檢查
+
+```java
+/**
+ * 架構測試 - 強制 MyBatis 與 Querydsl 隔離
+ * 放置於 src/test/java 下，CI 時自動執行
+ */
+@AnalyzeClasses(packages = "com.company.hrms")
+public class PersistenceArchitectureTest {
+
+    @ArchTest
+    static final ArchRule mybatis_should_not_depend_on_querydsl =
+        noClasses()
+            .that().resideInAPackage("..mybatis..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..querydsl..")
+            .because("MyBatis 模組不應依賴 Querydsl");
+
+    @ArchTest
+    static final ArchRule querydsl_should_not_depend_on_mybatis =
+        noClasses()
+            .that().resideInAPackage("..querydsl..")
+            .should().dependOnClassesThat()
+            .resideInAPackage("..mybatis..")
+            .because("Querydsl 模組不應依賴 MyBatis");
+
+    @ArchTest
+    static final ArchRule service_should_only_use_repository_interface =
+        noClasses()
+            .that().resideInAPackage("..application.service..")
+            .should().dependOnClassesThat()
+            .resideInAnyPackage("..mybatis..", "..querydsl..")
+            .because("Service 應透過 Repository Interface 存取，不應直接依賴實作");
+}
+```
+
+### D.7 PR Review Checklist
+
+新增持久層程式碼時，請確認以下項目：
+
+- [ ] **技術選擇合理**：新功能是否優先考慮 Fluent-Query-Engine？
+- [ ] **例外有理由**：若選擇 MyBatis，是否有充分理由（複雜度/效能）？
+- [ ] **套件正確**：程式碼是否放在正確的套件下？（`mybatis/` 或 `querydsl/`）
+- [ ] **介面隔離**：Service 是否只依賴 Repository Interface？
+- [ ] **無混用**：同一 Service 方法是否只使用單一技術？
+- [ ] **註解完整**：Repository Interface 方法是否標註 `@implNote` 說明實作方式？
+
+### D.8 各服務適用建議
+
+| 服務 | 既有 MyBatis | 新功能建議 | 說明 |
+|:---|:---|:---|:---|
+| IAM (01) | 維持 | Fluent-Query-Engine | 使用者列表、權限查詢 |
+| 組織員工 (02) | 維持 | Fluent-Query-Engine | 員工列表、組織樹查詢 |
+| 考勤管理 (03) | 維持 | Fluent-Query-Engine | 出勤記錄查詢 |
+| 薪資管理 (04) | 維持 | **MyBatis** | 計算邏輯複雜，保持 MyBatis |
+| 保險管理 (05) | 維持 | Fluent-Query-Engine | 保險記錄查詢 |
+| 專案管理 (06) | 維持 | Fluent-Query-Engine | 專案列表、WBS 查詢 |
+| 工時管理 (07) | 維持 | Fluent-Query-Engine | 工時統計 (GROUP BY 主力) |
+| 績效管理 (08) | 維持 | Fluent-Query-Engine | 績效記錄查詢 |
+| 招募管理 (09) | 維持 | Fluent-Query-Engine | 應徵者列表 |
+| 報表服務 (14) | 維持 | **混合** | 簡單報表用 FQE，複雜用 MyBatis |

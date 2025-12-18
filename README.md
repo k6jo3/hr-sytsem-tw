@@ -1,7 +1,7 @@
 # 人力資源暨專案管理系統 (HR & Project Management System)
 
-**版本:** 3.0  
-**更新日期:** 2025-12-07  
+**版本:** 3.1
+**更新日期:** 2025-12-18
 **架構:** 微服務架構 (Spring Cloud + ReactJS)
 
 ---
@@ -34,7 +34,8 @@
 | 服務發現 | Eureka |
 | 認證授權 | Spring Security + OAuth2 + JWT |
 | 資料庫 | PostgreSQL 15+ (每服務獨立DB) |
-| ORM | MyBatis 3.5.x |
+| ORM (既有) | MyBatis 3.5.x |
+| ORM (新功能) | Querydsl + JPA 5.0.0 (見 `Fluent-Query-Engine.md`) |
 | 快取 | Redis 7+ |
 | 訊息佇列 | Kafka (事件驅動) |
 | 分散式追蹤 | Sleuth + Zipkin |
@@ -57,6 +58,8 @@
 ```
 hr-system-2/
 ├── README.md                                     # 本文件
+├── CLAUDE.md                                     # AI 開發輔助指南
+├── Fluent-Query-Engine.md                        # Querydsl 查詢引擎規範
 ├── 人力資源暨專案管理系統_正式需求規格書.md   # 原始客戶需求
 ├── PM需求審查報告.md                          # PM審查報告
 ├── 系統開發工作計畫書.md                      # 開發工作計畫
@@ -304,6 +307,7 @@ Timesheet → TimesheetApproved事件
 4. 參考 `backend/架構說明與開發規範.md` 或 `frontend/架構說明與開發規範.md`
 5. 參考各服務系統設計書進行開發
 6. 複雜邏輯請參考 `spec/logic_spec/` 下的邏輯規格書
+7. **新增查詢功能請參考 `Fluent-Query-Engine.md`** (持久層技術選擇指引)
 
 ---
 
