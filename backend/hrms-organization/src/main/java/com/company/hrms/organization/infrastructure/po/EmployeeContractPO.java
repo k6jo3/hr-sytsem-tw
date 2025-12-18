@@ -2,10 +2,8 @@ package com.company.hrms.organization.infrastructure.po;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * 員工合約持久化對象
@@ -13,16 +11,15 @@ import java.util.UUID;
 @Data
 public class EmployeeContractPO {
 
-    private UUID contractId;
-    private UUID employeeId;
+    private String id;
+    private String employeeId;
     private String contractType;
-    private String contractNumber;
     private LocalDate startDate;
     private LocalDate endDate;
-    private BigDecimal workingHours;
-    private Integer trialPeriodMonths;
-    private String attachmentUrl;
     private String status;
+    private Integer probationMonths;
+    private Integer renewalCount;
+    private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

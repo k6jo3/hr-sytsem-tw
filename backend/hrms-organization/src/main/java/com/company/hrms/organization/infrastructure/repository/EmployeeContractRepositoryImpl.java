@@ -1,6 +1,6 @@
 package com.company.hrms.organization.infrastructure.repository;
 
-import com.company.hrms.organization.domain.model.entity.EmployeeContract;
+import com.company.hrms.organization.domain.model.aggregate.EmployeeContract;
 import com.company.hrms.organization.domain.model.valueobject.*;
 import com.company.hrms.organization.domain.repository.IEmployeeContractRepository;
 import com.company.hrms.organization.infrastructure.dao.EmployeeContractDAO;

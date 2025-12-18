@@ -4,13 +4,12 @@ import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.organization.domain.model.valueobject.ContractId;
 import com.company.hrms.organization.domain.model.valueobject.ContractStatus;
 import com.company.hrms.organization.domain.model.valueobject.ContractType;
+import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * 員工合約聚合根
@@ -21,11 +20,6 @@ import java.util.UUID;
 public class EmployeeContract {
 
     /**
-     * 預設每週工時
-     */
-    public static final BigDecimal DEFAULT_WORKING_HOURS = new BigDecimal("40.00");
-
-    /**
      * 合約 ID
      */
     private final ContractId id;
@@ -33,17 +27,12 @@ public class EmployeeContract {
     /**
      * 員工 ID
      */
-    private UUID employeeId;
+    private EmployeeId employeeId;
 
     /**
      * 合約類型 (不定期/定期)
      */
     private ContractType contractType;
-
-    /**
-     * 合約編號 (唯一)
-     */
-    private String contractNumber;
 
     /**
      * 合約開始日期
@@ -56,24 +45,24 @@ public class EmployeeContract {
     private LocalDate endDate;
 
     /**
-     * 每週工時
+     * 合約狀態
      */
-    private BigDecimal workingHours;
+    private ContractStatus status;
 
     /**
      * 試用期月數
      */
-    private Integer trialPeriodMonths;
+    private Integer probationMonths;
 
     /**
-     * 附件 URL
+     * 續約次數
      */
-    private String attachmentUrl;
+    private Integer renewalCount;
 
     /**
-     * 合約狀態
+     * 備註
      */
-    private ContractStatus status;
+    private String notes;
 
     /**
      * 建立時間
@@ -89,34 +78,24 @@ public class EmployeeContract {
 
     /**
      * 建立不定期合約
-     * @param employeeId 員工 ID
-     * @param contractNumber 合約編號
-     * @param startDate 開始日期
-     * @param workingHours 每週工時
-     * @param trialPeriodMonths 試用期月數
-     * @return 新的合約實例
      */
     public static EmployeeContract createIndefinite(
-            UUID employeeId,
-            String contractNumber,
+            EmployeeId employeeId,
             LocalDate startDate,
-            BigDecimal workingHours,
-            Integer trialPeriodMonths) {
+            Integer probationMonths) {
 
         validateEmployeeId(employeeId);
-        validateContractNumber(contractNumber);
         validateStartDate(startDate);
 
         return EmployeeContract.builder()
                 .id(ContractId.generate())
                 .employeeId(employeeId)
                 .contractType(ContractType.INDEFINITE)
-                .contractNumber(contractNumber)
                 .startDate(startDate)
                 .endDate(null)
-                .workingHours(workingHours != null ? workingHours : DEFAULT_WORKING_HOURS)
-                .trialPeriodMonths(trialPeriodMonths != null ? trialPeriodMonths : 0)
                 .status(ContractStatus.ACTIVE)
+                .probationMonths(probationMonths != null ? probationMonths : 0)
+                .renewalCount(0)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -124,24 +103,14 @@ public class EmployeeContract {
 
     /**
      * 建立定期合約
-     * @param employeeId 員工 ID
-     * @param contractNumber 合約編號
-     * @param startDate 開始日期
-     * @param endDate 結束日期
-     * @param workingHours 每週工時
-     * @param trialPeriodMonths 試用期月數
-     * @return 新的合約實例
      */
     public static EmployeeContract createFixedTerm(
-            UUID employeeId,
-            String contractNumber,
+            EmployeeId employeeId,
             LocalDate startDate,
             LocalDate endDate,
-            BigDecimal workingHours,
-            Integer trialPeriodMonths) {
+            Integer probationMonths) {
 
         validateEmployeeId(employeeId);
-        validateContractNumber(contractNumber);
         validateStartDate(startDate);
         validateEndDate(startDate, endDate);
 
@@ -149,12 +118,40 @@ public class EmployeeContract {
                 .id(ContractId.generate())
                 .employeeId(employeeId)
                 .contractType(ContractType.FIXED_TERM)
-                .contractNumber(contractNumber)
                 .startDate(startDate)
                 .endDate(endDate)
-                .workingHours(workingHours != null ? workingHours : DEFAULT_WORKING_HOURS)
-                .trialPeriodMonths(trialPeriodMonths != null ? trialPeriodMonths : 0)
                 .status(ContractStatus.ACTIVE)
+                .probationMonths(probationMonths != null ? probationMonths : 0)
+                .renewalCount(0)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    /**
+     * 從持久層還原
+     */
+    public static EmployeeContract reconstitute(
+            ContractId id,
+            EmployeeId employeeId,
+            ContractType contractType,
+            LocalDate startDate,
+            LocalDate endDate,
+            ContractStatus status,
+            Integer probationMonths,
+            Integer renewalCount,
+            String notes) {
+
+        return EmployeeContract.builder()
+                .id(id)
+                .employeeId(employeeId)
+                .contractType(contractType)
+                .startDate(startDate)
+                .endDate(endDate)
+                .status(status)
+                .probationMonths(probationMonths)
+                .renewalCount(renewalCount)
+                .notes(notes)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -164,8 +161,6 @@ public class EmployeeContract {
 
     /**
      * 續約
-     * @param newEndDate 新的結束日期
-     * @throws DomainException 若不是定期合約或已終止
      */
     public void renew(LocalDate newEndDate) {
         if (this.contractType != ContractType.FIXED_TERM) {
@@ -179,6 +174,7 @@ public class EmployeeContract {
         }
         this.endDate = newEndDate;
         this.status = ContractStatus.ACTIVE;
+        this.renewalCount = (this.renewalCount != null ? this.renewalCount : 0) + 1;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -210,11 +206,10 @@ public class EmployeeContract {
     }
 
     /**
-     * 更新附件
-     * @param attachmentUrl 附件 URL
+     * 更新備註
      */
-    public void updateAttachment(String attachmentUrl) {
-        this.attachmentUrl = attachmentUrl;
+    public void updateNotes(String notes) {
+        this.notes = notes;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -222,7 +217,6 @@ public class EmployeeContract {
 
     /**
      * 是否為不定期合約
-     * @return 是否為不定期
      */
     public boolean isIndefinite() {
         return this.contractType.isIndefinite();
@@ -230,7 +224,6 @@ public class EmployeeContract {
 
     /**
      * 是否生效中
-     * @return 是否生效
      */
     public boolean isActive() {
         return this.status.isActive();
@@ -238,7 +231,6 @@ public class EmployeeContract {
 
     /**
      * 是否即將到期 (30天內)
-     * @return 是否即將到期
      */
     public boolean isExpiringSoon() {
         if (this.contractType == ContractType.INDEFINITE || this.endDate == null) {
@@ -250,7 +242,6 @@ public class EmployeeContract {
 
     /**
      * 計算合約剩餘天數
-     * @return 剩餘天數，不定期合約返回 -1
      */
     public long getRemainingDays() {
         if (this.contractType == ContractType.INDEFINITE || this.endDate == null) {
@@ -261,18 +252,9 @@ public class EmployeeContract {
 
     // ==================== 驗證方法 ====================
 
-    private static void validateEmployeeId(UUID employeeId) {
+    private static void validateEmployeeId(EmployeeId employeeId) {
         if (employeeId == null) {
             throw new DomainException("EMPLOYEE_ID_REQUIRED", "員工 ID 不可為空");
-        }
-    }
-
-    private static void validateContractNumber(String contractNumber) {
-        if (contractNumber == null || contractNumber.isBlank()) {
-            throw new DomainException("CONTRACT_NUMBER_REQUIRED", "合約編號不可為空");
-        }
-        if (contractNumber.length() > 100) {
-            throw new DomainException("CONTRACT_NUMBER_TOO_LONG", "合約編號長度不可超過100字元");
         }
     }
 

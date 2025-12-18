@@ -15,7 +15,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * 新增員工服務實作
@@ -43,8 +43,8 @@ public class CreateEmployeeServiceImpl
         }
 
         // 驗證 Email 唯一性
-        if (employeeRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email 已存在: " + request.getEmail());
+        if (employeeRepository.existsByEmail(request.getCompanyEmail())) {
+            throw new IllegalArgumentException("Email 已存在: " + request.getCompanyEmail());
         }
 
         // 驗證身分證號唯一性
@@ -60,44 +60,53 @@ public class CreateEmployeeServiceImpl
         }
 
         // 建立員工 Aggregate
-        Employee employee = Employee.create(
+        Employee employee = Employee.onboard(
                 request.getEmployeeNumber(),
                 request.getFirstName(),
                 request.getLastName(),
-                request.getEnglishName(),
+                request.getNationalId(),
+                request.getDateOfBirth(),
                 Gender.valueOf(request.getGender()),
-                request.getBirthDate(),
-                request.getNationalId() != null ? new NationalId(request.getNationalId()) : null,
-                new Email(request.getEmail()),
-                request.getPhone(),
-                departmentId,
+                request.getCompanyEmail(),
+                request.getMobilePhone(),
+                UUID.fromString(request.getOrganizationId()),
+                UUID.fromString(request.getDepartmentId()),
                 request.getJobTitle(),
-                request.getJobLevel(),
                 EmploymentType.valueOf(request.getEmploymentType()),
                 request.getHireDate(),
-                request.getSupervisorId() != null ? new EmployeeId(request.getSupervisorId()) : null
+                request.getProbationMonths() != null ? request.getProbationMonths() : 3
         );
 
         // 設定其他可選欄位
         if (request.getMaritalStatus() != null) {
-            employee.updateMaritalStatus(MaritalStatus.valueOf(request.getMaritalStatus()));
+            employee.setMaritalStatus(MaritalStatus.valueOf(request.getMaritalStatus()));
         }
 
         if (request.getAddress() != null) {
-            employee.updateAddress(new Address(
-                    request.getAddress().getPostalCode(),
-                    request.getAddress().getCity(),
-                    request.getAddress().getDistrict(),
-                    request.getAddress().getStreet()
-            ));
+            employee.updatePersonalInfo(
+                    request.getPersonalEmail(),
+                    request.getMobilePhone(),
+                    new Address(
+                            request.getAddress().getPostalCode(),
+                            request.getAddress().getCity(),
+                            request.getAddress().getDistrict(),
+                            request.getAddress().getStreet()
+                    ),
+                    null
+            );
         }
 
         if (request.getEmergencyContact() != null) {
-            employee.updateEmergencyContact(new EmergencyContact(
-                    request.getEmergencyContact().getName(),
-                    request.getEmergencyContact().getRelationship(),
-                    request.getEmergencyContact().getPhone()
-            ));
+            employee.updatePersonalInfo(
+                    null,
+                    null,
+                    null,
+                    new EmergencyContact(
+                            request.getEmergencyContact().getName(),
+                            request.getEmergencyContact().getRelationship(),
+                            request.getEmergencyContact().getPhoneNumber()
+                    )
+            );
         }
 
         if (request.getBankAccount() != null) {
@@ -109,6 +118,15 @@ public class CreateEmployeeServiceImpl
             ));
         }
 
+        // 設定主管
+        if (request.getManagerId() != null) {
+            employee.updateJobInfo(
+                    request.getJobTitle(),
+                    request.getJobLevel(),
+                    UUID.fromString(request.getManagerId())
+            );
+        }
+
         // 儲存員工
         employeeRepository.save(employee);
 
@@ -117,8 +135,8 @@ public class CreateEmployeeServiceImpl
                 employee.getId().getValue(),
                 employee.getEmployeeNumber(),
                 employee.getFullName(),
-                employee.getEmail().getValue(),
-                employee.getDepartmentId().getValue(),
+                employee.getCompanyEmail().getValue(),
+                employee.getDepartmentId().toString(),
                 employee.getHireDate()
         ));
 

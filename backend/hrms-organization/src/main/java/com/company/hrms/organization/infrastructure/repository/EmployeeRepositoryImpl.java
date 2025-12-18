@@ -95,6 +95,11 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     }
 
     @Override
+    public boolean existsById(EmployeeId id) {
+        return employeeDAO.existsById(id.getValue());
+    }
+
+    @Override
     public boolean existsByEmployeeNumber(String employeeNumber) {
         return employeeDAO.existsByEmployeeNumber(employeeNumber);
     }
@@ -117,11 +122,6 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     @Override
     public boolean existsByEmail(Email email) {
         return employeeDAO.existsByEmail(email.getValue());
-    }
-
-    @Override
-    public boolean existsById(EmployeeId id) {
-        return employeeDAO.existsById(id.getValue());
     }
 
     @Override
@@ -165,20 +165,20 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
                 po.getFirstName(),
                 po.getLastName(),
                 po.getEnglishName(),
-                Gender.valueOf(po.getGender()),
+                po.getGender() != null ? Gender.valueOf(po.getGender()) : null,
                 po.getBirthDate(),
                 po.getNationalId() != null ? new NationalId(po.getNationalId()) : null,
-                new Email(po.getEmail()),
+                po.getEmail() != null ? new Email(po.getEmail()) : null,
                 po.getPhone(),
                 po.getMaritalStatus() != null ? MaritalStatus.valueOf(po.getMaritalStatus()) : null,
                 address,
                 emergencyContact,
                 bankAccount,
-                new DepartmentId(po.getDepartmentId()),
+                po.getDepartmentId() != null ? new DepartmentId(po.getDepartmentId()) : null,
                 po.getJobTitle(),
                 po.getJobLevel(),
-                EmploymentType.valueOf(po.getEmploymentType()),
-                EmploymentStatus.valueOf(po.getEmploymentStatus()),
+                po.getEmploymentType() != null ? EmploymentType.valueOf(po.getEmploymentType()) : null,
+                po.getEmploymentStatus() != null ? EmploymentStatus.valueOf(po.getEmploymentStatus()) : null,
                 po.getHireDate(),
                 po.getProbationEndDate(),
                 po.getTerminationDate(),
@@ -194,10 +194,10 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
         po.setFirstName(employee.getFirstName());
         po.setLastName(employee.getLastName());
         po.setEnglishName(employee.getEnglishName());
-        po.setGender(employee.getGender().name());
+        po.setGender(employee.getGender() != null ? employee.getGender().name() : null);
         po.setBirthDate(employee.getBirthDate());
         po.setNationalId(employee.getNationalId() != null ? employee.getNationalId().getValue() : null);
-        po.setEmail(employee.getEmail().getValue());
+        po.setEmail(employee.getEmail() != null ? employee.getEmail().getValue() : null);
         po.setPhone(employee.getPhone());
         po.setMaritalStatus(employee.getMaritalStatus() != null ? employee.getMaritalStatus().name() : null);
 
@@ -221,11 +221,11 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
             po.setBankAccountHolderName(employee.getBankAccount().getAccountHolderName());
         }
 
-        po.setDepartmentId(employee.getDepartmentId().getValue());
+        po.setDepartmentId(employee.getDepartmentIdVO() != null ? employee.getDepartmentIdVO().getValue() : null);
         po.setJobTitle(employee.getJobTitle());
         po.setJobLevel(employee.getJobLevel());
-        po.setEmploymentType(employee.getEmploymentType().name());
-        po.setEmploymentStatus(employee.getEmploymentStatus().name());
+        po.setEmploymentType(employee.getEmploymentType() != null ? employee.getEmploymentType().name() : null);
+        po.setEmploymentStatus(employee.getEmploymentStatus() != null ? employee.getEmploymentStatus().name() : null);
         po.setHireDate(employee.getHireDate());
         po.setProbationEndDate(employee.getProbationEndDate());
         po.setTerminationDate(employee.getTerminationDate());

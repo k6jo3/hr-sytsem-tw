@@ -329,6 +329,15 @@ public class Employee {
     }
 
     /**
+     * 設定婚姻狀況
+     * @param maritalStatus 婚姻狀況
+     */
+    public void setMaritalStatus(MaritalStatus maritalStatus) {
+        this.maritalStatus = maritalStatus;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
      * 更新個人資料
      * @param personalEmail 個人 Email
      * @param mobilePhone 手機
@@ -504,5 +513,94 @@ public class Employee {
         if (lastName == null || lastName.isBlank()) {
             throw new DomainException("LAST_NAME_REQUIRED", "姓不可為空");
         }
+    }
+
+    // ==================== 重建方法 (從持久層還原) ====================
+
+    /**
+     * 從持久層還原 Employee
+     */
+    public static Employee reconstitute(
+            EmployeeId id,
+            String employeeNumber,
+            String firstName,
+            String lastName,
+            String englishName,
+            Gender gender,
+            LocalDate birthDate,
+            NationalId nationalId,
+            Email email,
+            String phone,
+            MaritalStatus maritalStatus,
+            Address address,
+            EmergencyContact emergencyContact,
+            BankAccount bankAccount,
+            DepartmentId departmentId,
+            String jobTitle,
+            String jobLevel,
+            EmploymentType employmentType,
+            EmploymentStatus employmentStatus,
+            LocalDate hireDate,
+            LocalDate probationEndDate,
+            LocalDate terminationDate,
+            String terminationReason,
+            EmployeeId supervisorId) {
+
+        String fullName = lastName + firstName;
+
+        return Employee.builder()
+                .id(id)
+                .employeeNumber(employeeNumber)
+                .firstName(firstName)
+                .lastName(lastName)
+                .fullName(fullName)
+                .nationalId(nationalId)
+                .dateOfBirth(birthDate)
+                .gender(gender)
+                .maritalStatus(maritalStatus)
+                .companyEmail(email)
+                .mobilePhone(phone)
+                .address(address)
+                .emergencyContact(emergencyContact)
+                .bankAccount(bankAccount)
+                .departmentId(departmentId != null ? UUID.fromString(departmentId.getValue()) : null)
+                .jobTitle(jobTitle)
+                .jobLevel(jobLevel)
+                .employmentType(employmentType)
+                .employmentStatus(employmentStatus)
+                .hireDate(hireDate)
+                .probationEndDate(probationEndDate)
+                .terminationDate(terminationDate)
+                .terminationReason(terminationReason)
+                .managerId(supervisorId != null ? UUID.fromString(supervisorId.getValue()) : null)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    // ==================== Getter 方法 (for Repository) ====================
+
+    public Email getEmail() {
+        return this.companyEmail;
+    }
+
+    public LocalDate getBirthDate() {
+        return this.dateOfBirth;
+    }
+
+    public String getPhone() {
+        return this.mobilePhone;
+    }
+
+    public DepartmentId getDepartmentIdVO() {
+        return this.departmentId != null ? new DepartmentId(this.departmentId.toString()) : null;
+    }
+
+    public EmployeeId getSupervisorId() {
+        return this.managerId != null ? new EmployeeId(this.managerId.toString()) : null;
+    }
+
+    public String getEnglishName() {
+        return null; // 目前 Employee 沒有 englishName 欄位
     }
 }
