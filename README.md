@@ -310,7 +310,7 @@ Timesheet → TimesheetApproved事件
 5. 參考各服務系統設計書進行開發
 6. 複雜邏輯請參考 `spec/logic_spec/` 下的邏輯規格書
 7. **新增查詢功能請參考 `Fluent-Query-Engine.md`** (持久層技術選擇指引)
-8. **測試開發請參考 `測試架構規範.md`** (快照測試、三階測試法)
+8. **測試開發請參考 `測試架構規範.md`** (快照測試、三階測試法、合約驅動測試)
 9. **泛型基類設計請參考 `Generic-Library-Architecture.md`**
 
 ---
