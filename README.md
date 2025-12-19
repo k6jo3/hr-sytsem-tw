@@ -62,6 +62,17 @@ hr-system-2/
 ├── Fluent-Query-Engine.md                        # Querydsl 查詢引擎規範
 ├── Generic-Library-Architecture.md               # 泛型程式庫架構規範
 ├── 測試架構規範.md                              # 測試方法論與快照測試規範
+├── 全鏈路自動化架構實施指南.md                  # Service Pipeline 架構指南
+│
+├── framework/                                    # ✅ 可重用架構框架 (NEW)
+│   ├── README.md                                 # 架構框架總覽
+│   ├── architecture/                             # 架構設計規範
+│   │   ├── 01_核心架構原則.md
+│   │   ├── 02_DDD分層設計.md
+│   │   └── 03_Business_Pipeline.md              # ⭐ 宣告式業務流水線
+│   ├── development/                              # 開發流程規範
+│   └── testing/                                  # 測試架構規範
+│
 ├── 人力資源暨專案管理系統_正式需求規格書.md   # 原始客戶需求
 ├── PM需求審查報告.md                          # PM審查報告
 ├── 系統開發工作計畫書.md                      # 開發工作計畫
@@ -312,6 +323,7 @@ Timesheet → TimesheetApproved事件
 7. **新增查詢功能請參考 `Fluent-Query-Engine.md`** (持久層技術選擇指引)
 8. **測試開發請參考 `測試架構規範.md`** (快照測試、三階測試法、合約驅動測試)
 9. **泛型基類設計請參考 `Generic-Library-Architecture.md`**
+10. **複雜業務邏輯請參考 `framework/architecture/03_Business_Pipeline.md`** (Service 流水線模式)
 
 ---
 
