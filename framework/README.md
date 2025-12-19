@@ -1,7 +1,7 @@
 # 低成本高效能企業級開發架構框架
 
-**版本:** 1.0
-**建立日期:** 2025-12-19
+**版本:** 1.1
+**最後更新:** 2025-12-19
 **目標:** 提供一套可重用的企業級系統架構，實現「低開發成本、高測試性、易維護」
 
 ---
@@ -134,10 +134,11 @@ framework/
 ├── architecture/                       # 架構設計規範
 │   ├── 01_核心架構原則.md              # 設計哲學與原則
 │   ├── 02_DDD分層設計.md               # 四層架構詳細說明
-│   ├── 03_CQRS模式.md                  # 命令查詢分離
-│   ├── 04_Service_Factory模式.md       # 動態 Service 注入
-│   ├── 05_事件驅動架構.md              # 領域事件設計
-│   └── 06_Fluent_Query_Engine.md       # 宣告式查詢引擎
+│   ├── 03_Business_Pipeline.md         # 宣告式業務流水線 ⭐
+│   ├── 04_CQRS模式.md                  # 命令查詢分離
+│   ├── 05_Service_Factory模式.md       # 動態 Service 注入
+│   ├── 06_事件驅動架構.md              # 領域事件設計
+│   └── 07_Fluent_Query_Engine.md       # 宣告式查詢引擎
 │
 ├── development/                        # 開發流程規範
 │   ├── 01_開發流程.md                  # 五階段開發流程
@@ -177,13 +178,15 @@ framework/
 ### 我是架構師/技術主管
 
 1. 閱讀 [01_核心架構原則.md](architecture/01_核心架構原則.md) 了解設計哲學
-2. 閱讀 [project-setup-guide.md](templates/project-setup-guide.md) 了解如何套用到新專案
+2. 閱讀 [03_Business_Pipeline.md](architecture/03_Business_Pipeline.md) 了解 Service 層流水線模式
+3. 閱讀 [project-setup-guide.md](templates/project-setup-guide.md) 了解如何套用到新專案
 
 ### 我是後端工程師
 
 1. 閱讀 [01_開發流程.md](development/01_開發流程.md) 了解開發步驟
 2. 閱讀 [02_命名規範.md](development/02_命名規範.md) 了解命名標準
-3. 閱讀 [03_後端開發規範.md](development/03_後端開發規範.md) 開始實作
+3. 閱讀 [03_Business_Pipeline.md](architecture/03_Business_Pipeline.md) 了解複雜業務邏輯寫法
+4. 閱讀 [03_後端開發規範.md](development/03_後端開發規範.md) 開始實作
 
 ### 我是前端工程師
 
@@ -248,4 +251,5 @@ framework/
 
 | 版本 | 日期 | 變更 |
 |:---|:---|:---|
+| 1.1 | 2025-12-19 | 新增 Business Pipeline 架構文件 |
 | 1.0 | 2025-12-19 | 初版建立 |
