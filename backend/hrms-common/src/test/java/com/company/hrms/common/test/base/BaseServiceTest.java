@@ -1,11 +1,15 @@
 package com.company.hrms.common.test.base;
 
+import com.company.hrms.common.application.service.AbstractQueryService;
+import com.company.hrms.common.application.service.QueryGroupHolder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.assertion.QueryGroupAssert;
 import com.company.hrms.common.test.snapshot.FluentAssert;
 import com.company.hrms.common.test.snapshot.QuerySnapshotModule;
 import com.company.hrms.common.test.snapshot.SnapshotUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -23,7 +27,7 @@ import static org.mockito.Mockito.atLeastOnce;
  *   <li>DTO 轉換正確性</li>
  * </ul>
  *
- * <p>使用範例:
+ * <p>使用範例（使用 AbstractQueryService）:
  * <pre>
  * class GetEmployeeListServiceTest extends BaseServiceTest&lt;GetEmployeeListServiceImpl&gt; {
  *
@@ -38,11 +42,11 @@ import static org.mockito.Mockito.atLeastOnce;
  *         GetEmployeeListRequest req = new GetEmployeeListRequest();
  *         req.setDepartmentName("研發部");
  *
- *         verifyQuery(
- *             () -&gt; service.getResponse(req, mockUser),
- *             repository,
- *             "employee_search_by_dept.json"
- *         );
+ *         // 執行 Service（QueryGroup 會自動被攔截）
+ *         executeAndCapture(() -&gt; service.getResponse(req, mockUser));
+ *
+ *         // 驗證 QueryGroup
+ *         verifyCapturedQuery("employee_search_by_dept.json");
  *     }
  * }
  * </pre>
@@ -54,8 +58,74 @@ public abstract class BaseServiceTest<S> extends BaseUnitTest {
     /** QueryGroup 專用的 ObjectMapper */
     protected ObjectMapper queryMapper = QuerySnapshotModule.createMapper();
 
+    @BeforeEach
+    void setUpQueryHolder() {
+        QueryGroupHolder.clear();
+    }
+
+    @AfterEach
+    void tearDownQueryHolder() {
+        QueryGroupHolder.remove();
+    }
+
+    /**
+     * 執行 Service 並攔截 QueryGroup
+     * 適用於繼承 AbstractQueryService 的 Service
+     *
+     * @param serviceCall Service 呼叫
+     */
+    protected void executeAndCapture(Runnable serviceCall) {
+        QueryGroupHolder.clear();
+        try {
+            serviceCall.run();
+        } catch (Exception e) {
+            // 忽略執行錯誤，我們關心的是 QueryGroup
+        }
+    }
+
+    /**
+     * 執行 Service 並攔截 QueryGroup，同時回傳結果
+     *
+     * @param serviceCall Service 呼叫
+     * @return Service 回傳結果
+     */
+    protected <R> R executeAndCaptureWithResult(java.util.concurrent.Callable<R> serviceCall) {
+        QueryGroupHolder.clear();
+        try {
+            return serviceCall.call();
+        } catch (Exception e) {
+            throw new RuntimeException("Service 執行失敗", e);
+        }
+    }
+
+    /**
+     * 取得最後被攔截的 QueryGroup
+     */
+    protected QueryGroup getCapturedQuery() {
+        return QueryGroupHolder.getLast();
+    }
+
+    /**
+     * 取得第 N 個被攔截的 QueryGroup
+     */
+    protected QueryGroup getCapturedQuery(int index) {
+        return QueryGroupHolder.get(index);
+    }
+
+    /**
+     * 驗證被攔截的 QueryGroup（快照比對）
+     */
+    protected void verifyCapturedQuery(String snapshotName) {
+        QueryGroup captured = getCapturedQuery();
+        if (captured == null) {
+            throw new AssertionError("沒有攔截到 QueryGroup，請確認 Service 是否繼承 AbstractQueryService");
+        }
+        verifyQuerySnapshot(captured, snapshotName);
+    }
+
     /**
      * 驗證 Service 產出的 QueryGroup（快照比對）
+     * 相容舊版 Mockito ArgumentCaptor 方式
      *
      * @param serviceCall Service 呼叫（Lambda）
      * @param repository Mock 的 Repository
@@ -71,12 +141,16 @@ public abstract class BaseServiceTest<S> extends BaseUnitTest {
             // 忽略執行錯誤，我們只關心 QueryGroup
         }
 
-        try {
-            // 攔截 QueryGroup
-            verify(repository, atLeastOnce()).getClass(); // 確保 repository 被使用
+        // 優先使用 QueryGroupHolder
+        QueryGroup captured = QueryGroupHolder.getLast();
+        if (captured != null) {
+            verifyQuerySnapshot(captured, snapshotName);
+            return;
+        }
 
-            // 使用快照比對
-            // 注意：實際專案中需要根據 Repository 介面調整 verify 方法
+        try {
+            // Fallback: 使用 Mockito captor
+            verify(repository, atLeastOnce()).getClass();
             SnapshotUtils.compareOrUpdate(
                 getQuerySnapshotDirectory() + "/" + snapshotName,
                 captor.getValue(),
