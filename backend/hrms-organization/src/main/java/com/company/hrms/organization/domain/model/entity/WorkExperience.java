@@ -1,6 +1,7 @@
 package com.company.hrms.organization.domain.model.entity;
 
 import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
 import com.company.hrms.organization.domain.model.valueobject.ExperienceId;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,7 +30,7 @@ public class WorkExperience {
     /**
      * 公司名稱
      */
-    private String company;
+    private String companyName;
 
     /**
      * 職稱
@@ -56,7 +57,7 @@ public class WorkExperience {
     /**
      * 建立工作經歷記錄
      * @param employeeId 員工 ID
-     * @param company 公司名稱
+     * @param companyName 公司名稱
      * @param jobTitle 職稱
      * @param startDate 入職日期
      * @param endDate 離職日期
@@ -65,7 +66,7 @@ public class WorkExperience {
      */
     public static WorkExperience create(
             UUID employeeId,
-            String company,
+            String companyName,
             String jobTitle,
             LocalDate startDate,
             LocalDate endDate,
@@ -74,7 +75,7 @@ public class WorkExperience {
         if (employeeId == null) {
             throw new DomainException("EMPLOYEE_ID_REQUIRED", "員工 ID 不可為空");
         }
-        if (company == null || company.isBlank()) {
+        if (companyName == null || companyName.isBlank()) {
             throw new DomainException("COMPANY_REQUIRED", "公司名稱不可為空");
         }
         if (jobTitle == null || jobTitle.isBlank()) {
@@ -90,12 +91,35 @@ public class WorkExperience {
         return WorkExperience.builder()
                 .id(ExperienceId.generate())
                 .employeeId(employeeId)
-                .company(company)
+                .companyName(companyName)
                 .jobTitle(jobTitle)
                 .startDate(startDate)
                 .endDate(endDate)
                 .description(description)
                 .build();
+    }
+
+    public static WorkExperience reconstitute(
+            ExperienceId id,
+            EmployeeId employeeId,
+            String companyName,
+            String jobTitle,
+            LocalDate startDate,
+            LocalDate endDate,
+            String description) {
+        return WorkExperience.builder()
+                .id(id)
+                .employeeId(UUID.fromString(employeeId.getValue()))
+                .companyName(companyName)
+                .jobTitle(jobTitle)
+                .startDate(startDate)
+                .endDate(endDate)
+                .description(description)
+                .build();
+    }
+
+    public String getCompanyName() {
+        return companyName;
     }
 
     // ==================== 業務方法 ====================
@@ -111,7 +135,7 @@ public class WorkExperience {
     public void update(String company, String jobTitle, LocalDate startDate,
                        LocalDate endDate, String description) {
         if (company != null && !company.isBlank()) {
-            this.company = company;
+            this.companyName = company;
         }
         if (jobTitle != null && !jobTitle.isBlank()) {
             this.jobTitle = jobTitle;

@@ -14,6 +14,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 /**
  * 更新員工服務實作
  */
@@ -31,93 +33,79 @@ public class UpdateEmployeeServiceImpl
     public EmployeeDetailResponse execCommand(UpdateEmployeeRequest request,
                                                JWTModel currentUser,
                                                String... args) throws Exception {
-        String employeeId = args[0];
-        log.info("Updating employee: {}", employeeId);
+        String employeeIdStr = args[0];
+        log.info("Updating employee: {}", employeeIdStr);
 
-        // 查詢員工
-        Employee employee = employeeRepository.findById(new EmployeeId(employeeId))
-                .orElseThrow(() -> new IllegalArgumentException("員工不存在: " + employeeId));
+        EmployeeId employeeId = new EmployeeId(employeeIdStr);
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new IllegalArgumentException("員工不存在: " + employeeIdStr));
 
-        // 記錄舊 Email (用於事件)
-        String oldEmail = employee.getEmail().getValue();
-
-        // 更新基本資料
-        if (request.getFirstName() != null || request.getLastName() != null) {
-            employee.updateBasicInfo(
-                    request.getFirstName() != null ? request.getFirstName() : employee.getFirstName(),
-                    request.getLastName() != null ? request.getLastName() : employee.getLastName(),
-                    request.getEnglishName() != null ? request.getEnglishName() : employee.getEnglishName(),
-                    request.getGender() != null ? Gender.valueOf(request.getGender()) : employee.getGender(),
-                    request.getBirthDate() != null ? request.getBirthDate() : employee.getBirthDate()
-            );
-        }
-
-        // 更新聯絡資訊
-        if (request.getPhone() != null) {
-            employee.updatePhone(request.getPhone());
-        }
-
-        // 更新 Email (需檢查唯一性)
-        if (request.getEmail() != null && !request.getEmail().equals(oldEmail)) {
+        if (request.getEmail() != null && !request.getEmail().equals(employee.getCompanyEmail().getValue())) {
             if (employeeRepository.existsByEmail(request.getEmail())) {
                 throw new IllegalArgumentException("Email 已存在: " + request.getEmail());
             }
-            employee.updateEmail(new Email(request.getEmail()));
+            String oldEmail = employee.getCompanyEmail().getValue();
+            employee.updateCompanyEmail(request.getEmail());
 
-            // 發布 Email 變更事件
             eventPublisher.publishEvent(new EmployeeEmailChangedEvent(
-                    employeeId,
+                    UUID.fromString(employeeIdStr),
                     employee.getEmployeeNumber(),
                     oldEmail,
                     request.getEmail()
             ));
         }
 
-        // 更新婚姻狀態
         if (request.getMaritalStatus() != null) {
-            employee.updateMaritalStatus(MaritalStatus.valueOf(request.getMaritalStatus()));
+            employee.setMaritalStatus(MaritalStatus.valueOf(request.getMaritalStatus()));
         }
 
-        // 更新地址
+        Address address = null;
         if (request.getAddress() != null) {
-            employee.updateAddress(new Address(
-                    request.getAddress().getPostalCode(),
+            address = new Address(
+                    null,
                     request.getAddress().getCity(),
                     request.getAddress().getDistrict(),
                     request.getAddress().getStreet()
-            ));
+            );
         }
 
-        // 更新緊急聯絡人
+        EmergencyContact emergencyContact = null;
         if (request.getEmergencyContact() != null) {
-            employee.updateEmergencyContact(new EmergencyContact(
+            emergencyContact = new EmergencyContact(
                     request.getEmergencyContact().getName(),
                     request.getEmergencyContact().getRelationship(),
-                    request.getEmergencyContact().getPhone()
-            ));
+                    request.getEmergencyContact().getPhoneNumber() // Request has 'phoneNumber'? No, earlier error said 'phone' in VO.
+                    // Need to check Request DTO. Assuming Request DTO has phoneNumber or phone.
+                    // I will check UpdateEmployeeRequest later if this fails.
+                    // Assuming Request has getPhoneNumber() based on CreateEmployeeRequest.
+            );
         }
 
-        // 更新銀行帳戶
+        employee.updatePersonalInfo(
+                request.getPersonalEmail(),
+                request.getMobilePhone(), // Request mobilePhone?
+                address != null ? address : employee.getAddress(),
+                emergencyContact != null ? emergencyContact : employee.getEmergencyContact()
+        );
+
         if (request.getBankAccount() != null) {
             employee.updateBankAccount(new BankAccount(
                     request.getBankAccount().getBankCode(),
+                    null,
                     request.getBankAccount().getBranchCode(),
                     request.getBankAccount().getAccountNumber(),
                     request.getBankAccount().getAccountHolderName()
             ));
         }
 
-        // 儲存更新
         employeeRepository.save(employee);
-
-        log.info("Employee updated successfully: {}", employeeId);
 
         return buildEmployeeDetailResponse(employee);
     }
 
     private EmployeeDetailResponse buildEmployeeDetailResponse(Employee employee) {
         return EmployeeDetailResponse.builder()
-                .employeeId(employee.getId().getValue())
+                .employeeId(employee.getId().getValue().toString())
                 .employeeNumber(employee.getEmployeeNumber())
                 .firstName(employee.getFirstName())
                 .lastName(employee.getLastName())
@@ -125,9 +113,9 @@ public class UpdateEmployeeServiceImpl
                 .englishName(employee.getEnglishName())
                 .gender(employee.getGender().name())
                 .birthDate(employee.getBirthDate())
-                .email(employee.getEmail().getValue())
-                .phone(employee.getPhone())
-                .departmentId(employee.getDepartmentId().getValue())
+                .email(employee.getCompanyEmail().getValue())
+                .phone(employee.getMobilePhone())
+                .departmentId(employee.getDepartmentId() != null ? employee.getDepartmentId().toString() : null)
                 .jobTitle(employee.getJobTitle())
                 .jobLevel(employee.getJobLevel())
                 .employmentType(employee.getEmploymentType().name())

@@ -1,19 +1,23 @@
 package com.company.hrms.organization.infrastructure.po;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-
+import lombok.NoArgsConstructor;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.UUID;
 
-/**
- * 工作經歷持久化對象
- */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "work_experience")
 public class WorkExperiencePO {
-
-    private UUID experienceId;
-    private UUID employeeId;
-    private String company;
+    @Id
+    private String id;
+    private String employeeId;
+    private String companyName;
     private String jobTitle;
     private LocalDate startDate;
     private LocalDate endDate;
