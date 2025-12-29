@@ -8,14 +8,11 @@ import com.company.hrms.organization.infrastructure.po.EducationPO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * 學歷倉儲實作
- */
 @Repository
 @RequiredArgsConstructor
 public class EducationRepositoryImpl implements IEducationRepository {
@@ -23,44 +20,37 @@ public class EducationRepositoryImpl implements IEducationRepository {
     private final EducationDAO educationDAO;
 
     @Override
-    public Optional<Education> findById(EducationId id) {
-        return educationDAO.findById(id.getValue())
-                .map(this::toDomain);
-    }
-
-    @Override
-    public List<Education> findByEmployeeId(EmployeeId employeeId) {
-        return educationDAO.findByEmployeeId(employeeId.getValue()).stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public void save(Education education) {
         EducationPO po = toPO(education);
-        if (educationDAO.existsById(education.getId().getValue())) {
-            po.setUpdatedAt(LocalDateTime.now());
+        if (educationDAO.existsById(po.getId())) {
             educationDAO.update(po);
         } else {
-            po.setCreatedAt(LocalDateTime.now());
-            po.setUpdatedAt(LocalDateTime.now());
             educationDAO.insert(po);
         }
     }
 
     @Override
+    public Optional<Education> findById(EducationId id) {
+        return educationDAO.findById(id.getValue().toString())
+                .map(this::toDomain);
+    }
+
+    @Override
+    public List<Education> findByEmployeeId(UUID employeeId) {
+        return educationDAO.findByEmployeeId(employeeId.toString())
+                .stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void delete(EducationId id) {
-        educationDAO.deleteById(id.getValue());
+        educationDAO.deleteById(id.getValue().toString());
     }
 
     @Override
-    public void deleteByEmployeeId(EmployeeId employeeId) {
-        educationDAO.deleteByEmployeeId(employeeId.getValue());
-    }
-
-    @Override
-    public boolean existsById(EducationId id) {
-        return educationDAO.existsById(id.getValue());
+    public void deleteByEmployeeId(UUID employeeId) {
+        educationDAO.deleteByEmployeeId(employeeId.toString());
     }
 
     private Education toDomain(EducationPO po) {
@@ -76,16 +66,16 @@ public class EducationRepositoryImpl implements IEducationRepository {
         );
     }
 
-    private EducationPO toPO(Education education) {
+    private EducationPO toPO(Education entity) {
         EducationPO po = new EducationPO();
-        po.setId(education.getId().getValue());
-        po.setEmployeeId(education.getEmployeeId().getValue());
-        po.setSchoolName(education.getSchoolName());
-        po.setDegree(education.getDegree().name());
-        po.setMajor(education.getMajor());
-        po.setStartDate(education.getStartDate());
-        po.setEndDate(education.getEndDate());
-        po.setIsGraduated(education.isGraduated());
+        po.setId(entity.getId().getValue().toString());
+        po.setEmployeeId(entity.getEmployeeId().toString());
+        po.setDegree(entity.getDegree().name());
+        po.setSchoolName(entity.getSchoolName());
+        po.setMajor(entity.getMajor());
+        po.setStartDate(entity.getStartDate());
+        po.setEndDate(entity.getEndDate());
+        po.setIsGraduated(entity.isGraduated());
         return po;
     }
 }

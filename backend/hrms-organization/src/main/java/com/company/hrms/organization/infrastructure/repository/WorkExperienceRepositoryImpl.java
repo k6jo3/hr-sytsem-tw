@@ -1,21 +1,19 @@
 package com.company.hrms.organization.infrastructure.repository;
 
 import com.company.hrms.organization.domain.model.entity.WorkExperience;
-import com.company.hrms.organization.domain.model.valueobject.*;
+import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
+import com.company.hrms.organization.domain.model.valueobject.ExperienceId;
 import com.company.hrms.organization.domain.repository.IWorkExperienceRepository;
 import com.company.hrms.organization.infrastructure.dao.WorkExperienceDAO;
 import com.company.hrms.organization.infrastructure.po.WorkExperiencePO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * 工作經歷倉儲實作
- */
 @Repository
 @RequiredArgsConstructor
 public class WorkExperienceRepositoryImpl implements IWorkExperienceRepository {
@@ -23,44 +21,43 @@ public class WorkExperienceRepositoryImpl implements IWorkExperienceRepository {
     private final WorkExperienceDAO workExperienceDAO;
 
     @Override
-    public Optional<WorkExperience> findById(ExperienceId id) {
-        return workExperienceDAO.findById(id.getValue())
-                .map(this::toDomain);
-    }
-
-    @Override
-    public List<WorkExperience> findByEmployeeId(EmployeeId employeeId) {
-        return workExperienceDAO.findByEmployeeId(employeeId.getValue()).stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void save(WorkExperience experience) {
-        WorkExperiencePO po = toPO(experience);
-        if (workExperienceDAO.existsById(experience.getId().getValue())) {
-            po.setUpdatedAt(LocalDateTime.now());
+    public void save(WorkExperience workExperience) {
+        WorkExperiencePO po = toPO(workExperience);
+        if (workExperienceDAO.existsById(po.getId())) {
             workExperienceDAO.update(po);
         } else {
-            po.setCreatedAt(LocalDateTime.now());
-            po.setUpdatedAt(LocalDateTime.now());
             workExperienceDAO.insert(po);
         }
     }
 
     @Override
-    public void delete(ExperienceId id) {
-        workExperienceDAO.deleteById(id.getValue());
+    public Optional<WorkExperience> findById(ExperienceId id) {
+        return workExperienceDAO.findById(id.getValue().toString())
+                .map(this::toDomain);
     }
 
     @Override
-    public void deleteByEmployeeId(EmployeeId employeeId) {
-        workExperienceDAO.deleteByEmployeeId(employeeId.getValue());
+    public Optional<WorkExperience> findById(UUID id) {
+        return workExperienceDAO.findById(id.toString())
+                .map(this::toDomain);
     }
 
     @Override
-    public boolean existsById(ExperienceId id) {
-        return workExperienceDAO.existsById(id.getValue());
+    public List<WorkExperience> findByEmployeeId(UUID employeeId) {
+        return workExperienceDAO.findByEmployeeId(employeeId.toString())
+                .stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        workExperienceDAO.deleteById(id.toString());
+    }
+
+    @Override
+    public void deleteByEmployeeId(UUID employeeId) {
+        workExperienceDAO.deleteByEmployeeId(employeeId.toString());
     }
 
     private WorkExperience toDomain(WorkExperiencePO po) {
@@ -75,15 +72,15 @@ public class WorkExperienceRepositoryImpl implements IWorkExperienceRepository {
         );
     }
 
-    private WorkExperiencePO toPO(WorkExperience experience) {
+    private WorkExperiencePO toPO(WorkExperience entity) {
         WorkExperiencePO po = new WorkExperiencePO();
-        po.setId(experience.getId().getValue());
-        po.setEmployeeId(experience.getEmployeeId().getValue());
-        po.setCompanyName(experience.getCompanyName());
-        po.setJobTitle(experience.getJobTitle());
-        po.setStartDate(experience.getStartDate());
-        po.setEndDate(experience.getEndDate());
-        po.setDescription(experience.getDescription());
+        po.setId(entity.getId().getValue().toString());
+        po.setEmployeeId(entity.getEmployeeId().toString());
+        po.setCompanyName(entity.getCompanyName());
+        po.setJobTitle(entity.getJobTitle());
+        po.setStartDate(entity.getStartDate());
+        po.setEndDate(entity.getEndDate());
+        po.setDescription(entity.getDescription());
         return po;
     }
 }
