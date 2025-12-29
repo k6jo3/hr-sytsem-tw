@@ -5,6 +5,7 @@ import java.util.List;
 /**
  * 事件發布器介面
  * Application Layer 使用此介面發布領域事件
+ * <p>此介面定義了發布領域事件的標準契約</p>
  *
  * <p>使用範例：
  * <pre>

@@ -58,6 +58,7 @@ public interface IUserRepository {
 
     /**
      * 更新使用者
+     * <p>注意：此方法用於更新已存在的使用者資料</p>
      * @param user 使用者
      */
     void update(User user);

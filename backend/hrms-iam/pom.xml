@@ -24,6 +24,15 @@
             <artifactId>hrms-common</artifactId>
         </dependency>
 
+        <!-- HRMS Common Test -->
+        <dependency>
+            <groupId>com.company.hrms</groupId>
+            <artifactId>hrms-common</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Spring Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
