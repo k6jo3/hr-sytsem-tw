@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
  * 負責密碼的雜湊與驗證
  *
  * <p>使用 BCrypt 演算法，work factor = 12</p>
+ * <p>注意：此服務為 IAM 領域核心服務，負責所有密碼相關操作</p>
  */
 @Service
 public class PasswordHashingDomainService {

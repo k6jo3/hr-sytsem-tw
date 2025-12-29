@@ -1,5 +1,10 @@
 package com.company.hrms.common.aspect;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
+
+@Component
+@RequestScope
 public class BeanNameConfig {
     private String beanName;
 

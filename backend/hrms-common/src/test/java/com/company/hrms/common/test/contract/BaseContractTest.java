@@ -131,4 +131,12 @@ public abstract class BaseContractTest {
                     field, queryGroup.getFiltersForField(field)));
         }
     }
+
+    /**
+     * 取得測試類別名稱
+     * @return 測試類別名稱
+     */
+    protected String getTestClassName() {
+        return this.getClass().getSimpleName();
+    }
 }
