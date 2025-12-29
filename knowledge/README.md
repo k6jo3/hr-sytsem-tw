@@ -20,8 +20,7 @@ Contains the high-level architecture and detailed design specifications.
 - **Architecture:** `系統架構設計文件.md`, `Generic-Library-Architecture.md`
 - **Detailed Design:** `Detailed_Design/` folder (Merged System Design Specifications for all modules).
 - **Domain Logic:** `Logic_Specs/01_IAM_Domain_Layer_and_Data.md` (IAM Domain Events, Logic, Data Sources)
-- **Logic Specs:** `Logic_Specs/` folder (Specific business logic algorithms).
-- **Reports:** `Reports/` folder (Compliance and consistency checks).
+
 
 ### [04. API Standards](./04_API_Standards/)
 Contains the standards and templates for API documentation.
