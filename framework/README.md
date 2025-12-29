@@ -1,7 +1,7 @@
 # 低成本高效能企業級開發架構框架
 
-**版本:** 1.1
-**最後更新:** 2025-12-19
+**版本:** 1.2
+**最後更新:** 2025-12-29
 **目標:** 提供一套可重用的企業級系統架構，實現「低開發成本、高測試性、易維護」
 
 ---
@@ -135,40 +135,22 @@ framework/
 │   ├── 01_核心架構原則.md              # 設計哲學與原則
 │   ├── 02_DDD分層設計.md               # 四層架構詳細說明
 │   ├── 03_Business_Pipeline.md         # 宣告式業務流水線 ⭐
-│   ├── 04_CQRS模式.md                  # 命令查詢分離
-│   ├── 05_Service_Factory模式.md       # 動態 Service 注入
-│   ├── 06_事件驅動架構.md              # 領域事件設計
-│   └── 07_Fluent_Query_Engine.md       # 宣告式查詢引擎
+│   ├── 07_Fluent_Query_Engine.md       # 宣告式查詢引擎
+│   └── 08_Generic_Library.md           # 泛型程式庫架構
 │
 ├── development/                        # 開發流程規範
 │   ├── 01_開發流程.md                  # 五階段開發流程
-│   ├── 02_命名規範.md                  # 統一命名標準
-│   ├── 03_後端開發規範.md              # 後端實作指南
-│   └── 04_前端開發規範.md              # 前端實作指南
+│   ├── 02_命名規範.md                  # 統一命名標準 (含 Domain 代號)
+│   └── 05_API開發規範.md               # API 標準與文件格式
 │
 ├── testing/                            # 測試架構規範
 │   ├── 01_測試架構總覽.md              # 測試策略與金字塔
-│   ├── 02_三階測試法.md                # 引擎契約/業務組裝/資料工廠
-│   ├── 03_快照測試指南.md              # JSON 快照比對方法
-│   └── 04_合約驅動測試.md              # Markdown 合約斷言
-│
-├── infrastructure/                     # 基礎設施程式碼
-│   ├── backend/                        # 後端泛型基類
-│   │   ├── base/                       # BaseEntity, AggregateRoot
-│   │   ├── service/                    # BaseCommandService, BaseQueryService
-│   │   ├── repository/                 # BaseRepository
-│   │   ├── query/                      # QueryGroup, QueryBuilder
-│   │   └── test/                       # 測試基類
-│   │
-│   └── frontend/                       # 前端泛型基類
-│       ├── api/                        # createApi 工廠
-│       ├── hooks/                      # useTableQuery, useCrudMutation
-│       └── factory/                    # BaseFactory
+│   ├── 02_三階測試法.md                # 測試方法論 (Result Object, Snapshot)
+│   ├── 04_合約驅動測試.md              # Markdown 合約斷言 (Contract-Driven)
+│   └── 05_Fluent_Query_Testing.md      # 查詢引擎測試
 │
 └── templates/                          # 專案模板
-    ├── project-setup-guide.md          # 專案初始化指南
-    ├── backend-module-template/        # 後端模組模板
-    └── frontend-feature-template/      # 前端功能模板
+    └── project-setup-guide.md          # 專案初始化指南
 ```
 
 ---
@@ -179,24 +161,19 @@ framework/
 
 1. 閱讀 [01_核心架構原則.md](architecture/01_核心架構原則.md) 了解設計哲學
 2. 閱讀 [03_Business_Pipeline.md](architecture/03_Business_Pipeline.md) 了解 Service 層流水線模式
-3. 閱讀 [project-setup-guide.md](templates/project-setup-guide.md) 了解如何套用到新專案
+3. 閱讀 [07_Fluent_Query_Engine.md](architecture/07_Fluent_Query_Engine.md) 了解核心查詢引擎
 
 ### 我是後端工程師
 
 1. 閱讀 [01_開發流程.md](development/01_開發流程.md) 了解開發步驟
 2. 閱讀 [02_命名規範.md](development/02_命名規範.md) 了解命名標準
-3. 閱讀 [03_Business_Pipeline.md](architecture/03_Business_Pipeline.md) 了解複雜業務邏輯寫法
-4. 閱讀 [03_後端開發規範.md](development/03_後端開發規範.md) 開始實作
-
-### 我是前端工程師
-
-1. 閱讀 [04_前端開發規範.md](development/04_前端開發規範.md) 了解前端架構
-2. 參考 `infrastructure/frontend/` 使用泛型基類
+3. 閱讀 [05_API開發規範.md](development/05_API開發規範.md) 了解 API 設計標準
 
 ### 我是 QA/測試工程師
 
 1. 閱讀 [01_測試架構總覽.md](testing/01_測試架構總覽.md) 了解測試策略
 2. 閱讀 [04_合約驅動測試.md](testing/04_合約驅動測試.md) 了解合約測試
+3. 閱讀 [02_三階測試法.md](testing/02_三階測試法.md) 了解快照測試方法論
 
 ---
 
@@ -238,18 +215,10 @@ framework/
 
 ---
 
-## 相關文件
-
-| 文件 | 說明 |
-|:---|:---|
-| [架構師交接手冊](../架構師交接手冊：合約驅動與全鏈路自動化體系.md) | 架構核心概念與維護策略 |
-| [開發流程](../開發流程.md) | 五階段開發流程詳細說明 |
-
----
-
 ## 版本紀錄
 
 | 版本 | 日期 | 變更 |
 |:---|:---|:---|
+| 1.2 | 2025-12-29 | 整合 Knowledge Base 文件，重構目錄結構 |
 | 1.1 | 2025-12-19 | 新增 Business Pipeline 架構文件 |
 | 1.0 | 2025-12-19 | 初版建立 |

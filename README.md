@@ -1,7 +1,7 @@
 # 人力資源暨專案管理系統 (HR & Project Management System)
 
-**版本:** 3.1
-**更新日期:** 2025-12-18
+**版本:** 3.2
+**更新日期:** 2025-12-29
 **架構:** 微服務架構 (Spring Cloud + ReactJS)
 
 ---
@@ -35,7 +35,7 @@
 | 認證授權 | Spring Security + OAuth2 + JWT |
 | 資料庫 | PostgreSQL 15+ (每服務獨立DB) |
 | ORM (既有) | MyBatis 3.5.x |
-| ORM (新功能) | Querydsl + JPA 5.0.0 (見 `Fluent-Query-Engine.md`) |
+| ORM (新功能) | Querydsl + JPA 5.0.0 (見 `framework/architecture/07_Fluent_Query_Engine.md`) |
 | 快取 | Redis 7+ |
 | 訊息佇列 | Kafka (事件驅動) |
 | 分散式追蹤 | Sleuth + Zipkin |
@@ -59,68 +59,39 @@
 hr-system-2/
 ├── README.md                                     # 本文件
 ├── CLAUDE.md                                     # AI 開發輔助指南
-├── Fluent-Query-Engine.md                        # Querydsl 查詢引擎規範
-├── Generic-Library-Architecture.md               # 泛型程式庫架構規範
-├── 測試架構規範.md                              # 測試方法論與快照測試規範
-├── 全鏈路自動化架構實施指南.md                  # Service Pipeline 架構指南
 │
-├── framework/                                    # ✅ 可重用架構框架 (NEW)
+├── framework/                                    # ✅ 可重用架構框架 (Refactored)
 │   ├── README.md                                 # 架構框架總覽
 │   ├── architecture/                             # 架構設計規範
 │   │   ├── 01_核心架構原則.md
 │   │   ├── 02_DDD分層設計.md
-│   │   └── 03_Business_Pipeline.md              # ⭐ 宣告式業務流水線
+│   │   ├── 03_Business_Pipeline.md              # ⭐ 宣告式業務流水線
+│   │   ├── 07_Fluent_Query_Engine.md            # Querydsl 查詢引擎規範
+│   │   └── 08_Generic_Library.md                # 泛型程式庫架構規範
 │   ├── development/                              # 開發流程規範
+│   │   ├── 02_命名規範.md                        # 統一命名標準
+│   │   └── 05_API開發規範.md                     # API 標準
 │   └── testing/                                  # 測試架構規範
+│       ├── 01_測試架構總覽.md
+│       ├── 02_三階測試法.md
+│       └── 04_合約驅動測試.md
 │
-├── 人力資源暨專案管理系統_正式需求規格書.md   # 原始客戶需求
-├── PM需求審查報告.md                          # PM審查報告
-├── 系統開發工作計畫書.md                      # 開發工作計畫
-│
-├── 需求分析書/                                 # SA撰寫的需求分析 (14個服務)
-│   ├── 01_IAM服務需求分析書.md
-│   ├── ...
-│   └── 14_報表分析服務需求分析書.md
-│
-├── PM審查補充/                                 # PM審查後補充文件
-│   ├── 01_IAM服務需求分析書_PM審查補充.md
-│   └── ...
+├── archive/                                      # 📦 專案文檔歸檔 (Archived)
+│   └── knowledge/                                # 原始需求與分析文件
+│       ├── 01_Client_Requirements/
+│       ├── 02_Requirements_Analysis/
+│       └── 03_System_Architecture/
 │
 ├── spec/                                        # ✅ 系統設計文件 (已完成)
 │   ├── 系統架構設計文件.md                     # 整體技術架構 & DDD分層
-│   ├── 系統架構設計文件_命名規範.md            # 程式命名原則
+│   ├── 系統架構設計文件_命名規範.md            # (請參考 framework/development/02_命名規範.md)
 │   │
 │   ├── 01_IAM服務系統設計書.md                 # ✅ IAM (認證授權)
-│   ├── 01_IAM服務系統設計書_part2.md
-│   ├── 01_IAM服務系統設計書_part3.md
+│   ├── ... (略)
 │   │
-│   ├── 02_組織員工服務系統設計書.md            # ✅ 組織員工
-│   ├── 02_組織員工服務系統設計書_part2.md
-│   ├── 02_組織員工服務系統設計書_part3.md
-│   ├── 02_組織員工服務系統設計書_part4.md
-│   │
-│   ├── 03_考勤管理服務系統設計書.md            # ✅ 考勤管理
-│   ├── 03_考勤管理服務系統設計書_part2.md
-│   ├── 03_考勤管理服務系統設計書_part3.md
-│   │
-│   ├── 04_薪資管理服務系統設計書.md            # ✅ 薪資管理 (含Saga)
-│   ├── 05_保險管理服務系統設計書.md            # ✅ 勞健保管理
-│   ├── 06_專案管理服務系統設計書.md            # ✅ 專案與WBS
-│   ├── 07_工時管理服務系統設計書.md            # ✅ 工時填報
-│   ├── 08_績效管理服務系統設計書.md            # ✅ 績效考核
-│   ├── 09_招募管理服務系統設計書.md            # ✅ 招募 (Kanban)
-│   ├── 10_訓練管理服務系統設計書.md            # ✅ 訓練與證照
-│   ├── 11_簽核流程服務系統設計書.md            # ✅ 通用簽核引擎
-│   ├── 12_通知服務系統設計書.md                # ✅ 多渠道通知
-│   ├── 13_文件管理服務系統設計書.md            # ✅ 文件與範本
-│   ├── 14_報表分析服務系統設計書.md            # ✅ CQRS報表
-│   │
-│   ├── logic_spec/                              # ✅ 邏輯規格書 (NEW)
+│   ├── logic_spec/                              # ✅ 邏輯規格書
 │   │   ├── variable_hours_rules.md              # 變形工時計算邏輯
-│   │   ├── occupational_injury_compensation.md  # 職災補償邏輯
-│   │   ├── tax_insurance_tables_2025.md         # 2025年稅務保險級距
-│   │   ├── sso_account_linking.md               # SSO帳號連結流程
-│   │   └── regulatory_parameters_and_audit.md   # 法規參數與稽核設計
+│   │   ├── ... (略)
 │   │
 │   └── image/                                   # UI線稿圖片
 │
@@ -171,7 +142,7 @@ hr-system-2/
 |:---|:---|
 | `variable_hours_rules.md` | 台灣勞基法2週/4週/8週變形工時計算邏輯、加班費率 |
 | `occupational_injury_compensation.md` | 職災醫療/工資/失能(15級)/死亡補償計算 |
-| `tax_insurance_tables_2025.md` | 2025年勞保27級距、健保51級距、補充保費、所得稅扣繳 |
+| `tax_insurance_tables_2025.md` | 2025年稅務保險級距 |
 | `sso_account_linking.md` | Google/Microsoft/SAML帳號連結流程、安全考量 |
 | `regulatory_parameters_and_audit.md` | 年度法規參數管理、生效日邏輯、異動稽核設計 |
 
@@ -179,7 +150,7 @@ hr-system-2/
 
 ## 📐 程式命名規範
 
-> 詳見 `spec/系統架構設計文件_命名規範.md`
+> 詳見 `framework/development/02_命名規範.md`
 
 ### Domain代號對照表
 | 代號 | 服務名稱 | 說明 |
@@ -204,23 +175,6 @@ hr-system-2/
 HR{Domain代號}{畫面名稱}{Controller類型}Controller
 ```
 
-**範例:**
-| Domain | Controller | 說明 |
-|:---|:---|:---|
-| IAM (01) | `HR01UserCmdController` | 使用者管理Command操作 |
-| IAM (01) | `HR01UserQryController` | 使用者管理Query操作 |
-| ORG (02) | `HR02EmployeeCmdController` | 員工管理Command操作 |
-| ATT (03) | `HR03LeaveCmdController` | 請假Command操作 |
-| PAY (04) | `HR04PayrollRunCmdController` | 薪資計算Command操作 |
-
-### 頁面代碼格式
-```
-HR{DD}-P{NN}   (頁面)
-HR{DD}-M{NN}   (Modal對話框)
-```
-
-**範例:** `HR01-P01` (IAM登入頁), `HR02-P03` (員工列表頁), `HR04-P05` (薪資單頁)
-
 ---
 
 ## 📊 系統設計書內容
@@ -242,68 +196,6 @@ HR{DD}-M{NN}   (Modal對話框)
 
 ---
 
-## ⚖️ 法規遵循
-
-### 勞動基準法合規
-- ✅ 每月加班上限 46 小時
-- ✅ 三個月加班上限 138 小時
-- ✅ 特休假自動計算 (依年資)
-- ✅ 加班費計算 (平日1.34x/1.67x, 休息日1.34x~2.67x)
-- ✅ 變形工時管理 (二週/四週/八週) - 詳見邏輯規格書
-- ✅ 職業災害補償 (醫療/工資/失能/死亡) - 詳見邏輯規格書
-- ✅ 女性員工保護 (哺乳時間)
-
-### 保險法規合規 (2025年度)
-- ✅ 勞保投保級距 27級 (27,470~45,800元)
-- ✅ 健保投保級距 51級 (27,470~219,500元)
-- ✅ 二代健保補充保費 2.11%
-- ✅ 勞退新制 6%/自提0-6%
-- ✅ 政府申報格式匯出
-
-> 詳見 `spec/logic_spec/tax_insurance_tables_2025.md`
-
----
-
-## 📊 關鍵業務流程
-
-### 1. 員工到職 (Event-Driven Saga)
-```
-Organization → EmployeeCreated事件
-   ├→ IAM: 建立使用者帳號
-   ├→ Insurance: 自動加保
-   └→ Payroll: 建立薪資結構
-```
-
-### 2. 薪資計算 (Saga Pattern)
-```
-Payroll Service:
-   ├→ Organization: 取得員工清單
-   ├→ Attendance: 取得差勤數據
-   ├→ Insurance: 取得保費
-   ├→ Timesheet: 取得工時
-   └→ 計算薪資 → 發布PayslipGenerated事件
-```
-
-### 3. 請假審核 (CQRS + Event)
-```
-Employee 申請請假
-   → Attendance → LeaveApplied事件
-   → Workflow: 建立審核流程
-   → Manager 審核通過
-   → Attendance → LeaveApproved事件
-   → Payroll: 記錄請假扣薪
-   → Notification: 發送通知
-```
-
-### 4. 專案成本追蹤
-```
-Timesheet → TimesheetApproved事件
-   → Project: 累計專案工時成本
-   → Reporting: 更新專案成本報表
-```
-
----
-
 ## 🚀 快速開始
 
 ### 環境需求
@@ -314,15 +206,15 @@ Timesheet → TimesheetApproved事件
 - Kafka 3+
 
 ### 開發指南
-1. 閱讀 `人力資源暨專案管理系統_正式需求規格書.md` 了解業務需求
+1. 閱讀 `archive/knowledge/01_Client_Requirements/人力資源暨專案管理系統_正式需求規格書.md` 了解業務需求
 2. 閱讀 `spec/系統架構設計文件.md` 了解技術架構
-3. 閱讀 `spec/系統架構設計文件_命名規範.md` 了解命名規則
-4. 參考 `backend/架構說明與開發規範.md` 或 `frontend/架構說明與開發規範.md`
+3. 閱讀 `framework/development/02_命名規範.md` 了解命名規則
+4. 參考 `framework/development/` 下的前後端開發規範
 5. 參考各服務系統設計書進行開發
 6. 複雜邏輯請參考 `spec/logic_spec/` 下的邏輯規格書
-7. **新增查詢功能請參考 `Fluent-Query-Engine.md`** (持久層技術選擇指引)
-8. **測試開發請參考 `測試架構規範.md`** (快照測試、三階測試法、合約驅動測試)
-9. **泛型基類設計請參考 `Generic-Library-Architecture.md`**
+7. **新增查詢功能請參考 `framework/architecture/07_Fluent_Query_Engine.md`** (持久層技術選擇指引)
+8. **測試開發請參考 `framework/testing/`** (快照測試、三階測試法、合約驅動測試)
+9. **泛型基類設計請參考 `framework/architecture/08_Generic_Library.md`**
 10. **複雜業務邏輯請參考 `framework/architecture/03_Business_Pipeline.md`** (Service 流水線模式)
 
 ---
@@ -346,7 +238,7 @@ Timesheet → TimesheetApproved事件
 
 **專案經理:** PM  
 **系統分析師:** SA  
-**文件更新:** 2025-12-07
+**文件更新:** 2025-12-29
 
 ---
 
