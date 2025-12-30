@@ -1,22 +1,5 @@
 package com.company.hrms.common.infrastructure.persistence.querydsl.engine;
 
-import com.company.hrms.common.query.AggregateField;
-import com.company.hrms.common.query.FilterUnit;
-import com.company.hrms.common.query.GroupByClause;
-import com.company.hrms.common.query.LogicalOp;
-import com.company.hrms.common.query.Operator;
-import com.company.hrms.common.query.QueryGroup;
-import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.ComparableExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-
 import java.beans.Introspector;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,23 +11,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.company.hrms.common.query.AggregateField;
+import com.company.hrms.common.query.FilterUnit;
+import com.company.hrms.common.query.GroupByClause;
+import com.company.hrms.common.query.LogicalOp;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryGroup;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+
 /**
  * 聚合查詢引擎
  * 支援 GROUP BY、HAVING、聚合函數 (SUM、COUNT、AVG、MAX、MIN)
  *
- * <p>使用範例:</p>
+ * <p>
+ * 使用範例:
+ * </p>
+ * 
  * <pre>
  * AggregateQueryEngine&lt;Timesheet&gt; engine = new AggregateQueryEngine&lt;&gt;(factory, Timesheet.class);
  *
  * QueryGroup where = QueryBuilder.where()
- *     .eq("status", "APPROVED")
- *     .build();
+ *         .eq("status", "APPROVED")
+ *         .build();
  *
  * GroupByClause groupBy = GroupByClause.builder()
- *     .groupBy("project.id", "project.name")
- *     .sum("hours", "totalHours")
- *     .countDistinct("employeeId", "headCount")
- *     .build();
+ *         .groupBy("project.id", "project.name")
+ *         .sum("hours", "totalHours")
+ *         .countDistinct("employeeId", "headCount")
+ *         .build();
  *
  * List&lt;Tuple&gt; results = engine.executeAggregate(where, groupBy);
  * </pre>
@@ -113,7 +114,7 @@ public class AggregateQueryEngine<T> {
 
         // 建構查詢
         currentQuery = factory.select(selectExpressions.toArray(new Expression[0]))
-            .from(entityPath);
+                .from(entityPath);
 
         // 套用 JOIN
         applyJoins(requiredJoins);
@@ -145,7 +146,6 @@ public class AggregateQueryEngine<T> {
     /**
      * 建構聚合表達式
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private Expression<?> buildAggregateExpression(AggregateField agg) {
         String field = agg.getField();
         String[] parts = field.split("\\.");
@@ -270,7 +270,7 @@ public class AggregateQueryEngine<T> {
     /**
      * 建構單一過濾條件的表達式
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     private BooleanExpression buildFilterExpression(FilterUnit unit) {
         String field = unit.getField();
         String[] parts = field.split("\\.");
@@ -318,6 +318,22 @@ public class AggregateQueryEngine<T> {
                     return basePath.get(fieldName).in((Object[]) value);
                 }
                 throw new IllegalArgumentException("IN 運算子需要 Collection 或 Array 類型的值");
+
+            case NOT_IN:
+                if (value instanceof Collection) {
+                    return basePath.get(fieldName).notIn((Collection<?>) value);
+                } else if (value instanceof Object[]) {
+                    return basePath.get(fieldName).notIn((Object[]) value);
+                }
+                throw new IllegalArgumentException("NOT_IN 運算子需要 Collection 或 Array 類型的值");
+
+            case BETWEEN:
+                if (value instanceof Object[] && ((Object[]) value).length == 2) {
+                    Object[] range = (Object[]) value;
+                    return basePath.getComparable(fieldName, Comparable.class)
+                        .between((Comparable) range[0], (Comparable) range[1]);
+                }
+                throw new IllegalArgumentException("BETWEEN 運算子需要包含兩個元素的陣列");
 
             case IS_NULL:
                 return basePath.get(fieldName).isNull();

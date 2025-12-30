@@ -21,6 +21,10 @@ public enum Operator {
     LIKE("LIKE"),
     /** 包含於 */
     IN("IN"),
+    /** 不包含於 */
+    NOT_IN("NOT IN"),
+    /** 範圍 (介於) */
+    BETWEEN("BETWEEN"),
     /** 為空 */
     IS_NULL("IS NULL"),
     /** 不為空 */

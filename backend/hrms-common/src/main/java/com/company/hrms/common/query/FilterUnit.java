@@ -56,6 +56,23 @@ public class FilterUnit implements Serializable {
     }
 
     /**
+     * 建立 NOT IN 條件
+     */
+    public static FilterUnit notIn(String field, Object... values) {
+        return new FilterUnit(field, Operator.NOT_IN, values);
+    }
+
+    /**
+     * 建立 BETWEEN 條件
+     * @param field 欄位名稱
+     * @param start 起始值 (包含)
+     * @param end 結束值 (包含)
+     */
+    public static FilterUnit between(String field, Object start, Object end) {
+        return new FilterUnit(field, Operator.BETWEEN, new Object[]{start, end});
+    }
+
+    /**
      * 建立 IS NULL 條件
      */
     public static FilterUnit isNull(String field) {

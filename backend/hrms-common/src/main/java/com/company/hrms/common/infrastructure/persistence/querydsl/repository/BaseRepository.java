@@ -1,8 +1,21 @@
 package com.company.hrms.common.infrastructure.persistence.querydsl.repository;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.company.hrms.common.infrastructure.persistence.TableMeta;
 import com.company.hrms.common.infrastructure.persistence.querydsl.engine.AggregateQueryEngine;
 import com.company.hrms.common.infrastructure.persistence.querydsl.engine.UltimateQueryEngine;
+import com.company.hrms.common.query.Condition;
 import com.company.hrms.common.query.GroupByClause;
 import com.company.hrms.common.query.QueryGroup;
 import com.querydsl.core.Tuple;
@@ -11,27 +24,21 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * 基礎倉庫實作
  * 整合 UltimateQueryEngine 與 AggregateQueryEngine
- * 實作 IQueryRepository、ICommandRepository、ICommandBatchRepository、IAggregateRepository
+ * 實作
+ * IQueryRepository、ICommandRepository、ICommandBatchRepository、IAggregateRepository
  *
- * <p>使用範例:</p>
+ * <p>
+ * 使用範例:
+ * </p>
+ * 
  * <pre>
  * public class EmployeeRepository extends BaseRepository&lt;Employee, String&gt; {
  *
@@ -45,10 +52,10 @@ import java.util.stream.Collectors;
  * @param <ID> 主鍵類型
  */
 public abstract class BaseRepository<T, ID> implements
-    IQueryRepository<T, ID>,
-    ICommandRepository<T, ID>,
-    ICommandBatchRepository<T>,
-    IAggregateRepository<T> {
+        IQueryRepository<T, ID>,
+        ICommandRepository<T, ID>,
+        ICommandBatchRepository<T>,
+        IAggregateRepository<T> {
 
     @PersistenceContext
     protected EntityManager em;
@@ -61,7 +68,27 @@ public abstract class BaseRepository<T, ID> implements
         this.clazz = clazz;
     }
 
-    // ==================== IQueryRepository 實作 ====================
+    // ==================== IQueryRepository 實作 (Condition 方式) ====================
+
+    @Override
+    public <C> Page<T> findPage(Condition<C> condition) {
+        QueryGroup group = condition.toQueryGroup();
+        return findPage(group, condition.toPageable());
+    }
+
+    @Override
+    public <C> List<T> findAll(Condition<C> condition) {
+        QueryGroup group = condition.toQueryGroup();
+        return findAll(group);
+    }
+
+    @Override
+    public <C> Optional<T> findOne(Condition<C> condition) {
+        QueryGroup group = condition.toQueryGroup();
+        return findOne(group);
+    }
+
+    // ==================== IQueryRepository 實作 (QueryGroup 方式) ====================
 
     @Override
     public Page<T> findPage(QueryGroup group, Pageable pageable) {
@@ -72,13 +99,13 @@ public abstract class BaseRepository<T, ID> implements
         long total;
         if (countPredicate != null) {
             total = factory.select(countEngine.getEntityPath().count())
-                .from(countEngine.getEntityPath())
-                .where(countPredicate)
-                .fetchOne();
+                    .from(countEngine.getEntityPath())
+                    .where(countPredicate)
+                    .fetchOne();
         } else {
             total = factory.select(countEngine.getEntityPath().count())
-                .from(countEngine.getEntityPath())
-                .fetchOne();
+                    .from(countEngine.getEntityPath())
+                    .fetchOne();
         }
 
         // 若無資料則直接返回空頁
@@ -99,9 +126,9 @@ public abstract class BaseRepository<T, ID> implements
         applySorting(fetchQuery, fetchEngine.getEntityPath(), pageable.getSort());
 
         List<T> content = fetchQuery
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
 
         return new PageImpl<>(content, pageable, total);
     }
@@ -115,13 +142,13 @@ public abstract class BaseRepository<T, ID> implements
         long total;
         if (countPredicate != null) {
             total = countEngine.getQuery()
-                .select(countEngine.getEntityPath().countDistinct())
-                .where(countPredicate)
-                .fetchOne();
+                    .select(countEngine.getEntityPath().countDistinct())
+                    .where(countPredicate)
+                    .fetchOne();
         } else {
             total = countEngine.getQuery()
-                .select(countEngine.getEntityPath().countDistinct())
-                .fetchOne();
+                    .select(countEngine.getEntityPath().countDistinct())
+                    .fetchOne();
         }
 
         if (total == 0) {
@@ -141,9 +168,9 @@ public abstract class BaseRepository<T, ID> implements
         applySorting(fetchQuery, fetchEngine.getEntityPath(), pageable.getSort());
 
         List<T> content = fetchQuery
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
 
         return new PageImpl<>(content, pageable, total);
     }
@@ -182,13 +209,13 @@ public abstract class BaseRepository<T, ID> implements
 
         if (predicate != null) {
             return factory.select(engine.getEntityPath().count())
-                .from(engine.getEntityPath())
-                .where(predicate)
-                .fetchOne();
+                    .from(engine.getEntityPath())
+                    .where(predicate)
+                    .fetchOne();
         } else {
             return factory.select(engine.getEntityPath().count())
-                .from(engine.getEntityPath())
-                .fetchOne();
+                    .from(engine.getEntityPath())
+                    .fetchOne();
         }
     }
 
@@ -260,7 +287,7 @@ public abstract class BaseRepository<T, ID> implements
         TableMeta meta = clazz.getAnnotation(TableMeta.class);
         if (meta == null) {
             throw new IllegalStateException("Entity " + clazz.getSimpleName()
-                + " 必須標註 @TableMeta 才能使用 saveAllNative");
+                    + " 必須標註 @TableMeta 才能使用 saveAllNative");
         }
 
         String tableName = meta.name();
@@ -270,7 +297,7 @@ public abstract class BaseRepository<T, ID> implements
         // 建構 INSERT 語句的欄位部分
         String columnClause = String.join(", ", columns);
         String placeholders = String.join(", ",
-            Collections.nCopies(columns.length, "?"));
+                Collections.nCopies(columns.length, "?"));
 
         // 分批處理
         for (int i = 0; i < entities.size(); i += batchSize) {
@@ -278,8 +305,8 @@ public abstract class BaseRepository<T, ID> implements
 
             // 建構多值 INSERT 語句
             String valuesClauses = batch.stream()
-                .map(e -> "(" + placeholders + ")")
-                .collect(Collectors.joining(", "));
+                    .map(e -> "(" + placeholders + ")")
+                    .collect(Collectors.joining(", "));
 
             String sql = "INSERT INTO " + tableName + " (" + columnClause + ") VALUES " + valuesClauses;
 
@@ -318,7 +345,7 @@ public abstract class BaseRepository<T, ID> implements
     public <R> List<R> aggregateToDto(QueryGroup where, GroupByClause groupBy, Class<R> dtoClass) {
         // 此方法需要根據 DTO 類別的建構子進行映射
         // 暫時使用 Tuple 並透過反射轉換
-        List<Tuple> tuples = aggregate(where, groupBy);
+        // List<Tuple> tuples = aggregate(where, groupBy);
 
         // TODO: 實作 Tuple 到 DTO 的轉換邏輯
         throw new UnsupportedOperationException("aggregateToDto 尚未實作，請使用 aggregate 方法並手動轉換");
@@ -329,17 +356,17 @@ public abstract class BaseRepository<T, ID> implements
     /**
      * 套用 Spring Data 的 Sort 物件到 Querydsl 查詢
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     private void applySorting(JPAQuery<T> query, PathBuilder<T> entityPath, Sort sort) {
         if (sort == null || sort.isUnsorted()) {
             return;
         }
         for (Sort.Order order : sort) {
-            com.querydsl.core.types.dsl.ComparableExpression sortPath =
-                entityPath.getComparable(order.getProperty(), Comparable.class);
+            com.querydsl.core.types.dsl.ComparableExpression sortPath = entityPath.getComparable(order.getProperty(),
+                    Comparable.class);
             OrderSpecifier<?> orderSpecifier = order.isAscending()
-                ? sortPath.asc()
-                : sortPath.desc();
+                    ? sortPath.asc()
+                    : sortPath.desc();
             query.orderBy(orderSpecifier);
         }
     }

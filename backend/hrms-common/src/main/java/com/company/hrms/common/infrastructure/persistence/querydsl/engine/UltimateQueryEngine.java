@@ -1,5 +1,10 @@
 package com.company.hrms.common.infrastructure.persistence.querydsl.engine;
 
+import java.beans.Introspector;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.company.hrms.common.query.FilterUnit;
 import com.company.hrms.common.query.LogicalOp;
 import com.company.hrms.common.query.Operator;
@@ -11,17 +16,15 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import java.beans.Introspector;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * 通用查詢引擎
  * 將 QueryGroup 轉換為 Querydsl BooleanExpression
  * 支援自動 JOIN 偵測與嵌套路徑解析
  *
- * <p>使用範例:</p>
+ * <p>
+ * 使用範例:
+ * </p>
+ * 
  * <pre>
  * UltimateQueryEngine&lt;Employee&gt; engine = new UltimateQueryEngine&lt;&gt;(factory, Employee.class);
  * BooleanExpression predicate = engine.parse(queryGroup);
@@ -132,7 +135,7 @@ public class UltimateQueryEngine<T> {
     /**
      * 根據運算子類型建立對應的 Querydsl 謂詞
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "rawtypes" })
     private BooleanExpression createPredicate(PathBuilder<?> path, String fieldName, Operator op, Object value) {
         switch (op) {
             case EQ:
@@ -163,6 +166,22 @@ public class UltimateQueryEngine<T> {
                     return path.get(fieldName).in((Object[]) value);
                 }
                 throw new IllegalArgumentException("IN 運算子需要 Collection 或 Array 類型的值");
+
+            case NOT_IN:
+                if (value instanceof Collection) {
+                    return path.get(fieldName).notIn((Collection<?>) value);
+                } else if (value instanceof Object[]) {
+                    return path.get(fieldName).notIn((Object[]) value);
+                }
+                throw new IllegalArgumentException("NOT_IN 運算子需要 Collection 或 Array 類型的值");
+
+            case BETWEEN:
+                if (value instanceof Object[] && ((Object[]) value).length == 2) {
+                    Object[] range = (Object[]) value;
+                    return path.getComparable(fieldName, Comparable.class)
+                        .between((Comparable) range[0], (Comparable) range[1]);
+                }
+                throw new IllegalArgumentException("BETWEEN 運算子需要包含兩個元素的陣列");
 
             case IS_NULL:
                 return path.get(fieldName).isNull();

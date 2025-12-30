@@ -1,5 +1,6 @@
 package com.company.hrms.common.infrastructure.persistence.querydsl.repository;
 
+import com.company.hrms.common.query.Condition;
 import com.company.hrms.common.query.QueryGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,12 +10,74 @@ import java.util.Optional;
 
 /**
  * 查詢倉庫介面
- * 提供基於 QueryGroup 的查詢操作
+ * 提供基於 QueryGroup 或 Condition 的查詢操作
+ *
+ * <p>支援兩種使用方式:</p>
+ *
+ * <h3>方式一：使用 QueryGroup (手動建構)</h3>
+ * <pre>
+ * QueryGroup group = QueryBuilder.where()
+ *     .eq("status", "ACTIVE")
+ *     .like("name", "John")
+ *     .build();
+ * Page&lt;Employee&gt; result = repository.findPage(group, pageable);
+ * </pre>
+ *
+ * <h3>方式二：使用 Condition (註解式宣告)</h3>
+ * <pre>
+ * // 定義條件物件
+ * public class EmployeeSearchCondition {
+ *     &#64;EQ
+ *     private String status;
+ *
+ *     &#64;LIKE
+ *     private String name;
+ * }
+ *
+ * // 使用
+ * EmployeeSearchCondition cond = new EmployeeSearchCondition();
+ * cond.setStatus("ACTIVE");
+ * cond.setName("John");
+ *
+ * Condition&lt;EmployeeSearchCondition&gt; condition = Condition.of(cond).page(0).size(20);
+ * Page&lt;Employee&gt; result = repository.findPage(condition);
+ * </pre>
  *
  * @param <T>  實體類型
  * @param <ID> 主鍵類型
  */
 public interface IQueryRepository<T, ID> {
+
+    // ==================== Condition 方式 (推薦) ====================
+
+    /**
+     * 分頁查詢 (使用 Condition)
+     *
+     * @param condition 條件包裝器 (包含查詢條件與分頁參數)
+     * @param <C>       條件 DTO 類型
+     * @return 分頁結果
+     */
+    <C> Page<T> findPage(Condition<C> condition);
+
+    /**
+     * 查詢所有符合條件的資料 (使用 Condition)
+     *
+     * @param condition 條件包裝器
+     * @param <C>       條件 DTO 類型
+     * @return 結果列表
+     */
+    <C> List<T> findAll(Condition<C> condition);
+
+    /**
+     * 查詢單筆資料 (使用 Condition)
+     *
+     * @param condition 條件包裝器
+     * @param <C>       條件 DTO 類型
+     * @return Optional 包裝的結果
+     */
+    <C> Optional<T> findOne(Condition<C> condition);
+
+    // ==================== QueryGroup 方式 ====================
 
     /**
      * 分頁查詢
