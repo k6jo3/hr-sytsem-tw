@@ -63,4 +63,27 @@ public class Shift extends AggregateRoot<ShiftId> {
         // But usually standard shift start < end. For robustness assuming same day for
         // now or logic handles cross-day.
     }
+
+    private Shift(ShiftId id, String name, ShiftType type,
+            LocalTime workStartTime, LocalTime workEndTime,
+            LocalTime breakStartTime, LocalTime breakEndTime,
+            int lateToleranceMinutes, int earlyLeaveToleranceMinutes) {
+        super(id);
+        this.name = name;
+        this.type = type;
+        this.workStartTime = workStartTime;
+        this.workEndTime = workEndTime;
+        this.breakStartTime = breakStartTime;
+        this.breakEndTime = breakEndTime;
+        this.lateToleranceMinutes = lateToleranceMinutes;
+        this.earlyLeaveToleranceMinutes = earlyLeaveToleranceMinutes;
+    }
+
+    public static Shift reconstitute(ShiftId id, String name, ShiftType type,
+            LocalTime workStartTime, LocalTime workEndTime,
+            LocalTime breakStartTime, LocalTime breakEndTime,
+            int lateToleranceMinutes, int earlyLeaveToleranceMinutes) {
+        return new Shift(id, name, type, workStartTime, workEndTime,
+                breakStartTime, breakEndTime, lateToleranceMinutes, earlyLeaveToleranceMinutes);
+    }
 }

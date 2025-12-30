@@ -75,4 +75,31 @@ public class LeaveApplication extends AggregateRoot<ApplicationId> {
             throw new IllegalArgumentException("End date cannot be before start date");
         }
     }
+
+    private LeaveApplication(ApplicationId id, String employeeId, LeaveTypeId leaveTypeId,
+            LocalDate startDate, LocalDate endDate,
+            LeavePeriodType startPeriod, LeavePeriodType endPeriod,
+            String reason, String proofAttachmentUrl,
+            ApplicationStatus status, String rejectionReason) {
+        super(id);
+        this.employeeId = employeeId;
+        this.leaveTypeId = leaveTypeId;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.startPeriod = startPeriod;
+        this.endPeriod = endPeriod;
+        this.reason = reason;
+        this.proofAttachmentUrl = proofAttachmentUrl;
+        this.status = status;
+        this.rejectionReason = rejectionReason;
+    }
+
+    public static LeaveApplication reconstitute(ApplicationId id, String employeeId, LeaveTypeId leaveTypeId,
+            LocalDate startDate, LocalDate endDate,
+            LeavePeriodType startPeriod, LeavePeriodType endPeriod,
+            String reason, String proofAttachmentUrl,
+            ApplicationStatus status, String rejectionReason) {
+        return new LeaveApplication(id, employeeId, leaveTypeId, startDate, endDate,
+                startPeriod, endPeriod, reason, proofAttachmentUrl, status, rejectionReason);
+    }
 }

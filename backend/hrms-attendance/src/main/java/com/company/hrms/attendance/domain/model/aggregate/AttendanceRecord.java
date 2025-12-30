@@ -93,4 +93,29 @@ public class AttendanceRecord extends AggregateRoot<RecordId> {
         this.lateMinutes = 0;
         this.earlyLeaveMinutes = 0;
     }
+
+    private AttendanceRecord(RecordId id, String employeeId, LocalDate date,
+            LocalDateTime checkInTime, LocalDateTime checkOutTime,
+            boolean isLate, int lateMinutes, boolean isEarlyLeave, int earlyLeaveMinutes,
+            AnomalyType anomalyType, boolean isCorrected) {
+        super(id);
+        this.employeeId = employeeId;
+        this.date = date;
+        this.checkInTime = checkInTime;
+        this.checkOutTime = checkOutTime;
+        this.isLate = isLate;
+        this.lateMinutes = lateMinutes;
+        this.isEarlyLeave = isEarlyLeave;
+        this.earlyLeaveMinutes = earlyLeaveMinutes;
+        this.anomalyType = anomalyType;
+        this.isCorrected = isCorrected;
+    }
+
+    public static AttendanceRecord reconstitute(RecordId id, String employeeId, LocalDate date,
+            LocalDateTime checkInTime, LocalDateTime checkOutTime,
+            boolean isLate, int lateMinutes, boolean isEarlyLeave, int earlyLeaveMinutes,
+            AnomalyType anomalyType, boolean isCorrected) {
+        return new AttendanceRecord(id, employeeId, date, checkInTime, checkOutTime,
+                isLate, lateMinutes, isEarlyLeave, earlyLeaveMinutes, anomalyType, isCorrected);
+    }
 }

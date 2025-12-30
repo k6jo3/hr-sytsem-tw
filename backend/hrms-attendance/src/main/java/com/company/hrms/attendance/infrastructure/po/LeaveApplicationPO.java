@@ -14,6 +14,10 @@ public class LeaveApplicationPO {
     private LocalDate endDate;
     private String status;
     private String reason;
+    private String startPeriod;
+    private String endPeriod;
+    private String proofAttachmentUrl;
+    private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;

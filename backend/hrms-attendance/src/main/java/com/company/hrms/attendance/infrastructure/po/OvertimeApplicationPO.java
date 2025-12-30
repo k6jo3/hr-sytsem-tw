@@ -14,6 +14,7 @@ public class OvertimeApplicationPO {
     private String status;
     private String reason;
     private String overtimeType;
+    private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;

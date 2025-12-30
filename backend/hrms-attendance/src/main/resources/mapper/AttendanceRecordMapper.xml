@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.hrms.attendance.infrastructure.mapper.AttendanceRecordMapper">
+
+    <resultMap id="AttendanceRecordResultMap" type="com.company.hrms.attendance.infrastructure.po.AttendanceRecordPO">
+        <id column="id" property="id"/>
+        <result column="employee_id" property="employeeId"/>
+        <result column="date" property="date"/>
+        <result column="check_in_time" property="checkInTime"/>
+        <result column="check_out_time" property="checkOutTime"/>
+        <result column="status" property="status"/>
+        <result column="is_late" property="isLate"/>
+        <result column="late_minutes" property="lateMinutes"/>
+        <result column="is_early_leave" property="isEarlyLeave"/>
+        <result column="early_leave_minutes" property="earlyLeaveMinutes"/>
+        <result column="anomaly_type" property="anomalyType"/>
+        <result column="is_corrected" property="isCorrected"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, employee_id, date, check_in_time, check_out_time, status, 
+        is_late, late_minutes, is_early_leave, early_leave_minutes, anomaly_type, is_corrected,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="selectById" resultMap="AttendanceRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM attendance_records
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByEmployeeIdAndDate" resultMap="AttendanceRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM attendance_records
+        WHERE employee_id = #{employeeId} AND date = #{date}
+    </select>
+
+    <select id="selectByEmployeeIdAndDateRange" resultMap="AttendanceRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM attendance_records
+        WHERE employee_id = #{employeeId} AND date BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO attendance_records (
+            id, employee_id, date, check_in_time, check_out_time, status,
+            is_late, late_minutes, is_early_leave, early_leave_minutes, anomaly_type, is_corrected,
+            created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{id}, #{employeeId}, #{date}, #{checkInTime}, #{checkOutTime}, #{status},
+            #{isLate}, #{lateMinutes}, #{isEarlyLeave}, #{earlyLeaveMinutes}, #{anomalyType}, #{isCorrected},
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE attendance_records SET
+            employee_id = #{employeeId},
+            date = #{date},
+            check_in_time = #{checkInTime},
+            check_out_time = #{checkOutTime},
+            status = #{status},
+            is_late = #{isLate},
+            late_minutes = #{lateMinutes},
+            is_early_leave = #{isEarlyLeave},
+            early_leave_minutes = #{earlyLeaveMinutes},
+            anomaly_type = #{anomalyType},
+            is_corrected = #{isCorrected},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM attendance_records WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.hrms.attendance.infrastructure.mapper.ShiftMapper">
+
+    <resultMap id="ShiftResultMap" type="com.company.hrms.attendance.infrastructure.po.ShiftPO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="break_start_time" property="breakStartTime"/>
+        <result column="break_end_time" property="breakEndTime"/>
+        <result column="late_tolerance_minutes" property="lateToleranceMinutes"/>
+        <result column="early_leave_tolerance_minutes" property="earlyLeaveToleranceMinutes"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, type, start_time, end_time, 
+        break_start_time, break_end_time, late_tolerance_minutes, early_leave_tolerance_minutes,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="selectById" resultMap="ShiftResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM shifts
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="ShiftResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM shifts
+    </select>
+
+    <insert id="insert">
+        INSERT INTO shifts (
+            id, name, type, start_time, end_time, 
+            break_start_time, break_end_time, late_tolerance_minutes, early_leave_tolerance_minutes,
+            created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{id}, #{name}, #{type}, #{startTime}, #{endTime}, 
+            #{breakStartTime}, #{breakEndTime}, #{lateToleranceMinutes}, #{earlyLeaveToleranceMinutes},
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE shifts SET
+            name = #{name},
+            type = #{type},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            break_start_time = #{breakStartTime},
+            break_end_time = #{breakEndTime},
+            late_tolerance_minutes = #{lateToleranceMinutes},
+            early_leave_tolerance_minutes = #{earlyLeaveToleranceMinutes},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM shifts WHERE id = #{id}
+    </delete>
+
+</mapper>

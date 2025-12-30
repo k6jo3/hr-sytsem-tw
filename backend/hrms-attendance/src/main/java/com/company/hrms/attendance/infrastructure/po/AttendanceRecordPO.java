@@ -13,6 +13,12 @@ public class AttendanceRecordPO {
     private LocalDateTime checkInTime;
     private LocalDateTime checkOutTime;
     private String status;
+    private Boolean isLate;
+    private Integer lateMinutes;
+    private Boolean isEarlyLeave;
+    private Integer earlyLeaveMinutes;
+    private String anomalyType;
+    private Boolean isCorrected;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;

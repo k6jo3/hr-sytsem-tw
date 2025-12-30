@@ -49,4 +49,23 @@ public class OvertimeApplication extends AggregateRoot<OvertimeId> {
         this.status = ApplicationStatus.REJECTED;
         this.rejectionReason = reason;
     }
+
+    private OvertimeApplication(OvertimeId id, String employeeId, LocalDate date,
+            Double hours, OvertimeType overtimeType, String reason,
+            ApplicationStatus status, String rejectionReason) {
+        super(id);
+        this.employeeId = employeeId;
+        this.date = date;
+        this.hours = hours;
+        this.overtimeType = overtimeType;
+        this.reason = reason;
+        this.status = status;
+        this.rejectionReason = rejectionReason;
+    }
+
+    public static OvertimeApplication reconstitute(OvertimeId id, String employeeId, LocalDate date,
+            Double hours, OvertimeType overtimeType, String reason,
+            ApplicationStatus status, String rejectionReason) {
+        return new OvertimeApplication(id, employeeId, date, hours, overtimeType, reason, status, rejectionReason);
+    }
 }

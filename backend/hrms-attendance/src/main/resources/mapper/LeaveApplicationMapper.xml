@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.hrms.attendance.infrastructure.mapper.LeaveApplicationMapper">
+
+    <resultMap id="LeaveApplicationResultMap" type="com.company.hrms.attendance.infrastructure.po.LeaveApplicationPO">
+        <id column="id" property="id"/>
+        <result column="employee_id" property="employeeId"/>
+        <result column="leave_type_id" property="leaveTypeId"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="status" property="status"/>
+        <result column="reason" property="reason"/>
+        <result column="start_period" property="startPeriod"/>
+        <result column="end_period" property="endPeriod"/>
+        <result column="proof_attachment_url" property="proofAttachmentUrl"/>
+        <result column="rejection_reason" property="rejectionReason"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, employee_id, leave_type_id, start_date, end_date, status, reason,
+        start_period, end_period, proof_attachment_url, rejection_reason,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="selectById" resultMap="LeaveApplicationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM leave_applications
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByEmployeeId" resultMap="LeaveApplicationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM leave_applications
+        WHERE employee_id = #{employeeId}
+        ORDER BY start_date DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="LeaveApplicationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM leave_applications
+        WHERE status = #{status}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByEmployeeIdAndDateRange" resultMap="LeaveApplicationResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM leave_applications
+        WHERE employee_id = #{employeeId}
+          AND start_date &gt;= #{startDate}
+          AND end_date &lt;= #{endDate}
+        ORDER BY start_date
+    </select>
+
+    <insert id="insert">
+        INSERT INTO leave_applications (
+            id, employee_id, leave_type_id, start_date, end_date, status, reason,
+            start_period, end_period, proof_attachment_url, rejection_reason,
+            created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{id}, #{employeeId}, #{leaveTypeId}, #{startDate}, #{endDate}, #{status}, #{reason},
+            #{startPeriod}, #{endPeriod}, #{proofAttachmentUrl}, #{rejectionReason},
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE leave_applications SET
+            employee_id = #{employeeId},
+            leave_type_id = #{leaveTypeId},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            status = #{status},
+            reason = #{reason},
+            start_period = #{startPeriod},
+            end_period = #{endPeriod},
+            proof_attachment_url = #{proofAttachmentUrl},
+            rejection_reason = #{rejectionReason},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM leave_applications WHERE id = #{id}
+    </delete>
+
+</mapper>
