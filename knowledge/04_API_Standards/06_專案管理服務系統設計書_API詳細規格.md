@@ -175,6 +175,23 @@
 | Service | `UpdateCustomerServiceImpl` |
 | 權限 | `customer:manage` |
 
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 修改客戶基本資料、聯絡人、狀態等 |
+| 使用者 | HR、專案管理人員 |
+| 頁面 | HR06-P01 客戶管理頁面、HR06-M01 客戶編輯對話框 |
+
+**業務邏輯**
+
+| 步驟 | 處理邏輯 |
+|:---|:---|
+| 1 | 驗證客戶存在 |
+| 2 | 驗證客戶代碼若有變更需唯一 |
+| 3 | 更新客戶資料 |
+| 4 | 記錄更新時間 |
+
 **Path Parameters**
 
 | 參數 | 類型 | 必填 | 說明 |
@@ -187,10 +204,32 @@
 {
   "customerName": "XX銀行股份有限公司 (更新)",
   "industry": "金融業",
-  "contacts": [...],
+  "contacts": [
+    {
+      "contactId": "contact-001",
+      "name": "王小明",
+      "title": "資訊部經理",
+      "phone": "02-12345678",
+      "email": "wang@xxbank.com",
+      "isPrimary": true
+    }
+  ],
+  "address": "台北市信義區信義路五段7號",
+  "phoneNumber": "02-12345678",
+  "email": "contact@xxbank.com",
   "status": "ACTIVE"
 }
 ```
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 |
+|:---|:---:|:---:|:---|:---|
+| customerName | string | ❌ | 最長 255 字元 | 客戶名稱 |
+| industry | string | ❌ | 最長 100 字元 | 產業別 |
+| contacts | array | ❌ | - | 聯絡人列表 |
+| address | string | ❌ | - | 地址 |
+| phoneNumber | string | ❌ | 最長 50 字元 | 電話 |
+| email | string | ❌ | Email 格式 | 電子郵件 |
+| status | string | ❌ | `ACTIVE`, `INACTIVE` | 客戶狀態 |
 
 **Response Body**
 
@@ -204,6 +243,14 @@
   }
 }
 ```
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_CUSTOMER_NOT_FOUND` | 客戶不存在 | 確認客戶 ID |
+| 400 | `PRJ_CUSTOMER_CODE_DUPLICATE` | 客戶代碼已存在 | 使用其他代碼 |
+| 400 | `PRJ_INVALID_EMAIL` | Email 格式錯誤 | 確認 Email 格式 |
 
 ---
 
@@ -430,6 +477,24 @@
 | Service | `UpdateProjectServiceImpl` |
 | 權限 | `project:manage` |
 
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 修改專案基本資訊、預算、時程等 |
+| 使用者 | 專案經理、管理人員 |
+| 頁面 | HR06-P04 專案建立/編輯頁面 |
+
+**業務邏輯**
+
+| 步驟 | 處理邏輯 |
+|:---|:---|
+| 1 | 驗證專案存在 |
+| 2 | 驗證專案狀態允許編輯 (非 COMPLETED/CANCELLED) |
+| 3 | 驗證時程 (結束日 >= 開始日) |
+| 4 | 驗證專案經理存在 (若有變更) |
+| 5 | 更新專案資料 |
+
 **Path Parameters**
 
 | 參數 | 類型 | 必填 | 說明 |
@@ -441,12 +506,24 @@
 ```json
 {
   "projectName": "XX銀行核心系統開發 (Phase 1)",
+  "plannedStartDate": "2025-01-01",
   "plannedEndDate": "2026-03-31",
   "budgetAmount": 12000000,
   "budgetHours": 3000,
+  "projectManager": "emp-001",
   "description": "專案範圍擴大"
 }
 ```
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 |
+|:---|:---:|:---:|:---|:---|
+| projectName | string | ❌ | 最長 255 字元 | 專案名稱 |
+| plannedStartDate | string | ❌ | YYYY-MM-DD | 計畫開始日 |
+| plannedEndDate | string | ❌ | YYYY-MM-DD | 計畫結束日 |
+| budgetAmount | number | ❌ | >= 0 | 預算金額 |
+| budgetHours | number | ❌ | >= 0 | 預算工時 |
+| projectManager | string | ❌ | UUID 格式 | 專案經理 ID |
+| description | string | ❌ | - | 專案說明 |
 
 **Response Body**
 
@@ -461,6 +538,15 @@
   }
 }
 ```
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_NOT_FOUND` | 專案不存在 | 確認專案 ID |
+| 400 | `PRJ_INVALID_DATES` | 結束日早於開始日 | 修正日期範圍 |
+| 400 | `PRJ_CANNOT_EDIT` | 已結案/取消的專案無法編輯 | 確認專案狀態 |
+| 404 | `EMP_NOT_FOUND` | 專案經理不存在 | 確認員工 ID |
 
 ---
 
@@ -572,6 +658,14 @@
 }
 ```
 
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_NOT_FOUND` | 專案不存在 | 確認專案 ID |
+| 400 | `PRJ_INVALID_STATUS_TRANSITION` | 只有進行中的專案可以結案 | 確認專案狀態 |
+| 400 | `PRJ_HAS_INCOMPLETE_TASKS` | 仍有未完成的工項 | 完成或關閉所有工項後再結案 |
+
 ---
 
 ### 3.5 暫停專案
@@ -593,6 +687,21 @@
 | 使用者 | 專案經理 |
 | 前置條件 | 專案狀態為 IN_PROGRESS |
 
+**業務邏輯**
+
+| 步驟 | 處理邏輯 |
+|:---|:---|
+| 1 | 驗證專案存在 |
+| 2 | 驗證專案狀態為 IN_PROGRESS |
+| 3 | 更新狀態為 ON_HOLD |
+| 4 | 記錄暫停原因與時間 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| id | string | ✅ | 專案 ID |
+
 **Request Body**
 
 ```json
@@ -600,6 +709,10 @@
   "reason": "客戶要求暫停，等待預算審批"
 }
 ```
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 |
+|:---|:---:|:---:|:---|:---|
+| reason | string | ✅ | 最長 500 字元 | 暫停原因 |
 
 **Response Body**
 
@@ -609,10 +722,19 @@
   "data": {
     "projectId": "prj-001",
     "status": "ON_HOLD",
-    "holdReason": "客戶要求暫停，等待預算審批"
+    "holdReason": "客戶要求暫停，等待預算審批",
+    "holdDate": "2025-06-01"
   }
 }
 ```
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_NOT_FOUND` | 專案不存在 | 確認專案 ID |
+| 400 | `PRJ_INVALID_STATUS_TRANSITION` | 只有進行中的專案可以暫停 | 確認專案狀態 |
+| 400 | `PRJ_REASON_REQUIRED` | 暫停原因為必填 | 填寫暫停原因 |
 
 ---
 
@@ -853,6 +975,25 @@
 | Service | `RemoveProjectMemberServiceImpl` |
 | 權限 | `project:member:manage` |
 
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 將成員從專案團隊中移除 |
+| 使用者 | 專案經理 |
+| 頁面 | HR06-P03 專案詳情頁面 (成員分頁) |
+| 觸發事件 | `ProjectMemberRemoved` |
+
+**業務邏輯**
+
+| 步驟 | 處理邏輯 |
+|:---|:---|
+| 1 | 驗證專案存在 |
+| 2 | 驗證成員存在於該專案中 |
+| 3 | 驗證專案經理不可自行移除 |
+| 4 | 設定成員離開日期 |
+| 5 | 發布 `ProjectMemberRemoved` 事件 (通知 Timesheet) |
+
 **Path Parameters**
 
 | 參數 | 類型 | 必填 | 說明 |
@@ -872,6 +1013,15 @@
   }
 }
 ```
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_NOT_FOUND` | 專案不存在 | 確認專案 ID |
+| 404 | `PRJ_MEMBER_NOT_FOUND` | 成員不存在於該專案 | 確認成員 ID |
+| 400 | `PRJ_CANNOT_REMOVE_PM` | 專案經理不可移除 | 先變更專案經理再移除 |
+| 400 | `PRJ_MEMBER_HAS_PENDING_TIMESHEET` | 成員有未結算的工時 | 先處理工時後再移除 |
 
 ---
 
@@ -977,6 +1127,25 @@
 | Service | `UpdateTaskServiceImpl` |
 | 權限 | `project:task:manage` |
 
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 修改工項名稱、說明、時程、工時、負責人等 |
+| 使用者 | 專案經理 |
+| 頁面 | HR06-P05 WBS 工項管理頁面、HR06-M03 工項編輯對話框 |
+| 觸發事件 | `TaskAssigned` (若負責人變更) |
+
+**業務邏輯**
+
+| 步驟 | 處理邏輯 |
+|:---|:---|
+| 1 | 驗證工項存在 |
+| 2 | 驗證工項所屬專案狀態允許編輯 |
+| 3 | 驗證時程 (結束日 >= 開始日) |
+| 4 | 若負責人變更，發布 `TaskAssigned` 事件 |
+| 5 | 更新工項資料 |
+
 **Path Parameters**
 
 | 參數 | 類型 | 必填 | 說明 |
@@ -989,11 +1158,21 @@
 {
   "taskName": "需求分析 (更新)",
   "description": "進行客戶需求訪談與分析，含原型設計",
+  "plannedStartDate": "2025-01-15",
   "plannedEndDate": "2025-03-15",
   "estimatedHours": 250,
   "assigneeId": "emp-003"
 }
 ```
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 |
+|:---|:---:|:---:|:---|:---|
+| taskName | string | ❌ | 最長 255 字元 | 工項名稱 |
+| description | string | ❌ | - | 工項說明 |
+| plannedStartDate | string | ❌ | YYYY-MM-DD | 計畫開始日 |
+| plannedEndDate | string | ❌ | YYYY-MM-DD | 計畫結束日 |
+| estimatedHours | number | ❌ | >= 0 | 預估工時 |
+| assigneeId | string | ❌ | UUID 格式 | 負責人 ID |
 
 **Response Body**
 
@@ -1007,6 +1186,15 @@
   }
 }
 ```
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_TASK_NOT_FOUND` | 工項不存在 | 確認工項 ID |
+| 400 | `PRJ_CANNOT_EDIT_TASK` | 工項所屬專案已結案/取消 | 確認專案狀態 |
+| 400 | `PRJ_INVALID_TASK_DATES` | 結束日早於開始日 | 修正日期範圍 |
+| 404 | `PRJ_ASSIGNEE_NOT_IN_PROJECT` | 負責人非專案成員 | 先將該員工加入專案 |
 
 ---
 
@@ -1069,6 +1257,15 @@
   }
 }
 ```
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_TASK_NOT_FOUND` | 工項不存在 | 確認工項 ID |
+| 400 | `PRJ_INVALID_PROGRESS` | 進度值必須在 0-100 之間 | 修正進度值 |
+| 400 | `PRJ_CANNOT_UPDATE_PROGRESS` | 工項所屬專案已結案/取消 | 確認專案狀態 |
+| 400 | `PRJ_PARENT_TASK_PROGRESS` | 父工項進度由子工項計算，無法直接修改 | 更新子工項進度 |
 
 ---
 
