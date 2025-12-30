@@ -58,6 +58,14 @@ public interface IUserRepository {
     List<User> findAll();
 
     /**
+     * 動態查詢 (支援 QueryGroup)
+     */
+    List<User> findByQuery(com.company.hrms.common.query.QueryGroup query,
+            org.springframework.data.domain.Pageable pageable);
+
+    long countByQuery(com.company.hrms.common.query.QueryGroup query);
+
+    /**
      * 儲存使用者
      * 
      * @param user 使用者

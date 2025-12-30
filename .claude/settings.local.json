@@ -13,7 +13,15 @@
       "Bash(done)",
       "Bash(grep:*)",
       "Bash(tree:*)",
-      "Bash(claude update:*)"
+      "Bash(claude update:*)",
+      "Bash(mvn test:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(git rm:*)",
+      "Bash(del /q \"D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-iam\\\\src\\\\main\\\\java\\\\com\\\\company\\\\hrms\\\\iam\\\\application\\\\service\\\\user\\\\DeleteUserServiceImpl.java\")",
+      "Bash(del /q \"D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-iam\\\\src\\\\main\\\\java\\\\com\\\\company\\\\hrms\\\\iam\\\\application\\\\service\\\\user\\\\task\\\\DeleteUserTask.java\")",
+      "Bash(del /q \"D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-iam\\\\src\\\\test\\\\java\\\\com\\\\company\\\\hrms\\\\iam\\\\application\\\\service\\\\user\\\\DeleteUserServiceImplTest.java\")",
+      "Bash(mvn clean test:*)",
+      "Bash(mvn clean install:*)"
     ]
   }
 }

@@ -5,6 +5,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.company.hrms.common.test.contract.BaseContractTest;
+import com.company.hrms.iam.api.request.permission.GetPermissionListRequest;
+import com.company.hrms.iam.api.request.role.GetRoleListRequest;
+import com.company.hrms.iam.api.request.user.GetUserListRequest;
+import com.company.hrms.iam.application.service.permission.assembler.PermissionQueryAssembler;
+import com.company.hrms.iam.application.service.role.assembler.RoleQueryAssembler;
+import com.company.hrms.iam.application.service.user.assembler.UserQueryAssembler;
 
 /**
  * IAM 服務合約測試
@@ -36,7 +42,7 @@ public class IamContractTest extends BaseContractTest {
     @DisplayName("使用者查詢合約 (User Query Contract)")
     class UserQueryContractTests {
 
-        private final com.company.hrms.iam.application.service.user.assembler.UserQueryAssembler userQueryAssembler = new com.company.hrms.iam.application.service.user.assembler.UserQueryAssembler();
+        private final UserQueryAssembler userQueryAssembler = new UserQueryAssembler();
 
         @Test
         @DisplayName("IAM_U001: 查詢啟用中的使用者應包含正確過濾條件")
@@ -45,7 +51,7 @@ public class IamContractTest extends BaseContractTest {
             String contract = loadContractSpec("iam");
 
             // 2. 準備請求
-            var request = com.company.hrms.iam.api.request.user.GetUserListRequest.builder()
+            var request = GetUserListRequest.builder()
                     .status("ACTIVE")
                     .build();
 
@@ -60,7 +66,7 @@ public class IamContractTest extends BaseContractTest {
         @DisplayName("IAM_U002: 依帳號模糊查詢應包含 LIKE 條件")
         void searchByUsername_ShouldIncludeLikeFilter() throws Exception {
             String contract = loadContractSpec("iam");
-            var request = com.company.hrms.iam.api.request.user.GetUserListRequest.builder()
+            var request = GetUserListRequest.builder()
                     .username("admin")
                     .build();
 
@@ -73,7 +79,7 @@ public class IamContractTest extends BaseContractTest {
         @DisplayName("IAM_U003: 依角色查詢使用者應包含角色關聯")
         void searchByRole_ShouldIncludeRoleFilter() throws Exception {
             String contract = loadContractSpec("iam");
-            var request = com.company.hrms.iam.api.request.user.GetUserListRequest.builder()
+            var request = GetUserListRequest.builder()
                     .roleId("R001")
                     .build();
 
@@ -86,7 +92,7 @@ public class IamContractTest extends BaseContractTest {
         @DisplayName("IAM_U005: 依租戶查詢使用者")
         void searchByTenant_ShouldIncludeTenantFilter() throws Exception {
             String contract = loadContractSpec("iam");
-            var request = com.company.hrms.iam.api.request.user.GetUserListRequest.builder()
+            var request = GetUserListRequest.builder()
                     .tenantId("T001")
                     .build();
 
@@ -103,16 +109,63 @@ public class IamContractTest extends BaseContractTest {
     @DisplayName("角色查詢合約 (Role Query Contract)")
     class RoleQueryContractTests {
 
+        private final RoleQueryAssembler roleQueryAssembler = new RoleQueryAssembler();
+
         @Test
         @DisplayName("IAM_R001: 查詢所有啟用角色應包含正確過濾條件")
         void searchActiveRoles_ShouldIncludeCorrectFilters() throws Exception {
-            // TODO: 驗證 QueryGroup 必須包含: status = 'ACTIVE', is_deleted = 0
+            // 1. 載入合約
+            String contract = loadContractSpec("iam");
+
+            // 2. 準備請求
+            var request = GetRoleListRequest.builder()
+                    .status("ACTIVE")
+                    .build();
+
+            // 3. 執行轉換
+            var query = roleQueryAssembler.toQueryGroup(request);
+
+            // 4. 驗證合約
+            assertContract(query, contract, "IAM_R001");
+        }
+
+        @Test
+        @DisplayName("IAM_R002: 依名稱模糊查詢角色應包含 LIKE 條件")
+        void searchByName_ShouldIncludeLikeFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var request = GetRoleListRequest.builder()
+                    .name("管理")
+                    .build();
+
+            var query = roleQueryAssembler.toQueryGroup(request);
+
+            assertContract(query, contract, "IAM_R002");
         }
 
         @Test
         @DisplayName("IAM_R003: 查詢系統角色應包含類型過濾")
         void searchSystemRoles_ShouldIncludeTypeFilter() throws Exception {
-            // TODO: 驗證 QueryGroup 必須包含: type = 'SYSTEM', is_deleted = 0
+            String contract = loadContractSpec("iam");
+            var request = GetRoleListRequest.builder()
+                    .type("SYSTEM")
+                    .build();
+
+            var query = roleQueryAssembler.toQueryGroup(request);
+
+            assertContract(query, contract, "IAM_R003");
+        }
+
+        @Test
+        @DisplayName("IAM_R005: 依租戶查詢角色")
+        void searchByTenant_ShouldIncludeTenantFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var request = GetRoleListRequest.builder()
+                    .tenantId("T001")
+                    .build();
+
+            var query = roleQueryAssembler.toQueryGroup(request);
+
+            assertContract(query, contract, "IAM_R005");
         }
     }
 
@@ -123,16 +176,62 @@ public class IamContractTest extends BaseContractTest {
     @DisplayName("權限查詢合約 (Permission Query Contract)")
     class PermissionQueryContractTests {
 
+        private final PermissionQueryAssembler permissionQueryAssembler = new PermissionQueryAssembler();
+
         @Test
         @DisplayName("IAM_P001: 查詢所有權限應包含刪除標記過濾")
         void searchAllPermissions_ShouldIncludeDeleteFilter() throws Exception {
-            // TODO: 驗證 QueryGroup 必須包含: is_deleted = 0
+            // 1. 載入合約
+            String contract = loadContractSpec("iam");
+
+            // 2. 準備請求 (空請求)
+            var request = GetPermissionListRequest.builder()
+                    .build();
+
+            // 3. 執行轉換
+            var query = permissionQueryAssembler.toQueryGroup(request);
+
+            // 4. 驗證合約
+            assertContract(query, contract, "IAM_P001");
         }
 
         @Test
         @DisplayName("IAM_P002: 依模組查詢權限應包含模組過濾")
         void searchByModule_ShouldIncludeModuleFilter() throws Exception {
-            // TODO: 驗證 QueryGroup 必須包含: module = 'EMPLOYEE', is_deleted = 0
+            String contract = loadContractSpec("iam");
+            var request = GetPermissionListRequest.builder()
+                    .module("EMPLOYEE")
+                    .build();
+
+            var query = permissionQueryAssembler.toQueryGroup(request);
+
+            assertContract(query, contract, "IAM_P002");
+        }
+
+        @Test
+        @DisplayName("IAM_P003: 依類型查詢權限應包含類型過濾")
+        void searchByType_ShouldIncludeTypeFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var request = GetPermissionListRequest.builder()
+                    .type("MENU")
+                    .build();
+
+            var query = permissionQueryAssembler.toQueryGroup(request);
+
+            assertContract(query, contract, "IAM_P003");
+        }
+
+        @Test
+        @DisplayName("IAM_P004: 查詢角色的權限應包含角色關聯")
+        void searchByRole_ShouldIncludeRoleFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var request = GetPermissionListRequest.builder()
+                    .roleId("R001")
+                    .build();
+
+            var query = permissionQueryAssembler.toQueryGroup(request);
+
+            assertContract(query, contract, "IAM_P004");
         }
     }
 }

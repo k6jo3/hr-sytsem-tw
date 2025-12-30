@@ -48,6 +48,12 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
 
+        <!-- Spring Data JPA (for PageResponse) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
         <!-- ========== 測試依賴 ========== -->
         <!-- JUnit 5 -->
         <dependency>

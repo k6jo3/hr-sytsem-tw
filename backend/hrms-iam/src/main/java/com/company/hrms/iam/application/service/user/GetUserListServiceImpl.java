@@ -3,64 +3,80 @@ package com.company.hrms.iam.application.service.user;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.model.PageResponse;
+import com.company.hrms.common.application.service.AbstractQueryService;
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.common.service.QueryApiService;
-import com.company.hrms.iam.api.controller.user.HR01UserQryController.UserQueryRequest;
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.iam.api.request.user.GetUserListRequest;
 import com.company.hrms.iam.api.response.user.UserListResponse;
+import com.company.hrms.iam.application.service.user.assembler.UserQueryAssembler;
 import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 查詢使用者列表 Application Service
- * 
- * <p>
- * 命名規範：Get{名詞}ListServiceImpl
- * </p>
- * <p>
- * 對應 Controller 方法：getUserList
- * </p>
+ * 重構為繼承 AbstractQueryService 以支援快照測試
  */
 @Service("getUserListServiceImpl")
+@RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class GetUserListServiceImpl
-        implements QueryApiService<UserQueryRequest, List<UserListResponse>> {
+        extends AbstractQueryService<GetUserListRequest, PageResponse<UserListResponse>> {
 
     private final IUserRepository userRepository;
+    private final UserQueryAssembler queryAssembler;
 
-    public GetUserListServiceImpl(IUserRepository userRepository) {
-        this.userRepository = userRepository;
+    @Override
+    protected QueryGroup buildQuery(GetUserListRequest request, JWTModel currentUser) {
+        log.info("Building query for user list: {}", request);
+        return queryAssembler.toQueryGroup(request);
     }
 
-    /**
-     * 執行查詢使用者列表
-     * 
-     * @param request     查詢請求
-     * @param currentUser 當前登入使用者
-     * @param args        額外參數 (未使用)
-     * @return 使用者列表
-     */
     @Override
-    public List<UserListResponse> getResponse(UserQueryRequest request,
+    protected PageResponse<UserListResponse> executeQuery(
+            QueryGroup query,
+            GetUserListRequest request,
             JWTModel currentUser,
             String... args) throws Exception {
-        // 1. 查詢所有使用者 (實際應加入篩選條件)
-        List<User> users = userRepository.findAll();
 
-        // 2. 根據條件過濾
-        // TODO: 實作狀態和關鍵字篩選
+        // 處理分頁
+        int page = request.getPage() > 0 ? request.getPage() - 1 : 0;
+        int size = request.getSize() > 0 ? request.getSize() : 20;
 
-        // 3. 轉換為 Response VO
-        return users.stream()
+        // 簡單處理排序
+        Sort sort = Sort.by(Sort.Direction.DESC, "create_time");
+        if (request.getSort() != null && !request.getSort().isEmpty()) {
+            // TODO: 解析排序字串
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        List<User> users = userRepository.findByQuery(query, pageable);
+        long total = userRepository.countByQuery(query);
+
+        List<UserListResponse> items = users.stream()
                 .map(this::toListResponse)
                 .collect(Collectors.toList());
+
+        return PageResponse.<UserListResponse>builder()
+                .items(items)
+                .total(total)
+                .page(request.getPage())
+                .size(request.getSize())
+                .totalPages((int) Math.ceil((double) total / size))
+                .build();
     }
 
-    /**
-     * 轉換為列表項目回應
-     */
     private UserListResponse toListResponse(User user) {
         return UserListResponse.builder()
                 .userId(user.getId().getValue())

@@ -65,6 +65,21 @@ public interface IEmployeeRepository {
     long countByCriteria(EmployeeQueryCriteria criteria);
 
     /**
+     * 動態查詢 (支援 QueryGroup)
+     * 
+     * @param query    查詢條件
+     * @param pageable 分頁資訊
+     * @return 員工列表
+     */
+    List<Employee> findByQuery(com.company.hrms.common.query.QueryGroup query,
+            org.springframework.data.domain.Pageable pageable);
+
+    /**
+     * 動態查詢筆數
+     */
+    long countByQuery(com.company.hrms.common.query.QueryGroup query);
+
+    /**
      * 儲存員工
      * 
      * @param employee 員工
