@@ -44,12 +44,7 @@ class GenerateAndSendResetEmailTaskTest {
         context = new AuthContext();
 
         mockUser = mock(User.class);
-        when(mockUser.getId()).thenReturn(new UserId("user-123"));
-        when(mockUser.getEmail()).thenReturn(new Email("john@example.com"));
-        when(mockUser.getDisplayName()).thenReturn("John Doe");
-        when(mockUser.getUsername()).thenReturn("john.doe");
-
-        context.setUser(mockUser);
+        // Stubbings moved to individual tests
     }
 
     @Nested
@@ -61,6 +56,13 @@ class GenerateAndSendResetEmailTaskTest {
         void shouldGenerateTokenAndSendEmail() throws Exception {
             // Given
             String token = "reset-token";
+
+            when(mockUser.getId()).thenReturn(new UserId("user-123"));
+            when(mockUser.getEmail()).thenReturn(new Email("john@example.com"));
+            when(mockUser.getDisplayName()).thenReturn("John Doe");
+            when(mockUser.getUsername()).thenReturn("john.doe");
+            context.setUser(mockUser);
+
             when(passwordResetTokenService.generateToken("user-123")).thenReturn(token);
 
             // When
@@ -81,12 +83,19 @@ class GenerateAndSendResetEmailTaskTest {
         @DisplayName("發送郵件異常時應捕獲並記錄，不拋出例外")
         void shouldCatchExceptionWhenSendingFails() throws Exception {
             // Given
+            when(mockUser.getId()).thenReturn(new UserId("user-123"));
+            when(mockUser.getEmail()).thenReturn(new Email("john@example.com"));
+            when(mockUser.getDisplayName()).thenReturn("John Doe");
+            // Note: getUsername() is not stubbed because it's only called in success path (log.info)
+            context.setUser(mockUser);
+
             when(passwordResetTokenService.generateToken("user-123")).thenReturn("token");
             doThrow(new RuntimeException("Email service down"))
                     .when(emailService).sendPasswordResetEmail(anyString(), anyString(), anyString());
 
             // When & Then
             assertDoesNotThrow(() -> task.execute(context));
+            verify(passwordResetTokenService).generateToken("user-123");
             verify(emailService).sendPasswordResetEmail(anyString(), anyString(), anyString());
         }
     }
@@ -94,6 +103,7 @@ class GenerateAndSendResetEmailTaskTest {
     @Test
     @DisplayName("shouldExecute 在有使用者時應返回 true")
     void shouldExecuteWhenUserExists() {
+        context.setUser(mockUser);
         assertTrue(task.shouldExecute(context));
     }
 

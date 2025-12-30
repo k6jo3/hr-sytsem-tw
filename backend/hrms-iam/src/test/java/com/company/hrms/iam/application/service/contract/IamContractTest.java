@@ -1,6 +1,5 @@
 package com.company.hrms.iam.application.service.contract;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,6 @@ import com.company.hrms.common.test.contract.BaseContractTest;
  * </p>
  */
 @DisplayName("IAM 服務合約測試")
-@Disabled("待 User Query API 實作後啟用 - 目前為佔位符測試")
 public class IamContractTest extends BaseContractTest {
 
     /**
@@ -38,27 +36,63 @@ public class IamContractTest extends BaseContractTest {
     @DisplayName("使用者查詢合約 (User Query Contract)")
     class UserQueryContractTests {
 
+        private final com.company.hrms.iam.application.service.user.assembler.UserQueryAssembler userQueryAssembler = new com.company.hrms.iam.application.service.user.assembler.UserQueryAssembler();
+
         @Test
         @DisplayName("IAM_U001: 查詢啟用中的使用者應包含正確過濾條件")
         void searchActiveUsers_ShouldIncludeCorrectFilters() throws Exception {
-            // TODO: 待 GetUserListRequest 和對應 API 實作後啟用
-            // 載入合約規格
-            // String contract = loadContractSpec("iam");
-            // 準備請求 - 對應合約 {"status":"ACTIVE"}
-            // 驗證 QueryGroup 必須包含: status = 'ACTIVE', is_deleted = 0
-            // verifyApiContract("/api/v1/users", request, contract, "IAM_U001");
+            // 1. 載入合約
+            String contract = loadContractSpec("iam");
+
+            // 2. 準備請求
+            var request = com.company.hrms.iam.api.request.user.GetUserListRequest.builder()
+                    .status("ACTIVE")
+                    .build();
+
+            // 3. 執行轉換
+            var query = userQueryAssembler.toQueryGroup(request);
+
+            // 4. 驗證合約
+            assertContract(query, contract, "IAM_U001");
         }
 
         @Test
         @DisplayName("IAM_U002: 依帳號模糊查詢應包含 LIKE 條件")
         void searchByUsername_ShouldIncludeLikeFilter() throws Exception {
-            // TODO: 驗證 QueryGroup 必須包含: username LIKE 'admin', is_deleted = 0
+            String contract = loadContractSpec("iam");
+            var request = com.company.hrms.iam.api.request.user.GetUserListRequest.builder()
+                    .username("admin")
+                    .build();
+
+            var query = userQueryAssembler.toQueryGroup(request);
+
+            assertContract(query, contract, "IAM_U002");
         }
 
         @Test
         @DisplayName("IAM_U003: 依角色查詢使用者應包含角色關聯")
         void searchByRole_ShouldIncludeRoleFilter() throws Exception {
-            // TODO: 驗證 QueryGroup 必須包含: roles.id = 'R001', is_deleted = 0
+            String contract = loadContractSpec("iam");
+            var request = com.company.hrms.iam.api.request.user.GetUserListRequest.builder()
+                    .roleId("R001")
+                    .build();
+
+            var query = userQueryAssembler.toQueryGroup(request);
+
+            assertContract(query, contract, "IAM_U003");
+        }
+
+        @Test
+        @DisplayName("IAM_U005: 依租戶查詢使用者")
+        void searchByTenant_ShouldIncludeTenantFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var request = com.company.hrms.iam.api.request.user.GetUserListRequest.builder()
+                    .tenantId("T001")
+                    .build();
+
+            var query = userQueryAssembler.toQueryGroup(request);
+
+            assertContract(query, contract, "IAM_U005");
         }
     }
 
