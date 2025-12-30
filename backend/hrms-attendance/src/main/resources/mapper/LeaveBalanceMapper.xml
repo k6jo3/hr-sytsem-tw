@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.hrms.attendance.infrastructure.mapper.LeaveBalanceMapper">
+
+    <resultMap id="LeaveBalanceResultMap" type="com.company.hrms.attendance.infrastructure.po.LeaveBalancePO">
+        <id column="id" property="id"/>
+        <result column="employee_id" property="employeeId"/>
+        <result column="leave_type_id" property="leaveTypeId"/>
+        <result column="year" property="year"/>
+        <result column="total_days" property="totalDays"/>
+        <result column="used_days" property="usedDays"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, employee_id, leave_type_id, year, total_days, used_days,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="selectById" resultMap="LeaveBalanceResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM leave_balances
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByEmployeeIdAndLeaveTypeIdAndYear" resultMap="LeaveBalanceResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM leave_balances
+        WHERE employee_id = #{employeeId} AND leave_type_id = #{leaveTypeId} AND year = #{year}
+    </select>
+
+    <select id="selectByEmployeeIdAndYear" resultMap="LeaveBalanceResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM leave_balances
+        WHERE employee_id = #{employeeId} AND year = #{year}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO leave_balances (
+            id, employee_id, leave_type_id, year, total_days, used_days,
+            created_at, updated_at, created_by, updated_by
+        ) VALUES (
+            #{id}, #{employeeId}, #{leaveTypeId}, #{year}, #{totalDays}, #{usedDays},
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE leave_balances SET
+            total_days = #{totalDays},
+            used_days = #{usedDays},
+            updated_at = #{updatedAt},
+            updated_by = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM leave_balances WHERE id = #{id}
+    </delete>
+
+</mapper>

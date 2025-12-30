@@ -50,4 +50,19 @@ public class LeaveBalance extends AggregateRoot<BalanceId> {
     public BigDecimal getRemainingDays() {
         return totalDays.subtract(usedDays);
     }
+
+    private LeaveBalance(BalanceId id, String employeeId, LeaveTypeId leaveTypeId,
+            int year, BigDecimal totalDays, BigDecimal usedDays) {
+        super(id);
+        this.employeeId = employeeId;
+        this.leaveTypeId = leaveTypeId;
+        this.year = year;
+        this.totalDays = totalDays;
+        this.usedDays = usedDays;
+    }
+
+    public static LeaveBalance reconstitute(BalanceId id, String employeeId, LeaveTypeId leaveTypeId,
+            int year, BigDecimal totalDays, BigDecimal usedDays) {
+        return new LeaveBalance(id, employeeId, leaveTypeId, year, totalDays, usedDays);
+    }
 }

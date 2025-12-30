@@ -28,4 +28,9 @@ public class LeaveType extends AggregateRoot<LeaveTypeId> {
         this.unit = unit;
         this.isPaid = isPaid;
     }
+
+    public static LeaveType reconstitute(LeaveTypeId id, String name, String code, LeaveUnit unit, boolean isPaid) {
+        LeaveType type = new LeaveType(id, name, code, unit, isPaid);
+        return type;
+    }
 }
