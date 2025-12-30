@@ -13,7 +13,23 @@
       "Bash(done)",
       "Bash(grep:*)",
       "Bash(tree:*)",
-      "Bash(claude update:*)"
+      "Bash(claude update:*)",
+      "Bash(mvn compile:*)",
+      "Bash(pushd:*)",
+      "Bash(mvn clean compile:*)",
+      "Bash(copy:*)",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/infrastructure/persistence/querydsl/engine/AggregateQueryEngine.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/infrastructure/persistence/querydsl/engine/UltimateQueryEngine.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/infrastructure/persistence/querydsl/repository/BaseRepository.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/infrastructure/persistence/querydsl/repository/IQueryRepository.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/FilterUnit.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/Operator.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/QueryBuilder.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/Condition.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/ConditionParser.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/QueryCondition.java )",
+      "Bash(framework/architecture/Fluent-Query-Engine.md )",
+      "Bash(knowledge/03_System_Architecture/Fluent-Query-Engine.md)"
     ]
   }
 }

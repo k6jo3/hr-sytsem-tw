@@ -1,0 +1,265 @@
+package com.company.hrms.payroll.infrastructure.repository;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Repository;
+
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.payroll.domain.model.aggregate.Payslip;
+import com.company.hrms.payroll.domain.model.entity.PayslipItem;
+import com.company.hrms.payroll.domain.model.valueobject.BankAccount;
+import com.company.hrms.payroll.domain.model.valueobject.InsuranceDeductions;
+import com.company.hrms.payroll.domain.model.valueobject.ItemType;
+import com.company.hrms.payroll.domain.model.valueobject.OvertimePayDetail;
+import com.company.hrms.payroll.domain.model.valueobject.PayPeriod;
+import com.company.hrms.payroll.domain.model.valueobject.PayslipId;
+import com.company.hrms.payroll.domain.model.valueobject.PayslipStatus;
+import com.company.hrms.payroll.domain.model.valueobject.RunId;
+import com.company.hrms.payroll.domain.repository.IPayslipRepository;
+import com.company.hrms.payroll.infrastructure.po.PayslipItemPO;
+import com.company.hrms.payroll.infrastructure.po.PayslipPO;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+
+@Repository
+public class PayslipRepositoryImpl extends BaseRepository<PayslipPO, String> implements IPayslipRepository {
+
+    public PayslipRepositoryImpl(JPAQueryFactory factory) {
+        super(factory, PayslipPO.class);
+    }
+
+    @Override
+    public Payslip save(Payslip payslip) {
+        PayslipPO po = toPO(payslip);
+        if (po.getItems() != null) {
+            po.getItems().forEach(item -> item.setPayslip(po));
+        }
+
+        super.save(po);
+        return toDomain(po);
+    }
+
+    @Override
+    public void saveAllPayslips(List<Payslip> payslips) {
+        List<PayslipPO> pos = payslips.stream()
+                .map(this::toPO)
+                .collect(Collectors.toList());
+
+        pos.forEach(po -> {
+            if (po.getItems() != null) {
+                po.getItems().forEach(item -> item.setPayslip(po));
+            }
+        });
+
+        super.saveAll(pos);
+    }
+
+    @Override
+    public Optional<Payslip> findById(PayslipId id) {
+        return super.findById(id.getValue()).map(this::toDomain);
+    }
+
+    @Override
+    public List<Payslip> findByPayrollRun(RunId runId) {
+        QueryGroup group = QueryBuilder.where()
+                .and("runId", Operator.EQ, runId.getValue())
+                .build();
+        return super.findAll(group).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Payslip> findByEmployeeId(String employeeId) {
+        QueryGroup group = QueryBuilder.where()
+                .and("employeeId", Operator.EQ, employeeId)
+                .build();
+        return super.findAll(group).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Payslip> findByEmployeeAndYear(String employeeId, int year) {
+        LocalDate start = LocalDate.of(year, 1, 1);
+        LocalDate end = LocalDate.of(year, 12, 31);
+
+        QueryGroup group = QueryBuilder.where()
+                .and("employeeId", Operator.EQ, employeeId)
+                .and("payDate", Operator.GTE, start)
+                .and("payDate", Operator.LTE, end)
+                .build();
+        return super.findAll(group).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public org.springframework.data.domain.Page<Payslip> findAll(QueryGroup group,
+            org.springframework.data.domain.Pageable pageable) {
+        return super.findPage(group, pageable).map(this::toDomain);
+    }
+
+    // ==================== Mappers ====================
+
+    private PayslipPO toPO(Payslip domain) {
+        OvertimePayDetail ot = domain.getOvertimePay();
+        if (ot == null)
+            ot = OvertimePayDetail.empty();
+
+        InsuranceDeductions ins = domain.getInsuranceDeductions();
+        if (ins == null)
+            ins = InsuranceDeductions.empty();
+
+        BankAccount bank = domain.getBankAccount();
+
+        PayslipPO po = PayslipPO.builder()
+                .payslipId(domain.getId().getValue())
+                .runId(domain.getPayrollRunId().getValue())
+                .employeeId(domain.getEmployeeId())
+                .employeeCode(domain.getEmployeeNumber())
+                .employeeName(domain.getEmployeeName())
+                .periodStartDate(domain.getPayPeriod().getStartDate())
+                .periodEndDate(domain.getPayPeriod().getEndDate())
+                .payDate(domain.getPayDate())
+                .baseSalary(domain.getBaseSalary())
+                .grossWage(domain.getGrossWage())
+                .netWage(domain.getNetWage())
+                .incomeTax(domain.getIncomeTax())
+                .leaveDeduction(domain.getLeaveDeduction())
+
+                // Overtime
+                .overtimePayTotal(ot.getTotal())
+                .otWeekdayHours(ot.getWeekdayHours())
+                .otWeekdayPay(ot.getWeekdayPay())
+                .otRestDayHours(ot.getRestDayHours())
+                .otRestDayPay(ot.getRestDayPay())
+                .otHolidayHours(ot.getHolidayHours())
+                .otHolidayPay(ot.getHolidayPay())
+
+                // Insurance
+                .insLaborFee(ins.getLaborInsurance())
+                .insHealthFee(ins.getHealthInsurance())
+                .insPensionFee(ins.getPensionSelfContribution())
+                .insSupplementaryFee(ins.getSupplementaryPremium())
+
+                // Bank
+                .bankCode(bank != null ? bank.getBankCode() : null)
+                .bankAccountNumber(bank != null ? bank.getAccountNumber() : null)
+
+                .status(domain.getStatus().name())
+                .pdfUrl(domain.getPdfUrl())
+                .emailSentAt(domain.getEmailSentAt())
+                .items(new ArrayList<>())
+                .createdAt(domain.getCreatedAt())
+                .build();
+
+        // Items
+        List<PayslipItemPO> itemPOs = new ArrayList<>();
+        if (domain.getEarningItems() != null) {
+            itemPOs.addAll(domain.getEarningItems().stream().map(this::toItemPO).collect(Collectors.toList()));
+        }
+        if (domain.getDeductionItems() != null) {
+            itemPOs.addAll(domain.getDeductionItems().stream().map(this::toItemPO).collect(Collectors.toList()));
+        }
+        po.setItems(itemPOs);
+
+        return po;
+    }
+
+    private PayslipItemPO toItemPO(PayslipItem domain) {
+        return PayslipItemPO.builder()
+                .itemId(domain.getItemId())
+                .code(domain.getItemCode())
+                .name(domain.getItemName())
+                .type(domain.getItemType().name())
+                .amount(domain.getAmount())
+                .source(domain.getSource())
+                .taxable(domain.isTaxable())
+                .insurable(domain.isInsurable())
+                .displayOrder(domain.getDisplayOrder())
+                .build();
+    }
+
+    private Payslip toDomain(PayslipPO po) {
+        OvertimePayDetail ot = OvertimePayDetail.builder()
+                .weekdayHours(po.getOtWeekdayHours())
+                .weekdayPay(po.getOtWeekdayPay())
+                .restDayHours(po.getOtRestDayHours())
+                .restDayPay(po.getOtRestDayPay())
+                .holidayHours(po.getOtHolidayHours())
+                .holidayPay(po.getOtHolidayPay())
+                .build();
+
+        InsuranceDeductions ins = InsuranceDeductions.builder()
+                .laborInsurance(po.getInsLaborFee())
+                .healthInsurance(po.getInsHealthFee())
+                .pensionSelfContribution(po.getInsPensionFee())
+                .supplementaryPremium(po.getInsSupplementaryFee())
+                .build();
+
+        BankAccount bank = null;
+        if (po.getBankCode() != null && po.getBankAccountNumber() != null) {
+            try {
+                bank = new BankAccount(po.getBankCode(), null, null, po.getBankAccountNumber(), null);
+            } catch (Exception ignored) {
+            }
+        }
+
+        List<PayslipItem> earningItems = new ArrayList<>();
+        List<PayslipItem> deductionItems = new ArrayList<>();
+
+        if (po.getItems() != null) {
+            for (PayslipItemPO itemPO : po.getItems()) {
+                PayslipItem item = toItemDomain(itemPO);
+                if (item.isEarning()) {
+                    earningItems.add(item);
+                } else {
+                    deductionItems.add(item);
+                }
+            }
+        }
+
+        return Payslip.reconstruct(
+                new PayslipId(po.getPayslipId()),
+                new RunId(po.getRunId()),
+                po.getEmployeeId(),
+                po.getEmployeeCode(),
+                po.getEmployeeName(),
+                new PayPeriod(po.getPeriodStartDate(), po.getPeriodEndDate()),
+                po.getPayDate(),
+                po.getBaseSalary(),
+                earningItems,
+                deductionItems,
+                ot,
+                po.getLeaveDeduction(),
+                ins,
+                po.getIncomeTax(),
+                po.getGrossWage(),
+                po.getNetWage(),
+                bank,
+                PayslipStatus.valueOf(po.getStatus()),
+                po.getPdfUrl(),
+                po.getEmailSentAt(),
+                po.getCreatedAt());
+    }
+
+    private PayslipItem toItemDomain(PayslipItemPO po) {
+        return PayslipItem.reconstruct(
+                po.getItemId(),
+                po.getCode(),
+                po.getName(),
+                ItemType.valueOf(po.getType()),
+                po.getAmount(),
+                po.getSource(),
+                po.isTaxable(),
+                po.isInsurable(),
+                po.getDisplayOrder() != null ? po.getDisplayOrder() : 0);
+    }
+}
