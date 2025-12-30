@@ -22,7 +22,7 @@ public class DeleteRoleTask implements PipelineTask<RoleContext> {
     @Override
     public void execute(RoleContext context) throws Exception {
         var role = context.getRole();
-        roleRepository.delete(role.getId());
+        roleRepository.deleteById(role.getId());
         log.info("角色刪除: roleId={}", role.getId().getValue());
     }
 

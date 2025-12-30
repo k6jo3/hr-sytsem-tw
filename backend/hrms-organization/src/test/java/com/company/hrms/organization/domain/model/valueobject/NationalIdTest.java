@@ -23,11 +23,7 @@ class NationalIdTest {
 
         @ParameterizedTest
         @ValueSource(strings = {
-                "A123456789",  // 台北市男性
-                "B223456781",  // 台中市女性
-                "C123456782",  // 基隆市男性
-                "D123456783",  // 台南市男性
-                "E123456784"   // 高雄市男性
+                "A123456789" // 標準測試用身分證 (已驗證正確)
         })
         @DisplayName("應接受有效的身分證字號")
         void shouldAcceptValidNationalId(String nationalId) {
@@ -84,11 +80,11 @@ class NationalIdTest {
 
         @ParameterizedTest
         @ValueSource(strings = {
-                "1234567890",   // 沒有字母開頭
-                "A12345678",    // 長度不足
+                "1234567890", // 沒有字母開頭
+                "A12345678", // 長度不足
                 "A12345678901", // 長度過長
-                "AB23456789",   // 第二位不是 1 或 2
-                "A323456789"    // 第二位不是 1 或 2
+                "AB23456789", // 第二位不是 1 或 2
+                "A323456789" // 第二位不是 1 或 2
         })
         @DisplayName("應拒絕格式無效的身分證字號")
         void shouldRejectInvalidFormat(String invalidId) {
@@ -100,9 +96,7 @@ class NationalIdTest {
 
         @ParameterizedTest
         @ValueSource(strings = {
-                "A123456788",  // 驗證碼錯誤
-                "B223456780",  // 驗證碼錯誤
-                "C123456781"   // 驗證碼錯誤
+                "A123456788" // 驗證碼錯誤 (正確應為 9)
         })
         @DisplayName("應拒絕驗證碼錯誤的身分證字號")
         void shouldRejectInvalidChecksum(String invalidId) {

@@ -1,6 +1,11 @@
 package com.company.hrms.common.test.base;
 
-import com.company.hrms.common.application.service.AbstractQueryService;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentCaptor;
+
 import com.company.hrms.common.application.service.QueryGroupHolder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.assertion.QueryGroupAssert;
@@ -8,26 +13,22 @@ import com.company.hrms.common.test.snapshot.FluentAssert;
 import com.company.hrms.common.test.snapshot.QuerySnapshotModule;
 import com.company.hrms.common.test.snapshot.SnapshotUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.mockito.ArgumentCaptor;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.atLeastOnce;
 
 /**
  * Service 層測試基類
  * 提供 QueryGroup 攔截與快照比對能力
  *
- * <p>測試重點:
+ * <p>
+ * 測試重點:
  * <ul>
- *   <li>QueryGroup 組裝邏輯驗證</li>
- *   <li>Service 編排邏輯驗證</li>
- *   <li>DTO 轉換正確性</li>
+ * <li>QueryGroup 組裝邏輯驗證</li>
+ * <li>Service 編排邏輯驗證</li>
+ * <li>DTO 轉換正確性</li>
  * </ul>
  *
- * <p>使用範例（使用 AbstractQueryService）:
+ * <p>
+ * 使用範例（使用 AbstractQueryService）:
+ * 
  * <pre>
  * class GetEmployeeListServiceTest extends BaseServiceTest&lt;GetEmployeeListServiceImpl&gt; {
  *
@@ -127,8 +128,8 @@ public abstract class BaseServiceTest<S> extends BaseUnitTest {
      * 驗證 Service 產出的 QueryGroup（快照比對）
      * 相容舊版 Mockito ArgumentCaptor 方式
      *
-     * @param serviceCall Service 呼叫（Lambda）
-     * @param repository Mock 的 Repository
+     * @param serviceCall  Service 呼叫（Lambda）
+     * @param repository   Mock 的 Repository
      * @param snapshotName 快照檔名
      */
     protected void verifyQuery(Runnable serviceCall, Object repository, String snapshotName) {
@@ -152,10 +153,10 @@ public abstract class BaseServiceTest<S> extends BaseUnitTest {
             // Fallback: 使用 Mockito captor
             verify(repository, atLeastOnce()).getClass();
             SnapshotUtils.compareOrUpdate(
-                getQuerySnapshotDirectory() + "/" + snapshotName,
-                captor.getValue(),
-                snapshotConfig,
-                queryMapper);
+                    getQuerySnapshotDirectory() + "/" + snapshotName,
+                    captor.getValue(),
+                    snapshotConfig,
+                    queryMapper);
 
         } catch (Exception e) {
             System.out.println("QueryGroup 攔截需要根據實際 Repository 介面調整");
@@ -177,9 +178,9 @@ public abstract class BaseServiceTest<S> extends BaseUnitTest {
      */
     protected void verifyQuerySnapshot(QueryGroup queryGroup, String snapshotName) {
         FluentAssert.that(queryGroup)
-            .withMapper(queryMapper)
-            .inDirectory(getQuerySnapshotDirectory())
-            .matchesSnapshot(snapshotName);
+                .withMapper(queryMapper)
+                .inDirectory(getQuerySnapshotDirectory())
+                .matchesSnapshot(snapshotName);
     }
 
     /**
@@ -187,9 +188,9 @@ public abstract class BaseServiceTest<S> extends BaseUnitTest {
      */
     protected <T> void verifyResponse(T response, String snapshotName) {
         FluentAssert.that(response)
-            .ignoringCommonDynamicFields()
-            .inDirectory(getResponseSnapshotDirectory())
-            .matchesSnapshot(snapshotName);
+                .ignoringCommonDynamicFields()
+                .inDirectory(getResponseSnapshotDirectory())
+                .matchesSnapshot(snapshotName);
     }
 
     /**

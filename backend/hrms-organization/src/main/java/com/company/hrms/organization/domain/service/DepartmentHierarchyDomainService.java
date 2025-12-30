@@ -1,13 +1,23 @@
 package com.company.hrms.organization.domain.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.company.hrms.organization.domain.model.aggregate.Department;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
 import com.company.hrms.organization.domain.repository.IDepartmentRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 部門層級管理 Domain Service
@@ -26,6 +36,7 @@ public class DepartmentHierarchyDomainService {
 
     /**
      * 驗證新增子部門是否超過最大深度
+     * 
      * @param parentId 父部門ID
      * @return 是否可以新增
      */
@@ -40,6 +51,7 @@ public class DepartmentHierarchyDomainService {
 
     /**
      * 計算部門深度
+     * 
      * @param departmentId 部門ID
      * @return 深度 (根部門為1)
      */
@@ -62,8 +74,9 @@ public class DepartmentHierarchyDomainService {
 
     /**
      * 驗證移動部門是否會造成循環參照
+     * 
      * @param departmentId 要移動的部門ID
-     * @param newParentId 新的父部門ID
+     * @param newParentId  新的父部門ID
      * @return 是否會造成循環
      */
     public boolean wouldCauseCircularReference(DepartmentId departmentId, DepartmentId newParentId) {
@@ -82,6 +95,7 @@ public class DepartmentHierarchyDomainService {
 
     /**
      * 取得部門的所有子孫部門ID
+     * 
      * @param departmentId 部門ID
      * @return 所有子孫部門ID集合
      */
@@ -107,6 +121,7 @@ public class DepartmentHierarchyDomainService {
 
     /**
      * 取得部門的所有祖先部門ID (從根到父)
+     * 
      * @param departmentId 部門ID
      * @return 祖先部門ID列表
      */
@@ -129,6 +144,7 @@ public class DepartmentHierarchyDomainService {
 
     /**
      * 取得部門的完整路徑名稱
+     * 
      * @param departmentId 部門ID
      * @return 路徑名稱 (例如: "總公司 > 研發部 > 前端組")
      */
@@ -151,31 +167,28 @@ public class DepartmentHierarchyDomainService {
 
     /**
      * 建立部門樹結構
+     * 
      * @param organizationId 組織ID
      * @return 部門樹
      */
     public List<DepartmentTreeNode> buildDepartmentTree(String organizationId) {
         List<Department> allDepartments = departmentRepository.findByOrganizationId(organizationId);
 
-        // 建立ID到部門的映射
-        Map<String, Department> deptMap = allDepartments.stream()
-                .collect(Collectors.toMap(d -> d.getId().getValue(), d -> d));
-
         // 建立樹節點
         Map<String, DepartmentTreeNode> nodeMap = allDepartments.stream()
                 .collect(Collectors.toMap(
-                        d -> d.getId().getValue(),
-                        d -> new DepartmentTreeNode(d.getId().getValue(), d.getName(), d.getCode(), new ArrayList<>())
-                ));
+                        d -> d.getId().getValue().toString(),
+                        d -> new DepartmentTreeNode(d.getId().getValue().toString(), d.getName(), d.getCode(),
+                                new ArrayList<>())));
 
         // 建立父子關係
         List<DepartmentTreeNode> rootNodes = new ArrayList<>();
         for (Department dept : allDepartments) {
-            DepartmentTreeNode node = nodeMap.get(dept.getId().getValue());
+            DepartmentTreeNode node = nodeMap.get(dept.getId().getValue().toString());
             if (dept.getParentId() == null) {
                 rootNodes.add(node);
             } else {
-                DepartmentTreeNode parentNode = nodeMap.get(dept.getParentId().getValue());
+                DepartmentTreeNode parentNode = nodeMap.get(dept.getParentId().getValue().toString());
                 if (parentNode != null) {
                     parentNode.getChildren().add(node);
                 }
@@ -199,6 +212,7 @@ public class DepartmentHierarchyDomainService {
 
     /**
      * 取得最大層級深度
+     * 
      * @return 最大層級深度
      */
     public int getMaxHierarchyDepth() {

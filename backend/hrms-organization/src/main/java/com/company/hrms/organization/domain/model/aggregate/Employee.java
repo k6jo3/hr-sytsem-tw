@@ -1,13 +1,24 @@
 package com.company.hrms.organization.domain.model.aggregate;
 
-import com.company.hrms.common.exception.DomainException;
-import com.company.hrms.organization.domain.model.valueobject.*;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.organization.domain.model.valueobject.Address;
+import com.company.hrms.organization.domain.model.valueobject.BankAccount;
+import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
+import com.company.hrms.organization.domain.model.valueobject.Email;
+import com.company.hrms.organization.domain.model.valueobject.EmergencyContact;
+import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
+import com.company.hrms.organization.domain.model.valueobject.EmploymentStatus;
+import com.company.hrms.organization.domain.model.valueobject.EmploymentType;
+import com.company.hrms.organization.domain.model.valueobject.Gender;
+import com.company.hrms.organization.domain.model.valueobject.MaritalStatus;
+import com.company.hrms.organization.domain.model.valueobject.NationalId;
+
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * 員工聚合根
@@ -185,19 +196,20 @@ public class Employee {
 
     /**
      * 員工到職 - 建立新員工
-     * @param employeeNumber 員工編號
-     * @param firstName 姓
-     * @param lastName 名
-     * @param nationalId 身分證號
-     * @param dateOfBirth 出生日期
-     * @param gender 性別
-     * @param companyEmail 公司 Email
-     * @param mobilePhone 手機
-     * @param organizationId 組織 ID
-     * @param departmentId 部門 ID
-     * @param jobTitle 職稱
-     * @param employmentType 雇用類型
-     * @param hireDate 到職日期
+     * 
+     * @param employeeNumber  員工編號
+     * @param firstName       姓
+     * @param lastName        名
+     * @param nationalId      身分證號
+     * @param dateOfBirth     出生日期
+     * @param gender          性別
+     * @param companyEmail    公司 Email
+     * @param mobilePhone     手機
+     * @param organizationId  組織 ID
+     * @param departmentId    部門 ID
+     * @param jobTitle        職稱
+     * @param employmentType  雇用類型
+     * @param hireDate        到職日期
      * @param probationMonths 試用期月數
      * @return 新的 Employee 實例
      */
@@ -261,6 +273,7 @@ public class Employee {
 
     /**
      * 試用期轉正
+     * 
      * @throws DomainException 若不是試用期狀態
      */
     public void completeProbation() {
@@ -274,8 +287,9 @@ public class Employee {
 
     /**
      * 部門調動
+     * 
      * @param newDepartmentId 新部門 ID
-     * @param newManagerId 新主管 ID (可為 null)
+     * @param newManagerId    新主管 ID (可為 null)
      */
     public void transferDepartment(UUID newDepartmentId, UUID newManagerId) {
         if (newDepartmentId == null) {
@@ -291,6 +305,7 @@ public class Employee {
 
     /**
      * 升遷
+     * 
      * @param newJobTitle 新職稱
      * @param newJobLevel 新職等
      */
@@ -309,8 +324,9 @@ public class Employee {
 
     /**
      * 離職
+     * 
      * @param terminationDate 離職日期
-     * @param reason 離職原因
+     * @param reason          離職原因
      */
     public void terminate(LocalDate terminationDate, String reason) {
         if (this.employmentStatus.isTerminated()) {
@@ -330,6 +346,7 @@ public class Employee {
 
     /**
      * 設定婚姻狀況
+     * 
      * @param maritalStatus 婚姻狀況
      */
     public void setMaritalStatus(MaritalStatus maritalStatus) {
@@ -339,13 +356,14 @@ public class Employee {
 
     /**
      * 更新個人資料
-     * @param personalEmail 個人 Email
-     * @param mobilePhone 手機
-     * @param address 地址
+     * 
+     * @param personalEmail    個人 Email
+     * @param mobilePhone      手機
+     * @param address          地址
      * @param emergencyContact 緊急聯絡人
      */
     public void updatePersonalInfo(String personalEmail, String mobilePhone,
-                                    Address address, EmergencyContact emergencyContact) {
+            Address address, EmergencyContact emergencyContact) {
         if (personalEmail != null && !personalEmail.isBlank()) {
             this.personalEmail = new Email(personalEmail);
         }
@@ -363,6 +381,7 @@ public class Employee {
 
     /**
      * 更新公司 Email
+     * 
      * @param companyEmail 公司 Email
      */
     public void updateCompanyEmail(String companyEmail) {
@@ -375,6 +394,7 @@ public class Employee {
 
     /**
      * 更新銀行帳戶
+     * 
      * @param bankAccount 銀行帳戶
      */
     public void updateBankAccount(BankAccount bankAccount) {
@@ -387,8 +407,9 @@ public class Employee {
 
     /**
      * 更新職務資訊
-     * @param jobTitle 職稱
-     * @param jobLevel 職等
+     * 
+     * @param jobTitle  職稱
+     * @param jobLevel  職等
      * @param managerId 主管 ID
      */
     public void updateJobInfo(String jobTitle, String jobLevel, UUID managerId) {
@@ -404,6 +425,7 @@ public class Employee {
 
     /**
      * 更新照片
+     * 
      * @param photoUrl 照片 URL
      */
     public void updatePhoto(String photoUrl) {
@@ -448,6 +470,7 @@ public class Employee {
 
     /**
      * 是否在職
+     * 
      * @return 是否在職
      */
     public boolean isActive() {
@@ -456,6 +479,7 @@ public class Employee {
 
     /**
      * 是否試用期
+     * 
      * @return 是否試用期
      */
     public boolean isProbation() {
@@ -464,6 +488,7 @@ public class Employee {
 
     /**
      * 是否已離職
+     * 
      * @return 是否已離職
      */
     public boolean isTerminated() {
@@ -472,6 +497,7 @@ public class Employee {
 
     /**
      * 是否留停中
+     * 
      * @return 是否留停
      */
     public boolean isOnLeave() {
@@ -480,6 +506,7 @@ public class Employee {
 
     /**
      * 計算年資 (年)
+     * 
      * @return 年資
      */
     public int calculateSeniority() {
@@ -489,6 +516,7 @@ public class Employee {
 
     /**
      * 取得遮罩後的身分證號
+     * 
      * @return 遮罩後的身分證號
      */
     public String getMaskedNationalId() {
@@ -563,7 +591,7 @@ public class Employee {
                 .address(address)
                 .emergencyContact(emergencyContact)
                 .bankAccount(bankAccount)
-                .departmentId(departmentId != null ? UUID.fromString(departmentId.getValue()) : null)
+                .departmentId(departmentId != null ? departmentId.getValue() : null)
                 .jobTitle(jobTitle)
                 .jobLevel(jobLevel)
                 .employmentType(employmentType)
@@ -572,7 +600,7 @@ public class Employee {
                 .probationEndDate(probationEndDate)
                 .terminationDate(terminationDate)
                 .terminationReason(terminationReason)
-                .managerId(supervisorId != null ? UUID.fromString(supervisorId.getValue()) : null)
+                .managerId(supervisorId != null ? supervisorId.getValue() : null)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

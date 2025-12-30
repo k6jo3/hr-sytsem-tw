@@ -1,12 +1,13 @@
 package com.company.hrms.organization.domain.service;
 
-import com.company.hrms.organization.domain.repository.IEmployeeRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.stereotype.Service;
+
+import com.company.hrms.organization.domain.repository.IEmployeeRepository;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 員工編號生成 Domain Service
@@ -38,6 +39,7 @@ public class EmployeeNumberGeneratorDomainService {
 
     /**
      * 生成新的員工編號
+     * 
      * @return 新的員工編號
      */
     public String generateEmployeeNumber() {
@@ -53,6 +55,7 @@ public class EmployeeNumberGeneratorDomainService {
 
     /**
      * 驗證員工編號格式
+     * 
      * @param employeeNumber 員工編號
      * @return 是否為有效格式
      */
@@ -67,6 +70,7 @@ public class EmployeeNumberGeneratorDomainService {
 
     /**
      * 檢查員工編號是否已存在
+     * 
      * @param employeeNumber 員工編號
      * @return 是否已存在
      */
@@ -76,6 +80,7 @@ public class EmployeeNumberGeneratorDomainService {
 
     /**
      * 生成指定前綴的員工編號 (用於特殊情況，如約聘人員)
+     * 
      * @param customPrefix 自訂前綴
      * @return 新的員工編號
      */

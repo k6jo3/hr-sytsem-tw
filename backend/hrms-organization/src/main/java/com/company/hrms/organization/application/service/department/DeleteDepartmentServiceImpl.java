@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
-import com.company.hrms.organization.domain.model.aggregate.Department;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
 import com.company.hrms.organization.domain.repository.IDepartmentRepository;
@@ -53,7 +52,7 @@ public class DeleteDepartmentServiceImpl implements CommandApiService<Object, Vo
 
         // 查詢部門
         DepartmentId deptId = new DepartmentId(departmentId);
-        Department department = departmentRepository.findById(deptId)
+        departmentRepository.findById(deptId)
                 .orElseThrow(() -> new ResourceNotFoundException("DEPT_NOT_FOUND", "部門不存在: " + departmentId));
 
         // 檢查是否有員工

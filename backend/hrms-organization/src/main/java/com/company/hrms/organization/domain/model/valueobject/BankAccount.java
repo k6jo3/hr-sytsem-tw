@@ -1,6 +1,5 @@
 package com.company.hrms.organization.domain.model.valueobject;
 
-import com.company.hrms.common.exception.DomainException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -28,7 +27,8 @@ public class BankAccount {
         return bankName != null ? bankName : bankCode;
     }
 
-    public void validate() {}
+    public void validate() {
+    }
 
     @Override
     public String toString() {

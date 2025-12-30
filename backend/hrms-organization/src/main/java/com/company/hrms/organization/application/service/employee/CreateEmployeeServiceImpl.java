@@ -1,151 +1,70 @@
 package com.company.hrms.organization.application.service.employee;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.organization.api.request.employee.CreateEmployeeRequest;
 import com.company.hrms.organization.api.response.employee.CreateEmployeeResponse;
-import com.company.hrms.organization.domain.event.EmployeeCreatedEvent;
-import com.company.hrms.organization.domain.model.aggregate.Employee;
-import com.company.hrms.organization.domain.model.valueobject.*;
-import com.company.hrms.organization.domain.repository.IEmployeeRepository;
-import com.company.hrms.organization.domain.repository.IDepartmentRepository;
+import com.company.hrms.organization.application.service.employee.context.EmployeeContext;
+import com.company.hrms.organization.application.service.employee.task.CreateEmployeeTask;
+import com.company.hrms.organization.application.service.employee.task.PublishCreatedEventTask;
+import com.company.hrms.organization.application.service.employee.task.SaveEmployeeTask;
+import com.company.hrms.organization.application.service.employee.task.ValidateEmployeeTask;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 /**
- * 新增員工服務實作
+ * 新增員工服務實作 (Pipeline 模式)
+ * 
+ * <p>
+ * Pipeline 步驟：
+ * <ol>
+ * <li>ValidateEmployeeTask - 驗證員工資料唯一性</li>
+ * <li>CreateEmployeeTask - 建立員工聚合根</li>
+ * <li>SaveEmployeeTask - 儲存員工</li>
+ * <li>PublishCreatedEventTask - 發布員工建立事件</li>
+ * </ol>
  */
 @Service("createEmployeeServiceImpl")
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class CreateEmployeeServiceImpl
-        implements CommandApiService<CreateEmployeeRequest, CreateEmployeeResponse> {
+                implements CommandApiService<CreateEmployeeRequest, CreateEmployeeResponse> {
 
-    private final IEmployeeRepository employeeRepository;
-    private final IDepartmentRepository departmentRepository;
-    private final ApplicationEventPublisher eventPublisher;
+        // === Pipeline Tasks ===
+        private final ValidateEmployeeTask validateEmployeeTask;
+        private final CreateEmployeeTask createEmployeeTask;
+        private final SaveEmployeeTask saveEmployeeTask;
+        private final PublishCreatedEventTask publishCreatedEventTask;
 
-    @Override
-    public CreateEmployeeResponse execCommand(CreateEmployeeRequest request,
-                                               JWTModel currentUser,
-                                               String... args) throws Exception {
-        log.info("Creating employee: {}", request.getEmployeeNumber());
+        @Override
+        public CreateEmployeeResponse execCommand(CreateEmployeeRequest request,
+                        JWTModel currentUser,
+                        String... args) throws Exception {
+                log.info("新增員工流程開始: {}", request.getEmployeeNumber());
 
-        // 驗證員工編號唯一性
-        if (employeeRepository.existsByEmployeeNumber(request.getEmployeeNumber())) {
-            throw new IllegalArgumentException("員工編號已存在: " + request.getEmployeeNumber());
+                // 建立 Pipeline Context
+                EmployeeContext context = new EmployeeContext(request, currentUser.getTenantId());
+
+                // 執行 Pipeline
+                BusinessPipeline.start(context)
+                                .next(validateEmployeeTask) // 驗證資料
+                                .next(createEmployeeTask) // 建立員工
+                                .next(saveEmployeeTask) // 儲存員工
+                                .next(publishCreatedEventTask) // 發布事件
+                                .execute();
+
+                log.info("新增員工流程完成: {}", context.getEmployee().getId().getValue());
+
+                // 組裝回應
+                return CreateEmployeeResponse.success(
+                                context.getEmployee().getId().getValue().toString(),
+                                context.getEmployee().getEmployeeNumber(),
+                                context.getEmployee().getFullName());
         }
-
-        // 驗證 Email 唯一性
-        if (employeeRepository.existsByEmail(request.getCompanyEmail())) {
-            throw new IllegalArgumentException("Email 已存在: " + request.getCompanyEmail());
-        }
-
-        // 驗證身分證號唯一性
-        if (request.getNationalId() != null &&
-                employeeRepository.existsByNationalId(request.getNationalId())) {
-            throw new IllegalArgumentException("身分證號已存在");
-        }
-
-        // 驗證部門存在
-        DepartmentId departmentId = new DepartmentId(request.getDepartmentId());
-        if (!departmentRepository.existsById(departmentId)) {
-            throw new IllegalArgumentException("部門不存在: " + request.getDepartmentId());
-        }
-
-        // 建立員工 Aggregate
-        Employee employee = Employee.onboard(
-                request.getEmployeeNumber(),
-                request.getFirstName(),
-                request.getLastName(),
-                request.getNationalId(),
-                request.getDateOfBirth(),
-                Gender.valueOf(request.getGender()),
-                request.getCompanyEmail(),
-                request.getMobilePhone(),
-                UUID.fromString(request.getOrganizationId()),
-                UUID.fromString(request.getDepartmentId()),
-                request.getJobTitle(),
-                EmploymentType.valueOf(request.getEmploymentType()),
-                request.getHireDate(),
-                request.getProbationMonths() != null ? request.getProbationMonths() : 3
-        );
-
-        // 設定其他可選欄位
-        if (request.getMaritalStatus() != null) {
-            employee.setMaritalStatus(MaritalStatus.valueOf(request.getMaritalStatus()));
-        }
-
-        if (request.getAddress() != null) {
-            employee.updatePersonalInfo(
-                    request.getPersonalEmail(),
-                    request.getMobilePhone(),
-                    new Address(
-                            request.getAddress().getPostalCode(),
-                            request.getAddress().getCity(),
-                            request.getAddress().getDistrict(),
-                            request.getAddress().getStreet()
-                    ),
-                    null
-            );
-        }
-
-        if (request.getEmergencyContact() != null) {
-            employee.updatePersonalInfo(
-                    null,
-                    null,
-                    null,
-                    new EmergencyContact(
-                            request.getEmergencyContact().getName(),
-                            request.getEmergencyContact().getRelationship(),
-                            request.getEmergencyContact().getPhoneNumber()
-                    )
-            );
-        }
-
-        if (request.getBankAccount() != null) {
-            employee.updateBankAccount(new BankAccount(
-                    request.getBankAccount().getBankCode(),
-                    request.getBankAccount().getBranchCode(),
-                    request.getBankAccount().getAccountNumber(),
-                    request.getBankAccount().getAccountHolderName()
-            ));
-        }
-
-        // 設定主管
-        if (request.getManagerId() != null) {
-            employee.updateJobInfo(
-                    request.getJobTitle(),
-                    request.getJobLevel(),
-                    UUID.fromString(request.getManagerId())
-            );
-        }
-
-        // 儲存員工
-        employeeRepository.save(employee);
-
-        // 發布領域事件
-        eventPublisher.publishEvent(new EmployeeCreatedEvent(
-                employee.getId().getValue(),
-                employee.getEmployeeNumber(),
-                employee.getFullName(),
-                employee.getCompanyEmail().getValue(),
-                employee.getDepartmentId().toString(),
-                employee.getHireDate()
-        ));
-
-        log.info("Employee created successfully: {}", employee.getId().getValue());
-
-        return CreateEmployeeResponse.success(
-                employee.getId().getValue(),
-                employee.getEmployeeNumber(),
-                employee.getFullName()
-        );
-    }
 }

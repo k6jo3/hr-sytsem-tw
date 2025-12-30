@@ -12,7 +12,6 @@ import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.iam.api.request.user.AssignUserRolesRequest;
 import com.company.hrms.iam.api.response.user.AssignUserRolesResponse;
 import com.company.hrms.iam.domain.model.aggregate.Role;
-import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.model.valueobject.RoleId;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.repository.IRoleRepository;
@@ -45,7 +44,7 @@ public class AssignUserRolesServiceImpl implements CommandApiService<AssignUserR
                 String userId = args[0];
 
                 // 1. 載入使用者
-                User user = userRepository.findById(new UserId(userId))
+                userRepository.findById(new UserId(userId))
                                 .orElseThrow(() -> new ResourceNotFoundException("USER_NOT_FOUND",
                                                 "使用者不存在: " + userId));
 

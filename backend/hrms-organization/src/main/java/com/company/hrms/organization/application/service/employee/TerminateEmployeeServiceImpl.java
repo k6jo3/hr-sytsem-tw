@@ -1,78 +1,77 @@
 package com.company.hrms.organization.application.service.employee;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.organization.api.request.employee.TerminateEmployeeRequest;
 import com.company.hrms.organization.api.response.employee.TerminateEmployeeResponse;
-import com.company.hrms.organization.domain.event.EmployeeTerminatedEvent;
-import com.company.hrms.organization.domain.model.aggregate.Employee;
-import com.company.hrms.organization.domain.model.entity.EmployeeHistory;
-import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
-import com.company.hrms.organization.domain.repository.IEmployeeHistoryRepository;
-import com.company.hrms.organization.domain.repository.IEmployeeRepository;
+import com.company.hrms.organization.application.service.employee.context.EmployeeContext;
+import com.company.hrms.organization.application.service.employee.task.LoadEmployeeTask;
+import com.company.hrms.organization.application.service.employee.task.PublishTerminatedEventTask;
+import com.company.hrms.organization.application.service.employee.task.SaveEmployeeTask;
+import com.company.hrms.organization.application.service.employee.task.SaveTerminationHistoryTask;
+import com.company.hrms.organization.application.service.employee.task.TerminateEmployeeTask;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 員工離職服務實作
+ * 員工離職服務實作 (Pipeline 模式)
+ * 
+ * <p>
+ * Pipeline 步驟：
+ * <ol>
+ * <li>LoadEmployeeTask - 載入員工資料</li>
+ * <li>TerminateEmployeeTask - 執行離職</li>
+ * <li>SaveEmployeeTask - 儲存員工</li>
+ * <li>SaveTerminationHistoryTask - 記錄離職歷程</li>
+ * <li>PublishTerminatedEventTask - 發布離職事件</li>
+ * </ol>
  */
 @Service("terminateEmployeeServiceImpl")
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class TerminateEmployeeServiceImpl
-        implements CommandApiService<TerminateEmployeeRequest, TerminateEmployeeResponse> {
+                implements CommandApiService<TerminateEmployeeRequest, TerminateEmployeeResponse> {
 
-    private final IEmployeeRepository employeeRepository;
-    private final IEmployeeHistoryRepository employeeHistoryRepository;
-    private final ApplicationEventPublisher eventPublisher;
+        // === Pipeline Tasks ===
+        private final LoadEmployeeTask loadEmployeeTask;
+        private final TerminateEmployeeTask terminateEmployeeTask;
+        private final SaveEmployeeTask saveEmployeeTask;
+        private final SaveTerminationHistoryTask saveTerminationHistoryTask;
+        private final PublishTerminatedEventTask publishTerminatedEventTask;
 
-    @Override
-    public TerminateEmployeeResponse execCommand(TerminateEmployeeRequest request,
-                                                  JWTModel currentUser,
-                                                  String... args) throws Exception {
-        String employeeId = args[0];
-        log.info("Terminating employee: {} on {}", employeeId, request.getTerminationDate());
+        @Override
+        public TerminateEmployeeResponse execCommand(TerminateEmployeeRequest request,
+                        JWTModel currentUser,
+                        String... args) throws Exception {
+                String employeeId = args[0];
+                log.info("離職流程開始: employeeId={}, date={}",
+                                employeeId, request.getTerminationDate());
 
-        // 查詢員工
-        Employee employee = employeeRepository.findById(new EmployeeId(employeeId))
-                .orElseThrow(() -> new IllegalArgumentException("員工不存在: " + employeeId));
+                // 建立 Pipeline Context
+                EmployeeContext context = new EmployeeContext(employeeId, request);
 
-        // 執行離職
-        employee.terminate(request.getTerminationDate(), request.getTerminationReason());
+                // 執行 Pipeline
+                BusinessPipeline.start(context)
+                                .next(loadEmployeeTask) // 載入員工
+                                .next(terminateEmployeeTask) // 執行離職
+                                .next(saveEmployeeTask) // 儲存員工
+                                .next(saveTerminationHistoryTask) // 記錄歷程
+                                .next(publishTerminatedEventTask) // 發布事件
+                                .execute();
 
-        // 儲存更新
-        employeeRepository.save(employee);
+                log.info("離職流程完成: employeeId={}", employeeId);
 
-        // 記錄人事歷程
-        EmployeeHistory history = EmployeeHistory.createTerminationHistory(
-                employee.getId(),
-                request.getTerminationDate(),
-                request.getTerminationReason(),
-                request.getRemarks()
-        );
-        employeeHistoryRepository.save(history);
-
-        // 發布領域事件
-        eventPublisher.publishEvent(new EmployeeTerminatedEvent(
-                employeeId,
-                employee.getEmployeeNumber(),
-                employee.getFullName(),
-                employee.getDepartmentId().getValue(),
-                request.getTerminationDate(),
-                request.getTerminationReason()
-        ));
-
-        log.info("Employee terminated successfully: {} on {}", employeeId, request.getTerminationDate());
-
-        return TerminateEmployeeResponse.success(
-                employeeId,
-                employee.getEmployeeNumber(),
-                employee.getFullName(),
-                request.getTerminationDate()
-        );
-    }
+                // 組裝回應
+                return TerminateEmployeeResponse.success(
+                                employeeId,
+                                context.getEmployee().getEmployeeNumber(),
+                                context.getEmployee().getFullName(),
+                                request.getTerminationDate());
+        }
 }

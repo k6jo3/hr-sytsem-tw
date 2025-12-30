@@ -1,10 +1,11 @@
 package com.company.hrms.organization.infrastructure.mapper;
 
-import com.company.hrms.organization.infrastructure.po.EducationPO;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.company.hrms.organization.infrastructure.po.EducationPO;
 
 /**
  * 學歷 MyBatis Mapper
@@ -51,4 +52,9 @@ public interface EducationMapper {
      * 檢查學歷 ID 是否存在
      */
     boolean existsById(@Param("id") String id);
+
+    /**
+     * 根據員工 ID 查詢最高學歷
+     */
+    EducationPO selectHighestByEmployeeId(@Param("employeeId") String employeeId);
 }

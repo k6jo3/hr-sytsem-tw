@@ -26,15 +26,15 @@ public class AssignPermissionsTask implements PipelineTask<RoleContext> {
         role.clearPermissions();
 
         // 指派新權限
-        if (request.getPermissionIds() != null) {
-            for (String permissionId : request.getPermissionIds()) {
+        if (request.permissionIds() != null) {
+            for (String permissionId : request.permissionIds()) {
                 role.assignPermission(PermissionId.of(permissionId));
             }
         }
 
         log.info("權限指派: roleId={}, permissionCount={}",
                 role.getId().getValue(),
-                request.getPermissionIds() != null ? request.getPermissionIds().size() : 0);
+                request.permissionIds() != null ? request.permissionIds().size() : 0);
     }
 
     @Override

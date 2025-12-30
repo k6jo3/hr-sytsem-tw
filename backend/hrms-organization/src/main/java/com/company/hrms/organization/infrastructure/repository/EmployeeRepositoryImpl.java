@@ -37,7 +37,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
 
     @Override
     public Optional<Employee> findById(EmployeeId id) {
-        return employeeDAO.findById(id.getValue())
+        return employeeDAO.findById(id.getValue().toString())
                 .map(this::toDomain);
     }
 
@@ -55,7 +55,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
 
     @Override
     public List<Employee> findByDepartmentId(DepartmentId departmentId) {
-        return employeeDAO.findByDepartmentId(departmentId.getValue()).stream()
+        return employeeDAO.findByDepartmentId(departmentId.getValue().toString()).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -90,7 +90,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     @Override
     public void save(Employee employee) {
         EmployeePO po = toPO(employee);
-        if (employeeDAO.existsById(employee.getId().getValue())) {
+        if (employeeDAO.existsById(employee.getId().getValue().toString())) {
             po.setUpdatedAt(LocalDateTime.now());
             employeeDAO.update(po);
         } else {
@@ -102,12 +102,12 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
 
     @Override
     public void delete(EmployeeId id) {
-        employeeDAO.deleteById(id.getValue());
+        employeeDAO.deleteById(id.getValue().toString());
     }
 
     @Override
     public boolean existsById(EmployeeId id) {
-        return employeeDAO.existsById(id.getValue());
+        return employeeDAO.existsById(id.getValue().toString());
     }
 
     @Override
@@ -167,6 +167,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
         if (po.getBankCode() != null) {
             bankAccount = new BankAccount(
                     po.getBankCode(),
+                    null, // bankName - PO 中無此欄位
                     po.getBankBranchCode(),
                     po.getBankAccountNumber(),
                     po.getBankAccountHolderName());
@@ -201,7 +202,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
 
     private EmployeePO toPO(Employee employee) {
         EmployeePO po = new EmployeePO();
-        po.setId(employee.getId().getValue());
+        po.setId(employee.getId().getValue().toString());
         po.setEmployeeNumber(employee.getEmployeeNumber());
         po.setFirstName(employee.getFirstName());
         po.setLastName(employee.getLastName());
@@ -233,7 +234,8 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
             po.setBankAccountHolderName(employee.getBankAccount().getAccountHolderName());
         }
 
-        po.setDepartmentId(employee.getDepartmentIdVO() != null ? employee.getDepartmentIdVO().getValue() : null);
+        po.setDepartmentId(
+                employee.getDepartmentIdVO() != null ? employee.getDepartmentIdVO().getValue().toString() : null);
         po.setJobTitle(employee.getJobTitle());
         po.setJobLevel(employee.getJobLevel());
         po.setEmploymentType(employee.getEmploymentType() != null ? employee.getEmploymentType().name() : null);
@@ -242,7 +244,8 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
         po.setProbationEndDate(employee.getProbationEndDate());
         po.setTerminationDate(employee.getTerminationDate());
         po.setTerminationReason(employee.getTerminationReason());
-        po.setSupervisorId(employee.getSupervisorId() != null ? employee.getSupervisorId().getValue() : null);
+        po.setSupervisorId(
+                employee.getSupervisorId() != null ? employee.getSupervisorId().getValue().toString() : null);
 
         return po;
     }

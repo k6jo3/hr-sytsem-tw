@@ -1,14 +1,15 @@
 package com.company.hrms.organization.domain.model.entity;
 
-import com.company.hrms.common.exception.DomainException;
-import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
-import com.company.hrms.organization.domain.model.valueobject.ExperienceId;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
+
+import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
+import com.company.hrms.organization.domain.model.valueobject.ExperienceId;
+
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * 工作經歷實體
@@ -56,11 +57,12 @@ public class WorkExperience {
 
     /**
      * 建立工作經歷記錄
-     * @param employeeId 員工 ID
+     * 
+     * @param employeeId  員工 ID
      * @param companyName 公司名稱
-     * @param jobTitle 職稱
-     * @param startDate 入職日期
-     * @param endDate 離職日期
+     * @param jobTitle    職稱
+     * @param startDate   入職日期
+     * @param endDate     離職日期
      * @param description 工作描述
      * @return 新的工作經歷實例
      */
@@ -109,7 +111,7 @@ public class WorkExperience {
             String description) {
         return WorkExperience.builder()
                 .id(id)
-                .employeeId(UUID.fromString(employeeId.getValue()))
+                .employeeId(employeeId.getValue())
                 .companyName(companyName)
                 .jobTitle(jobTitle)
                 .startDate(startDate)
@@ -126,14 +128,15 @@ public class WorkExperience {
 
     /**
      * 更新工作經歷
-     * @param company 公司
-     * @param jobTitle 職稱
-     * @param startDate 入職日期
-     * @param endDate 離職日期
+     * 
+     * @param company     公司
+     * @param jobTitle    職稱
+     * @param startDate   入職日期
+     * @param endDate     離職日期
      * @param description 描述
      */
     public void update(String company, String jobTitle, LocalDate startDate,
-                       LocalDate endDate, String description) {
+            LocalDate endDate, String description) {
         if (company != null && !company.isBlank()) {
             this.companyName = company;
         }
@@ -149,6 +152,7 @@ public class WorkExperience {
 
     /**
      * 是否為目前工作
+     * 
      * @return 是否為目前工作
      */
     public boolean isCurrent() {
@@ -157,6 +161,7 @@ public class WorkExperience {
 
     /**
      * 計算年資 (月)
+     * 
      * @return 年資月數
      */
     public long getMonthsWorked() {
@@ -166,6 +171,7 @@ public class WorkExperience {
 
     /**
      * 取得期間描述
+     * 
      * @return 期間描述
      */
     public String getPeriodDescription() {

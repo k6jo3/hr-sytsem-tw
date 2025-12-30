@@ -37,15 +37,7 @@ public class DepartmentRepositoryImpl implements IDepartmentRepository {
 
     @Override
     public List<Department> findByOrganizationId(OrganizationId organizationId) {
-        return departmentDAO.findByOrganizationId(organizationId.getValue()) // OrganizationId wraps String? need check.
-                // Assuming OrganizationId wraps String based on previous errors.
-                // If it wraps UUID, need .toString().
-                // I'll use .toString() to be safe if getValue() is Object/UUID.
-                // If getValue() is String, toString() is redundant but safe.
-                // Wait, OrganizationId.getValue() -> String?
-                // Let's assume .toString() on the ID object itself if possible, or
-                // getValue().toString().
-                // I'll check OrganizationId later if this fails.
+        return departmentDAO.findByOrganizationId(organizationId.getValue().toString())
                 .stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
@@ -61,7 +53,7 @@ public class DepartmentRepositoryImpl implements IDepartmentRepository {
 
     @Override
     public List<Department> findRootDepartments(OrganizationId organizationId) {
-        return departmentDAO.findRootDepartments(organizationId.getValue())
+        return departmentDAO.findRootDepartments(organizationId.getValue().toString())
                 .stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
@@ -126,7 +118,7 @@ public class DepartmentRepositoryImpl implements IDepartmentRepository {
         po.setNameEn(entity.getNameEn());
 
         if (entity.getOrganizationId() != null) {
-            po.setOrganizationId(entity.getOrganizationId().getValue());
+            po.setOrganizationId(entity.getOrganizationId().getValue().toString());
         }
 
         if (entity.getParentId() != null) {

@@ -27,15 +27,14 @@ class OrganizationTest {
                     "ORG001",
                     "台灣科技公司",
                     "Taiwan Tech Co.",
-                    "12345678"
-            );
+                    "12345678");
 
             // Then
             assertNotNull(org.getId());
             assertNotNull(org.getId().getValue());
             assertEquals("ORG001", org.getCode());
             assertEquals("台灣科技公司", org.getName());
-            assertEquals("Taiwan Tech Co.", org.getEnglishName());
+            assertEquals("Taiwan Tech Co.", org.getNameEn());
             assertEquals("12345678", org.getTaxId());
         }
 
@@ -44,8 +43,7 @@ class OrganizationTest {
         void shouldCreateWithActiveStatus() {
             // When
             Organization org = Organization.create(
-                    "ORG001", "台灣科技公司", null, null
-            );
+                    "ORG001", "台灣科技公司", null, null);
 
             // Then
             assertEquals(OrganizationStatus.ACTIVE, org.getStatus());
@@ -56,9 +54,8 @@ class OrganizationTest {
         @DisplayName("代碼為空時應拋出例外")
         void shouldThrowExceptionWhenCodeIsBlank() {
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    Organization.create("", "台灣科技公司", null, null)
-            );
+            DomainException exception = assertThrows(DomainException.class,
+                    () -> Organization.create("", "台灣科技公司", null, null));
             assertEquals("ORG_CODE_REQUIRED", exception.getErrorCode());
         }
 
@@ -66,9 +63,8 @@ class OrganizationTest {
         @DisplayName("名稱為空時應拋出例外")
         void shouldThrowExceptionWhenNameIsBlank() {
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    Organization.create("ORG001", "", null, null)
-            );
+            DomainException exception = assertThrows(DomainException.class,
+                    () -> Organization.create("ORG001", "", null, null));
             assertEquals("ORG_NAME_REQUIRED", exception.getErrorCode());
         }
     }
@@ -88,7 +84,7 @@ class OrganizationTest {
 
             // Then
             assertEquals("新名稱", org.getName());
-            assertEquals("New Name", org.getEnglishName());
+            assertEquals("New Name", org.getNameEn());
             assertEquals("12345678", org.getTaxId());
             assertEquals("地址", org.getAddress());
             assertEquals("02-12345678", org.getPhone());
@@ -102,9 +98,8 @@ class OrganizationTest {
             org.deactivate();
 
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    org.update("新名稱", null, null, null, null)
-            );
+            DomainException exception = assertThrows(DomainException.class,
+                    () -> org.update("新名稱", null, null, null, null));
             assertEquals("ORG_DEACTIVATED", exception.getErrorCode());
         }
     }

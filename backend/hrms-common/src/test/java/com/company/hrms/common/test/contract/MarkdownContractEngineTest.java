@@ -1,14 +1,14 @@
 package com.company.hrms.common.test.contract;
 
-import com.company.hrms.common.query.FilterUnit;
-import com.company.hrms.common.query.QueryBuilder;
-import com.company.hrms.common.query.QueryGroup;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
 
 /**
  * MarkdownContractEngine 單元測試
@@ -18,12 +18,12 @@ class MarkdownContractEngineTest {
     private MarkdownContractEngine engine;
 
     private static final String SAMPLE_CONTRACT = """
-        | 場景 ID | 測試描述 | 模擬角色 | 輸入 | 必須包含的過濾條件 |
-        | :--- | :--- | :--- | :--- | :--- |
-        | EMP_001 | 查詢在職員工 | EMPLOYEE | `{}` | `status = 'ACTIVE'`, `is_deleted = 0` |
-        | EMP_002 | HR查詢特定部門 | HR | `{}` | `department.id = 'D001'`, `is_deleted = 0` |
-        | EMP_003 | 模糊查詢姓名 | ADMIN | `{}` | `name LIKE '王'`, `is_deleted = 0` |
-        """;
+            | 場景 ID | 測試描述 | 模擬角色 | 輸入 | 必須包含的過濾條件 |
+            | :--- | :--- | :--- | :--- | :--- |
+            | EMP_001 | 查詢在職員工 | EMPLOYEE | `{}` | `status = 'ACTIVE'`, `is_deleted = 0` |
+            | EMP_002 | HR查詢特定部門 | HR | `{}` | `department.id = 'D001'`, `is_deleted = 0` |
+            | EMP_003 | 模糊查詢姓名 | ADMIN | `{}` | `name LIKE '王'`, `is_deleted = 0` |
+            """;
 
     @BeforeEach
     void setUp() {
@@ -39,13 +39,12 @@ class MarkdownContractEngineTest {
         void shouldPassWhenAllRequiredFiltersPresent() {
             // Given
             QueryGroup query = QueryBuilder.where()
-                .eq("status", "ACTIVE")
-                .eq("is_deleted", 0)
-                .build();
+                    .eq("status", "ACTIVE")
+                    .eq("is_deleted", 0)
+                    .build();
 
             // When & Then - 不應拋出例外
-            assertDoesNotThrow(() ->
-                engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
+            assertDoesNotThrow(() -> engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
         }
 
         @Test
@@ -53,13 +52,12 @@ class MarkdownContractEngineTest {
         void shouldRecognizeNestedFields() {
             // Given
             QueryGroup query = QueryBuilder.where()
-                .eq("department.id", "D001")
-                .eq("is_deleted", 0)
-                .build();
+                    .eq("department.id", "D001")
+                    .eq("is_deleted", 0)
+                    .build();
 
             // When & Then
-            assertDoesNotThrow(() ->
-                engine.assertContract(query, SAMPLE_CONTRACT, "EMP_002"));
+            assertDoesNotThrow(() -> engine.assertContract(query, SAMPLE_CONTRACT, "EMP_002"));
         }
 
         @Test
@@ -67,14 +65,13 @@ class MarkdownContractEngineTest {
         void shouldPassWithExtraFilters() {
             // Given - 除了必要條件外，還有額外條件
             QueryGroup query = QueryBuilder.where()
-                .eq("status", "ACTIVE")
-                .eq("is_deleted", 0)
-                .eq("company_id", "C001") // 額外條件
-                .build();
+                    .eq("status", "ACTIVE")
+                    .eq("is_deleted", 0)
+                    .eq("company_id", "C001") // 額外條件
+                    .build();
 
             // When & Then
-            assertDoesNotThrow(() ->
-                engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
+            assertDoesNotThrow(() -> engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
         }
     }
 
@@ -87,13 +84,13 @@ class MarkdownContractEngineTest {
         void shouldFailWhenMissingIsDeletedFilter() {
             // Given - 缺少 is_deleted = 0
             QueryGroup query = QueryBuilder.where()
-                .eq("status", "ACTIVE")
-                .build();
+                    .eq("status", "ACTIVE")
+                    .build();
 
             // When & Then
             ContractViolationException ex = assertThrows(
-                ContractViolationException.class,
-                () -> engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
+                    ContractViolationException.class,
+                    () -> engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
 
             assertTrue(ex.getMessage().contains("is_deleted"));
         }
@@ -103,13 +100,13 @@ class MarkdownContractEngineTest {
         void shouldFailWhenMissingStatusFilter() {
             // Given - 缺少 status = 'ACTIVE'
             QueryGroup query = QueryBuilder.where()
-                .eq("is_deleted", 0)
-                .build();
+                    .eq("is_deleted", 0)
+                    .build();
 
             // When & Then
             ContractViolationException ex = assertThrows(
-                ContractViolationException.class,
-                () -> engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
+                    ContractViolationException.class,
+                    () -> engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
 
             assertTrue(ex.getMessage().contains("status"));
         }
@@ -122,7 +119,7 @@ class MarkdownContractEngineTest {
 
             // When & Then
             assertThrows(IllegalArgumentException.class,
-                () -> engine.assertContract(query, SAMPLE_CONTRACT, "NON_EXIST"));
+                    () -> engine.assertContract(query, SAMPLE_CONTRACT, "NON_EXIST"));
         }
     }
 
@@ -135,13 +132,12 @@ class MarkdownContractEngineTest {
         void shouldIgnoreCaseForStringValues() {
             // Given
             QueryGroup query = QueryBuilder.where()
-                .eq("status", "active") // 小寫
-                .eq("is_deleted", 0)
-                .build();
+                    .eq("status", "active") // 小寫
+                    .eq("is_deleted", 0)
+                    .build();
 
             // When & Then - 合約中是 'ACTIVE' 大寫
-            assertDoesNotThrow(() ->
-                engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
+            assertDoesNotThrow(() -> engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
         }
 
         @Test
@@ -149,13 +145,12 @@ class MarkdownContractEngineTest {
         void shouldHandleNumericValues() {
             // Given
             QueryGroup query = QueryBuilder.where()
-                .eq("status", "ACTIVE")
-                .eq("is_deleted", 0) // Integer
-                .build();
+                    .eq("status", "ACTIVE")
+                    .eq("is_deleted", 0) // Integer
+                    .build();
 
             // When & Then
-            assertDoesNotThrow(() ->
-                engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
+            assertDoesNotThrow(() -> engine.assertContract(query, SAMPLE_CONTRACT, "EMP_001"));
         }
     }
 
@@ -168,12 +163,12 @@ class MarkdownContractEngineTest {
         void shouldCountTotalConditions() {
             // Given
             QueryGroup query = QueryBuilder.where()
-                .eq("a", 1)
-                .eq("b", 2)
-                .andGroup(sub -> sub
-                    .eq("c", 3)
-                    .eq("d", 4))
-                .build();
+                    .eq("a", 1)
+                    .eq("b", 2)
+                    .andGroup(sub -> sub
+                            .eq("c", 3)
+                            .eq("d", 4))
+                    .build();
 
             // When & Then
             assertEquals(4, query.getTotalConditionCount());
@@ -184,9 +179,9 @@ class MarkdownContractEngineTest {
         void shouldCheckFieldExistence() {
             // Given
             QueryGroup query = QueryBuilder.where()
-                .eq("status", "ACTIVE")
-                .eq("department.id", "D001")
-                .build();
+                    .eq("status", "ACTIVE")
+                    .eq("department.id", "D001")
+                    .build();
 
             // When & Then
             assertTrue(query.hasFilterForField("status"));
@@ -199,11 +194,11 @@ class MarkdownContractEngineTest {
         void shouldGetAllFiltersRecursively() {
             // Given
             QueryGroup query = QueryBuilder.where()
-                .eq("a", 1)
-                .orGroup(sub -> sub
-                    .eq("b", 2)
-                    .eq("c", 3))
-                .build();
+                    .eq("a", 1)
+                    .orGroup(sub -> sub
+                            .eq("b", 2)
+                            .eq("c", 3))
+                    .build();
 
             // When
             var allFilters = query.getAllFilters();

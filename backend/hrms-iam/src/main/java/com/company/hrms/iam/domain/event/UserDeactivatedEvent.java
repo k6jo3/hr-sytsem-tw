@@ -1,7 +1,5 @@
 package com.company.hrms.iam.domain.event;
 
-import java.time.LocalDateTime;
-
 import com.company.hrms.common.domain.event.DomainEvent;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 

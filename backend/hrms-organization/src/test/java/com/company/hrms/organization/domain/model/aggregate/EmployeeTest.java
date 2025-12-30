@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.company.hrms.common.exception.DomainException;
-import com.company.hrms.organization.domain.model.valueobject.*;
+import com.company.hrms.organization.domain.model.valueobject.EmploymentStatus;
+import com.company.hrms.organization.domain.model.valueobject.EmploymentType;
+import com.company.hrms.organization.domain.model.valueobject.Gender;
 
 /**
  * Employee 聚合根單元測試
@@ -72,16 +74,13 @@ class EmployeeTest {
         @DisplayName("員工編號為空時應拋出例外")
         void shouldThrowExceptionWhenEmployeeNumberIsBlank() {
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    Employee.onboard(
-                            "",
-                            "大明", "王", "A123456789",
-                            LocalDate.of(1990, 1, 1), Gender.MALE,
-                            "wang@company.com", "0912345678",
-                            ORG_ID, DEPT_ID, "軟體工程師",
-                            EmploymentType.FULL_TIME, HIRE_DATE, 3
-                    )
-            );
+            DomainException exception = assertThrows(DomainException.class, () -> Employee.onboard(
+                    "",
+                    "大明", "王", "A123456789",
+                    LocalDate.of(1990, 1, 1), Gender.MALE,
+                    "wang@company.com", "0912345678",
+                    ORG_ID, DEPT_ID, "軟體工程師",
+                    EmploymentType.FULL_TIME, HIRE_DATE, 3));
             assertEquals("EMPLOYEE_NUMBER_REQUIRED", exception.getErrorCode());
         }
 
@@ -89,16 +88,13 @@ class EmployeeTest {
         @DisplayName("姓名為空時應拋出例外")
         void shouldThrowExceptionWhenNameIsBlank() {
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    Employee.onboard(
-                            "EMP001",
-                            "", "王", "A123456789",
-                            LocalDate.of(1990, 1, 1), Gender.MALE,
-                            "wang@company.com", "0912345678",
-                            ORG_ID, DEPT_ID, "軟體工程師",
-                            EmploymentType.FULL_TIME, HIRE_DATE, 3
-                    )
-            );
+            DomainException exception = assertThrows(DomainException.class, () -> Employee.onboard(
+                    "EMP001",
+                    "", "王", "A123456789",
+                    LocalDate.of(1990, 1, 1), Gender.MALE,
+                    "wang@company.com", "0912345678",
+                    ORG_ID, DEPT_ID, "軟體工程師",
+                    EmploymentType.FULL_TIME, HIRE_DATE, 3));
             assertEquals("FIRST_NAME_REQUIRED", exception.getErrorCode());
         }
 
@@ -106,16 +102,13 @@ class EmployeeTest {
         @DisplayName("組織 ID 為空時應拋出例外")
         void shouldThrowExceptionWhenOrganizationIdIsNull() {
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    Employee.onboard(
-                            "EMP001",
-                            "大明", "王", "A123456789",
-                            LocalDate.of(1990, 1, 1), Gender.MALE,
-                            "wang@company.com", "0912345678",
-                            null, DEPT_ID, "軟體工程師",
-                            EmploymentType.FULL_TIME, HIRE_DATE, 3
-                    )
-            );
+            DomainException exception = assertThrows(DomainException.class, () -> Employee.onboard(
+                    "EMP001",
+                    "大明", "王", "A123456789",
+                    LocalDate.of(1990, 1, 1), Gender.MALE,
+                    "wang@company.com", "0912345678",
+                    null, DEPT_ID, "軟體工程師",
+                    EmploymentType.FULL_TIME, HIRE_DATE, 3));
             assertEquals("ORG_ID_REQUIRED", exception.getErrorCode());
         }
     }
@@ -336,8 +329,9 @@ class EmployeeTest {
         @Test
         @DisplayName("非在職員工申請留停應拋出例外")
         void shouldThrowExceptionWhenNotActive() {
-            // Given
-            Employee employee = createTestEmployee(3); // 試用期
+            // Given - 已離職員工
+            Employee employee = createTestEmployee(0);
+            employee.terminate(LocalDate.now(), "自願離職");
 
             // When & Then
             DomainException exception = assertThrows(DomainException.class,
@@ -362,8 +356,7 @@ class EmployeeTest {
                     LocalDate.of(1990, 1, 1), Gender.MALE,
                     "wang@company.com", "0912345678",
                     ORG_ID, DEPT_ID, "軟體工程師",
-                    EmploymentType.FULL_TIME, LocalDate.now().minusYears(5), 0
-            );
+                    EmploymentType.FULL_TIME, LocalDate.now().minusYears(5), 0);
 
             // When
             int seniority = employee.calculateSeniority();
@@ -386,7 +379,6 @@ class EmployeeTest {
                 LocalDate.of(1990, 1, 1), Gender.MALE,
                 "wang@company.com", "0912345678",
                 ORG_ID, DEPT_ID, "軟體工程師",
-                EmploymentType.FULL_TIME, HIRE_DATE, probationMonths
-        );
+                EmploymentType.FULL_TIME, HIRE_DATE, probationMonths);
     }
 }

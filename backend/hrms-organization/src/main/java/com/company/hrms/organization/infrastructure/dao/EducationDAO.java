@@ -1,12 +1,14 @@
 package com.company.hrms.organization.infrastructure.dao;
 
-import com.company.hrms.organization.infrastructure.mapper.EducationMapper;
-import com.company.hrms.organization.infrastructure.po.EducationPO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+import com.company.hrms.organization.infrastructure.mapper.EducationMapper;
+import com.company.hrms.organization.infrastructure.po.EducationPO;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 學歷 DAO
@@ -47,5 +49,9 @@ public class EducationDAO {
 
     public boolean existsById(String id) {
         return educationMapper.existsById(id);
+    }
+
+    public Optional<EducationPO> findHighestByEmployeeId(String employeeId) {
+        return Optional.ofNullable(educationMapper.selectHighestByEmployeeId(employeeId));
     }
 }

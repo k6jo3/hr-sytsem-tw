@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentStatus;
+import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
 
 /**
  * Department 聚合根單元測試
@@ -31,15 +32,14 @@ class DepartmentTest {
                     ORG_ID,
                     "DEPT001",
                     "研發部",
-                    null
-            );
+                    null);
 
             // Then
             assertNotNull(dept.getId());
             assertNotNull(dept.getId().getValue());
             assertEquals("DEPT001", dept.getCode());
             assertEquals("研發部", dept.getName());
-            assertEquals(ORG_ID, dept.getOrganizationId());
+            assertEquals(ORG_ID.toString(), dept.getOrganizationId().getValue().toString());
             assertNull(dept.getParentId());
         }
 
@@ -65,21 +65,19 @@ class DepartmentTest {
                     ORG_ID,
                     "DEPT001-01",
                     "前端組",
-                    parent.getId().getValue()
-            );
+                    parent.getId().getValue().toString());
 
             // Then
             assertNotNull(child.getParentId());
-            assertEquals(parent.getId().getValue(), child.getParentId());
+            assertEquals(parent.getId().getValue(), child.getParentId().getValue());
         }
 
         @Test
         @DisplayName("代碼為空時應拋出例外")
         void shouldThrowExceptionWhenCodeIsBlank() {
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    Department.create(ORG_ID, "", "研發部", null)
-            );
+            DomainException exception = assertThrows(DomainException.class,
+                    () -> Department.create(ORG_ID, "", "研發部", null));
             assertEquals("DEPT_CODE_REQUIRED", exception.getErrorCode());
         }
 
@@ -87,9 +85,8 @@ class DepartmentTest {
         @DisplayName("名稱為空時應拋出例外")
         void shouldThrowExceptionWhenNameIsBlank() {
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    Department.create(ORG_ID, "DEPT001", "", null)
-            );
+            DomainException exception = assertThrows(DomainException.class,
+                    () -> Department.create(ORG_ID, "DEPT001", "", null));
             assertEquals("DEPT_NAME_REQUIRED", exception.getErrorCode());
         }
 
@@ -97,9 +94,8 @@ class DepartmentTest {
         @DisplayName("組織 ID 為空時應拋出例外")
         void shouldThrowExceptionWhenOrganizationIdIsNull() {
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    Department.create(null, "DEPT001", "研發部", null)
-            );
+            DomainException exception = assertThrows(DomainException.class,
+                    () -> Department.create(null, "DEPT001", "研發部", null));
             assertEquals("ORG_ID_REQUIRED", exception.getErrorCode());
         }
     }
@@ -130,9 +126,7 @@ class DepartmentTest {
             dept.deactivate();
 
             // When & Then
-            DomainException exception = assertThrows(DomainException.class, () ->
-                    dept.update("新名稱", null)
-            );
+            DomainException exception = assertThrows(DomainException.class, () -> dept.update("新名稱", null));
             assertEquals("DEPT_DEACTIVATED", exception.getErrorCode());
         }
     }
@@ -152,7 +146,7 @@ class DepartmentTest {
             dept.assignManager(managerId);
 
             // Then
-            assertEquals(managerId, dept.getManagerId());
+            assertEquals(managerId.toString(), dept.getManagerId().getValue().toString());
         }
 
         @Test
@@ -185,7 +179,7 @@ class DepartmentTest {
             dept.moveTo(newParentId);
 
             // Then
-            assertEquals(newParentId, dept.getParentId());
+            assertEquals(newParentId.toString(), dept.getParentId().getValue().toString());
         }
 
         @Test
@@ -264,7 +258,7 @@ class DepartmentTest {
 
             Department dept2 = Department.builder()
                     .id(dept1.getId())
-                    .organizationId(ORG_ID)
+                    .organizationId(new OrganizationId(ORG_ID.toString()))
                     .code("DEPT002")
                     .name("名稱2")
                     .status(DepartmentStatus.ACTIVE)

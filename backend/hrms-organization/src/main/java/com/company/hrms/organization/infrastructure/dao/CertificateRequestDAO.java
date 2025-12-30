@@ -1,12 +1,14 @@
 package com.company.hrms.organization.infrastructure.dao;
 
-import com.company.hrms.organization.infrastructure.mapper.CertificateRequestMapper;
-import com.company.hrms.organization.infrastructure.po.CertificateRequestPO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+import com.company.hrms.organization.infrastructure.mapper.CertificateRequestMapper;
+import com.company.hrms.organization.infrastructure.po.CertificateRequestPO;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 證明文件申請 DAO
@@ -47,6 +49,14 @@ public class CertificateRequestDAO {
 
     public void deleteById(String id) {
         certificateRequestMapper.deleteById(id);
+    }
+
+    public List<CertificateRequestPO> findByEmployeeIdAndStatus(String employeeId, String status) {
+        return certificateRequestMapper.selectByEmployeeIdAndStatus(employeeId, status);
+    }
+
+    public List<CertificateRequestPO> findByEmployeeIdAndCertificateType(String employeeId, String certificateType) {
+        return certificateRequestMapper.selectByEmployeeIdAndCertificateType(employeeId, certificateType);
     }
 
     public boolean existsById(String id) {

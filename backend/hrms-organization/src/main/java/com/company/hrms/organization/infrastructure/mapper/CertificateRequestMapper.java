@@ -1,10 +1,11 @@
 package com.company.hrms.organization.infrastructure.mapper;
 
-import com.company.hrms.organization.infrastructure.po.CertificateRequestPO;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.company.hrms.organization.infrastructure.po.CertificateRequestPO;
 
 /**
  * 證明文件申請 MyBatis Mapper
@@ -56,4 +57,18 @@ public interface CertificateRequestMapper {
      * 檢查申請 ID 是否存在
      */
     boolean existsById(@Param("id") String id);
+
+    /**
+     * 根據員工 ID 和狀態查詢申請
+     */
+    List<CertificateRequestPO> selectByEmployeeIdAndStatus(
+            @Param("employeeId") String employeeId,
+            @Param("status") String status);
+
+    /**
+     * 根據員工 ID 和證明類型查詢申請
+     */
+    List<CertificateRequestPO> selectByEmployeeIdAndCertificateType(
+            @Param("employeeId") String employeeId,
+            @Param("certificateType") String certificateType);
 }

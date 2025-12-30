@@ -29,7 +29,7 @@ class EmployeeIdTest {
 
             // Then
             assertNotNull(id);
-            assertEquals(uuidString, id.getValue());
+            assertEquals(uuidString, id.getValue().toString());
         }
 
         @Test
@@ -41,7 +41,7 @@ class EmployeeIdTest {
             // Then
             assertNotNull(id);
             assertNotNull(id.getValue());
-            assertDoesNotThrow(() -> UUID.fromString(id.getValue()));
+            assertDoesNotThrow(() -> UUID.fromString(id.getValue().toString()));
         }
 
         @Test
@@ -53,7 +53,7 @@ class EmployeeIdTest {
 
             // Then
             assertNotEquals(id1, id2);
-            assertNotEquals(id1.getValue(), id2.getValue());
+            assertNotEquals(id1.getValue().toString(), id2.getValue().toString());
         }
     }
 
