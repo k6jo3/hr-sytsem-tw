@@ -1,18 +1,15 @@
 package com.company.hrms.attendance.application.service.checkout;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.attendance.api.request.attendance.CheckOutRequest;
 import com.company.hrms.attendance.api.response.attendance.CheckOutResponse;
-import com.company.hrms.attendance.domain.model.aggregate.AttendanceRecord;
-import com.company.hrms.attendance.domain.model.aggregate.Shift;
-import com.company.hrms.attendance.domain.repository.IAttendanceRecordRepository;
-import com.company.hrms.attendance.domain.repository.IShiftRepository;
+import com.company.hrms.attendance.application.service.checkout.context.CheckOutContext;
+import com.company.hrms.attendance.application.service.checkout.task.PerformCheckOutTask;
+import com.company.hrms.attendance.application.service.checkout.task.SaveCheckOutRecordTask;
+import com.company.hrms.attendance.application.service.checkout.task.ValidateCheckOutTask;
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 
@@ -20,7 +17,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 下班打卡服務實作
+ * 下班打卡服務實作 (Pipeline 模式)
+ * 
+ * <p>
+ * Pipeline 步驟：
+ * <ol>
+ * <li>ValidateCheckOutTask - 驗證打卡條件（是否已上班打卡、是否已下班打卡）</li>
+ * <li>PerformCheckOutTask - 執行打卡並計算早退/工時</li>
+ * <li>SaveCheckOutRecordTask - 儲存打卡記錄</li>
+ * </ol>
  */
 @Service("checkOutServiceImpl")
 @RequiredArgsConstructor
@@ -28,50 +33,32 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class CheckOutServiceImpl implements CommandApiService<CheckOutRequest, CheckOutResponse> {
 
-    private final IAttendanceRecordRepository attendanceRecordRepository;
-    private final IShiftRepository shiftRepository;
+    private final ValidateCheckOutTask validateCheckOutTask;
+    private final PerformCheckOutTask performCheckOutTask;
+    private final SaveCheckOutRecordTask saveCheckOutRecordTask;
 
     @Override
     public CheckOutResponse execCommand(CheckOutRequest request, JWTModel currentUser, String... args)
             throws Exception {
-        String employeeId = request.getEmployeeId();
-        LocalDateTime checkOutTime = request.getCheckOutTime() != null
-                ? request.getCheckOutTime()
-                : LocalDateTime.now();
-        LocalDate today = checkOutTime.toLocalDate();
+        log.info("下班打卡流程開始: employeeId={}", request.getEmployeeId());
 
-        log.info("下班打卡流程開始: employeeId={}", employeeId);
+        CheckOutContext context = new CheckOutContext(request, currentUser.getTenantId());
 
-        // Find today's record
-        var records = attendanceRecordRepository.findByEmployeeIdAndDate(employeeId, today);
-        if (records.isEmpty()) {
-            throw new IllegalStateException("今日尚未上班打卡");
-        }
+        BusinessPipeline.start(context)
+                .next(validateCheckOutTask)
+                .next(performCheckOutTask)
+                .next(saveCheckOutRecordTask)
+                .execute();
 
-        AttendanceRecord record = records.get(0);
-        if (record.getCheckOutTime() != null) {
-            throw new IllegalStateException("今日已完成下班打卡");
-        }
-
-        // Get shift
-        Shift shift = shiftRepository.findAll().stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("找不到班別設定"));
-
-        // Perform check-out
-        record.checkOut(checkOutTime, shift);
-        attendanceRecordRepository.save(record);
-
-        // Calculate working hours
-        double workingHours = Duration.between(record.getCheckInTime(), checkOutTime).toMinutes() / 60.0;
+        var record = context.getRecord();
 
         log.info("下班打卡流程完成: recordId={}", record.getId().getValue());
 
         return CheckOutResponse.success(
                 record.getId().getValue(),
                 record.getCheckInTime(),
-                checkOutTime,
-                workingHours,
+                record.getCheckOutTime(),
+                context.getWorkingHours(),
                 record.isEarlyLeave(),
                 record.getEarlyLeaveMinutes());
     }
