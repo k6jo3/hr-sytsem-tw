@@ -57,8 +57,8 @@ public class LeaveApplication extends AggregateRoot<ApplicationId> {
     }
 
     public void cancel() {
-        if (this.status == ApplicationStatus.REJECTED) {
-            throw new IllegalStateException("Cannot cancel rejected applications");
+        if (this.status != ApplicationStatus.PENDING) {
+            throw new IllegalStateException("Only pending applications can be cancelled");
         }
         this.status = ApplicationStatus.CANCELLED;
     }

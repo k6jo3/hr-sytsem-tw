@@ -28,10 +28,12 @@ public class AttendanceRecord extends AggregateRoot<RecordId> {
 
     public AttendanceRecord(RecordId id, String employeeId, LocalDate date) {
         super(id);
-        if (employeeId == null)
-            throw new IllegalArgumentException("EmployeeID cannot be null");
-        if (date == null)
+        if (employeeId == null || employeeId.isBlank()) {
+            throw new IllegalArgumentException("EmployeeID cannot be null or blank");
+        }
+        if (date == null) {
             throw new IllegalArgumentException("Date cannot be null");
+        }
 
         this.employeeId = employeeId;
         this.date = date;
