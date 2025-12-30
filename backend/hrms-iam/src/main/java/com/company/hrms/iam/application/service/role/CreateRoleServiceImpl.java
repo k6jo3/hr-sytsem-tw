@@ -3,60 +3,54 @@ package com.company.hrms.iam.application.service.role;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.iam.api.request.role.CreateRoleRequest;
 import com.company.hrms.iam.api.response.role.CreateRoleResponse;
-import com.company.hrms.iam.domain.model.aggregate.Role;
-import com.company.hrms.iam.domain.model.valueobject.PermissionId;
-import com.company.hrms.iam.domain.repository.IRoleRepository;
+import com.company.hrms.iam.application.service.role.context.RoleContext;
+import com.company.hrms.iam.application.service.role.task.CheckRoleCodeExistenceTask;
+import com.company.hrms.iam.application.service.role.task.CreateRoleAggregateTask;
+import com.company.hrms.iam.application.service.role.task.SaveRoleTask;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * 建立角色 Application Service
- *
+ * 建立角色 Application Service (Pipeline 模式)
+ * 
  * <p>
- * 命名規範：{動詞}{名詞}ServiceImpl
- * </p>
- * <p>
- * 對應 Controller 方法：createRole
+ * 對應 API: POST /api/v1/roles
  * </p>
  */
 @Service("createRoleServiceImpl")
+@RequiredArgsConstructor
+@Slf4j
 @Transactional
-public class CreateRoleServiceImpl implements CommandApiService<CreateRoleRequest, CreateRoleResponse> {
+public class CreateRoleServiceImpl
+        implements CommandApiService<CreateRoleRequest, CreateRoleResponse> {
 
-    private final IRoleRepository roleRepository;
-
-    public CreateRoleServiceImpl(IRoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
+    private final CheckRoleCodeExistenceTask checkRoleCodeExistenceTask;
+    private final CreateRoleAggregateTask createRoleAggregateTask;
+    private final SaveRoleTask saveRoleTask;
 
     @Override
     public CreateRoleResponse execCommand(CreateRoleRequest request, JWTModel currentUser, String... args)
             throws Exception {
-        // 檢查角色代碼是否已存在
+
         String tenantId = currentUser != null ? currentUser.getTenantId() : null;
-        if (roleRepository.existsByRoleCodeAndTenantId(request.getRoleCode(), tenantId)) {
-            throw new DomainException("ROLE_CODE_EXISTS", "角色代碼已存在");
-        }
+        log.info("建立角色: code={}", request.getRoleCode());
 
-        // 建立角色
-        Role role = Role.create(
-                request.getRoleName(),
-                request.getRoleCode(),
-                request.getDescription(),
-                tenantId);
+        RoleContext context = new RoleContext(request, tenantId);
 
-        // 指派權限
-        if (request.getPermissionIds() != null && !request.getPermissionIds().isEmpty()) {
-            for (String permissionId : request.getPermissionIds()) {
-                role.assignPermission(PermissionId.of(permissionId));
-            }
-        }
+        BusinessPipeline.start(context)
+                .next(checkRoleCodeExistenceTask)
+                .next(createRoleAggregateTask)
+                .next(saveRoleTask)
+                .execute();
 
-        // 儲存角色
-        roleRepository.save(role);
+        var role = context.getRole();
+        log.info("角色建立成功: id={}, code={}", role.getId().getValue(), role.getRoleCode());
 
         return CreateRoleResponse.builder()
                 .roleId(role.getId().getValue())

@@ -1,15 +1,15 @@
 package com.company.hrms.organization.domain.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import com.company.hrms.organization.domain.model.aggregate.Employee;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
 import com.company.hrms.organization.domain.model.valueobject.Email;
 import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
 import com.company.hrms.organization.domain.model.valueobject.EmploymentStatus;
 import com.company.hrms.organization.domain.model.valueobject.NationalId;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * 員工 Repository 介面
@@ -18,6 +18,7 @@ public interface IEmployeeRepository {
 
     /**
      * 依 ID 查詢
+     * 
      * @param id 員工 ID
      * @return 員工
      */
@@ -25,6 +26,7 @@ public interface IEmployeeRepository {
 
     /**
      * 依員工編號查詢
+     * 
      * @param employeeNumber 員工編號
      * @return 員工
      */
@@ -32,6 +34,7 @@ public interface IEmployeeRepository {
 
     /**
      * 依 Email 查詢
+     * 
      * @param email Email
      * @return 員工
      */
@@ -39,6 +42,7 @@ public interface IEmployeeRepository {
 
     /**
      * 依部門 ID 查詢員工
+     * 
      * @param departmentId 部門 ID
      * @return 員工列表
      */
@@ -46,6 +50,7 @@ public interface IEmployeeRepository {
 
     /**
      * 條件查詢 (分頁)
+     * 
      * @param criteria 查詢條件
      * @return 員工列表
      */
@@ -53,6 +58,7 @@ public interface IEmployeeRepository {
 
     /**
      * 條件查詢筆數
+     * 
      * @param criteria 查詢條件
      * @return 筆數
      */
@@ -60,18 +66,21 @@ public interface IEmployeeRepository {
 
     /**
      * 儲存員工
+     * 
      * @param employee 員工
      */
     void save(Employee employee);
 
     /**
      * 刪除員工
+     * 
      * @param id 員工 ID
      */
     void delete(EmployeeId id);
 
     /**
      * 檢查員工 ID 是否存在
+     * 
      * @param id 員工 ID
      * @return 是否存在
      */
@@ -79,6 +88,7 @@ public interface IEmployeeRepository {
 
     /**
      * 檢查員工編號是否存在
+     * 
      * @param employeeNumber 員工編號
      * @return 是否存在
      */
@@ -86,6 +96,7 @@ public interface IEmployeeRepository {
 
     /**
      * 檢查 Email 是否存在
+     * 
      * @param email Email
      * @return 是否存在
      */
@@ -93,6 +104,7 @@ public interface IEmployeeRepository {
 
     /**
      * 檢查身分證號是否存在
+     * 
      * @param nationalId 身分證號
      * @return 是否存在
      */
@@ -100,6 +112,7 @@ public interface IEmployeeRepository {
 
     /**
      * 檢查身分證號是否存在 (使用 Value Object)
+     * 
      * @param nationalId 身分證號
      * @return 是否存在
      */
@@ -107,6 +120,7 @@ public interface IEmployeeRepository {
 
     /**
      * 檢查 Email 是否存在 (使用 Value Object)
+     * 
      * @param email Email
      * @return 是否存在
      */
@@ -115,10 +129,19 @@ public interface IEmployeeRepository {
     /**
      * 查詢特定前綴的最大流水號
      * 用於生成員工編號
+     * 
      * @param prefix 員工編號前綴 (例如: EMP202412-)
      * @return 最大流水號，如果沒有則回傳 0
      */
     int findMaxSequenceByPrefix(String prefix);
+
+    /**
+     * 計算組織下的員工數
+     * 
+     * @param organizationId 組織 ID
+     * @return 員工數
+     */
+    int countByOrganizationId(com.company.hrms.organization.domain.model.valueobject.OrganizationId organizationId);
 
     /**
      * 查詢條件類別

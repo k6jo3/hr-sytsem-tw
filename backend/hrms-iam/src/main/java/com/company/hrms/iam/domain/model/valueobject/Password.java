@@ -1,24 +1,27 @@
 package com.company.hrms.iam.domain.model.valueobject;
 
-import com.company.hrms.common.exception.DomainException;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import com.company.hrms.common.exception.DomainException;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
  * Password 值物件
  * 封裝密碼強度驗證邏輯
  *
- * <p>密碼要求：</p>
+ * <p>
+ * 密碼要求：
+ * </p>
  * <ul>
- *   <li>至少 8 個字元</li>
- *   <li>至少一個大寫字母</li>
- *   <li>至少一個小寫字母</li>
- *   <li>至少一個數字</li>
- *   <li>至少一個特殊字元 (!@#$%^&*()_+-=[]{}|;':\",./<>?)</li>
+ * <li>至少 8 個字元</li>
+ * <li>至少一個大寫字母</li>
+ * <li>至少一個小寫字母</li>
+ * <li>至少一個數字</li>
+ * <li>至少一個特殊字元 (!@#$%^&*()_+-=[]{}|;':\",./<>?)</li>
  * </ul>
  */
 @Getter
@@ -42,6 +45,7 @@ public class Password {
 
     /**
      * 工廠方法：建立並驗證密碼
+     * 
      * @param rawPassword 原始密碼
      * @return Password 值物件
      * @throws DomainException 若密碼不符合強度要求
@@ -53,10 +57,11 @@ public class Password {
 
     /**
      * 驗證密碼強度
+     * 
      * @param password 密碼
      * @throws DomainException 若密碼不符合要求
      */
-    private static void validate(String password) {
+    public static void validate(String password) {
         // 檢查是否為空
         if (password == null || password.isBlank()) {
             throw new DomainException("PASSWORD_REQUIRED", "密碼不可為空");
@@ -92,6 +97,7 @@ public class Password {
 
     /**
      * 檢查密碼是否符合強度要求
+     * 
      * @return 是否為強密碼
      */
     public boolean isStrong() {

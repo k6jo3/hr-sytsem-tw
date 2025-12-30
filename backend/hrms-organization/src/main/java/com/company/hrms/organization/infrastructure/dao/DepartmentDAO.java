@@ -1,12 +1,14 @@
 package com.company.hrms.organization.infrastructure.dao;
 
-import com.company.hrms.organization.infrastructure.mapper.DepartmentMapper;
-import com.company.hrms.organization.infrastructure.po.DepartmentPO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+import com.company.hrms.organization.infrastructure.mapper.DepartmentMapper;
+import com.company.hrms.organization.infrastructure.po.DepartmentPO;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 部門 DAO
@@ -67,5 +69,9 @@ public class DepartmentDAO {
 
     public int countByParentId(String parentId) {
         return departmentMapper.countByParentId(parentId);
+    }
+
+    public int countByOrganizationId(String organizationId) {
+        return departmentMapper.countByOrganizationId(organizationId);
     }
 }

@@ -249,4 +249,10 @@
         WHERE employee_number LIKE CONCAT(#{prefix}, '%')
     </select>
 
+    <select id="countByOrganizationId" resultType="int">
+        SELECT COUNT(*) FROM employees e
+        JOIN departments d ON e.department_id = d.id
+        WHERE d.organization_id = #{organizationId}
+    </select>
+
 </mapper>

@@ -89,4 +89,18 @@ public class UserDAO {
     public boolean existsByEmail(String email) {
         return userMapper.existsByEmail(email);
     }
+
+    /**
+     * 刪除使用者的所有角色關聯
+     */
+    public void deleteUserRoles(String userId) {
+        userMapper.deleteUserRoles(userId);
+    }
+
+    /**
+     * 新增使用者角色關聯
+     */
+    public void insertUserRole(String userId, String roleId) {
+        userMapper.insertUserRole(userId, roleId);
+    }
 }

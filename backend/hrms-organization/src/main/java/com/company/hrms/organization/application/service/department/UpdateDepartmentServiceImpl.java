@@ -1,69 +1,82 @@
 package com.company.hrms.organization.application.service.department;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.organization.api.request.department.UpdateDepartmentRequest;
 import com.company.hrms.organization.api.response.department.DepartmentDetailResponse;
-import com.company.hrms.organization.domain.model.aggregate.Department;
-import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
-import com.company.hrms.organization.domain.repository.IDepartmentRepository;
+import com.company.hrms.organization.application.service.department.context.DepartmentContext;
+import com.company.hrms.organization.application.service.department.task.LoadDeptStatsTask;
+import com.company.hrms.organization.application.service.department.task.LoadDeptTask;
+import com.company.hrms.organization.application.service.department.task.SaveDeptTask;
+import com.company.hrms.organization.application.service.department.task.UpdateDeptAggregateTask;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 更新部門服務實作
+ * 更新部門 Application Service (Pipeline 模式)
  */
 @Service("updateDepartmentServiceImpl")
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
 public class UpdateDepartmentServiceImpl
-        implements CommandApiService<UpdateDepartmentRequest, DepartmentDetailResponse> {
+                implements CommandApiService<UpdateDepartmentRequest, DepartmentDetailResponse> {
 
-    private final IDepartmentRepository departmentRepository;
+        private final LoadDeptTask loadDeptTask;
+        private final UpdateDeptAggregateTask updateDeptAggregateTask;
+        private final SaveDeptTask saveDeptTask;
+        private final LoadDeptStatsTask loadDeptStatsTask;
 
-    @Override
-    public DepartmentDetailResponse execCommand(UpdateDepartmentRequest request,
-                                                 JWTModel currentUser,
-                                                 String... args) throws Exception {
-        String departmentId = args[0];
-        log.info("Updating department: {}", departmentId);
+        @Override
+        public DepartmentDetailResponse execCommand(UpdateDepartmentRequest request,
+                        JWTModel currentUser, String... args) throws Exception {
 
-        Department department = departmentRepository.findById(new DepartmentId(departmentId))
-                .orElseThrow(() -> new IllegalArgumentException("部門不存在: " + departmentId));
+                String departmentId = args[0];
+                log.info("更新部門: id={}", departmentId);
 
-        // 更新部門資訊
-        department.update(
-                request.getName() != null ? request.getName() : department.getName(),
-                request.getNameEn() != null ? request.getNameEn() : department.getNameEn(),
-                request.getDescription() != null ? request.getDescription() : department.getDescription()
-        );
+                DepartmentContext context = new DepartmentContext(departmentId, request);
 
-        // 儲存更新
-        departmentRepository.save(department);
+                BusinessPipeline.start(context)
+                                .next(loadDeptTask)
+                                .next(updateDeptAggregateTask)
+                                .next(saveDeptTask)
+                                .next(loadDeptStatsTask)
+                                .execute();
 
-        log.info("Department updated successfully: {}", departmentId);
+                log.info("部門更新成功: id={}", departmentId);
+                return buildResponse(context);
+        }
 
-        return buildDepartmentDetailResponse(department);
-    }
+        private DepartmentDetailResponse buildResponse(DepartmentContext context) {
+                var dept = context.getDepartment();
 
-    private DepartmentDetailResponse buildDepartmentDetailResponse(Department department) {
-        return DepartmentDetailResponse.builder()
-                .departmentId(department.getId().getValue())
-                .code(department.getCode())
-                .name(department.getName())
-                .nameEn(department.getNameEn())
-                .organizationId(department.getOrganizationId().getValue())
-                .parentId(department.getParentId() != null ? department.getParentId().getValue() : null)
-                .level(department.getLevel())
-                .path(department.getPath())
-                .managerId(department.getManagerId() != null ? department.getManagerId().getValue() : null)
-                .status(department.getStatus().name())
-                .statusDisplay(department.getStatus().getDisplayName())
-                .sortOrder(department.getSortOrder())
-                .description(department.getDescription())
-                .build();
-    }
+                return DepartmentDetailResponse.builder()
+                                .departmentId(dept.getId().getValue().toString())
+                                .code(dept.getCode())
+                                .name(dept.getName())
+                                .nameEn(dept.getNameEn())
+                                .organizationId(dept.getOrganizationId() != null
+                                                ? dept.getOrganizationId().getValue().toString()
+                                                : null)
+                                .organizationName(context.getOrganizationName())
+                                .parentId(dept.getParentId() != null ? dept.getParentId().getValue().toString() : null)
+                                .parentName(context.getParentName())
+                                .level(dept.getLevel())
+                                .path(dept.getPath())
+                                .managerId(dept.getManagerId() != null ? dept.getManagerId().getValue().toString()
+                                                : null)
+                                .managerName(context.getManagerName())
+                                .status(dept.getStatus().name())
+                                .statusDisplay(dept.getStatus().getDisplayName())
+                                .sortOrder(dept.getSortOrder())
+                                .description(dept.getDescription())
+                                .employeeCount(context.getEmployeeCount())
+                                .childDepartmentCount(context.getChildDepartmentCount())
+                                .build();
+        }
 }

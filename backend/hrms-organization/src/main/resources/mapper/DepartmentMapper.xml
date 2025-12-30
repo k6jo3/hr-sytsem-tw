@@ -119,4 +119,8 @@
         SELECT COUNT(*) FROM departments WHERE parent_id = #{parentId}
     </select>
 
+    <select id="countByOrganizationId" resultType="int">
+        SELECT COUNT(*) FROM departments WHERE organization_id = #{organizationId}
+    </select>
+
 </mapper>

@@ -1,7 +1,7 @@
 package com.company.hrms.iam.application.service.user;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,30 +13,37 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.company.hrms.iam.api.request.user.CreateUserRequest;
 import com.company.hrms.iam.api.response.user.CreateUserResponse;
 import com.company.hrms.iam.application.service.user.context.UserPipelineContext;
-import com.company.hrms.iam.application.service.user.task.*;
+import com.company.hrms.iam.application.service.user.task.CheckUserExistenceTask;
+import com.company.hrms.iam.application.service.user.task.CreateUserAggregateTask;
+import com.company.hrms.iam.application.service.user.task.HashPasswordTask;
+import com.company.hrms.iam.application.service.user.task.PublishUserEventTask;
+import com.company.hrms.iam.application.service.user.task.SaveUserTask;
 import com.company.hrms.iam.domain.model.aggregate.User;
-import com.company.hrms.iam.domain.model.valueobject.UserId;
 
 @ExtendWith(MockitoExtension.class)
 class CreateUserServiceImplTest {
 
-    @Mock private CheckUserExistenceTask checkUserExistenceTask;
-    @Mock private HashPasswordTask hashPasswordTask;
-    @Mock private CreateUserAggregateTask createUserAggregateTask;
-    @Mock private SaveUserTask saveUserTask;
-    @Mock private PublishUserEventTask publishUserEventTask;
+    @Mock
+    private CheckUserExistenceTask checkUserExistenceTask;
+    @Mock
+    private HashPasswordTask hashPasswordTask;
+    @Mock
+    private CreateUserAggregateTask createUserAggregateTask;
+    @Mock
+    private SaveUserTask saveUserTask;
+    @Mock
+    private PublishUserEventTask publishUserEventTask;
 
     private CreateUserServiceImpl createUserService;
 
     @BeforeEach
     void setUp() {
         createUserService = new CreateUserServiceImpl(
-            checkUserExistenceTask,
-            hashPasswordTask,
-            createUserAggregateTask,
-            saveUserTask,
-            publishUserEventTask
-        );
+                checkUserExistenceTask,
+                hashPasswordTask,
+                createUserAggregateTask,
+                saveUserTask,
+                publishUserEventTask);
 
         when(checkUserExistenceTask.shouldExecute(any())).thenReturn(true);
         when(hashPasswordTask.shouldExecute(any())).thenReturn(true);

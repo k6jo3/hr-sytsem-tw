@@ -3,47 +3,44 @@ package com.company.hrms.iam.application.service.role;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
-import com.company.hrms.iam.domain.model.aggregate.Role;
-import com.company.hrms.iam.domain.model.valueobject.RoleId;
-import com.company.hrms.iam.domain.repository.IRoleRepository;
+import com.company.hrms.iam.application.service.role.context.RoleContext;
+import com.company.hrms.iam.application.service.role.task.DeleteRoleTask;
+import com.company.hrms.iam.application.service.role.task.LoadRoleTask;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * 刪除角色 Application Service
- *
- * <p>
- * 命名規範：{動詞}{名詞}ServiceImpl
- * </p>
- * <p>
- * 對應 Controller 方法：deleteRole
- * </p>
+ * 刪除角色 Application Service (Pipeline 模式)
  */
 @Service("deleteRoleServiceImpl")
+@RequiredArgsConstructor
+@Slf4j
 @Transactional
-public class DeleteRoleServiceImpl implements CommandApiService<Void, Void> {
+public class DeleteRoleServiceImpl
+        implements CommandApiService<Object, Void> {
 
-    private final IRoleRepository roleRepository;
-
-    public DeleteRoleServiceImpl(IRoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
+    private final LoadRoleTask loadRoleTask;
+    private final DeleteRoleTask deleteRoleTask;
 
     @Override
-    public Void execCommand(Void request, JWTModel currentUser, String... args) throws Exception {
+    public Void execCommand(Object request, JWTModel currentUser, String... args)
+            throws Exception {
+
         String roleId = args[0];
+        log.info("刪除角色: roleId={}", roleId);
 
-        // 查詢角色
-        Role role = roleRepository.findById(RoleId.of(roleId))
-                .orElseThrow(() -> new DomainException("ROLE_NOT_FOUND", "角色不存在"));
+        RoleContext context = new RoleContext(roleId);
 
-        // 軟刪除角色
-        role.delete();
+        BusinessPipeline.start(context)
+                .next(loadRoleTask)
+                .next(deleteRoleTask)
+                .execute();
 
-        // 儲存更新
-        roleRepository.update(role);
-
+        log.info("角色刪除成功: roleId={}", roleId);
         return null;
     }
 }

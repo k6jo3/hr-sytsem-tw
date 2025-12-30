@@ -1,71 +1,67 @@
 package com.company.hrms.iam.application.service.role;
 
-import com.company.hrms.common.exception.DomainException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.iam.api.request.role.UpdateRoleRequest;
 import com.company.hrms.iam.api.response.role.RoleDetailResponse;
-import com.company.hrms.iam.domain.model.aggregate.Role;
+import com.company.hrms.iam.application.service.role.context.RoleContext;
+import com.company.hrms.iam.application.service.role.task.LoadRoleTask;
+import com.company.hrms.iam.application.service.role.task.SaveRoleTask;
+import com.company.hrms.iam.application.service.role.task.UpdateRoleAggregateTask;
 import com.company.hrms.iam.domain.model.entity.Permission;
-import com.company.hrms.iam.domain.model.valueobject.PermissionId;
-import com.company.hrms.iam.domain.model.valueobject.RoleId;
 import com.company.hrms.iam.domain.repository.IPermissionRepository;
-import com.company.hrms.iam.domain.repository.IRoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * 更新角色 Application Service
- *
- * <p>命名規範：{動詞}{名詞}ServiceImpl</p>
- * <p>對應 Controller 方法：updateRole</p>
+ * 更新角色 Application Service (Pipeline 模式)
  */
 @Service("updateRoleServiceImpl")
+@RequiredArgsConstructor
+@Slf4j
 @Transactional
-public class UpdateRoleServiceImpl implements CommandApiService<UpdateRoleRequest, RoleDetailResponse> {
+public class UpdateRoleServiceImpl
+        implements CommandApiService<UpdateRoleRequest, RoleDetailResponse> {
 
-    private final IRoleRepository roleRepository;
+    private final LoadRoleTask loadRoleTask;
+    private final UpdateRoleAggregateTask updateRoleAggregateTask;
+    private final SaveRoleTask saveRoleTask;
     private final IPermissionRepository permissionRepository;
 
-    @Autowired
-    public UpdateRoleServiceImpl(IRoleRepository roleRepository, IPermissionRepository permissionRepository) {
-        this.roleRepository = roleRepository;
-        this.permissionRepository = permissionRepository;
-    }
-
     @Override
-    public RoleDetailResponse execCommand(UpdateRoleRequest request, JWTModel currentUser, String... args) throws Exception {
+    public RoleDetailResponse execCommand(UpdateRoleRequest request, JWTModel currentUser, String... args)
+            throws Exception {
+
         String roleId = args[0];
+        log.info("更新角色: roleId={}", roleId);
 
-        // 查詢角色
-        Role role = roleRepository.findById(RoleId.of(roleId))
-                .orElseThrow(() -> new DomainException("ROLE_NOT_FOUND", "角色不存在"));
+        RoleContext context = new RoleContext(roleId, request);
 
-        // 更新角色資訊
-        role.update(request.getRoleName(), request.getDescription());
+        BusinessPipeline.start(context)
+                .next(loadRoleTask)
+                .next(updateRoleAggregateTask)
+                .next(saveRoleTask)
+                .execute();
 
-        // 更新權限 (若有提供)
-        if (request.getPermissionIds() != null) {
-            role.clearPermissions();
-            for (String permissionId : request.getPermissionIds()) {
-                role.assignPermission(PermissionId.of(permissionId));
-            }
-        }
-
-        // 儲存更新
-        roleRepository.update(role);
-
-        // 查詢權限詳情
+        var role = context.getRole();
         List<Permission> permissions = permissionRepository.findByIds(role.getPermissionIds());
 
+        log.info("角色更新成功: roleId={}", roleId);
         return toDetailResponse(role, permissions);
     }
 
-    private RoleDetailResponse toDetailResponse(Role role, List<Permission> permissions) {
+    private RoleDetailResponse toDetailResponse(
+            com.company.hrms.iam.domain.model.aggregate.Role role,
+            List<Permission> permissions) {
+
         List<RoleDetailResponse.PermissionItem> permissionItems = permissions.stream()
                 .map(p -> RoleDetailResponse.PermissionItem.builder()
                         .permissionId(p.getId().getValue())

@@ -38,29 +38,31 @@
 
 | 狀態 | 數量 | 百分比 |
 |:---:|:---:|:---:|
-| ✅ 已完成 | 3 | 20% |
-| ⏳ 待完成 | 12 | 80% |
+| ✅ 已完成 | 6 | 40% |
+| ⏳ 待完成 | 9 | 60% |
 | **總計** | **15** | 100% |
+
+> **注意:** 原本已完成的 API 規格文件（HR01、HR02）在某個 Git 版本中被誤刪除，已於 2025-12-29 全部重新建立完成。
 
 ### 2.2 詳細進度
 
 | 序號 | 項目 | 狀態 | API 數量 | 輸出檔案 |
 |:---:|:---|:---:|:---:|:---|
-| 0 | API 文件標準模板 | ✅ 完成 | - | `spec/API文件標準模板.md` |
-| 1 | HR01 IAM 服務 | ✅ 完成 | 29 | `spec/01_IAM服務系統設計書_API詳細規格.md` |
-| 2 | HR02 組織員工服務 | ✅ 完成 | 31 | `spec/02_組織員工服務系統設計書_API詳細規格.md` |
-| 3 | HR03 考勤管理服務 | ⏳ 待完成 | ~20 | `spec/03_考勤管理服務系統設計書_API詳細規格.md` |
-| 4 | HR04 薪資管理服務 | ⏳ 待完成 | ~15 | `spec/04_薪資管理服務系統設計書_API詳細規格.md` |
-| 5 | HR05 保險管理服務 | ⏳ 待完成 | ~12 | `spec/05_保險管理服務系統設計書_API詳細規格.md` |
-| 6 | HR06 專案管理服務 | ⏳ 待完成 | ~18 | `spec/06_專案管理服務系統設計書_API詳細規格.md` |
-| 7 | HR07 工時管理服務 | ⏳ 待完成 | ~10 | `spec/07_工時管理服務系統設計書_API詳細規格.md` |
-| 8 | HR08 績效管理服務 | ⏳ 待完成 | ~15 | `spec/08_績效管理服務系統設計書_API詳細規格.md` |
-| 9 | HR09 招募管理服務 | ⏳ 待完成 | ~16 | `spec/09_招募管理服務系統設計書_API詳細規格.md` |
-| 10 | HR10 培訓管理服務 | ⏳ 待完成 | ~12 | `spec/10_訓練管理服務系統設計書_API詳細規格.md` |
-| 11 | HR11 簽核流程服務 | ⏳ 待完成 | ~10 | `spec/11_簽核流程服務系統設計書_API詳細規格.md` |
-| 12 | HR12 通知服務 | ⏳ 待完成 | ~8 | `spec/12_通知服務系統設計書_API詳細規格.md` |
-| 13 | HR13 文件管理服務 | ⏳ 待完成 | ~10 | `spec/13_文件管理服務系統設計書_API詳細規格.md` |
-| 14 | HR14 報表分析服務 | ⏳ 待完成 | ~8 | `spec/14_報表分析服務系統設計書_API詳細規格.md` |
+| 0 | API 文件標準模板 | ✅ 完成 | - | `knowledge/04_API_Standards/API文件標準模板.md` |
+| 1 | HR01 IAM 服務 | ✅ 重建完成 | 29 | `knowledge/04_API_Standards/01_IAM服務系統設計書_API詳細規格.md` |
+| 2 | HR02 組織員工服務 | ✅ 重建完成 | 31 | `knowledge/04_API_Standards/02_組織員工服務系統設計書_API詳細規格.md` |
+| 3 | HR03 考勤管理服務 | ✅ 完成 | 31 | `knowledge/04_API_Standards/03_考勤管理服務系統設計書_API詳細規格.md` |
+| 4 | HR04 薪資管理服務 | ✅ 完成 | 19 | `knowledge/04_API_Standards/04_薪資管理服務系統設計書_API詳細規格.md` |
+| 5 | HR05 保險管理服務 | ✅ 完成 | 12 | `knowledge/04_API_Standards/05_保險管理服務系統設計書_API詳細規格.md` |
+| 6 | HR06 專案管理服務 | ⏳ 待完成 | ~18 | `knowledge/04_API_Standards/06_專案管理服務系統設計書_API詳細規格.md` |
+| 7 | HR07 工時管理服務 | ⏳ 待完成 | ~10 | `knowledge/04_API_Standards/07_工時管理服務系統設計書_API詳細規格.md` |
+| 8 | HR08 績效管理服務 | ⏳ 待完成 | ~15 | `knowledge/04_API_Standards/08_績效管理服務系統設計書_API詳細規格.md` |
+| 9 | HR09 招募管理服務 | ⏳ 待完成 | ~16 | `knowledge/04_API_Standards/09_招募管理服務系統設計書_API詳細規格.md` |
+| 10 | HR10 培訓管理服務 | ⏳ 待完成 | ~12 | `knowledge/04_API_Standards/10_訓練管理服務系統設計書_API詳細規格.md` |
+| 11 | HR11 簽核流程服務 | ⏳ 待完成 | ~10 | `knowledge/04_API_Standards/11_簽核流程服務系統設計書_API詳細規格.md` |
+| 12 | HR12 通知服務 | ⏳ 待完成 | ~8 | `knowledge/04_API_Standards/12_通知服務系統設計書_API詳細規格.md` |
+| 13 | HR13 文件管理服務 | ⏳ 待完成 | ~10 | `knowledge/04_API_Standards/13_文件管理服務系統設計書_API詳細規格.md` |
+| 14 | HR14 報表分析服務 | ⏳ 待完成 | ~8 | `knowledge/04_API_Standards/14_報表分析服務系統設計書_API詳細規格.md` |
 
 **預估總 API 數量:** ~200 個端點
 
@@ -330,16 +332,19 @@
 
 | 文件 | 路徑 | 說明 |
 |:---|:---|:---|
-| **API 文件標準模板** | `spec/API文件標準模板.md` | API 規格撰寫標準格式 |
-| **系統架構設計文件** | `spec/系統架構設計文件.md` | 整體架構與 DDD 分層 |
-| **命名規範** | `spec/系統架構設計文件_命名規範.md` | Controller、Service、DTO 命名規則 |
+| **API 文件標準模板** | `knowledge/04_API_Standards/API文件標準模板.md` | API 規格撰寫標準格式 |
+| **系統架構設計文件** | `knowledge/03_System_Architecture/System_Architecture_Design.md` | 整體架構與 DDD 分層 |
+| **命名規範** | `knowledge/03_System_Architecture/System_Architecture_Design_Naming_Conventions.md` | Controller、Service、DTO 命名規則 |
 
 ### 4.2 已完成範例（參考格式）
 
-| 文件 | 路徑 | API 數量 |
-|:---|:---|:---:|
-| HR01 IAM 服務 API 規格 | `spec/01_IAM服務系統設計書_API詳細規格.md` | 29 |
-| HR02 組織員工服務 API 規格 | `spec/02_組織員工服務系統設計書_API詳細規格.md` | 31 |
+| 文件 | 路徑 | API 數量 | 狀態 |
+|:---|:---|:---:|:---:|
+| HR01 IAM 服務 API 規格 | `knowledge/04_API_Standards/01_IAM服務系統設計書_API詳細規格.md` | 29 | ✅ 已重建 |
+| HR02 組織員工服務 API 規格 | `knowledge/04_API_Standards/02_組織員工服務系統設計書_API詳細規格.md` | 31 | ✅ 已重建 |
+| HR03 考勤管理服務 API 規格 | `knowledge/04_API_Standards/03_考勤管理服務系統設計書_API詳細規格.md` | 31 | ✅ 完成 |
+| HR04 薪資管理服務 API 規格 | `knowledge/04_API_Standards/04_薪資管理服務系統設計書_API詳細規格.md` | 19 | ✅ 完成 |
+| HR05 保險管理服務 API 規格 | `knowledge/04_API_Standards/05_保險管理服務系統設計書_API詳細規格.md` | 12 | ✅ 完成 |
 
 ### 4.3 業務邏輯規格
 
@@ -416,7 +421,13 @@
 |:---|:---|:---|
 | 2025-12-29 | 建立工作計畫文件 | Claude |
 | 2025-12-29 | 完成 HR01、HR02 API 規格 | Claude |
+| 2025-12-29 | 發現原 API 規格文件被刪除，重建 HR01 API 規格文件 | Claude |
+| 2025-12-29 | 更新工作計畫：修正進度狀態、更新檔案路徑至 knowledge 目錄 | Claude |
+| 2025-12-29 | 重建 HR02 組織員工服務 API 規格文件（31 個端點） | Claude |
+| 2025-12-29 | 完成 HR03 考勤管理服務 API 規格文件（31 個端點） | Claude |
+| 2025-12-29 | 完成 HR04 薪資管理服務 API 規格文件（19 個端點，含 Saga 薪資計算流程） | Claude |
+| 2025-12-29 | 完成 HR05 保險管理服務 API 規格文件（12 個端點，含二代健保補充保費計算） | Claude |
 
 ---
 
-**下一步:** 繼續補齊 HR03 考勤管理服務 API 規格
+**下一步:** 繼續完成 HR06~HR14 服務的 API 詳細規格文件

@@ -161,4 +161,17 @@ public class UserRepositoryImpl implements IUserRepository {
     private Timestamp toTimestamp(LocalDateTime dateTime) {
         return dateTime != null ? Timestamp.valueOf(dateTime) : null;
     }
+
+    @Override
+    public void updateUserRoles(UserId userId, List<String> roleIds) {
+        // 先刪除使用者現有的所有角色
+        userDAO.deleteUserRoles(userId.getValue());
+
+        // 再新增新的角色關聯
+        if (roleIds != null && !roleIds.isEmpty()) {
+            for (String roleId : roleIds) {
+                userDAO.insertUserRole(userId.getValue(), roleId);
+            }
+        }
+    }
 }

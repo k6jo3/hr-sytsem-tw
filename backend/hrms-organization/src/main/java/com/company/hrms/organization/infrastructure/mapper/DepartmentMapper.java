@@ -1,10 +1,11 @@
 package com.company.hrms.organization.infrastructure.mapper;
 
-import com.company.hrms.organization.infrastructure.po.DepartmentPO;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.company.hrms.organization.infrastructure.po.DepartmentPO;
 
 /**
  * 部門 MyBatis Mapper
@@ -76,4 +77,9 @@ public interface DepartmentMapper {
      * 計算子部門數量
      */
     int countByParentId(@Param("parentId") String parentId);
+
+    /**
+     * 計算組織下的部門數量
+     */
+    int countByOrganizationId(@Param("organizationId") String organizationId);
 }

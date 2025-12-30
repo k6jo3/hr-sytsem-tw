@@ -1,12 +1,7 @@
 package com.company.hrms.common.test.base;
 
-import com.company.hrms.common.query.QueryGroup;
-import com.company.hrms.common.test.contract.BaseContractTest;
-import com.company.hrms.common.test.snapshot.FluentAssert;
-import com.company.hrms.common.test.snapshot.QuerySnapshotModule;
-import com.company.hrms.common.test.snapshot.SnapshotUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.mockito.ArgumentCaptor;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,22 +10,28 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.common.test.contract.BaseContractTest;
+import com.company.hrms.common.test.snapshot.FluentAssert;
+import com.company.hrms.common.test.snapshot.QuerySnapshotModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * API 契約測試基類
  * 驗證 Request → Service 的參數轉換與 QueryGroup 組裝
  *
- * <p>測試重點:
+ * <p>
+ * 測試重點:
  * <ul>
- *   <li>API 請求參數解析</li>
- *   <li>DTO 驗證</li>
- *   <li>QueryGroup 組裝正確性</li>
- *   <li>回應格式</li>
+ * <li>API 請求參數解析</li>
+ * <li>DTO 驗證</li>
+ * <li>QueryGroup 組裝正確性</li>
+ * <li>回應格式</li>
  * </ul>
  *
- * <p>使用範例:
+ * <p>
+ * 使用範例:
+ * 
  * <pre>
  * class EmployeeApiContractTest extends BaseApiContractTest {
  *
@@ -67,8 +68,8 @@ public abstract class BaseApiContractTest extends BaseContractTest {
      */
     protected ResultActions performPost(String url, Object request) throws Exception {
         return mockMvc.perform(post(url)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
     }
 
     /**
@@ -76,7 +77,7 @@ public abstract class BaseApiContractTest extends BaseContractTest {
      */
     protected ResultActions performGet(String url) throws Exception {
         return mockMvc.perform(get(url)
-            .contentType(MediaType.APPLICATION_JSON));
+                .contentType(MediaType.APPLICATION_JSON));
     }
 
     /**
@@ -84,8 +85,8 @@ public abstract class BaseApiContractTest extends BaseContractTest {
      */
     protected ResultActions performPut(String url, Object request) throws Exception {
         return mockMvc.perform(put(url)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
     }
 
     /**
@@ -93,7 +94,7 @@ public abstract class BaseApiContractTest extends BaseContractTest {
      */
     protected ResultActions performDelete(String url) throws Exception {
         return mockMvc.perform(delete(url)
-            .contentType(MediaType.APPLICATION_JSON));
+                .contentType(MediaType.APPLICATION_JSON));
     }
 
     /**
@@ -101,9 +102,9 @@ public abstract class BaseApiContractTest extends BaseContractTest {
      */
     protected void verifyDtoSnapshot(Object dto, String snapshotName) {
         FluentAssert.that(dto)
-            .ignoringCommonDynamicFields()
-            .inDirectory(getDtoSnapshotDirectory())
-            .matchesSnapshot(snapshotName);
+                .ignoringCommonDynamicFields()
+                .inDirectory(getDtoSnapshotDirectory())
+                .matchesSnapshot(snapshotName);
     }
 
     /**
@@ -111,17 +112,17 @@ public abstract class BaseApiContractTest extends BaseContractTest {
      */
     protected void verifyQuerySnapshot(QueryGroup queryGroup, String snapshotName) {
         FluentAssert.that(queryGroup)
-            .withMapper(queryMapper)
-            .inDirectory(getQuerySnapshotDirectory())
-            .matchesSnapshot(snapshotName);
+                .withMapper(queryMapper)
+                .inDirectory(getQuerySnapshotDirectory())
+                .matchesSnapshot(snapshotName);
     }
 
     /**
      * 驗證完整 API 流程（DTO + Query）
      */
     protected void verifyApiFlow(String url, Object request,
-                                  QueryGroup capturedQuery,
-                                  String flowName) {
+            QueryGroup capturedQuery,
+            String flowName) {
         // 驗證 DTO
         verifyDtoSnapshot(request, flowName + "_dto.json");
 

@@ -1,11 +1,11 @@
 package com.company.hrms.organization.domain.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.company.hrms.organization.domain.model.aggregate.Department;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
 import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * 部門 Repository 介面
@@ -68,4 +68,9 @@ public interface IDepartmentRepository {
      * 計算子部門數
      */
     int countByParentId(DepartmentId parentId);
+
+    /**
+     * 計算組織下的部門數
+     */
+    int countByOrganizationId(OrganizationId organizationId);
 }

@@ -1,23 +1,26 @@
 package com.company.hrms.iam.domain.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.model.valueobject.Email;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.model.valueobject.UserStatus;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
  * User Repository 介面
  * 定義於 Domain 層，實作於 Infrastructure 層
  * 
- * <p>遵循依賴反轉原則 (DIP)：Domain 層不依賴 Infrastructure 層</p>
+ * <p>
+ * 遵循依賴反轉原則 (DIP)：Domain 層不依賴 Infrastructure 層
+ * </p>
  */
 public interface IUserRepository {
 
     /**
      * 根據 ID 查找使用者
+     * 
      * @param id 使用者 ID
      * @return 使用者 Optional
      */
@@ -25,6 +28,7 @@ public interface IUserRepository {
 
     /**
      * 根據使用者名稱查找使用者
+     * 
      * @param username 使用者名稱
      * @return 使用者 Optional
      */
@@ -32,6 +36,7 @@ public interface IUserRepository {
 
     /**
      * 根據 Email 查找使用者
+     * 
      * @param email Email
      * @return 使用者 Optional
      */
@@ -39,6 +44,7 @@ public interface IUserRepository {
 
     /**
      * 根據狀態查找使用者列表
+     * 
      * @param status 使用者狀態
      * @return 使用者列表
      */
@@ -46,31 +52,38 @@ public interface IUserRepository {
 
     /**
      * 查詢所有使用者
+     * 
      * @return 使用者列表
      */
     List<User> findAll();
 
     /**
      * 儲存使用者
+     * 
      * @param user 使用者
      */
     void save(User user);
 
     /**
      * 更新使用者
-     * <p>注意：此方法用於更新已存在的使用者資料</p>
+     * <p>
+     * 注意：此方法用於更新已存在的使用者資料
+     * </p>
+     * 
      * @param user 使用者
      */
     void update(User user);
 
     /**
      * 刪除使用者
+     * 
      * @param id 使用者 ID
      */
     void deleteById(UserId id);
 
     /**
      * 檢查使用者名稱是否存在
+     * 
      * @param username 使用者名稱
      * @return 是否存在
      */
@@ -78,8 +91,17 @@ public interface IUserRepository {
 
     /**
      * 檢查 Email 是否存在
+     * 
      * @param email Email
      * @return 是否存在
      */
     boolean existsByEmail(Email email);
+
+    /**
+     * 更新使用者的角色列表
+     * 
+     * @param userId  使用者 ID
+     * @param roleIds 角色 ID 列表
+     */
+    void updateUserRoles(UserId userId, java.util.List<String> roleIds);
 }

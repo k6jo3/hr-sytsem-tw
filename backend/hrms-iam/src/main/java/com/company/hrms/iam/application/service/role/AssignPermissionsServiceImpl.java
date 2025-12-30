@@ -3,54 +3,48 @@ package com.company.hrms.iam.application.service.role;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.iam.api.controller.role.HR01RoleCmdController.AssignPermissionsRequest;
-import com.company.hrms.iam.domain.model.aggregate.Role;
-import com.company.hrms.iam.domain.model.valueobject.PermissionId;
-import com.company.hrms.iam.domain.model.valueobject.RoleId;
-import com.company.hrms.iam.domain.repository.IRoleRepository;
+import com.company.hrms.iam.application.service.role.context.RoleContext;
+import com.company.hrms.iam.application.service.role.task.AssignPermissionsTask;
+import com.company.hrms.iam.application.service.role.task.LoadRoleTask;
+import com.company.hrms.iam.application.service.role.task.SaveRoleTask;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * 指派權限 Application Service
- *
- * <p>
- * 命名規範：{動詞}{名詞}ServiceImpl
- * </p>
- * <p>
- * 對應 Controller 方法：assignPermissions
- * </p>
+ * 指派權限 Application Service (Pipeline 模式)
  */
 @Service("assignPermissionsServiceImpl")
+@RequiredArgsConstructor
+@Slf4j
 @Transactional
-public class AssignPermissionsServiceImpl implements CommandApiService<AssignPermissionsRequest, Void> {
+public class AssignPermissionsServiceImpl
+        implements CommandApiService<AssignPermissionsRequest, Void> {
 
-    private final IRoleRepository roleRepository;
-
-    public AssignPermissionsServiceImpl(IRoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
+    private final LoadRoleTask loadRoleTask;
+    private final AssignPermissionsTask assignPermissionsTask;
+    private final SaveRoleTask saveRoleTask;
 
     @Override
-    public Void execCommand(AssignPermissionsRequest request, JWTModel currentUser, String... args) throws Exception {
+    public Void execCommand(AssignPermissionsRequest request, JWTModel currentUser, String... args)
+            throws Exception {
+
         String roleId = args[0];
+        log.info("指派權限: roleId={}", roleId);
 
-        // 查詢角色
-        Role role = roleRepository.findById(RoleId.of(roleId))
-                .orElseThrow(() -> new DomainException("ROLE_NOT_FOUND", "角色不存在"));
+        RoleContext context = new RoleContext(roleId, request);
 
-        // 清除現有權限並指派新權限
-        role.clearPermissions();
-        if (request.permissionIds() != null) {
-            for (String permissionId : request.permissionIds()) {
-                role.assignPermission(PermissionId.of(permissionId));
-            }
-        }
+        BusinessPipeline.start(context)
+                .next(loadRoleTask)
+                .next(assignPermissionsTask)
+                .next(saveRoleTask)
+                .execute();
 
-        // 儲存更新
-        roleRepository.update(role);
-
+        log.info("權限指派成功: roleId={}", roleId);
         return null;
     }
 }

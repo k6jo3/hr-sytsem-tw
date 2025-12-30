@@ -1,13 +1,15 @@
 package com.company.hrms.organization.infrastructure.dao;
 
-import com.company.hrms.organization.infrastructure.mapper.EmployeeMapper;
-import com.company.hrms.organization.infrastructure.po.EmployeePO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+import com.company.hrms.organization.infrastructure.mapper.EmployeeMapper;
+import com.company.hrms.organization.infrastructure.po.EmployeePO;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 員工 DAO
@@ -47,16 +49,16 @@ public class EmployeeDAO {
     }
 
     public List<EmployeePO> findByCriteria(String keyword, String departmentId,
-                                           String employmentStatus, String employmentType,
-                                           LocalDate hireDateFrom, LocalDate hireDateTo,
-                                           int offset, int limit) {
+            String employmentStatus, String employmentType,
+            LocalDate hireDateFrom, LocalDate hireDateTo,
+            int offset, int limit) {
         return employeeMapper.selectByCriteria(keyword, departmentId, employmentStatus,
                 employmentType, hireDateFrom, hireDateTo, offset, limit);
     }
 
     public long countByCriteria(String keyword, String departmentId,
-                                String employmentStatus, String employmentType,
-                                LocalDate hireDateFrom, LocalDate hireDateTo) {
+            String employmentStatus, String employmentType,
+            LocalDate hireDateFrom, LocalDate hireDateTo) {
         return employeeMapper.countByCriteria(keyword, departmentId, employmentStatus,
                 employmentType, hireDateFrom, hireDateTo);
     }
@@ -95,11 +97,16 @@ public class EmployeeDAO {
 
     /**
      * 查詢特定前綴的最大流水號
+     * 
      * @param prefix 員工編號前綴
      * @return 最大流水號
      */
     public int findMaxSequenceByPrefix(String prefix) {
         Integer maxSeq = employeeMapper.findMaxSequenceByPrefix(prefix);
         return maxSeq != null ? maxSeq : 0;
+    }
+
+    public int countByOrganizationId(String organizationId) {
+        return employeeMapper.countByOrganizationId(organizationId);
     }
 }

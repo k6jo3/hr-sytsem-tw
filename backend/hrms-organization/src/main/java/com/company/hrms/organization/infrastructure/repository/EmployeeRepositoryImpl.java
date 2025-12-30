@@ -1,17 +1,30 @@
 package com.company.hrms.organization.infrastructure.repository;
 
-import com.company.hrms.organization.domain.model.aggregate.Employee;
-import com.company.hrms.organization.domain.model.valueobject.*;
-import com.company.hrms.organization.domain.repository.IEmployeeRepository;
-import com.company.hrms.organization.infrastructure.dao.EmployeeDAO;
-import com.company.hrms.organization.infrastructure.po.EmployeePO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Repository;
+
+import com.company.hrms.organization.domain.model.aggregate.Employee;
+import com.company.hrms.organization.domain.model.valueobject.Address;
+import com.company.hrms.organization.domain.model.valueobject.BankAccount;
+import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
+import com.company.hrms.organization.domain.model.valueobject.Email;
+import com.company.hrms.organization.domain.model.valueobject.EmergencyContact;
+import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
+import com.company.hrms.organization.domain.model.valueobject.EmploymentStatus;
+import com.company.hrms.organization.domain.model.valueobject.EmploymentType;
+import com.company.hrms.organization.domain.model.valueobject.Gender;
+import com.company.hrms.organization.domain.model.valueobject.MaritalStatus;
+import com.company.hrms.organization.domain.model.valueobject.NationalId;
+import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
+import com.company.hrms.organization.domain.repository.IEmployeeRepository;
+import com.company.hrms.organization.infrastructure.dao.EmployeeDAO;
+import com.company.hrms.organization.infrastructure.po.EmployeePO;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 員工倉儲實作
@@ -58,8 +71,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
                 criteria.getHireDateFrom(),
                 criteria.getHireDateTo(),
                 offset,
-                criteria.getPageSize()
-        ).stream()
+                criteria.getPageSize()).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -72,8 +84,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
                 criteria.getEmploymentStatus() != null ? criteria.getEmploymentStatus().name() : null,
                 criteria.getEmploymentType(),
                 criteria.getHireDateFrom(),
-                criteria.getHireDateTo()
-        );
+                criteria.getHireDateTo());
     }
 
     @Override
@@ -129,6 +140,11 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
         return employeeDAO.findMaxSequenceByPrefix(prefix);
     }
 
+    @Override
+    public int countByOrganizationId(OrganizationId organizationId) {
+        return employeeDAO.countByOrganizationId(organizationId.getValue().toString());
+    }
+
     private Employee toDomain(EmployeePO po) {
         Address address = null;
         if (po.getAddressCity() != null) {
@@ -136,8 +152,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
                     po.getAddressPostalCode(),
                     po.getAddressCity(),
                     po.getAddressDistrict(),
-                    po.getAddressStreet()
-            );
+                    po.getAddressStreet());
         }
 
         EmergencyContact emergencyContact = null;
@@ -145,8 +160,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
             emergencyContact = new EmergencyContact(
                     po.getEmergencyContactName(),
                     po.getEmergencyContactRelationship(),
-                    po.getEmergencyContactPhone()
-            );
+                    po.getEmergencyContactPhone());
         }
 
         BankAccount bankAccount = null;
@@ -155,8 +169,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
                     po.getBankCode(),
                     po.getBankBranchCode(),
                     po.getBankAccountNumber(),
-                    po.getBankAccountHolderName()
-            );
+                    po.getBankAccountHolderName());
         }
 
         return Employee.reconstitute(
@@ -183,8 +196,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
                 po.getProbationEndDate(),
                 po.getTerminationDate(),
                 po.getTerminationReason(),
-                po.getSupervisorId() != null ? new EmployeeId(po.getSupervisorId()) : null
-        );
+                po.getSupervisorId() != null ? new EmployeeId(po.getSupervisorId()) : null);
     }
 
     private EmployeePO toPO(Employee employee) {

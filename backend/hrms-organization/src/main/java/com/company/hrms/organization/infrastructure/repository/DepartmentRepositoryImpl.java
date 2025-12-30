@@ -1,5 +1,11 @@
 package com.company.hrms.organization.infrastructure.repository;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Repository;
+
 import com.company.hrms.organization.domain.model.aggregate.Department;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentStatus;
@@ -8,13 +14,8 @@ import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
 import com.company.hrms.organization.domain.repository.IDepartmentRepository;
 import com.company.hrms.organization.infrastructure.dao.DepartmentDAO;
 import com.company.hrms.organization.infrastructure.po.DepartmentPO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
@@ -42,7 +43,8 @@ public class DepartmentRepositoryImpl implements IDepartmentRepository {
                 // I'll use .toString() to be safe if getValue() is Object/UUID.
                 // If getValue() is String, toString() is redundant but safe.
                 // Wait, OrganizationId.getValue() -> String?
-                // Let's assume .toString() on the ID object itself if possible, or getValue().toString().
+                // Let's assume .toString() on the ID object itself if possible, or
+                // getValue().toString().
                 // I'll check OrganizationId later if this fails.
                 .stream()
                 .map(this::toDomain)
@@ -95,6 +97,11 @@ public class DepartmentRepositoryImpl implements IDepartmentRepository {
         return departmentDAO.countByParentId(parentId.getValue().toString());
     }
 
+    @Override
+    public int countByOrganizationId(OrganizationId organizationId) {
+        return departmentDAO.countByOrganizationId(organizationId.getValue().toString());
+    }
+
     private Department toDomain(DepartmentPO po) {
         return Department.reconstitute(
                 new DepartmentId(po.getId()),
@@ -108,8 +115,7 @@ public class DepartmentRepositoryImpl implements IDepartmentRepository {
                 po.getManagerId() != null ? new EmployeeId(po.getManagerId()) : null,
                 po.getStatus() != null ? DepartmentStatus.valueOf(po.getStatus()) : DepartmentStatus.ACTIVE,
                 po.getSortOrder(),
-                po.getDescription()
-        );
+                po.getDescription());
     }
 
     private DepartmentPO toPO(Department entity) {

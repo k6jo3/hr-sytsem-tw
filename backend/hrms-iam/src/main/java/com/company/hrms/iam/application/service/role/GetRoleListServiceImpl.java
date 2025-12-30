@@ -8,51 +8,44 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
-import com.company.hrms.iam.api.controller.role.HR01RoleQryController.RoleQueryRequest;
 import com.company.hrms.iam.api.response.role.RoleListResponse;
 import com.company.hrms.iam.domain.model.aggregate.Role;
-import com.company.hrms.iam.domain.model.valueobject.RoleStatus;
 import com.company.hrms.iam.domain.repository.IRoleRepository;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * 查詢角色列表 Application Service
- *
+ * 查詢角色列表 Application Service (Pipeline 模式)
+ * 
  * <p>
- * 命名規範：{動詞}{名詞}ServiceImpl
- * </p>
- * <p>
- * 對應 Controller 方法：getRoleList
+ * 注意：簡單查詢可選擇不使用 Pipeline，但為保持一致性仍使用標準結構
  * </p>
  */
 @Service("getRoleListServiceImpl")
+@RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
-public class GetRoleListServiceImpl implements QueryApiService<RoleQueryRequest, List<RoleListResponse>> {
+public class GetRoleListServiceImpl
+        implements QueryApiService<Object, List<RoleListResponse>> {
 
     private final IRoleRepository roleRepository;
 
-    public GetRoleListServiceImpl(IRoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
-
     @Override
-    public List<RoleListResponse> getResponse(RoleQueryRequest request, JWTModel currentUser, String... args)
+    public List<RoleListResponse> getResponse(Object request, JWTModel currentUser, String... args)
             throws Exception {
+
+        log.info("查詢角色列表");
+
+        // 取得所有角色（簡單查詢，不需要 Pipeline）
+        String tenantId = currentUser != null ? currentUser.getTenantId() : null;
         List<Role> roles;
 
-        // 根據查詢條件取得角色列表
-        if (request.status() != null && !request.status().isBlank()) {
-            roles = roleRepository.findByStatus(RoleStatus.valueOf(request.status().toUpperCase()));
-        } else if (Boolean.TRUE.equals(request.systemRole())) {
-            roles = roleRepository.findSystemRoles();
+        if (tenantId != null) {
+            roles = roleRepository.findByTenantId(tenantId);
+            roles.addAll(roleRepository.findSystemRoles());
         } else {
-            String tenantId = currentUser != null ? currentUser.getTenantId() : null;
-            if (tenantId != null) {
-                roles = roleRepository.findByTenantId(tenantId);
-                // 加入系統角色
-                roles.addAll(roleRepository.findSystemRoles());
-            } else {
-                roles = roleRepository.findAll();
-            }
+            roles = roleRepository.findAll();
         }
 
         return roles.stream()

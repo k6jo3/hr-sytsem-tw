@@ -50,6 +50,29 @@ spring:
       properties:
         spring.json.trusted.packages: com.company.hrms.*
 
+  # Mail Configuration (Gmail SMTP)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:your-gmail@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    default-encoding: UTF-8
+
+# Password Reset Configuration
+password-reset:
+  token-expiry-minutes: ${PASSWORD_RESET_TOKEN_EXPIRY:30}
+  base-url: ${PASSWORD_RESET_BASE_URL:http://localhost:3000/reset-password}
+
 # MyBatis Configuration
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
