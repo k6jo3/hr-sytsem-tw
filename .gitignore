@@ -46,3 +46,4 @@ coverage/
 .settings/
 .classpath
 .project
+test_output.txt
