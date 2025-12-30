@@ -135,7 +135,7 @@ public class HR01RoleCmdController extends CommandBaseController {
             @ApiResponse(responseCode = "403", description = "無權限"),
             @ApiResponse(responseCode = "404", description = "角色或權限不存在")
     })
-    @PostMapping("/{roleId}/permissions")
+    @PutMapping("/{roleId}/permissions")
     @PreAuthorize("hasAuthority('role:assign-permission')")
     public ResponseEntity<Void> assignPermissions(
             @PathVariable String roleId,

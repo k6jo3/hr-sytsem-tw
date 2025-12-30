@@ -86,6 +86,12 @@
                 <artifactId>hrms-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.company.hrms</groupId>
+                <artifactId>hrms-common</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
 
             <!-- JJWT -->
             <dependency>

@@ -2,7 +2,6 @@ package com.company.hrms.iam.api.controller.user;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -154,21 +153,4 @@ public class HR01UserCmdController extends CommandBaseController {
         return ResponseEntity.ok(execCommand(request, currentUser));
     }
 
-    /**
-     * 刪除使用者
-     */
-    @Operation(summary = "刪除使用者", operationId = "deleteUser")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "成功"),
-            @ApiResponse(responseCode = "401", description = "未授權"),
-            @ApiResponse(responseCode = "404", description = "使用者不存在")
-    })
-    @DeleteMapping("/{userId}")
-    @PreAuthorize("hasAuthority('user:delete')")
-    public ResponseEntity<Void> deleteUser(
-            @PathVariable String userId,
-            @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-        execCommand(null, currentUser, userId);
-        return ResponseEntity.noContent().build();
-    }
 }

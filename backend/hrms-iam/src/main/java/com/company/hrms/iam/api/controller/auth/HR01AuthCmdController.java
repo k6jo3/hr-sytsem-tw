@@ -67,7 +67,7 @@ public class HR01AuthCmdController extends CommandBaseController {
                         @ApiResponse(responseCode = "400", description = "請求格式錯誤"),
                         @ApiResponse(responseCode = "401", description = "Token 無效或已過期")
         })
-        @PostMapping("/refresh")
+        @PostMapping("/refresh-token")
         public ResponseEntity<RefreshTokenResponse> refreshToken(
                         @RequestBody @Valid RefreshTokenRequest request) throws Exception {
                 return ResponseEntity.ok(execCommand(request, null));
@@ -112,7 +112,7 @@ public class HR01AuthCmdController extends CommandBaseController {
                         @ApiResponse(responseCode = "400", description = "請求格式錯誤或密碼不符合規則"),
                         @ApiResponse(responseCode = "401", description = "未授權或當前密碼不正確")
         })
-        @PostMapping("/password/reset")
+        @PostMapping("/reset-password")
         public ResponseEntity<ResetPasswordResponse> resetPassword(
                         @RequestBody @Valid ResetPasswordRequest request,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
