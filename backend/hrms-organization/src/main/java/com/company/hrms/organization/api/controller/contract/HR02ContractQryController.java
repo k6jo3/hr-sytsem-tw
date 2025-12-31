@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.controller.QueryBaseController;
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.organization.api.response.contract.ContractDetailResponse;
 import com.company.hrms.organization.api.response.contract.ContractListResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +40,19 @@ public class HR02ContractQryController extends QueryBaseController {
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         log.info("Getting contracts for employee: {}", employeeId);
         return ResponseEntity.ok(getResponse(null, currentUser, employeeId));
+    }
+
+    @GetMapping("/api/v1/contracts/{contractId}")
+    @Operation(summary = "查詢合約詳情", operationId = "getContractDetail")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "404", description = "合約不存在")
+    })
+    public ResponseEntity<ContractDetailResponse> getContractDetail(
+            @PathVariable String contractId,
+            @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+        log.info("Getting contract detail: {}", contractId);
+        return ResponseEntity.ok(getResponse(null, currentUser, contractId));
     }
 
     @GetMapping("/api/v1/contracts/expiring")

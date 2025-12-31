@@ -12,6 +12,7 @@ import com.company.hrms.common.controller.CommandBaseController;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.organization.api.request.contract.CreateContractRequest;
 import com.company.hrms.organization.api.request.contract.RenewContractRequest;
+import com.company.hrms.organization.api.request.contract.UpdateContractRequest;
 import com.company.hrms.organization.api.response.contract.ContractDetailResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +46,21 @@ public class HR02ContractCmdController extends CommandBaseController {
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
                 log.info("Creating contract for employee: {}", employeeId);
                 return ResponseEntity.ok(execCommand(request, currentUser, employeeId));
+        }
+
+        @PutMapping("/api/v1/contracts/{contractId}")
+        @Operation(summary = "更新合約", operationId = "updateContract")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "成功"),
+                        @ApiResponse(responseCode = "400", description = "請求格式錯誤"),
+                        @ApiResponse(responseCode = "404", description = "合約不存在")
+        })
+        public ResponseEntity<ContractDetailResponse> updateContract(
+                        @PathVariable String contractId,
+                        @Valid @RequestBody UpdateContractRequest request,
+                        @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+                log.info("Updating contract: {}", contractId);
+                return ResponseEntity.ok(execCommand(request, currentUser, contractId));
         }
 
         @PutMapping("/api/v1/contracts/{contractId}/renew")

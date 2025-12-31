@@ -29,7 +29,10 @@
       "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/ConditionParser.java )",
       "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/QueryCondition.java )",
       "Bash(framework/architecture/Fluent-Query-Engine.md )",
-      "Bash(knowledge/03_System_Architecture/Fluent-Query-Engine.md)"
+      "Bash(knowledge/03_System_Architecture/Fluent-Query-Engine.md)",
+      "Bash(mvn test:*)",
+      "Bash(java -version:*)",
+      "Bash(mvn:*)"
     ]
   }
 }

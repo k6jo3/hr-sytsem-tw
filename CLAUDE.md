@@ -21,6 +21,8 @@
 9. repository、dao層的開發參考Fluent-Query-Engine.md
 10. application service需依照Business_Pipeline.md去實做
 11. 註解用繁體中文
+12. 開發前，先確認系統分析書、設計書、api規格文件等
+13. API會建立swagger文件，請依照api規格文件去實做
 ---
 ### 總結架構師的實踐清單
 
