@@ -14,14 +14,22 @@
       "Bash(grep:*)",
       "Bash(tree:*)",
       "Bash(claude update:*)",
-      "Bash(mvn test:*)",
+      "Bash(mvn compile:*)",
+      "Bash(pushd:*)",
       "Bash(mvn clean compile:*)",
-      "Bash(git rm:*)",
-      "Bash(del /q \"D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-iam\\\\src\\\\main\\\\java\\\\com\\\\company\\\\hrms\\\\iam\\\\application\\\\service\\\\user\\\\DeleteUserServiceImpl.java\")",
-      "Bash(del /q \"D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-iam\\\\src\\\\main\\\\java\\\\com\\\\company\\\\hrms\\\\iam\\\\application\\\\service\\\\user\\\\task\\\\DeleteUserTask.java\")",
-      "Bash(del /q \"D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-iam\\\\src\\\\test\\\\java\\\\com\\\\company\\\\hrms\\\\iam\\\\application\\\\service\\\\user\\\\DeleteUserServiceImplTest.java\")",
-      "Bash(mvn clean test:*)",
-      "Bash(mvn clean install:*)"
+      "Bash(copy:*)",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/infrastructure/persistence/querydsl/engine/AggregateQueryEngine.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/infrastructure/persistence/querydsl/engine/UltimateQueryEngine.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/infrastructure/persistence/querydsl/repository/BaseRepository.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/infrastructure/persistence/querydsl/repository/IQueryRepository.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/FilterUnit.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/Operator.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/QueryBuilder.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/Condition.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/ConditionParser.java )",
+      "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/QueryCondition.java )",
+      "Bash(framework/architecture/Fluent-Query-Engine.md )",
+      "Bash(knowledge/03_System_Architecture/Fluent-Query-Engine.md)"
     ]
   }
 }

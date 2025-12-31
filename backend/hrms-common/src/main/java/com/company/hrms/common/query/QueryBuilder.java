@@ -42,6 +42,41 @@ public class QueryBuilder {
         return new QueryBuilder(LogicalOp.OR);
     }
 
+    /**
+     * 從帶有 QueryCondition 註解的條件物件直接建立 QueryGroup
+     * <p>
+     * 這是最便捷的使用方式，只需要在條件物件欄位上標註運算子註解，
+     * 即可自動建構查詢條件，無需手動撰寫 if-else 判斷。
+     * </p>
+     *
+     * <pre>
+     * // 定義條件物件
+     * public class EmployeeSearchCondition {
+     *     &#64;EQ
+     *     private String employeeId;
+     *
+     *     &#64;LIKE
+     *     private String name;
+     *
+     *     &#64;IN("status")
+     *     private List&lt;String&gt; statuses;
+     * }
+     *
+     * // 使用方式
+     * EmployeeSearchCondition cond = new EmployeeSearchCondition();
+     * cond.setName("John");
+     *
+     * QueryGroup group = QueryBuilder.fromCondition(cond);
+     * List&lt;Employee&gt; result = repository.findAll(group);
+     * </pre>
+     *
+     * @param condition 帶有 QueryCondition 註解的條件物件
+     * @return QueryGroup
+     */
+    public static QueryGroup fromCondition(Object condition) {
+        return ConditionParser.parse(condition);
+    }
+
     // ========== 條件新增 ==========
 
     /**

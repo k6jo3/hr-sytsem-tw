@@ -17,7 +17,10 @@
 5. 所有的api實作時需確認domain所提供的方法與事件，若所需的方法或事件不存在，再自行補充
 6. 實作時，必須說明流程，與這時所要調用的事件或方法
 7. 前端開發時，需確認每個事件或api，後端是否有提供相符合的api或事件解決方案，並針對缺漏的部份建立相關文件，以供後端修正
-8. 先確認framework底下的架構文件，再進行開發
+8. 先確認framework底下的全部文件，再進行開發
+9. repository、dao層的開發參考Fluent-Query-Engine.md
+10. application service需依照Business_Pipeline.md去實做
+11. 註解用繁體中文
 ---
 ### 總結架構師的實踐清單
 
