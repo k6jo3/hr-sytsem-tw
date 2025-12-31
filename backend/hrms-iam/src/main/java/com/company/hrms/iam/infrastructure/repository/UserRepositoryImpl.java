@@ -61,6 +61,19 @@ public class UserRepositoryImpl implements IUserRepository {
     }
 
     @Override
+    public java.util.List<User> findByQuery(com.company.hrms.common.query.QueryGroup query,
+            org.springframework.data.domain.Pageable pageable) {
+        // TODO: 實作動態查詢 (目前返回空列表)
+        return new ArrayList<>();
+    }
+
+    @Override
+    public long countByQuery(com.company.hrms.common.query.QueryGroup query) {
+        // TODO: 實作動態查詢計數
+        return 0;
+    }
+
+    @Override
     public List<User> findAll() {
         List<UserPO> poList = userDAO.selectAll();
         return poList.stream()

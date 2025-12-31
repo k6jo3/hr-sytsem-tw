@@ -145,6 +145,20 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
         return employeeDAO.countByOrganizationId(organizationId.getValue().toString());
     }
 
+    @Override
+    public List<Employee> findByQuery(com.company.hrms.common.query.QueryGroup query,
+            org.springframework.data.domain.Pageable pageable) {
+        // TODO: 實作動態查詢適配器 (QueryGroup -> Mybatis/JPA Criteria)
+        // 目前僅返回空列表以通過編譯
+        return java.util.Collections.emptyList();
+    }
+
+    @Override
+    public long countByQuery(com.company.hrms.common.query.QueryGroup query) {
+        // TODO: 實作動態查詢計數
+        return 0;
+    }
+
     private Employee toDomain(EmployeePO po) {
         Address address = null;
         if (po.getAddressCity() != null) {

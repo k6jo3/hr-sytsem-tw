@@ -1,26 +1,36 @@
 package com.company.hrms.iam.api.controller.user;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.controller.QueryBaseController;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.iam.api.response.user.UserDetailResponse;
 import com.company.hrms.iam.api.response.user.UserListResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * IAM - 使用者管理 Query Controller
  * 負責使用者的查詢操作
  * 
- * <p>命名規範：HR{DD}{Screen}QryController</p>
- * <p>DD = 01 (IAM Domain)</p>
+ * <p>
+ * 命名規範：HR{DD}{Screen}QryController
+ * </p>
+ * <p>
+ * DD = 01 (IAM Domain)
+ * </p>
  */
 @RestController
 @RequestMapping("/api/v1/users")
@@ -32,8 +42,8 @@ public class HR01UserQryController extends QueryBaseController {
      */
     @Operation(summary = "查詢使用者列表", operationId = "getUserList")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權")
     })
     @GetMapping
     public ResponseEntity<List<UserListResponse>> getUserList(
@@ -41,8 +51,18 @@ public class HR01UserQryController extends QueryBaseController {
             @RequestParam(required = false) String keyword,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         // 建立查詢請求物件
-        UserQueryRequest request = new UserQueryRequest(status, keyword);
-        return ResponseEntity.ok(getResponse(request, currentUser));
+        // UserQueryRequest request = new UserQueryRequest(status, keyword);
+        // 改用 GetUserListRequest 以支援進階查詢與統一 Service 介面
+        com.company.hrms.iam.api.request.user.GetUserListRequest request = com.company.hrms.iam.api.request.user.GetUserListRequest
+                .builder()
+                .status(status)
+                .keyword(keyword)
+                .page(1) // 預設第一頁
+                .size(100) // 預設查詢 100 筆 (相容舊 API 行為)
+                .build();
+
+        com.company.hrms.common.model.PageResponse<UserListResponse> response = getResponse(request, currentUser);
+        return ResponseEntity.ok(response.getItems());
     }
 
     /**
@@ -50,9 +70,9 @@ public class HR01UserQryController extends QueryBaseController {
      */
     @Operation(summary = "查詢單一使用者", operationId = "getUser")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權"),
-        @ApiResponse(responseCode = "404", description = "使用者不存在")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權"),
+            @ApiResponse(responseCode = "404", description = "使用者不存在")
     })
     @GetMapping("/{userId}")
     public ResponseEntity<UserDetailResponse> getUser(
@@ -64,10 +84,12 @@ public class HR01UserQryController extends QueryBaseController {
     /**
      * 使用者查詢請求 (內部類別)
      */
-    public record UserQueryRequest(String status, String keyword) {}
+    public record UserQueryRequest(String status, String keyword) {
+    }
 
     /**
      * 取得使用者請求 (內部類別)
      */
-    public record GetUserRequest() {}
+    public record GetUserRequest() {
+    }
 }

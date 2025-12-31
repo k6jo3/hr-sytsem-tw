@@ -1,0 +1,12 @@
+{
+  "junction" : "AND",
+  "conditions" : [ {
+    "f" : "is_deleted",
+    "op" : "EQ",
+    "v" : 0
+  }, {
+    "f" : "status",
+    "op" : "EQ",
+    "v" : "ACTIVE"
+  } ]
+}
