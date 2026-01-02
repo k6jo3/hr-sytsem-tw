@@ -19,16 +19,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.project.api.request.GetTaskDetailRequest;
 import com.company.hrms.project.api.response.GetTaskDetailResponse;
+import com.company.hrms.project.application.service.task.BuildTaskDetailResponseTask;
+import com.company.hrms.project.application.service.task.LoadTaskTask;
 import com.company.hrms.project.domain.model.aggregate.Task;
 import com.company.hrms.project.domain.model.valueobject.TaskId;
 import com.company.hrms.project.domain.model.valueobject.TaskStatus;
 import com.company.hrms.project.domain.repository.ITaskRepository;
 
+/**
+ * GetTaskDetailServiceImpl 測試 - Business Pipeline 版本
+ */
 @ExtendWith(MockitoExtension.class)
 public class GetTaskDetailServiceTest {
 
     @Mock
     private ITaskRepository taskRepository;
+
+    @Mock
+    private LoadTaskTask loadTaskTask;
+
+    @Mock
+    private BuildTaskDetailResponseTask buildTaskDetailResponseTask;
 
     @InjectMocks
     private GetTaskDetailServiceImpl getTaskDetailService;
@@ -72,6 +83,8 @@ public class GetTaskDetailServiceTest {
         assertEquals("Task 1", response.getTaskName());
         assertEquals(50, response.getProgress());
 
-        verify(taskRepository).findById(any(TaskId.class));
+        // Verify Pipeline Tasks were executed
+        verify(loadTaskTask, times(1)).execute(any());
+        verify(buildTaskDetailResponseTask, times(1)).execute(any());
     }
 }

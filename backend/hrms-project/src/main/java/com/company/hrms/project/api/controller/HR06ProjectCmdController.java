@@ -25,19 +25,24 @@ import com.company.hrms.project.api.response.UpdateProjectResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * HR06 專案管理 - 專案維護 Controller
+ * 
+ * 負責專案的新增、修改、成員管理、啟動、結案等寫入操作
+ */
 @RestController
 @RequestMapping("/api/v1/projects")
-@Tag(name = "HR06-Project-Command")
+@Tag(name = "HR06-專案維護", description = "專案管理 - 專案維護 API")
 public class HR06ProjectCmdController extends CommandBaseController {
 
-    @Operation(summary = "Create project", operationId = "createProject")
+    @Operation(summary = "建立專案", operationId = "createProject", description = "建立新專案")
     @PostMapping
     public ResponseEntity<CreateProjectResponse> createProject(@RequestBody CreateProjectRequest request,
             @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(execCommand(request, currentUser));
     }
 
-    @Operation(summary = "Update project", operationId = "updateProject")
+    @Operation(summary = "更新專案", operationId = "updateProject", description = "更新專案基本資訊")
     @PutMapping("/{id}")
     public ResponseEntity<UpdateProjectResponse> updateProject(@PathVariable String id,
             @RequestBody UpdateProjectRequest request, @CurrentUser JWTModel currentUser) throws Exception {
@@ -45,7 +50,7 @@ public class HR06ProjectCmdController extends CommandBaseController {
         return ResponseEntity.ok(execCommand(request, currentUser));
     }
 
-    @Operation(summary = "Add project member", operationId = "addProjectMember")
+    @Operation(summary = "新增專案成員", operationId = "addProjectMember", description = "將員工加入專案團隊")
     @PostMapping("/{id}/members")
     public ResponseEntity<AddProjectMemberResponse> addProjectMember(@PathVariable String id,
             @RequestBody AddProjectMemberRequest request, @CurrentUser JWTModel currentUser) throws Exception {
@@ -53,7 +58,7 @@ public class HR06ProjectCmdController extends CommandBaseController {
         return ResponseEntity.ok(execCommand(request, currentUser));
     }
 
-    @Operation(summary = "Start project", operationId = "startProject")
+    @Operation(summary = "啟動專案", operationId = "startProject", description = "將專案狀態變更為進行中")
     @PutMapping("/{id}/start")
     public ResponseEntity<StartProjectResponse> startProject(@PathVariable String id,
             @RequestBody StartProjectRequest request, @CurrentUser JWTModel currentUser) throws Exception {
@@ -61,7 +66,7 @@ public class HR06ProjectCmdController extends CommandBaseController {
         return ResponseEntity.ok(execCommand(request, currentUser));
     }
 
-    @Operation(summary = "Complete project", operationId = "completeProject")
+    @Operation(summary = "結案", operationId = "completeProject", description = "完成專案並結案")
     @PutMapping("/{id}/complete")
     public ResponseEntity<CompleteProjectResponse> completeProject(@PathVariable String id,
             @RequestBody CompleteProjectRequest request, @CurrentUser JWTModel currentUser) throws Exception {

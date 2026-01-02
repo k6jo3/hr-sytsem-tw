@@ -18,19 +18,24 @@ import com.company.hrms.project.api.response.GetCustomerListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * HR06 專案管理 - 客戶查詢 Controller
+ * 
+ * 負責客戶的查詢操作，包含列表查詢、詳情查詢
+ */
 @RestController
 @RequestMapping("/api/v1/customers")
-@Tag(name = "HR06-Customer-Query")
+@Tag(name = "HR06-客戶查詢", description = "專案管理 - 客戶查詢 API")
 public class HR06CustomerQryController extends QueryBaseController {
 
-    @Operation(summary = "Query customer list", operationId = "getCustomerList")
+    @Operation(summary = "查詢客戶列表", operationId = "getCustomerList", description = "查詢客戶列表，支援分頁與過濾")
     @GetMapping
     public ResponseEntity<GetCustomerListResponse> getCustomerList(@ModelAttribute GetCustomerListRequest request,
             @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(getResponse(request, currentUser));
     }
 
-    @Operation(summary = "Query customer detail", operationId = "getCustomerDetail")
+    @Operation(summary = "查詢客戶詳情", operationId = "getCustomerDetail", description = "根據客戶 ID 查詢客戶詳細資訊")
     @GetMapping("/{id}")
     public ResponseEntity<GetCustomerDetailResponse> getCustomerDetail(
             @PathVariable String id,

@@ -16,16 +16,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.project.api.request.GetCustomerDetailRequest;
 import com.company.hrms.project.api.response.GetCustomerDetailResponse;
+import com.company.hrms.project.application.service.task.BuildCustomerDetailResponseTask;
+import com.company.hrms.project.application.service.task.LoadCustomerTask;
 import com.company.hrms.project.domain.model.aggregate.Customer;
 import com.company.hrms.project.domain.model.valueobject.CustomerId;
 import com.company.hrms.project.domain.model.valueobject.CustomerStatus;
 import com.company.hrms.project.domain.repository.ICustomerRepository;
 
+/**
+ * GetCustomerDetailServiceImpl 測試 - Business Pipeline 版本
+ */
 @ExtendWith(MockitoExtension.class)
 public class GetCustomerDetailServiceTest {
 
     @Mock
     private ICustomerRepository customerRepository;
+
+    @Mock
+    private LoadCustomerTask loadCustomerTask;
+
+    @Mock
+    private BuildCustomerDetailResponseTask buildCustomerDetailResponseTask;
 
     @InjectMocks
     private GetCustomerDetailServiceImpl getCustomerDetailService;
@@ -68,6 +79,8 @@ public class GetCustomerDetailServiceTest {
         assertEquals("Tech Corp", response.getCustomerName());
         assertEquals("ACTIVE", response.getStatus());
 
-        verify(customerRepository).findById(any(CustomerId.class));
+        // Verify Pipeline Tasks were executed
+        verify(loadCustomerTask, times(1)).execute(any());
+        verify(buildCustomerDetailResponseTask, times(1)).execute(any());
     }
 }

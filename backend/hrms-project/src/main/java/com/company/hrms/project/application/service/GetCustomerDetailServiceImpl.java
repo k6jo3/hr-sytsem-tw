@@ -3,42 +3,43 @@ package com.company.hrms.project.application.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.project.api.request.GetCustomerDetailRequest;
 import com.company.hrms.project.api.response.GetCustomerDetailResponse;
-import com.company.hrms.project.domain.model.aggregate.Customer;
-import com.company.hrms.project.domain.model.valueobject.CustomerId;
-import com.company.hrms.project.domain.repository.ICustomerRepository;
+import com.company.hrms.project.application.service.context.CustomerDetailContext;
+import com.company.hrms.project.application.service.task.BuildCustomerDetailResponseTask;
+import com.company.hrms.project.application.service.task.LoadCustomerTask;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 客戶詳情查詢服務 - Business Pipeline 版本
+ */
 @Service("getCustomerDetailServiceImpl")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class GetCustomerDetailServiceImpl
-        implements QueryApiService<GetCustomerDetailRequest, GetCustomerDetailResponse> {
+                implements QueryApiService<GetCustomerDetailRequest, GetCustomerDetailResponse> {
 
-    private final ICustomerRepository customerRepository;
+        private final LoadCustomerTask loadCustomerTask;
+        private final BuildCustomerDetailResponseTask buildCustomerDetailResponseTask;
 
-    @Override
-    public GetCustomerDetailResponse getResponse(GetCustomerDetailRequest req, JWTModel currentUser, String... args)
-            throws Exception {
-        CustomerId customerId = new CustomerId(req.getCustomerId());
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new IllegalArgumentException("Customer not found: " + req.getCustomerId()));
+        @Override
+        public GetCustomerDetailResponse getResponse(GetCustomerDetailRequest req, JWTModel currentUser, String... args)
+                        throws Exception {
 
-        return GetCustomerDetailResponse.builder()
-                .customerId(customer.getId().getValue())
-                .customerCode(customer.getCustomerCode())
-                .customerName(customer.getCustomerName())
-                .taxId(customer.getTaxId())
-                .industry(customer.getIndustry())
-                .email(customer.getEmail())
-                .phoneNumber(customer.getPhoneNumber())
-                .status(customer.getStatus().name())
-                .createdAt(customer.getCreatedAt())
-                .updatedAt(customer.getUpdatedAt())
-                .build();
-    }
+                // 1. 建立 Context
+                CustomerDetailContext context = new CustomerDetailContext(req.getCustomerId());
+
+                // 2. 執行 Pipeline
+                BusinessPipeline.start(context)
+                                .next(loadCustomerTask) // Infrastructure Task: 載入客戶
+                                .next(buildCustomerDetailResponseTask) // Domain Task: 建構回應
+                                .execute();
+
+                // 3. 回傳結果
+                return context.getResponse();
+        }
 }
