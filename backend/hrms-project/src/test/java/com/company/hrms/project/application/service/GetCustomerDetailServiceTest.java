@@ -9,7 +9,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -25,6 +24,11 @@ import com.company.hrms.project.domain.repository.ICustomerRepository;
 
 /**
  * GetCustomerDetailServiceImpl 測試 - Business Pipeline 版本
+ * 
+ * 採用 "Business Assembly Test" 策略：
+ * 1. 使用真實的 Pipeline Mock 對象 (LoadCustomerTask, BuildCustomerDetailResponseTask)
+ * 2. Mock 底層 Repository
+ * 3. 驗證 Pipeline 流程組裝與數據流轉正確性
  */
 @ExtendWith(MockitoExtension.class)
 public class GetCustomerDetailServiceTest {
@@ -32,13 +36,6 @@ public class GetCustomerDetailServiceTest {
     @Mock
     private ICustomerRepository customerRepository;
 
-    @Mock
-    private LoadCustomerTask loadCustomerTask;
-
-    @Mock
-    private BuildCustomerDetailResponseTask buildCustomerDetailResponseTask;
-
-    @InjectMocks
     private GetCustomerDetailServiceImpl getCustomerDetailService;
 
     private GetCustomerDetailRequest request;
@@ -47,6 +44,13 @@ public class GetCustomerDetailServiceTest {
 
     @BeforeEach
     void setUp() {
+        // 手動組裝 Pipeline Components
+        LoadCustomerTask loadCustomerTask = new LoadCustomerTask(customerRepository);
+        BuildCustomerDetailResponseTask buildCustomerDetailResponseTask = new BuildCustomerDetailResponseTask();
+
+        // 注入真實 Task 到 Service
+        getCustomerDetailService = new GetCustomerDetailServiceImpl(loadCustomerTask, buildCustomerDetailResponseTask);
+
         currentUser = new JWTModel();
         currentUser.setUserId("USER-001");
 
@@ -79,8 +83,7 @@ public class GetCustomerDetailServiceTest {
         assertEquals("Tech Corp", response.getCustomerName());
         assertEquals("ACTIVE", response.getStatus());
 
-        // Verify Pipeline Tasks were executed
-        verify(loadCustomerTask, times(1)).execute(any());
-        verify(buildCustomerDetailResponseTask, times(1)).execute(any());
+        // Verify Repository was called via LoadCustomerTask
+        verify(customerRepository, times(1)).findById(any(CustomerId.class));
     }
 }

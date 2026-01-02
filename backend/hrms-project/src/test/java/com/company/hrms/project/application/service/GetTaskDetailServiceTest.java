@@ -12,7 +12,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -28,6 +27,11 @@ import com.company.hrms.project.domain.repository.ITaskRepository;
 
 /**
  * GetTaskDetailServiceImpl 測試 - Business Pipeline 版本
+ * 
+ * 採用 "Business Assembly Test" 策略：
+ * 1. 使用真實的 Pipeline Mock 對象 (LoadTaskTask, BuildTaskDetailResponseTask)
+ * 2. Mock 底層 Repository
+ * 3. 驗證 Pipeline 流程組裝與數據流轉正確性
  */
 @ExtendWith(MockitoExtension.class)
 public class GetTaskDetailServiceTest {
@@ -35,13 +39,6 @@ public class GetTaskDetailServiceTest {
     @Mock
     private ITaskRepository taskRepository;
 
-    @Mock
-    private LoadTaskTask loadTaskTask;
-
-    @Mock
-    private BuildTaskDetailResponseTask buildTaskDetailResponseTask;
-
-    @InjectMocks
     private GetTaskDetailServiceImpl getTaskDetailService;
 
     private GetTaskDetailRequest request;
@@ -51,6 +48,13 @@ public class GetTaskDetailServiceTest {
 
     @BeforeEach
     void setUp() {
+        // 手動組裝 Pipeline Components
+        LoadTaskTask loadTaskTask = new LoadTaskTask(taskRepository);
+        BuildTaskDetailResponseTask buildTaskDetailResponseTask = new BuildTaskDetailResponseTask();
+
+        // 注入真實 Task 到 Service
+        getTaskDetailService = new GetTaskDetailServiceImpl(loadTaskTask, buildTaskDetailResponseTask);
+
         currentUser = new JWTModel();
         currentUser.setUserId("USER-001");
 
@@ -71,6 +75,8 @@ public class GetTaskDetailServiceTest {
         when(task.getStartDate()).thenReturn(LocalDate.now());
         when(task.getEndDate()).thenReturn(LocalDate.now().plusDays(7));
         when(task.getEstimatedHours()).thenReturn(BigDecimal.valueOf(40));
+        // Mock getAssigneeId to prevent NPE if used in DTO
+        when(task.getAssigneeId()).thenReturn(UUID.randomUUID());
 
         when(taskRepository.findById(any(TaskId.class))).thenReturn(Optional.of(task));
 
@@ -83,8 +89,7 @@ public class GetTaskDetailServiceTest {
         assertEquals("Task 1", response.getTaskName());
         assertEquals(50, response.getProgress());
 
-        // Verify Pipeline Tasks were executed
-        verify(loadTaskTask, times(1)).execute(any());
-        verify(buildTaskDetailResponseTask, times(1)).execute(any());
+        // Verify Repository was called via LoadTaskTask
+        verify(taskRepository, times(1)).findById(any(TaskId.class));
     }
 }
