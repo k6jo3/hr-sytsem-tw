@@ -135,6 +135,50 @@ public class PerformanceReview {
     }
 
     /**
+     * 重建考核記錄（用於從資料庫載入）
+     */
+    public static PerformanceReview reconstitute(
+            ReviewId reviewId,
+            CycleId cycleId,
+            UUID employeeId,
+            UUID reviewerId,
+            ReviewType reviewType,
+            List<EvaluationItem> evaluationItems,
+            BigDecimal overallScore,
+            String overallRating,
+            BigDecimal finalScore,
+            String finalRating,
+            String adjustmentReason,
+            String comments,
+            ReviewStatus status,
+            LocalDateTime submittedAt,
+            LocalDateTime finalizedAt,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+
+        PerformanceReview review = new PerformanceReview();
+        review.reviewId = reviewId;
+        review.cycleId = cycleId;
+        review.employeeId = employeeId;
+        review.reviewerId = reviewerId;
+        review.reviewType = reviewType;
+        review.evaluationItems = evaluationItems != null ? new ArrayList<>(evaluationItems) : new ArrayList<>();
+        review.overallScore = overallScore;
+        review.overallRating = overallRating;
+        review.finalScore = finalScore;
+        review.finalRating = finalRating;
+        review.adjustmentReason = adjustmentReason;
+        review.comments = comments;
+        review.status = status;
+        review.submittedAt = submittedAt;
+        review.finalizedAt = finalizedAt;
+        review.createdAt = createdAt;
+        review.updatedAt = updatedAt;
+
+        return review;
+    }
+
+    /**
      * 提交評估
      */
     public void submitEvaluation(List<EvaluationItem> items, String comments) {

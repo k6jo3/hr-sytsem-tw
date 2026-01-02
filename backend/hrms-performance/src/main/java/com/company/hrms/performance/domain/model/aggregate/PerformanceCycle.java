@@ -104,6 +104,38 @@ public class PerformanceCycle {
     }
 
     /**
+     * 重建考核週期（用於從資料庫載入）
+     */
+    public static PerformanceCycle reconstitute(
+            CycleId cycleId,
+            String cycleName,
+            CycleType cycleType,
+            LocalDate startDate,
+            LocalDate endDate,
+            LocalDate selfEvalDeadline,
+            LocalDate managerEvalDeadline,
+            CycleStatus status,
+            EvaluationTemplate template,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+
+        PerformanceCycle cycle = new PerformanceCycle();
+        cycle.cycleId = cycleId;
+        cycle.cycleName = cycleName;
+        cycle.cycleType = cycleType;
+        cycle.startDate = startDate;
+        cycle.endDate = endDate;
+        cycle.selfEvalDeadline = selfEvalDeadline;
+        cycle.managerEvalDeadline = managerEvalDeadline;
+        cycle.status = status;
+        cycle.template = template;
+        cycle.createdAt = createdAt;
+        cycle.updatedAt = updatedAt;
+
+        return cycle;
+    }
+
+    /**
      * 啟動考核週期
      */
     public void start() {
