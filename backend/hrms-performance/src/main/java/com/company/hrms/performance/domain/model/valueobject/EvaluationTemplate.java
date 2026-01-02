@@ -5,16 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 /**
  * 考核表單範本
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class EvaluationTemplate {
     /**
      * 表單名稱
@@ -46,6 +39,63 @@ public class EvaluationTemplate {
      * 是否已發布
      */
     private Boolean isPublished;
+
+    public EvaluationTemplate() {
+    }
+
+    public EvaluationTemplate(String formName, ScoringSystem scoringSystem, Boolean forcedDistribution,
+            Map<String, Integer> distributionRules, List<EvaluationItem> evaluationItems, Boolean isPublished) {
+        this.formName = formName;
+        this.scoringSystem = scoringSystem;
+        this.forcedDistribution = forcedDistribution;
+        this.distributionRules = distributionRules;
+        this.evaluationItems = evaluationItems;
+        this.isPublished = isPublished;
+    }
+
+    public String getFormName() {
+        return formName;
+    }
+
+    public void setFormName(String formName) {
+        this.formName = formName;
+    }
+
+    public ScoringSystem getScoringSystem() {
+        return scoringSystem;
+    }
+
+    public void setScoringSystem(ScoringSystem scoringSystem) {
+        this.scoringSystem = scoringSystem;
+    }
+
+    public Boolean getForcedDistribution() {
+        return forcedDistribution;
+    }
+
+    public void setForcedDistribution(Boolean forcedDistribution) {
+        this.forcedDistribution = forcedDistribution;
+    }
+
+    public Map<String, Integer> getDistributionRules() {
+        return distributionRules;
+    }
+
+    public List<EvaluationItem> getEvaluationItems() {
+        return evaluationItems;
+    }
+
+    public void setEvaluationItems(List<EvaluationItem> evaluationItems) {
+        this.evaluationItems = evaluationItems;
+    }
+
+    public Boolean getIsPublished() {
+        return isPublished;
+    }
+
+    public void setIsPublished(Boolean isPublished) {
+        this.isPublished = isPublished;
+    }
 
     /**
      * 建立表單範本

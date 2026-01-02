@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBatchBaseRepository;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.project.domain.model.aggregate.Project;
@@ -24,7 +24,8 @@ import com.company.hrms.project.infrastructure.entity.ProjectMemberEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
-public class ProjectRepositoryImpl extends BaseRepository<ProjectEntity, String> implements IProjectRepository {
+public class ProjectRepositoryImpl extends CommandBatchBaseRepository<ProjectEntity, String>
+        implements IProjectRepository {
 
     public ProjectRepositoryImpl(JPAQueryFactory factory) {
         super(factory, ProjectEntity.class);

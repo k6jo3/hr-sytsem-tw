@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBatchBaseRepository;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.insurance.domain.model.aggregate.InsuranceEnrollment;
 import com.company.hrms.insurance.domain.model.valueobject.EnrollmentId;
@@ -25,7 +25,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  */
 @Repository
 public class InsuranceEnrollmentRepository
-                extends BaseRepository<InsuranceEnrollmentEntity, UUID>
+                extends CommandBatchBaseRepository<InsuranceEnrollmentEntity, UUID>
                 implements IInsuranceEnrollmentRepository {
 
         public InsuranceEnrollmentRepository(JPAQueryFactory factory) {

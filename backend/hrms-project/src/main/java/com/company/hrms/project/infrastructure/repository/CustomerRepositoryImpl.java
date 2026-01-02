@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBatchBaseRepository;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.project.domain.model.aggregate.Customer;
 import com.company.hrms.project.domain.model.valueobject.CustomerId;
@@ -17,7 +17,8 @@ import com.company.hrms.project.infrastructure.entity.CustomerEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
-public class CustomerRepositoryImpl extends BaseRepository<CustomerEntity, String> implements ICustomerRepository {
+public class CustomerRepositoryImpl extends CommandBatchBaseRepository<CustomerEntity, String>
+        implements ICustomerRepository {
 
     public CustomerRepositoryImpl(JPAQueryFactory factory) {
         super(factory, CustomerEntity.class);

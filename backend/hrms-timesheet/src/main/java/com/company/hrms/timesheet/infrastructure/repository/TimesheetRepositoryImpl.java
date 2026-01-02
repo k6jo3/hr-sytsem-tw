@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.company.hrms.common.domain.event.DomainEvent;
 import com.company.hrms.common.domain.event.EventPublisher;
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBatchBaseRepository;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.timesheet.domain.model.aggregate.Timesheet;
@@ -24,7 +24,8 @@ import com.company.hrms.timesheet.infrastructure.entity.TimesheetEntryEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
-public class TimesheetRepositoryImpl extends BaseRepository<TimesheetEntity, UUID> implements ITimesheetRepository {
+public class TimesheetRepositoryImpl extends CommandBatchBaseRepository<TimesheetEntity, UUID>
+        implements ITimesheetRepository {
 
     private final EventPublisher eventPublisher;
 

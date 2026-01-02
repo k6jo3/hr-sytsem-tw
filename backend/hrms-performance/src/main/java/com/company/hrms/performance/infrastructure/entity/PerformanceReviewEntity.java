@@ -13,14 +13,12 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Data;
 
 /**
  * 考核記錄 Entity
  */
 @Entity
 @Table(name = "performance_reviews")
-@Data
 public class PerformanceReviewEntity {
 
     @Id
@@ -77,4 +75,142 @@ public class PerformanceReviewEntity {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // === Getters and Setters (Manual due to Lombok issues) ===
+
+    public UUID getReviewId() {
+        return reviewId;
+    }
+
+    public void setReviewId(UUID reviewId) {
+        this.reviewId = reviewId;
+    }
+
+    public UUID getCycleId() {
+        return cycleId;
+    }
+
+    public void setCycleId(UUID cycleId) {
+        this.cycleId = cycleId;
+    }
+
+    public UUID getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(UUID employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public UUID getReviewerId() {
+        return reviewerId;
+    }
+
+    public void setReviewerId(UUID reviewerId) {
+        this.reviewerId = reviewerId;
+    }
+
+    public ReviewType getReviewType() {
+        return reviewType;
+    }
+
+    public void setReviewType(ReviewType reviewType) {
+        this.reviewType = reviewType;
+    }
+
+    public String getEvaluationItemsJson() {
+        return evaluationItemsJson;
+    }
+
+    public void setEvaluationItemsJson(String evaluationItemsJson) {
+        this.evaluationItemsJson = evaluationItemsJson;
+    }
+
+    public BigDecimal getOverallScore() {
+        return overallScore;
+    }
+
+    public void setOverallScore(BigDecimal overallScore) {
+        this.overallScore = overallScore;
+    }
+
+    public String getOverallRating() {
+        return overallRating;
+    }
+
+    public void setOverallRating(String overallRating) {
+        this.overallRating = overallRating;
+    }
+
+    public BigDecimal getFinalScore() {
+        return finalScore;
+    }
+
+    public void setFinalScore(BigDecimal finalScore) {
+        this.finalScore = finalScore;
+    }
+
+    public String getFinalRating() {
+        return finalRating;
+    }
+
+    public void setFinalRating(String finalRating) {
+        this.finalRating = finalRating;
+    }
+
+    public String getAdjustmentReason() {
+        return adjustmentReason;
+    }
+
+    public void setAdjustmentReason(String adjustmentReason) {
+        this.adjustmentReason = adjustmentReason;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+    public ReviewStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReviewStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public void setSubmittedAt(LocalDateTime submittedAt) {
+        this.submittedAt = submittedAt;
+    }
+
+    public LocalDateTime getFinalizedAt() {
+        return finalizedAt;
+    }
+
+    public void setFinalizedAt(LocalDateTime finalizedAt) {
+        this.finalizedAt = finalizedAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

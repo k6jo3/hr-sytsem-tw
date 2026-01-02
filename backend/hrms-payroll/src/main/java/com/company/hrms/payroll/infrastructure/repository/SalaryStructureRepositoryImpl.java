@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBatchBaseRepository;
 import com.company.hrms.common.query.Condition;
 import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryBuilder;
@@ -29,7 +29,7 @@ import com.company.hrms.payroll.infrastructure.po.SalaryStructurePO;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
-public class SalaryStructureRepositoryImpl extends BaseRepository<SalaryStructurePO, String>
+public class SalaryStructureRepositoryImpl extends CommandBatchBaseRepository<SalaryStructurePO, String>
         implements ISalaryStructureRepository {
 
     public SalaryStructureRepositoryImpl(JPAQueryFactory factory) {

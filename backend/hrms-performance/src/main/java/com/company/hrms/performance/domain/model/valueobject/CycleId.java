@@ -2,14 +2,19 @@ package com.company.hrms.performance.domain.model.valueobject;
 
 import java.util.UUID;
 
-import lombok.Value;
-
 /**
  * 考核週期 ID
  */
-@Value
 public class CycleId {
-    UUID value;
+    private final UUID value;
+
+    public CycleId(UUID value) {
+        this.value = value;
+    }
+
+    public UUID getValue() {
+        return value;
+    }
 
     public static CycleId create() {
         return new CycleId(UUID.randomUUID());
@@ -27,5 +32,25 @@ public class CycleId {
             throw new IllegalArgumentException("CycleId 不可為空");
         }
         return new CycleId(UUID.fromString(value));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        CycleId cycleId = (CycleId) o;
+        return value.equals(cycleId.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(value);
+    }
+
+    @Override
+    public String toString() {
+        return "CycleId(value=" + value + ")";
     }
 }

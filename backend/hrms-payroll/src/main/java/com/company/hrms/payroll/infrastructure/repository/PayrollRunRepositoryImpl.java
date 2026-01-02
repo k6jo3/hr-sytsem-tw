@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBatchBaseRepository;
 import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
@@ -21,7 +21,8 @@ import com.company.hrms.payroll.infrastructure.po.PayrollRunPO;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
-public class PayrollRunRepositoryImpl extends BaseRepository<PayrollRunPO, String> implements IPayrollRunRepository {
+public class PayrollRunRepositoryImpl extends CommandBatchBaseRepository<PayrollRunPO, String>
+        implements IPayrollRunRepository {
 
     public PayrollRunRepositoryImpl(JPAQueryFactory factory) {
         super(factory, PayrollRunPO.class);

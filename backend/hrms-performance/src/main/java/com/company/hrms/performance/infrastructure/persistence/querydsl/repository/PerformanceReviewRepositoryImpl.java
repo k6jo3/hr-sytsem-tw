@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.company.hrms.common.domain.event.EventPublisher;
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBaseRepository;
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.performance.domain.model.aggregate.PerformanceReview;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
 import com.company.hrms.performance.domain.model.valueobject.EvaluationItem;
@@ -26,7 +29,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  */
 @Repository
 public class PerformanceReviewRepositoryImpl
-        extends BaseRepository<PerformanceReviewEntity, UUID>
+        extends CommandBaseRepository<PerformanceReviewEntity, UUID>
         implements IPerformanceReviewRepository {
 
     private final EventPublisher eventPublisher;
@@ -135,4 +138,5 @@ public class PerformanceReviewRepositoryImpl
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }
+
 }

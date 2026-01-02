@@ -13,14 +13,12 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Data;
 
 /**
  * 考核週期 Entity
  */
 @Entity
 @Table(name = "performance_cycles")
-@Data
 public class PerformanceCycleEntity {
 
     @Id
@@ -59,4 +57,94 @@ public class PerformanceCycleEntity {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    // === Getters and Setters (Manual due to Lombok issues) ===
+
+    public UUID getCycleId() {
+        return cycleId;
+    }
+
+    public void setCycleId(UUID cycleId) {
+        this.cycleId = cycleId;
+    }
+
+    public String getCycleName() {
+        return cycleName;
+    }
+
+    public void setCycleName(String cycleName) {
+        this.cycleName = cycleName;
+    }
+
+    public CycleType getCycleType() {
+        return cycleType;
+    }
+
+    public void setCycleType(CycleType cycleType) {
+        this.cycleType = cycleType;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalDate getSelfEvalDeadline() {
+        return selfEvalDeadline;
+    }
+
+    public void setSelfEvalDeadline(LocalDate selfEvalDeadline) {
+        this.selfEvalDeadline = selfEvalDeadline;
+    }
+
+    public LocalDate getManagerEvalDeadline() {
+        return managerEvalDeadline;
+    }
+
+    public void setManagerEvalDeadline(LocalDate managerEvalDeadline) {
+        this.managerEvalDeadline = managerEvalDeadline;
+    }
+
+    public CycleStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CycleStatus status) {
+        this.status = status;
+    }
+
+    public String getTemplateJson() {
+        return templateJson;
+    }
+
+    public void setTemplateJson(String templateJson) {
+        this.templateJson = templateJson;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

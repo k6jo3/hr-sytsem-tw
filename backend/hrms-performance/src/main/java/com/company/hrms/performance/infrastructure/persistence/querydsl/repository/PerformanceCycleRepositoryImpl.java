@@ -3,12 +3,12 @@ package com.company.hrms.performance.infrastructure.persistence.querydsl.reposit
 import java.util.Optional;
 import java.util.UUID;
 
-import org.hibernate.query.Page;
-import org.springdoc.core.converters.models.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.company.hrms.common.domain.event.EventPublisher;
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBaseRepository;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.performance.domain.model.aggregate.PerformanceCycle;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
@@ -25,7 +25,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  */
 @Repository
 public class PerformanceCycleRepositoryImpl
-        extends BaseRepository<PerformanceCycleEntity, UUID>
+        extends CommandBaseRepository<PerformanceCycleEntity, UUID>
         implements IPerformanceCycleRepository {
 
     private final EventPublisher eventPublisher;
@@ -119,4 +119,5 @@ public class PerformanceCycleRepositoryImpl
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }
+
 }

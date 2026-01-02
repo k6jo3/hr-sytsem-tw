@@ -14,12 +14,9 @@ import com.company.hrms.performance.domain.model.valueobject.ReviewStatus;
 import com.company.hrms.performance.domain.model.valueobject.ReviewType;
 import com.company.hrms.performance.domain.model.valueobject.ScoringSystem;
 
-import lombok.Getter;
-
 /**
  * 考核記錄聚合根
  */
-@Getter
 public class PerformanceReview {
     /**
      * 考核記錄 ID
@@ -350,5 +347,74 @@ public class PerformanceReview {
         if (reviewType == null) {
             throw new IllegalArgumentException("評估類型不可為空");
         }
+    }
+    // === Getters (Manual due to Lombok issues) ===
+
+    public ReviewId getReviewId() {
+        return reviewId;
+    }
+
+    public CycleId getCycleId() {
+        return cycleId;
+    }
+
+    public UUID getEmployeeId() {
+        return employeeId;
+    }
+
+    public UUID getReviewerId() {
+        return reviewerId;
+    }
+
+    public ReviewType getReviewType() {
+        return reviewType;
+    }
+
+    public List<EvaluationItem> getEvaluationItems() {
+        return evaluationItems;
+    }
+
+    public BigDecimal getOverallScore() {
+        return overallScore;
+    }
+
+    public String getOverallRating() {
+        return overallRating;
+    }
+
+    public BigDecimal getFinalScore() {
+        return finalScore;
+    }
+
+    public String getFinalRating() {
+        return finalRating;
+    }
+
+    public String getAdjustmentReason() {
+        return adjustmentReason;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public ReviewStatus getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public LocalDateTime getFinalizedAt() {
+        return finalizedAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

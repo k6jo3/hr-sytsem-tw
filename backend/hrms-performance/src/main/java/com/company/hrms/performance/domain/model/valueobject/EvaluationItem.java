@@ -3,16 +3,9 @@ package com.company.hrms.performance.domain.model.valueobject;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 /**
  * 評估項目
  */
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class EvaluationItem {
     /**
      * 項目 ID
@@ -53,6 +46,85 @@ public class EvaluationItem {
      * 主管評說明
      */
     private String managerComment;
+
+    public EvaluationItem() {
+    }
+
+    public EvaluationItem(UUID itemId, String itemName, Integer weight, String description, String scoringCriteria,
+            Integer score, String selfComment, String managerComment) {
+        this.itemId = itemId;
+        this.itemName = itemName;
+        this.weight = weight;
+        this.description = description;
+        this.scoringCriteria = scoringCriteria;
+        this.score = score;
+        this.selfComment = selfComment;
+        this.managerComment = managerComment;
+    }
+
+    public UUID getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(UUID itemId) {
+        this.itemId = itemId;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public Integer getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Integer weight) {
+        this.weight = weight;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getScoringCriteria() {
+        return scoringCriteria;
+    }
+
+    public void setScoringCriteria(String scoringCriteria) {
+        this.scoringCriteria = scoringCriteria;
+    }
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public String getSelfComment() {
+        return selfComment;
+    }
+
+    public void setSelfComment(String selfComment) {
+        this.selfComment = selfComment;
+    }
+
+    public String getManagerComment() {
+        return managerComment;
+    }
+
+    public void setManagerComment(String managerComment) {
+        this.managerComment = managerComment;
+    }
 
     /**
      * 建立評估項目定義（用於表單範本）

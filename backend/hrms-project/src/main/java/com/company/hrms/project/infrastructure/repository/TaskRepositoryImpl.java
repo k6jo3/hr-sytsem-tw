@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBatchBaseRepository;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.project.domain.model.aggregate.Task;
 import com.company.hrms.project.domain.model.valueobject.TaskId;
@@ -16,7 +16,7 @@ import com.company.hrms.project.infrastructure.entity.TaskEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
-public class TaskRepositoryImpl extends BaseRepository<TaskEntity, String> implements ITaskRepository {
+public class TaskRepositoryImpl extends CommandBatchBaseRepository<TaskEntity, String> implements ITaskRepository {
 
     public TaskRepositoryImpl(JPAQueryFactory factory) {
         super(factory, TaskEntity.class);

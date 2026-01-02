@@ -8,12 +8,9 @@ import com.company.hrms.performance.domain.model.valueobject.CycleStatus;
 import com.company.hrms.performance.domain.model.valueobject.CycleType;
 import com.company.hrms.performance.domain.model.valueobject.EvaluationTemplate;
 
-import lombok.Getter;
-
 /**
  * 考核週期聚合根
  */
-@Getter
 public class PerformanceCycle {
     /**
      * 週期 ID
@@ -224,6 +221,52 @@ public class PerformanceCycle {
      */
     public boolean canDelete() {
         return status == CycleStatus.DRAFT;
+    }
+
+    // === Getters (Manual due to Lombok issues) ===
+
+    public CycleId getCycleId() {
+        return cycleId;
+    }
+
+    public String getCycleName() {
+        return cycleName;
+    }
+
+    public CycleType getCycleType() {
+        return cycleType;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public LocalDate getSelfEvalDeadline() {
+        return selfEvalDeadline;
+    }
+
+    public LocalDate getManagerEvalDeadline() {
+        return managerEvalDeadline;
+    }
+
+    public CycleStatus getStatus() {
+        return status;
+    }
+
+    public EvaluationTemplate getTemplate() {
+        return template;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
     // === 驗證方法 ===
