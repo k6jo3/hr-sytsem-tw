@@ -1,0 +1,38 @@
+# Test Configuration for Project Service
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+# JWT Configuration for Testing
+jwt:
+  secret: test-secret-key-for-jwt-token-generation-must-be-long-enough-256-bits
+  access-token-expiry: 3600000
+  refresh-token-expiry: 604800000
+
+# Disable Eureka for Tests
+eureka:
+  client:
+    enabled: false
+
+# Disable Redis for Tests
+spring.data.redis:
+  host: localhost
+  port: 6379
+
+# Logging
+logging:
+  level:
+    com.company.hrms: DEBUG
+    org.springframework.security: DEBUG

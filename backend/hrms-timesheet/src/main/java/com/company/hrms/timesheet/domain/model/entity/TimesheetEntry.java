@@ -19,10 +19,12 @@ public class TimesheetEntry {
     private String description;
     private LocalDateTime createdAt;
 
-    public static TimesheetEntry create(UUID projectId, LocalDate workDate, BigDecimal hours, String description) {
+    public static TimesheetEntry create(UUID projectId, UUID taskId, LocalDate workDate, BigDecimal hours,
+            String description) {
         TimesheetEntry entry = new TimesheetEntry();
         entry.id = UUID.randomUUID();
         entry.projectId = projectId;
+        entry.taskId = taskId;
         entry.workDate = workDate;
         entry.hours = hours;
         entry.description = description;
