@@ -2,8 +2,12 @@ package com.company.hrms.project.infrastructure.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
@@ -34,8 +38,7 @@ public class ProjectRepositoryImpl extends BaseRepository<ProjectEntity, String>
     }
 
     @Override
-    public org.springframework.data.domain.Page<Project> findProjects(QueryGroup query,
-            org.springframework.data.domain.Pageable pageable) {
+    public Page<Project> findProjects(QueryGroup query, Pageable pageable) {
         return super.findPage(query, pageable).map(this::toDomain);
     }
 
@@ -59,6 +62,24 @@ public class ProjectRepositoryImpl extends BaseRepository<ProjectEntity, String>
     @Override
     public void deleteById(ProjectId id) {
         super.deleteById(id.getValue());
+    }
+
+    @Override
+    public Page<Project> findByMemberEmployeeId(UUID employeeId, Pageable pageable) {
+        // 暫時使用 findAll + 過濾方式，待 Q-class 生成後再優化
+        List<Project> allProjects = findAll();
+        List<Project> filtered = allProjects.stream()
+                .filter(p -> p.getMembers().stream()
+                        .anyMatch(m -> employeeId.equals(m.getEmployeeId())))
+                .collect(Collectors.toList());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filtered.size());
+        List<Project> pageContent = start < filtered.size()
+                ? filtered.subList(start, end)
+                : List.of();
+
+        return new PageImpl<>(pageContent, pageable, filtered.size());
     }
 
     // ================= Mapper =================

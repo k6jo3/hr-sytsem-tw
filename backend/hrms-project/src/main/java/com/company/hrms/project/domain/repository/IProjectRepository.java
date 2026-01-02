@@ -2,6 +2,7 @@ package com.company.hrms.project.domain.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,4 +23,9 @@ public interface IProjectRepository {
     boolean existsById(ProjectId id);
 
     void deleteById(ProjectId id);
+
+    /**
+     * 根據成員員工 ID 查詢專案 (ESS 我的專案)
+     */
+    Page<Project> findByMemberEmployeeId(UUID employeeId, Pageable pageable);
 }
