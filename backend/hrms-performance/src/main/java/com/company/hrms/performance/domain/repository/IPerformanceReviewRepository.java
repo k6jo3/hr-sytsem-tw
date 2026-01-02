@@ -1,65 +1,32 @@
 package com.company.hrms.performance.domain.repository;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.ICommandRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.IQueryRepository;
 import com.company.hrms.performance.domain.model.aggregate.PerformanceReview;
-import com.company.hrms.performance.domain.model.valueobject.CycleId;
 import com.company.hrms.performance.domain.model.valueobject.ReviewId;
-import com.company.hrms.performance.domain.model.valueobject.ReviewStatus;
-import com.company.hrms.performance.domain.model.valueobject.ReviewType;
 
 /**
  * 考核記錄 Repository 介面
+ * 
+ * 繼承基礎 Repository 介面，提供標準的 CRUD 和查詢操作
  */
-public interface IPerformanceReviewRepository {
+public interface IPerformanceReviewRepository
+                extends IQueryRepository<PerformanceReview, ReviewId>,
+                ICommandRepository<PerformanceReview, ReviewId> {
 
-    /**
-     * 儲存考核記錄
-     */
-    PerformanceReview save(PerformanceReview review);
+        // 基礎介面已提供以下方法：
+        // - findById(ReviewId id)
+        // - save(PerformanceReview entity)
+        // - update(PerformanceReview entity)
+        // - delete(PerformanceReview entity)
+        // - deleteById(ReviewId id)
+        // - existsById(ReviewId id)
+        // - findPage(QueryGroup group, Pageable pageable)
+        // - findPage(Condition<C> condition)
+        // - findOne(QueryGroup group)
+        // - findAll(QueryGroup group)
+        // - count(QueryGroup group)
+        // - exists(QueryGroup group)
 
-    /**
-     * 根據 ID 查詢
-     */
-    Optional<PerformanceReview> findById(ReviewId reviewId);
-
-    /**
-     * 查詢員工的考核記錄
-     */
-    List<PerformanceReview> findByEmployeeId(UUID employeeId, CycleId cycleId);
-
-    /**
-     * 查詢團隊考核記錄（分頁）
-     */
-    Page<PerformanceReview> findTeamReviews(
-            CycleId cycleId,
-            List<UUID> employeeIds,
-            ReviewStatus status,
-            Pageable pageable);
-
-    /**
-     * 查詢特定週期和員工的考核記錄
-     */
-    Optional<PerformanceReview> findByCycleAndEmployeeAndType(
-            CycleId cycleId,
-            UUID employeeId,
-            ReviewType reviewType);
-
-    /**
-     * 查詢週期內所有已確認的考核記錄
-     */
-    List<PerformanceReview> findFinalizedReviewsByCycle(CycleId cycleId);
-
-    /**
-     * 檢查是否已存在考核記錄
-     */
-    boolean existsByCycleAndEmployeeAndType(
-            CycleId cycleId,
-            UUID employeeId,
-            ReviewType reviewType);
+        // 如需額外的業務查詢方法，可在此處新增
 }

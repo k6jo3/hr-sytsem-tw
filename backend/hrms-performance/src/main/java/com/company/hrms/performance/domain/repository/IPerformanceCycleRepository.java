@@ -1,50 +1,32 @@
 package com.company.hrms.performance.domain.repository;
 
-import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.ICommandRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.IQueryRepository;
 import com.company.hrms.performance.domain.model.aggregate.PerformanceCycle;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
-import com.company.hrms.performance.domain.model.valueobject.CycleStatus;
-import com.company.hrms.performance.domain.model.valueobject.CycleType;
 
 /**
  * 考核週期 Repository 介面
+ * 
+ * 繼承基礎 Repository 介面，提供標準的 CRUD 和查詢操作
  */
-public interface IPerformanceCycleRepository {
+public interface IPerformanceCycleRepository
+        extends IQueryRepository<PerformanceCycle, CycleId>,
+        ICommandRepository<PerformanceCycle, CycleId> {
 
-    /**
-     * 儲存考核週期
-     */
-    PerformanceCycle save(PerformanceCycle cycle);
+    // 基礎介面已提供以下方法：
+    // - findById(CycleId id)
+    // - save(PerformanceCycle entity)
+    // - update(PerformanceCycle entity)
+    // - delete(PerformanceCycle entity)
+    // - deleteById(CycleId id)
+    // - existsById(CycleId id)
+    // - findPage(QueryGroup group, Pageable pageable)
+    // - findPage(Condition<C> condition)
+    // - findOne(QueryGroup group)
+    // - findAll(QueryGroup group)
+    // - count(QueryGroup group)
+    // - exists(QueryGroup group)
 
-    /**
-     * 根據 ID 查詢
-     */
-    Optional<PerformanceCycle> findById(CycleId cycleId);
-
-    /**
-     * 查詢所有考核週期（分頁）
-     */
-    Page<PerformanceCycle> findAll(
-            CycleStatus status,
-            CycleType cycleType,
-            Pageable pageable);
-
-    /**
-     * 根據名稱查詢
-     */
-    Optional<PerformanceCycle> findByName(String cycleName);
-
-    /**
-     * 刪除考核週期
-     */
-    void delete(PerformanceCycle cycle);
-
-    /**
-     * 檢查名稱是否存在
-     */
-    boolean existsByName(String cycleName);
+    // 如需額外的業務查詢方法，可在此處新增
 }
