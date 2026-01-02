@@ -25,6 +25,7 @@ public class SaveEntryTask implements PipelineTask<TimesheetEntryContext> {
 
         TimesheetEntry entry = TimesheetEntry.create(
                 request.getProjectId(),
+                request.getTaskId(),
                 request.getWorkDate(),
                 request.getHours(),
                 request.getDescription());

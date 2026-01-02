@@ -49,7 +49,7 @@ public class SubmitTimesheetServiceTest {
         LocalDate weekStart = LocalDate.now();
         Timesheet timesheet = Timesheet.create(employeeId, weekStart);
         // Add entry to allow submission
-        timesheet.addEntry(TimesheetEntry.create(UUID.randomUUID(), weekStart, new BigDecimal("8"), "test"));
+        timesheet.addEntry(TimesheetEntry.create(UUID.randomUUID(), null, weekStart, new BigDecimal("8"), "test"));
 
         when(timesheetRepository.findById(any())).thenReturn(Optional.of(timesheet));
 

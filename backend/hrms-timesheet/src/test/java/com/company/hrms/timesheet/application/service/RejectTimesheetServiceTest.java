@@ -52,7 +52,7 @@ public class RejectTimesheetServiceTest {
         LocalDate weekStart = LocalDate.now();
 
         Timesheet timesheet = Timesheet.create(employeeId, weekStart);
-        timesheet.addEntry(TimesheetEntry.create(UUID.randomUUID(), weekStart, new BigDecimal("8"), "test"));
+        timesheet.addEntry(TimesheetEntry.create(UUID.randomUUID(), null, weekStart, new BigDecimal("8"), "test"));
         timesheet.submit(); // Must be submitted
 
         when(timesheetRepository.findById(any())).thenReturn(Optional.of(timesheet));

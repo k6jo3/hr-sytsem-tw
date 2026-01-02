@@ -43,7 +43,7 @@ class TimesheetTest {
     void addEntry_ValidEntry_ShouldAddSuccessfully() {
         UUID projectId = UUID.randomUUID();
         LocalDate workDate = weekStart;
-        TimesheetEntry entry = TimesheetEntry.create(projectId, workDate, new BigDecimal("8.0"), "Work");
+        TimesheetEntry entry = TimesheetEntry.create(projectId, null, workDate, new BigDecimal("8.0"), "Work");
 
         timesheet.addEntry(entry);
 
@@ -57,7 +57,7 @@ class TimesheetTest {
 
         UUID projectId = UUID.randomUUID();
         LocalDate workDate = weekStart;
-        TimesheetEntry entry = TimesheetEntry.create(projectId, workDate, new BigDecimal("8.0"), "Work");
+        TimesheetEntry entry = TimesheetEntry.create(projectId, null, workDate, new BigDecimal("8.0"), "Work");
 
         assertThrows(DomainException.class, () -> timesheet.addEntry(entry));
     }
@@ -66,7 +66,7 @@ class TimesheetTest {
     void addEntry_FutureDate_ShouldThrowException() {
         UUID projectId = UUID.randomUUID();
         LocalDate futureDate = LocalDate.now().plusDays(1);
-        TimesheetEntry entry = TimesheetEntry.create(projectId, futureDate, new BigDecimal("8.0"), "Future Work");
+        TimesheetEntry entry = TimesheetEntry.create(projectId, null, futureDate, new BigDecimal("8.0"), "Future Work");
 
         assertThrows(DomainException.class, () -> timesheet.addEntry(entry));
     }
@@ -77,9 +77,9 @@ class TimesheetTest {
         UUID projectId2 = UUID.randomUUID();
         LocalDate workDate = weekStart;
 
-        timesheet.addEntry(TimesheetEntry.create(projectId1, workDate, new BigDecimal("20.0"), "Work 1"));
+        timesheet.addEntry(TimesheetEntry.create(projectId1, null, workDate, new BigDecimal("20.0"), "Work 1"));
 
-        TimesheetEntry entry2 = TimesheetEntry.create(projectId2, workDate, new BigDecimal("5.0"), "Work 2");
+        TimesheetEntry entry2 = TimesheetEntry.create(projectId2, null, workDate, new BigDecimal("5.0"), "Work 2");
 
         // 20 + 5 > 24
         assertThrows(DomainException.class, () -> timesheet.addEntry(entry2));
@@ -88,7 +88,7 @@ class TimesheetTest {
     @Test
     void submit_ValidState_ShouldUpdateStatus() {
         UUID projectId = UUID.randomUUID();
-        timesheet.addEntry(TimesheetEntry.create(projectId, weekStart, new BigDecimal("8.0"), "Work"));
+        timesheet.addEntry(TimesheetEntry.create(projectId, null, weekStart, new BigDecimal("8.0"), "Work"));
 
         timesheet.submit();
 
