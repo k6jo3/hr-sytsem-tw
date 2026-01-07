@@ -26,6 +26,9 @@ public class CreateCycleRequest {
     @Schema(description = "考核類型", example = "ANNUAL")
     private CycleType cycleType;
 
+    @Schema(description = "年份", example = "2025")
+    private Integer year;
+
     @Schema(description = "考核期間開始日")
     private LocalDate startDate;
 
