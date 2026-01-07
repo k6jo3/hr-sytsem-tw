@@ -27,6 +27,10 @@ public class GetMyReviewsRequest {
     @Schema(description = "員工ID (系統自動帶入 currentUser)")
     private String employeeId;
 
+    @QueryFilter(property = "status", operator = Operator.EQ)
+    @Schema(description = "考核狀態")
+    private com.company.hrms.performance.domain.model.valueobject.ReviewStatus status;
+
     @Schema(description = "頁碼", example = "1")
     private int page = 1;
 

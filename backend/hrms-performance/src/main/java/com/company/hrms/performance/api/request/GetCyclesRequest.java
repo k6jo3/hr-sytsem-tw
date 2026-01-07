@@ -29,6 +29,10 @@ public class GetCyclesRequest {
     @Schema(description = "考核類型")
     private CycleType cycleType;
 
+    @QueryFilter(property = "year", operator = Operator.EQ)
+    @Schema(description = "年份", example = "2025")
+    private Integer year;
+
     @Schema(description = "頁碼", example = "1")
     private int page = 1;
 
