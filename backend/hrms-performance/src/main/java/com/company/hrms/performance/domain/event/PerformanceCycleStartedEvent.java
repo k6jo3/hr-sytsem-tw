@@ -2,6 +2,7 @@ package com.company.hrms.performance.domain.event;
 
 import java.time.LocalDateTime;
 
+import com.company.hrms.common.domain.event.DomainEvent;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
 
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PerformanceCycleStartedEvent {
+public class PerformanceCycleStartedEvent extends DomainEvent {
     /**
      * 事件 ID
      */
@@ -72,5 +73,15 @@ public class PerformanceCycleStartedEvent {
         event.occurredAt = LocalDateTime.now();
 
         return event;
+    }
+
+    @Override
+    public String getAggregateType() {
+        return "PerformanceCycle";
+    }
+
+    @Override
+    public String getAggregateId() {
+        return cycleId.getValue().toString();
     }
 }

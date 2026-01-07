@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.company.hrms.common.domain.event.DomainEvent;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
 import com.company.hrms.performance.domain.model.valueobject.ReviewId;
 
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PerformanceReviewSubmittedEvent {
+public class PerformanceReviewSubmittedEvent extends DomainEvent {
     /**
      * 事件 ID
      */
@@ -89,5 +90,15 @@ public class PerformanceReviewSubmittedEvent {
         event.occurredAt = LocalDateTime.now();
 
         return event;
+    }
+
+    @Override
+    public String getAggregateType() {
+        return "PerformanceReview";
+    }
+
+    @Override
+    public String getAggregateId() {
+        return reviewId.getValue().toString();
     }
 }
