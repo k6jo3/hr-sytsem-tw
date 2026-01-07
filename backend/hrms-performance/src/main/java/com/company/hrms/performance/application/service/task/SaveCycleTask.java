@@ -1,0 +1,29 @@
+package com.company.hrms.performance.application.service.task;
+
+import org.springframework.stereotype.Component;
+
+import com.company.hrms.common.application.pipeline.PipelineTask;
+import com.company.hrms.performance.application.service.context.StartCycleContext;
+import com.company.hrms.performance.domain.repository.IPerformanceCycleRepository;
+
+import lombok.RequiredArgsConstructor;
+
+/**
+ * 儲存考核週期 Task (Infrastructure)
+ */
+@Component
+@RequiredArgsConstructor
+public class SaveCycleTask implements PipelineTask<StartCycleContext> {
+
+    private final IPerformanceCycleRepository cycleRepository;
+
+    @Override
+    public void execute(StartCycleContext context) throws Exception {
+        cycleRepository.save(context.getCycle());
+    }
+
+    @Override
+    public String getName() {
+        return "儲存考核週期";
+    }
+}
