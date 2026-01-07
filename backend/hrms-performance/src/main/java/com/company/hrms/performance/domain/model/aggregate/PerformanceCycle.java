@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.company.hrms.common.domain.model.AggregateRoot;
+import com.company.hrms.performance.domain.event.PerformanceCycleStartedEvent;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
 import com.company.hrms.performance.domain.model.valueobject.CycleStatus;
 import com.company.hrms.performance.domain.model.valueobject.CycleType;
@@ -153,6 +154,14 @@ public class PerformanceCycle extends AggregateRoot<CycleId> {
 
         this.status = CycleStatus.IN_PROGRESS;
         this.updatedAt = LocalDateTime.now();
+
+        // 發布事件
+        registerEvent(PerformanceCycleStartedEvent.create(
+                this.cycleId,
+                this.cycleName,
+                this.cycleType.name(),
+                this.selfEvalDeadline != null ? this.selfEvalDeadline.toString() : null,
+                this.managerEvalDeadline != null ? this.managerEvalDeadline.toString() : null));
     }
 
     /**

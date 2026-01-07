@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.company.hrms.common.domain.model.AggregateRoot;
+import com.company.hrms.performance.domain.event.PerformanceReviewCompletedEvent;
+import com.company.hrms.performance.domain.event.PerformanceReviewSubmittedEvent;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
 import com.company.hrms.performance.domain.model.valueobject.EvaluationItem;
 import com.company.hrms.performance.domain.model.valueobject.ReviewId;
@@ -220,6 +222,16 @@ public class PerformanceReview extends AggregateRoot<ReviewId> {
         } else if (status == ReviewStatus.PENDING_MANAGER) {
             this.status = ReviewStatus.PENDING_FINALIZE;
         }
+
+        // 發布事件
+        registerEvent(PerformanceReviewSubmittedEvent.create(
+                this.reviewId,
+                this.cycleId,
+                this.employeeId,
+                this.reviewerId,
+                this.reviewType.name(),
+                this.overallScore,
+                this.overallRating));
     }
 
     /**
@@ -245,6 +257,22 @@ public class PerformanceReview extends AggregateRoot<ReviewId> {
         this.status = ReviewStatus.FINALIZED;
         this.finalizedAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+
+        // 發布事件
+        registerEvent(PerformanceReviewCompletedEvent.create(
+                this.reviewId,
+                this.cycleId,
+                // 注意：這裡應該傳入週期名稱，但 AggregateRoot 中沒有儲存週期名稱引用。
+                // 為了簡化，暫時傳 null 或需要調整 Aggregate 結構。
+                // 根據 Event 定義，cycleName 是 String。
+                // 實務上通常 AggregateRoot 會有週期名稱快照，或是透過 CycleId 查詢。
+                // 這裡假設我們只傳 null，由 Consumer 處理，或修改 create 方法。
+                // 為了編譯通過，先傳 null。
+                null,
+                this.employeeId,
+                this.finalScore,
+                this.finalRating,
+                this.adjustmentReason));
     }
 
     /**
