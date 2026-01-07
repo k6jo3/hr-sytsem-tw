@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
-import com.company.hrms.performance.api.request.StartCycleRequest;
+import com.company.hrms.performance.api.request.GetCycleDetailRequest;
 import com.company.hrms.performance.api.response.GetCyclesResponse;
 import com.company.hrms.performance.domain.model.aggregate.PerformanceCycle;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
@@ -19,25 +19,27 @@ import lombok.RequiredArgsConstructor;
 @Service("getCycleDetailServiceImpl")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class GetCycleDetailServiceImpl implements QueryApiService<StartCycleRequest, GetCyclesResponse.CycleSummary> {
+public class GetCycleDetailServiceImpl
+                implements QueryApiService<GetCycleDetailRequest, GetCyclesResponse.CycleSummary> {
 
-    private final IPerformanceCycleRepository cycleRepository;
+        private final IPerformanceCycleRepository cycleRepository;
 
-    @Override
-    public GetCyclesResponse.CycleSummary getResponse(StartCycleRequest req, JWTModel currentUser, String... args)
-            throws Exception {
+        @Override
+        public GetCyclesResponse.CycleSummary getResponse(GetCycleDetailRequest req, JWTModel currentUser,
+                        String... args)
+                        throws Exception {
 
-        PerformanceCycle cycle = cycleRepository.findById(CycleId.of(req.getCycleId()))
-                .orElseThrow(() -> new IllegalArgumentException("考核週期不存在"));
+                PerformanceCycle cycle = cycleRepository.findById(CycleId.of(req.getCycleId()))
+                                .orElseThrow(() -> new IllegalArgumentException("考核週期不存在"));
 
-        return GetCyclesResponse.CycleSummary.builder()
-                .cycleId(cycle.getCycleId().getValue().toString())
-                .cycleName(cycle.getCycleName())
-                .cycleType(cycle.getCycleType())
-                .status(cycle.getStatus())
-                .startDate(cycle.getStartDate())
-                .endDate(cycle.getEndDate())
-                .hasTemplate(cycle.getTemplate() != null)
-                .build();
-    }
+                return GetCyclesResponse.CycleSummary.builder()
+                                .cycleId(cycle.getCycleId().getValue().toString())
+                                .cycleName(cycle.getCycleName())
+                                .cycleType(cycle.getCycleType())
+                                .status(cycle.getStatus())
+                                .startDate(cycle.getStartDate())
+                                .endDate(cycle.getEndDate())
+                                .hasTemplate(cycle.getTemplate() != null)
+                                .build();
+        }
 }
