@@ -3,6 +3,7 @@ package com.company.hrms.performance.domain.model.aggregate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.company.hrms.common.domain.model.AggregateRoot;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
 import com.company.hrms.performance.domain.model.valueobject.CycleStatus;
 import com.company.hrms.performance.domain.model.valueobject.CycleType;
@@ -11,7 +12,7 @@ import com.company.hrms.performance.domain.model.valueobject.EvaluationTemplate;
 /**
  * 考核週期聚合根
  */
-public class PerformanceCycle {
+public class PerformanceCycle extends AggregateRoot<CycleId> {
     /**
      * 週期 ID
      */
@@ -68,6 +69,14 @@ public class PerformanceCycle {
     private LocalDateTime updatedAt;
 
     /**
+     * Domain 建構子
+     */
+    private PerformanceCycle(CycleId id) {
+        super(id);
+        this.cycleId = id;
+    }
+
+    /**
      * 建立考核週期
      */
     public static PerformanceCycle create(
@@ -84,8 +93,8 @@ public class PerformanceCycle {
         validateDateRange(startDate, endDate);
         validateDeadlines(endDate, selfEvalDeadline, managerEvalDeadline);
 
-        PerformanceCycle cycle = new PerformanceCycle();
-        cycle.cycleId = CycleId.create();
+        CycleId cycleId = CycleId.create();
+        PerformanceCycle cycle = new PerformanceCycle(cycleId);
         cycle.cycleName = cycleName;
         cycle.cycleType = cycleType;
         cycle.startDate = startDate;
@@ -116,8 +125,7 @@ public class PerformanceCycle {
             LocalDateTime createdAt,
             LocalDateTime updatedAt) {
 
-        PerformanceCycle cycle = new PerformanceCycle();
-        cycle.cycleId = cycleId;
+        PerformanceCycle cycle = new PerformanceCycle(cycleId);
         cycle.cycleName = cycleName;
         cycle.cycleType = cycleType;
         cycle.startDate = startDate;

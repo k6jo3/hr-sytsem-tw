@@ -2,18 +2,15 @@ package com.company.hrms.performance.domain.model.valueobject;
 
 import java.util.UUID;
 
+import com.company.hrms.common.domain.model.Identifier;
+
 /**
  * 考核記錄 ID
  */
-public class ReviewId {
-    private final UUID value;
+public class ReviewId extends Identifier<UUID> {
 
     public ReviewId(UUID value) {
-        this.value = value;
-    }
-
-    public UUID getValue() {
-        return value;
+        super(value);
     }
 
     public static ReviewId create() {
@@ -35,22 +32,7 @@ public class ReviewId {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        ReviewId reviewId = (ReviewId) o;
-        return value.equals(reviewId.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return java.util.Objects.hash(value);
-    }
-
-    @Override
     public String toString() {
-        return "ReviewId(value=" + value + ")";
+        return "ReviewId(value=" + getValue() + ")";
     }
 }

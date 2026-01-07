@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.company.hrms.common.domain.model.AggregateRoot;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
 import com.company.hrms.performance.domain.model.valueobject.EvaluationItem;
 import com.company.hrms.performance.domain.model.valueobject.ReviewId;
@@ -17,7 +18,7 @@ import com.company.hrms.performance.domain.model.valueobject.ScoringSystem;
 /**
  * 考核記錄聚合根
  */
-public class PerformanceReview {
+public class PerformanceReview extends AggregateRoot<ReviewId> {
     /**
      * 考核記錄 ID
      */
@@ -104,7 +105,15 @@ public class PerformanceReview {
     private LocalDateTime updatedAt;
 
     /**
-     * 建立考核記錄
+     * Domain 建構子
+     */
+    private PerformanceReview(ReviewId id) {
+        super(id);
+        this.reviewId = id;
+    }
+
+    /**
+     * 建立考核（組織端發起）
      */
     public static PerformanceReview create(
             CycleId cycleId,
@@ -117,8 +126,8 @@ public class PerformanceReview {
         validateReviewerId(reviewerId);
         validateReviewType(reviewType);
 
-        PerformanceReview review = new PerformanceReview();
-        review.reviewId = ReviewId.create();
+        ReviewId reviewId = ReviewId.create();
+        PerformanceReview review = new PerformanceReview(reviewId);
         review.cycleId = cycleId;
         review.employeeId = employeeId;
         review.reviewerId = reviewerId;
@@ -153,8 +162,7 @@ public class PerformanceReview {
             LocalDateTime createdAt,
             LocalDateTime updatedAt) {
 
-        PerformanceReview review = new PerformanceReview();
-        review.reviewId = reviewId;
+        PerformanceReview review = new PerformanceReview(reviewId);
         review.cycleId = cycleId;
         review.employeeId = employeeId;
         review.reviewerId = reviewerId;

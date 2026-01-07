@@ -2,18 +2,15 @@ package com.company.hrms.performance.domain.model.valueobject;
 
 import java.util.UUID;
 
+import com.company.hrms.common.domain.model.Identifier;
+
 /**
  * 考核週期 ID
  */
-public class CycleId {
-    private final UUID value;
+public class CycleId extends Identifier<UUID> {
 
     public CycleId(UUID value) {
-        this.value = value;
-    }
-
-    public UUID getValue() {
-        return value;
+        super(value);
     }
 
     public static CycleId create() {
@@ -35,22 +32,7 @@ public class CycleId {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
-        CycleId cycleId = (CycleId) o;
-        return value.equals(cycleId.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return java.util.Objects.hash(value);
-    }
-
-    @Override
     public String toString() {
-        return "CycleId(value=" + value + ")";
+        return "CycleId(value=" + getValue() + ")";
     }
 }
