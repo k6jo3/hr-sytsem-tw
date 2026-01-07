@@ -36,8 +36,8 @@ public class DeleteCycleServiceImpl implements CommandApiService<DeleteCycleRequ
                 .next(loadCycleTask)
                 .execute();
 
-        // TODO: Delete logic - Repository doesn't have delete method yet
-        // Would need: cycleRepository.delete(ctx.getCycle());
+        // Delete after pipeline (not in pipeline to keep simplicity)
+        cycleRepository.delete(ctx.getCycle());
 
         return SuccessResponse.of("考核週期已刪除");
     }

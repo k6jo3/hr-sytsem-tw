@@ -16,7 +16,7 @@ import com.company.hrms.performance.application.service.task.SaveCycleTask;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 更新考核週期 Service (Business Pipeline 架構 - 簡化版)
+ * 更新考核週期 Service (Business Pipeline 架構)
  */
 @Service("updateCycleServiceImpl")
 @RequiredArgsConstructor
@@ -35,8 +35,16 @@ public class UpdateCycleServiceImpl implements CommandApiService<UpdateCycleRequ
 
         BusinessPipeline.start(ctx)
                 .next(loadCycleTask)
-                // Note: Update logic simplified - in real implementation should have
-                // UpdateCycleTask
+                .next(context -> {
+                    // 更新週期名稱 (使用 Domain 方法)
+                    if (req.getCycleName() != null) {
+                        context.getCycle().updateCycleName(req.getCycleName());
+                    }
+                    // 更新考核期間 (使用 Domain 方法)
+                    if (req.getStartDate() != null && req.getEndDate() != null) {
+                        context.getCycle().updatePeriod(req.getStartDate(), req.getEndDate());
+                    }
+                })
                 .next(saveCycleTask)
                 .next(publishEventsTask)
                 .execute();

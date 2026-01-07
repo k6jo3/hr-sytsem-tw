@@ -20,6 +20,11 @@ public interface IPerformanceCycleRepository {
     PerformanceCycle save(PerformanceCycle cycle);
 
     /**
+     * 刪除考核週期
+     */
+    void delete(PerformanceCycle cycle);
+
+    /**
      * 根據 ID 查詢
      */
     Optional<PerformanceCycle> findById(CycleId cycleId);

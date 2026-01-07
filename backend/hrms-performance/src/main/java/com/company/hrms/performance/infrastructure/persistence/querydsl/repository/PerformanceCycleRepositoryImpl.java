@@ -52,6 +52,12 @@ public class PerformanceCycleRepositoryImpl
     }
 
     @Override
+    public void delete(PerformanceCycle cycle) {
+        PerformanceCycleEntity entity = toEntity(cycle);
+        super.delete(entity);
+    }
+
+    @Override
     public Optional<PerformanceCycle> findById(CycleId id) {
         return super.findById(id.getValue()).map(this::toDomain);
     }

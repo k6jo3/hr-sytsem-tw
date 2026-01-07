@@ -36,6 +36,10 @@ public class PublishTemplateServiceImpl implements CommandApiService<StartCycleR
         // Note: Simplified - actual publish logic should be in a PublishTemplateTask
         BusinessPipeline.start(ctx)
                 .next(loadCycleTask)
+                .next(context -> {
+                    // Publish template (Use Domain Method)
+                    context.getCycle().publishTemplate();
+                })
                 .next(saveCycleTask)
                 .next(publishEventsTask)
                 .execute();

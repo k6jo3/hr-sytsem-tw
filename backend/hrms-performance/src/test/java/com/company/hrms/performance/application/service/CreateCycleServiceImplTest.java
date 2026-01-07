@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -16,6 +15,9 @@ import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.performance.api.request.CreateCycleRequest;
 import com.company.hrms.performance.api.response.CreateCycleResponse;
+import com.company.hrms.performance.application.service.task.CreateCycleTask;
+import com.company.hrms.performance.application.service.task.PublishCycleEventsForCreateTask;
+import com.company.hrms.performance.application.service.task.SaveCycleForCreateTask;
 import com.company.hrms.performance.domain.model.aggregate.PerformanceCycle;
 import com.company.hrms.performance.domain.model.valueobject.CycleType;
 import com.company.hrms.performance.domain.repository.IPerformanceCycleRepository;
@@ -31,7 +33,6 @@ class CreateCycleServiceImplTest {
     @Mock
     private EventPublisher eventPublisher;
 
-    @InjectMocks
     private CreateCycleServiceImpl service;
 
     private JWTModel currentUser;
@@ -40,7 +41,13 @@ class CreateCycleServiceImplTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         currentUser = new JWTModel();
-        // JWTModel will have necessary user information
+
+        // Manual instantiation with real tasks to test the pipeline flow
+        CreateCycleTask createCycleTask = new CreateCycleTask();
+        SaveCycleForCreateTask saveCycleTask = new SaveCycleForCreateTask(cycleRepository);
+        PublishCycleEventsForCreateTask publishEventsTask = new PublishCycleEventsForCreateTask(eventPublisher);
+
+        service = new CreateCycleServiceImpl(createCycleTask, saveCycleTask, publishEventsTask);
     }
 
     @Test
