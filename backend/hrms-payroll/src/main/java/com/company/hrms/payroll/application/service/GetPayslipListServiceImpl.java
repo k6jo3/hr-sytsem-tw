@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.company.hrms.common.api.response.PageResponse;
 import com.company.hrms.common.application.service.AbstractQueryService;
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.payroll.application.dto.request.GetPayslipListRequest;
@@ -58,23 +57,10 @@ public class GetPayslipListServiceImpl
 
     @Override
     protected QueryGroup buildQuery(GetPayslipListRequest request, JWTModel currentUser) {
-        QueryBuilder builder = QueryBuilder.where();
-
-        if (request.getRunId() != null) {
-            builder.and("payrollRunId", Operator.EQ, request.getRunId());
-        }
-
-        if (request.getEmployeeId() != null) {
-            builder.and("employeeId", Operator.EQ, request.getEmployeeId());
-        } else if (currentUser != null && !currentUser.hasRole("HR_ADMIN")) {
-            // If not HR Admin, only see own?
-            // Logic not fully clear from task, but common practice.
-            // Assume "Employee" role can only see own.
-            // Rely on filtered request for now or add logic.
-            // builder.and("employeeId", Operator.EQ, currentUser.getUserId());
-        }
-
-        return builder.build();
+        // 純宣告式查詢：自動解析 Request 上的 @QueryFilter 註解
+        return QueryBuilder.where()
+                .fromDto(request) // 自動處理 runId, employeeId 等所有 @QueryFilter 欄位
+                .build();
     }
 
     @Override

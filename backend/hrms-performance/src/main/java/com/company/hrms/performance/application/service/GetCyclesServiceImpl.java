@@ -3,14 +3,19 @@ package com.company.hrms.performance.application.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.api.response.PageResponse;
+import com.company.hrms.common.application.service.AbstractQueryService;
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
-import com.company.hrms.common.service.QueryApiService;
-import com.company.hrms.performance.api.request.StartCycleRequest;
+import com.company.hrms.performance.api.request.GetCyclesRequest;
 import com.company.hrms.performance.api.response.GetCyclesResponse;
+import com.company.hrms.performance.application.factory.CycleDtoFactory;
 import com.company.hrms.performance.domain.model.aggregate.PerformanceCycle;
 import com.company.hrms.performance.domain.repository.IPerformanceCycleRepository;
 
@@ -18,40 +23,45 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * 查詢考核週期列表 Service
+ * 
+ * <p>
+ * 使用 Fluent-Query-Engine 宣告式查詢：
+ * <ul>
+ * <li>Request DTO 上使用 @QueryFilter 註解宣告篩選條件</li>
+ * <li>Service 使用 QueryBuilder.fromDto() 自動解析</li>
+ * <li>無需手動 if 判斷，實現「能用宣告的就不用程式碼」原則</li>
+ * </ul>
  */
 @Service("getCyclesServiceImpl")
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class GetCyclesServiceImpl implements QueryApiService<StartCycleRequest, GetCyclesResponse> {
+@RequiredArgsConstructor
+public class GetCyclesServiceImpl
+                extends AbstractQueryService<GetCyclesRequest, PageResponse<GetCyclesResponse.CycleSummary>> {
 
-    private final IPerformanceCycleRepository cycleRepository;
+        private final IPerformanceCycleRepository repository;
 
-    @Override
-    public GetCyclesResponse getResponse(StartCycleRequest req, JWTModel currentUser, String... args) throws Exception {
+        @Override
+        protected QueryGroup buildQuery(GetCyclesRequest request, JWTModel currentUser) {
+                // 純宣告式查詢：自動解析 Request 上的 @QueryFilter 註解
+                return QueryBuilder.where()
+                                .fromDto(request) // 自動處理 status, cycleType 等所有 @QueryFilter 欄位
+                                .build();
+        }
 
-        // 查詢所有週期（可加入分頁和篩選條件）
-        QueryGroup queryGroup = new QueryGroup();
-        List<PerformanceCycle> cycles = cycleRepository
-                .findAll(queryGroup, org.springframework.data.domain.PageRequest.of(0, 100)).getContent();
+        @Override
+        protected PageResponse<GetCyclesResponse.CycleSummary> executeQuery(
+                        QueryGroup query, GetCyclesRequest request, JWTModel currentUser, String... args)
+                        throws Exception {
 
-        // 轉換為 DTO
-        List<GetCyclesResponse.CycleSummary> summaries = cycles.stream()
-                .map(cycle -> GetCyclesResponse.CycleSummary.builder()
-                        .cycleId(cycle.getCycleId().getValue().toString())
-                        .cycleName(cycle.getCycleName())
-                        .cycleType(cycle.getCycleType())
-                        .status(cycle.getStatus())
-                        .startDate(cycle.getStartDate())
-                        .endDate(cycle.getEndDate())
-                        .hasTemplate(cycle.getTemplate() != null)
-                        .build())
-                .collect(Collectors.toList());
+                int pageIdx = request.getPage() > 0 ? request.getPage() - 1 : 0;
+                PageRequest pageable = PageRequest.of(pageIdx, request.getSize());
 
-        return GetCyclesResponse.builder()
-                .cycles(summaries)
-                .totalCount(summaries.size())
-                .pageSize(summaries.size())
-                .currentPage(1)
-                .build();
-    }
+                Page<PerformanceCycle> page = repository.findAll(query, pageable);
+
+                List<GetCyclesResponse.CycleSummary> items = page.getContent().stream()
+                                .map(CycleDtoFactory::toSummary)
+                                .collect(Collectors.toList());
+
+                return PageResponse.of(items, request.getPage(), request.getSize(), page.getTotalElements());
+        }
 }
