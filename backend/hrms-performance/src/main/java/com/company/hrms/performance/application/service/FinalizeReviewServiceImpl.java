@@ -35,8 +35,11 @@ public class FinalizeReviewServiceImpl implements CommandApiService<FinalizeRevi
         PerformanceReview review = reviewRepository.findById(ReviewId.of(req.getReviewId()))
                 .orElseThrow(() -> new IllegalArgumentException("考核記錄不存在"));
 
-        // TODO: 確認最終評等 (需要 Domain 方法支援)
-        // review.finalizeReview(req.getFinalRating(), req.getAdjustmentReason());
+        // 確認最終評等：呼叫 Domain 方法
+        review.finalize(
+                req.getFinalScore(),
+                req.getFinalRating(),
+                req.getAdjustmentReason());
         reviewRepository.save(review);
 
         // 發布領域事件 (假設 PerformanceReviewCompletedEvent 已存在)
