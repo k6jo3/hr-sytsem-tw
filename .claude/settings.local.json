@@ -29,7 +29,21 @@
       "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/ConditionParser.java )",
       "Bash(backend/hrms-common/src/main/java/com/company/hrms/common/query/QueryCondition.java )",
       "Bash(framework/architecture/Fluent-Query-Engine.md )",
-      "Bash(knowledge/03_System_Architecture/Fluent-Query-Engine.md)"
+      "Bash(knowledge/03_System_Architecture/Fluent-Query-Engine.md)",
+      "Bash(mvn test:*)",
+      "Bash(java -version:*)",
+      "Bash(mvn:*)",
+      "Bash(findstr:*)",
+      "Bash(cat:*)",
+      "Bash(popd)",
+      "Bash(gh pr create:*)",
+      "Bash(where:*)",
+      "Bash(cmd.exe /c \"where gh\")",
+      "Bash(cmd.exe /c \"cd /d D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-insurance && mvn compile test-compile -q\")",
+      "Bash(cmd.exe /c \"cd /d D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-attendance && mvn compile test-compile -q\")",
+      "Bash(cmd.exe /c:*)",
+      "Bash(cmd /c \"D: && cd D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-attendance && mvn test -Dtest=AttendanceContractTest\")",
+      "Bash(D:)"
     ]
   }
 }

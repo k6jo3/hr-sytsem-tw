@@ -24,6 +24,14 @@
             <artifactId>hrms-common</artifactId>
         </dependency>
 
+        <!-- HRMS Common Test (for BaseContractTest) -->
+        <dependency>
+            <groupId>com.company.hrms</groupId>
+            <artifactId>hrms-common</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -71,6 +79,12 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        <!-- H2 Database -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

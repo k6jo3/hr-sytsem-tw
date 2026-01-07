@@ -1,17 +1,19 @@
 package com.company.hrms.common.application.pipeline;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 業務流程 Pipeline
  * 提供流暢 API 編排多個 Task 的執行順序
  *
- * <p>使用範例：
+ * <p>
+ * 使用範例：
+ * 
  * <pre>
  * {@literal @}Service("calculateMonthlySalaryServiceImpl")
  * public class CalculateMonthlySalaryServiceImpl implements CommandApiService&lt;...&gt; {
@@ -54,7 +56,7 @@ public class BusinessPipeline<C extends PipelineContext> {
      * 開始建構 Pipeline
      *
      * @param context Pipeline 執行上下文
-     * @param <C> Context 類型
+     * @param <C>     Context 類型
      * @return Pipeline 建構器
      */
     public static <C extends PipelineContext> BusinessPipeline<C> start(C context) {
@@ -67,7 +69,13 @@ public class BusinessPipeline<C extends PipelineContext> {
      * @param task 待執行的任務
      * @return Pipeline 建構器（支援鏈式呼叫）
      */
-    public BusinessPipeline<C> next(PipelineTask<C> task) {
+    /**
+     * 新增任務
+     *
+     * @param task 待執行的任務
+     * @return Pipeline 建構器（支援鏈式呼叫）
+     */
+    public BusinessPipeline<C> next(PipelineTask<? super C> task) {
         tasks.add(new TaskEntry<>(task, null));
         return this;
     }
@@ -77,10 +85,10 @@ public class BusinessPipeline<C extends PipelineContext> {
      * 只有當條件滿足時才執行該任務
      *
      * @param condition 執行條件
-     * @param task 待執行的任務
+     * @param task      待執行的任務
      * @return Pipeline 建構器（支援鏈式呼叫）
      */
-    public BusinessPipeline<C> nextIf(Predicate<C> condition, PipelineTask<C> task) {
+    public BusinessPipeline<C> nextIf(Predicate<? super C> condition, PipelineTask<? super C> task) {
         tasks.add(new TaskEntry<>(task, condition));
         return this;
     }
@@ -104,7 +112,7 @@ public class BusinessPipeline<C extends PipelineContext> {
                 break;
             }
 
-            PipelineTask<C> task = entry.task;
+            PipelineTask<? super C> task = entry.task;
             String taskName = task.getName();
 
             // 檢查條件
@@ -115,7 +123,11 @@ public class BusinessPipeline<C extends PipelineContext> {
             }
 
             // 檢查任務自身條件
-            if (!task.shouldExecute(context)) {
+            // Note: Safe cast because C is instance of super C
+            @SuppressWarnings("unchecked")
+            PipelineTask<C> typedTask = (PipelineTask<C>) task;
+
+            if (!typedTask.shouldExecute(context)) {
                 log.debug("Task [{}] skipped: shouldExecute returned false", taskName);
                 skippedCount++;
                 continue;
@@ -126,7 +138,7 @@ public class BusinessPipeline<C extends PipelineContext> {
                 log.debug("Executing task: [{}]", taskName);
                 long taskStart = System.currentTimeMillis();
 
-                task.execute(context);
+                typedTask.execute(context);
 
                 long taskDuration = System.currentTimeMillis() - taskStart;
                 log.debug("Task [{}] completed in {} ms", taskName, taskDuration);
@@ -154,10 +166,10 @@ public class BusinessPipeline<C extends PipelineContext> {
      * 任務條目（內部類）
      */
     private static class TaskEntry<C extends PipelineContext> {
-        final PipelineTask<C> task;
-        final Predicate<C> condition;
+        final PipelineTask<? super C> task;
+        final Predicate<? super C> condition;
 
-        TaskEntry(PipelineTask<C> task, Predicate<C> condition) {
+        TaskEntry(PipelineTask<? super C> task, Predicate<? super C> condition) {
             this.task = task;
             this.condition = condition;
         }

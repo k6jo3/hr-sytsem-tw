@@ -1,6 +1,7 @@
 package com.company.hrms.organization.api.controller.department;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -66,7 +67,22 @@ public class HR02DepartmentCmdController extends CommandBaseController {
                 return ResponseEntity.ok(execCommand(request, currentUser, departmentId));
         }
 
-        @PutMapping("/{departmentId}/manager")
+        @DeleteMapping("/{departmentId}")
+        @Operation(summary = "刪除部門", operationId = "deleteDepartment")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "204", description = "成功"),
+                        @ApiResponse(responseCode = "400", description = "部門下有在職員工或子部門，無法刪除"),
+                        @ApiResponse(responseCode = "404", description = "部門不存在")
+        })
+        public ResponseEntity<Void> deleteDepartment(
+                        @PathVariable String departmentId,
+                        @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+                log.info("Deleting department: {}", departmentId);
+                execCommand(null, currentUser, departmentId);
+                return ResponseEntity.noContent().build();
+        }
+
+        @PutMapping("/{departmentId}/assign-manager")
         @Operation(summary = "指派部門主管", operationId = "assignManager")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "成功"),

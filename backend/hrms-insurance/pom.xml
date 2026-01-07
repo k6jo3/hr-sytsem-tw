@@ -72,6 +72,14 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
+
+        <!-- HRMS Common Test Classes -->
+        <dependency>
+            <groupId>com.company.hrms</groupId>
+            <artifactId>hrms-common</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

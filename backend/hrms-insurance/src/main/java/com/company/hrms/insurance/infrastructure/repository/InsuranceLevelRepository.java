@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBatchBaseRepository;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.insurance.domain.model.aggregate.InsuranceLevel;
 import com.company.hrms.insurance.domain.model.valueobject.InsuranceType;
@@ -18,11 +18,10 @@ import com.company.hrms.insurance.infrastructure.entity.InsuranceLevelEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /**
- * 投保級距Repository實作
+ * 投保薪資分級Repository實作
  */
 @Repository
-public class InsuranceLevelRepository
-        extends BaseRepository<InsuranceLevelEntity, UUID>
+public class InsuranceLevelRepository extends CommandBatchBaseRepository<InsuranceLevelEntity, UUID>
         implements IInsuranceLevelRepository {
 
     public InsuranceLevelRepository(JPAQueryFactory factory) {

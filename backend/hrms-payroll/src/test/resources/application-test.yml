@@ -1,0 +1,41 @@
+# Test Configuration for Payroll Service
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+# Disable Eureka for Tests
+eureka:
+  client:
+    enabled: false
+
+# Disable Redis for Tests
+spring.data.redis:
+  host: localhost
+  port: 6379
+
+# Disable Kafka for Tests
+spring.kafka:
+  bootstrap-servers: localhost:9092
+  consumer:
+    auto-startup: false
+
+# Logging
+logging:
+  level:
+    com.company.hrms: DEBUG
+    org.hibernate.SQL: DEBUG

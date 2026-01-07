@@ -19,8 +19,11 @@
 7. 前端開發時，需確認每個事件或api，後端是否有提供相符合的api或事件解決方案，並針對缺漏的部份建立相關文件，以供後端修正
 8. 先確認framework底下的全部文件，再進行開發
 9. repository、dao層的開發參考Fluent-Query-Engine.md
-10. application service需依照Business_Pipeline.md去實做
-11. 註解用繁體中文
+10. 查詢條件的建立用的是QueryBuilder
+11. application service需依照Business_Pipeline.md去實做，原則上，步驟大於等於2步以上就需建立task
+12. 註解用繁體中文
+13. 開發前，先確認系統分析書、設計書、api規格文件等
+14. API會建立swagger文件，請依照api規格文件去實做
 ---
 ### 總結架構師的實踐清單
 
@@ -1055,6 +1058,123 @@ describe('LoginForm', () => {
   });
 });
 ```
+
+### Contract-Driven Testing (合約驅動測試)
+
+**核心概念：** 合約驅動測試是將 **SA 定義的業務規格直接轉化為測試斷言**，實現「需求即測試」的目標。
+
+#### 測試目標
+- SA 定義的使用者場景 → 驗證功能符合業務意圖
+- 完整的 API → Service → Domain 流程測試
+- 角色權限過濾驗證 (EMPLOYEE, MANAGER, HR)
+- 不僅限於資料持久層
+
+#### 測試層級區分
+
+| 層級 | 基類 | 測試對象 | 方法 |
+|:---|:---|:---|:---|
+| **Assembler 單元測試** | `BaseContractTest` | Assembler.toQueryGroup() | 直接調用 Assembler |
+| **API 合約測試** | `BaseApiContractTest` | Controller → Service → QueryGroup | MockMvc + QueryGroup 攔截 |
+| **完整流程測試** | `BaseIntegrationTest` | API → DB → Response | Testcontainers |
+
+#### 合約規格檔案
+
+**位置:** `src/test/resources/contracts/{service_name}_contracts.md`
+
+**格式範例:**
+```markdown
+| 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 |
+| :--- | :--- | :--- | :--- | :--- |
+| EMP_001 | 一般員工查詢在職人員 | EMPLOYEE | `{"status":"ACTIVE"}` | `status = 'ACTIVE'`, `is_deleted = 0` |
+| EMP_002 | HR 查詢特定部門 | HR | `{"deptId":"D001"}` | `department_id = 'D001'`, `is_deleted = 0` |
+```
+
+#### API 合約測試實作範例
+
+```java
+@SpringBootTest(webEnvironment = WebEnvironment.MOCK)
+@AutoConfigureMockMvc
+class EmployeeApiContractTest extends BaseApiContractTest {
+
+    @MockBean
+    private EmployeeRepository repository;
+
+    @Test
+    @DisplayName("EMP_001: 一般員工查詢在職人員")
+    void searchEmployee_AsEmployee_ShouldIncludeSecurityFilters() throws Exception {
+        // 1. 載入 SA 定義的合約規格
+        String contractSpec = loadContractSpec("employee");
+
+        // 2. 模擬請求
+        var request = EmployeeSearchRequest.builder()
+            .status("ACTIVE")
+            .build();
+
+        // 3. 攔截 QueryGroup
+        ArgumentCaptor<QueryGroup> captor = createQueryGroupCaptor();
+
+        // 4. 執行 API 並驗證合約
+        performPost("/api/v1/employees/search", request)
+            .andExpect(status().isOk());
+
+        verify(repository).findPage(captor.capture(), any());
+        assertContract(captor.getValue(), contractSpec, "EMP_001");
+    }
+
+    @Test
+    @DisplayName("EMP_002: HR 查詢特定部門 - 驗證角色權限")
+    @WithMockUser(roles = "HR")
+    void searchByDept_AsHR_ShouldFilterByDepartment() throws Exception {
+        String contractSpec = loadContractSpec("employee");
+
+        var request = EmployeeSearchRequest.builder()
+            .deptId("D001")
+            .build();
+
+        verifyApiContract("/api/v1/employees/search", request, contractSpec, "EMP_002");
+    }
+}
+```
+
+#### 合約測試 vs Assembler 單元測試
+
+| 面向 | Assembler 單元測試 | API 合約測試 |
+|:---|:---|:---|
+| **測試範圍** | 僅 Assembler 組裝邏輯 | Controller → Service → Assembler 完整流程 |
+| **使用基類** | `BaseContractTest` | `BaseApiContractTest` |
+| **角色模擬** | ❌ 不支援 | ✅ 支援 `@WithMockUser` |
+| **適用場景** | 快速驗證查詢條件組裝 | 完整業務場景驗證 |
+| **執行速度** | 極快 (毫秒級) | 較慢 (需啟動 Spring Context) |
+
+#### 命令操作 (Command) 合約測試
+
+合約測試不僅限於查詢操作，命令操作也應納入合約：
+
+```java
+@Test
+@DisplayName("ATT_CMD_001: 員工打卡")
+void clockIn_AsEmployee_ShouldSaveRecord() throws Exception {
+    String contractSpec = loadContractSpec("attendance_commands");
+
+    var request = ClockInRequest.builder()
+        .employeeId("E001")
+        .clockTime(LocalDateTime.now())
+        .build();
+
+    performPost("/api/v1/attendance/clock-in", request)
+        .andExpect(status().isOk());
+
+    // 驗證命令合約 (驗證 Domain Event 或儲存的資料)
+    assertCommandContract(contractSpec, "ATT_CMD_001");
+}
+```
+
+#### 重要注意事項
+
+1. **合約由 SA 定義**：合約規格 (Markdown 表格) 是 SA 的工作產出，工程師依據合約實作
+2. **非對稱驗證**：工程師不再是「自己測試自己」，SA 定義的 Markdown 作為「外部法規」進行驗證
+3. **所有查詢場景需覆蓋**：包含權限過濾、軟刪除、多租戶隔離等
+4. **測試即文檔**：合約測試通過代表功能符合需求規格
 
 ---
 

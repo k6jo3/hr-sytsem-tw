@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.company.hrms.payroll.domain.model.aggregate.SalaryStructure;
 import com.company.hrms.payroll.domain.model.entity.SalaryItem;
@@ -20,7 +21,8 @@ import com.company.hrms.payroll.domain.repository.ISalaryStructureRepository;
 @DataJpaTest
 @Import({ SalaryStructureRepositoryImpl.class,
         com.company.hrms.common.infrastructure.persistence.querydsl.config.QuerydslConfig.class })
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@ActiveProfiles("test")
 class SalaryStructureRepositoryTest {
 
     @Autowired

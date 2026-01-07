@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBatchBaseRepository;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.insurance.domain.model.aggregate.SupplementaryPremium;
 import com.company.hrms.insurance.domain.model.valueobject.PremiumId;
@@ -16,11 +16,10 @@ import com.company.hrms.insurance.infrastructure.entity.SupplementaryPremiumEnti
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /**
- * 補充保費Repository實作
+ * 二代健保補充保費 Repository 實作
  */
 @Repository
-public class SupplementaryPremiumRepository
-        extends BaseRepository<SupplementaryPremiumEntity, UUID>
+public class SupplementaryPremiumRepository extends CommandBatchBaseRepository<SupplementaryPremiumEntity, UUID>
         implements ISupplementaryPremiumRepository {
 
     public SupplementaryPremiumRepository(JPAQueryFactory factory) {

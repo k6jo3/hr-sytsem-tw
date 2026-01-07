@@ -6,8 +6,9 @@ import java.util.Optional;
 
 import com.company.hrms.attendance.domain.model.aggregate.AttendanceRecord;
 import com.company.hrms.attendance.domain.model.valueobject.RecordId;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.IQueryRepository;
 
-public interface IAttendanceRecordRepository {
+public interface IAttendanceRecordRepository extends IQueryRepository<AttendanceRecord, RecordId> {
     void save(AttendanceRecord record);
 
     Optional<AttendanceRecord> findById(RecordId id);

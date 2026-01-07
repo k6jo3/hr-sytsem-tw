@@ -1,0 +1,119 @@
+﻿package com.company.hrms.project.application.service.context;
+
+import com.company.hrms.project.api.response.GetCustomerDetailResponse;
+import com.company.hrms.project.domain.model.aggregate.Customer;
+
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * 摰Ｘ閰單??亥岷 Context
+ */
+@Getter
+@Setter
+public class  extends PipelineContext {
+
+    // 頛詨
+    private String customerId;
+
+    // 銝剝?蝯?
+    private Customer customer;
+
+    // 頛詨
+    private GetCustomerDetailResponse response;
+
+    public CustomerDetailContext(String customerId) {
+        this.customerId = customerId;
+    }
+}
+package com.company.hrms.project.application.service.context;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+
+import com.company.hrms.common.application.pipeline.PipelineContext;
+import com.company.hrms.project.api.response.GetMyProjectsResponse;
+import com.company.hrms.project.api.response.GetMyProjectsResponse.MyProjectItemDto;
+import com.company.hrms.project.domain.model.aggregate.Project;
+
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * ??撠??亥岷 Context
+ * 
+ * ?冽??Pipeline 銝剖??? */
+@Getter
+@Setter
+public class MyProjectsContext extends PipelineContext {
+
+    // ===== 頛詨 =====
+    /**
+     * ?嗅?雿輻??ID (?∪極 ID)
+     */
+    private UUID employeeId;
+
+    /**
+     * ???Ⅳ
+     */
+    private int page;
+
+    /**
+     * ??憭批?
+     */
+    private int size;
+
+    // ===== 銝剝?蝯? =====
+    /**
+     * ?亥岷?啁?撠???蝯?
+     */
+    private Page<Project> projects;
+
+    /**
+     * 頧?敺? DTO ?”
+     */
+    private List<MyProjectItemDto> projectItems;
+
+    // ===== 頛詨 =====
+    /**
+     * ?蝯???     */
+    private GetMyProjectsResponse response;
+
+    /**
+     * 撱箸?摮?     */
+    public MyProjectsContext(UUID employeeId, int page, int size) {
+        this.employeeId = employeeId;
+        this.page = page;
+        this.size = size;
+    }
+}
+package com.company.hrms.project.application.service.context;
+
+import com.company.hrms.project.api.response.GetTaskDetailResponse;
+import com.company.hrms.project.domain.model.aggregate.Task;
+
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * 撌仿?閰單??亥岷 Context
+ */
+@Getter
+@Setter
+public class  extends PipelineContext {
+
+    // 頛詨
+    private String taskId;
+
+    // 銝剝?蝯?
+    private Task task;
+
+    // 頛詨
+    private GetTaskDetailResponse response;
+
+    public TaskDetailContext(String taskId) {
+        this.taskId = taskId;
+    }
+}

@@ -135,15 +135,15 @@ public class HR02EmployeeCmdController extends CommandBaseController {
     /**
      * 試用期轉正
      */
-    @Operation(summary = "試用期轉正", operationId = "completeProbation")
+    @Operation(summary = "試用期轉正", operationId = "regularizeEmployee")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "成功"),
         @ApiResponse(responseCode = "401", description = "未授權"),
         @ApiResponse(responseCode = "404", description = "員工不存在"),
         @ApiResponse(responseCode = "409", description = "員工不在試用期")
     })
-    @PostMapping("/{employeeId}/complete-probation")
-    public ResponseEntity<Void> completeProbation(
+    @PostMapping("/{employeeId}/regularize")
+    public ResponseEntity<Void> regularizeEmployee(
             @PathVariable String employeeId,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         execCommand(null, currentUser, employeeId);

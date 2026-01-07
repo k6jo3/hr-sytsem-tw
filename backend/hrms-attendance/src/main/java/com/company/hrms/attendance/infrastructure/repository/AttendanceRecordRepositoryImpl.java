@@ -14,14 +14,19 @@ import com.company.hrms.attendance.domain.model.valueobject.RecordId;
 import com.company.hrms.attendance.domain.repository.IAttendanceRecordRepository;
 import com.company.hrms.attendance.infrastructure.dao.AttendanceRecordDAO;
 import com.company.hrms.attendance.infrastructure.po.AttendanceRecordPO;
-
-import lombok.RequiredArgsConstructor;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.QueryBaseRepository;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
-@RequiredArgsConstructor
-public class AttendanceRecordRepositoryImpl implements IAttendanceRecordRepository {
+public class AttendanceRecordRepositoryImpl extends QueryBaseRepository<AttendanceRecord, RecordId>
+        implements IAttendanceRecordRepository {
 
     private final AttendanceRecordDAO attendanceRecordDAO;
+
+    public AttendanceRecordRepositoryImpl(JPAQueryFactory factory, AttendanceRecordDAO attendanceRecordDAO) {
+        super(factory, AttendanceRecord.class);
+        this.attendanceRecordDAO = attendanceRecordDAO;
+    }
 
     @Override
     public Optional<AttendanceRecord> findById(RecordId id) {
