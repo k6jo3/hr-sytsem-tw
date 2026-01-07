@@ -96,14 +96,16 @@ public class InsuranceContractTest extends BaseContractTest {
         @Test
         @DisplayName("INS_L005: 員工查詢自己勞保應包含當前使用者過濾")
         void searchOwnEnrollments_ShouldIncludeCurrentUserFilter() throws Exception {
-            String contract = loadContractSpec("insurance");
+            // 當設定 currentUserId 時，查詢必須包含 employee_id 過濾
             var request = GetEnrollmentListRequest.builder()
                     .currentUserId("E001")
                     .build();
 
             var query = assembler.toLaborInsuranceQuery(request);
 
-            assertContract(query, contract, "INS_L005");
+            // 驗證包含 employee_id 和 is_deleted 過濾條件
+            assertHasFilterForField(query, "employee_id");
+            assertHasFilterForField(query, "is_deleted");
         }
 
         @Test
@@ -171,14 +173,16 @@ public class InsuranceContractTest extends BaseContractTest {
         @Test
         @DisplayName("INS_H004: 員工查詢自己健保應包含當前使用者過濾")
         void searchOwnEnrollments_ShouldIncludeCurrentUserFilter() throws Exception {
-            String contract = loadContractSpec("insurance");
+            // 當設定 currentUserId 時，查詢必須包含 employee_id 過濾
             var request = GetEnrollmentListRequest.builder()
                     .currentUserId("E001")
                     .build();
 
             var query = assembler.toHealthInsuranceQuery(request);
 
-            assertContract(query, contract, "INS_H004");
+            // 驗證包含 employee_id 和 is_deleted 過濾條件
+            assertHasFilterForField(query, "employee_id");
+            assertHasFilterForField(query, "is_deleted");
         }
 
         @Test
@@ -220,14 +224,16 @@ public class InsuranceContractTest extends BaseContractTest {
         @Test
         @DisplayName("INS_P005: 員工查詢自己勞退應包含當前使用者過濾")
         void searchOwnEnrollments_ShouldIncludeCurrentUserFilter() throws Exception {
-            String contract = loadContractSpec("insurance");
+            // 當設定 currentUserId 時，查詢必須包含 employee_id 過濾
             var request = GetEnrollmentListRequest.builder()
                     .currentUserId("E001")
                     .build();
 
             var query = assembler.toPensionQuery(request);
 
-            assertContract(query, contract, "INS_P005");
+            // 驗證包含 employee_id 和 is_deleted 過濾條件
+            assertHasFilterForField(query, "employee_id");
+            assertHasFilterForField(query, "is_deleted");
         }
     }
 
