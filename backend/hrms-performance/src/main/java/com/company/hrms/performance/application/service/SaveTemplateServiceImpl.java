@@ -1,7 +1,5 @@
 package com.company.hrms.performance.application.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,12 +8,11 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.performance.api.request.SaveTemplateRequest;
 import com.company.hrms.performance.api.response.SuccessResponse;
-import com.company.hrms.performance.application.service.context.StartCycleContext;
+import com.company.hrms.performance.application.service.context.SaveTemplateContext;
 import com.company.hrms.performance.application.service.task.LoadCycleTask;
 import com.company.hrms.performance.application.service.task.PublishCycleEventsTask;
 import com.company.hrms.performance.application.service.task.SaveCycleTask;
-import com.company.hrms.performance.domain.model.valueobject.EvaluationItem;
-import com.company.hrms.performance.domain.model.valueobject.EvaluationTemplate;
+import com.company.hrms.performance.application.service.task.SaveTemplateTask;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class SaveTemplateServiceImpl implements CommandApiService<SaveTemplateRequest, SuccessResponse> {
 
         private final LoadCycleTask loadCycleTask;
+        private final SaveTemplateTask saveTemplateTask;
         private final SaveCycleTask saveCycleTask;
         private final PublishCycleEventsTask publishEventsTask;
 
@@ -35,31 +33,14 @@ public class SaveTemplateServiceImpl implements CommandApiService<SaveTemplateRe
         public SuccessResponse execCommand(SaveTemplateRequest req, JWTModel currentUser, String... args)
                         throws Exception {
 
-                StartCycleContext ctx = new StartCycleContext(req.getCycleId());
+                SaveTemplateContext ctx = new SaveTemplateContext(req);
 
                 BusinessPipeline.start(ctx)
-                                .next(context -> {
-                                        // 建立並儲存範本 (使用 Domain 方法)
-                                        List<EvaluationItem> items = req.getItems().stream()
-                                                        .map(itemReq -> EvaluationItem.createDefinition(
-                                                                        itemReq.getItemName(),
-                                                                        itemReq.getWeight(),
-                                                                        itemReq.getDescription(),
-                                                                        itemReq.getCriteria()))
-                                                        .toList();
-
-                                        EvaluationTemplate template = EvaluationTemplate.create(
-                                                        req.getTemplateName(),
-                                                        req.getScoringSystem(),
-                                                        req.getEnableDistribution()); // Request Field:
-                                                                                      // enableDistribution, Domain arg
-                                                                                      // name: forcedDistribution
-
-                                        // Set items
-                                        template.setEvaluationItems(items);
-
-                                        context.getCycle().saveTemplate(template);
-                                }).next(saveCycleTask).next(publishEventsTask).execute();
+                                .next(loadCycleTask)
+                                .next(saveTemplateTask)
+                                .next(saveCycleTask)
+                                .next(publishEventsTask)
+                                .execute();
 
                 return SuccessResponse.of("考核範本已儲存");
         }
