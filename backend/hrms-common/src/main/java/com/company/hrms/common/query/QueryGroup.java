@@ -28,6 +28,9 @@ public class QueryGroup implements Serializable {
     /** 子群組 (用於巢狀邏輯) */
     private final List<QueryGroup> subGroups = new ArrayList<>();
 
+    /** 分頁資訊 */
+    private transient org.springframework.data.domain.Pageable pageable;
+
     public QueryGroup() {
     }
 
@@ -195,11 +198,16 @@ public class QueryGroup implements Serializable {
         return junction;
     }
 
-    /**
-     * 設定邏輯運算子
-     */
     public void setJunction(LogicalOp junction) {
         this.junction = junction;
+    }
+
+    public org.springframework.data.domain.Pageable getPageable() {
+        return pageable;
+    }
+
+    public void setPageable(org.springframework.data.domain.Pageable pageable) {
+        this.pageable = pageable;
     }
 
     /**
@@ -226,8 +234,9 @@ public class QueryGroup implements Serializable {
     public boolean hasFilterForField(String field) {
         // 檢查本群組
         boolean found = conditions.stream()
-            .anyMatch(f -> f.getField().equalsIgnoreCase(field));
-        if (found) return true;
+                .anyMatch(f -> f.getField().equalsIgnoreCase(field));
+        if (found)
+            return true;
 
         // 遞迴檢查子群組
         for (QueryGroup subGroup : subGroups) {
@@ -243,8 +252,8 @@ public class QueryGroup implements Serializable {
      */
     public List<FilterUnit> getFiltersForField(String field) {
         List<FilterUnit> result = conditions.stream()
-            .filter(f -> f.getField().equalsIgnoreCase(field))
-            .collect(Collectors.toList());
+                .filter(f -> f.getField().equalsIgnoreCase(field))
+                .collect(Collectors.toList());
 
         for (QueryGroup subGroup : subGroups) {
             result.addAll(subGroup.getFiltersForField(field));
@@ -260,16 +269,16 @@ public class QueryGroup implements Serializable {
         if (!conditions.isEmpty()) {
             sb.append(", conditions=[");
             sb.append(conditions.stream()
-                .map(FilterUnit::toString)
-                .collect(Collectors.joining(", ")));
+                    .map(FilterUnit::toString)
+                    .collect(Collectors.joining(", ")));
             sb.append("]");
         }
 
         if (!subGroups.isEmpty()) {
             sb.append(", subGroups=[");
             sb.append(subGroups.stream()
-                .map(QueryGroup::toString)
-                .collect(Collectors.joining(", ")));
+                    .map(QueryGroup::toString)
+                    .collect(Collectors.joining(", ")));
             sb.append("]");
         }
 
@@ -279,12 +288,14 @@ public class QueryGroup implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         QueryGroup that = (QueryGroup) o;
         return junction == that.junction &&
-               Objects.equals(conditions, that.conditions) &&
-               Objects.equals(subGroups, that.subGroups);
+                Objects.equals(conditions, that.conditions) &&
+                Objects.equals(subGroups, that.subGroups);
     }
 
     @Override

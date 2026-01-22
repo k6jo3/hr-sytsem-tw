@@ -6,7 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * 分頁請求基類
  * 所有需要分頁的查詢請求應繼承此類
  *
- * <p>使用範例：
+ * <p>
+ * 使用範例：
+ * 
  * <pre>
  * public class GetEmployeeListRequest extends PageRequest {
  *     private String department;
@@ -47,6 +49,7 @@ public class PageRequest {
 
     /**
      * 取得頁碼（從 1 開始）
+     * 
      * @return 頁碼
      */
     public Integer getPage() {
@@ -59,6 +62,7 @@ public class PageRequest {
 
     /**
      * 取得每頁筆數
+     * 
      * @return 每頁筆數（限制在 1 ~ MAX_PAGE_SIZE 之間）
      */
     public Integer getSize() {
@@ -90,6 +94,7 @@ public class PageRequest {
 
     /**
      * 計算 offset（供 SQL 分頁使用）
+     * 
      * @return offset 值
      */
     public int getOffset() {
@@ -98,6 +103,7 @@ public class PageRequest {
 
     /**
      * 取得 limit（供 SQL 分頁使用）
+     * 
      * @return limit 值
      */
     public int getLimit() {
@@ -110,5 +116,25 @@ public class PageRequest {
     public enum SortDirection {
         ASC,
         DESC
+    }
+
+    /**
+     * 轉換為 Spring Data Pageable 物件
+     * 
+     * @return Pageable
+     */
+    public org.springframework.data.domain.Pageable toPageable() {
+        int pageNo = getPage() > 0 ? getPage() - 1 : 0; // 轉為 0-based
+        int pageSize = getSize();
+
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.unsorted();
+        if (sortBy != null && !sortBy.isEmpty()) {
+            org.springframework.data.domain.Sort.Direction direction = sortDirection == SortDirection.ASC
+                    ? org.springframework.data.domain.Sort.Direction.ASC
+                    : org.springframework.data.domain.Sort.Direction.DESC;
+            sort = org.springframework.data.domain.Sort.by(direction, sortBy);
+        }
+
+        return org.springframework.data.domain.PageRequest.of(pageNo, pageSize, sort);
     }
 }

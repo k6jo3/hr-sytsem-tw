@@ -51,4 +51,31 @@ public class ProjectMember {
             LocalDate joinDate, LocalDate leaveDate) {
         return new ProjectMember(id, projectId, employeeId, role, allocatedHours, joinDate, leaveDate);
     }
+
+    /**
+     * 設定成員離開日期
+     *
+     * @param leaveDate 離開日期
+     */
+    public void setLeaveDate(LocalDate leaveDate) {
+        this.leaveDate = leaveDate;
+    }
+
+    /**
+     * 更新配置工時
+     *
+     * @param allocatedHours 配置工時
+     */
+    public void updateAllocatedHours(BigDecimal allocatedHours) {
+        this.allocatedHours = allocatedHours;
+    }
+
+    /**
+     * 更新角色
+     *
+     * @param role 新角色
+     */
+    public void updateRole(String role) {
+        this.role = role;
+    }
 }

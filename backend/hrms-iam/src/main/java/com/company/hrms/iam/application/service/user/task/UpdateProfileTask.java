@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import com.company.hrms.common.application.pipeline.PipelineTask;
 import com.company.hrms.iam.application.service.user.context.UserPipelineContext;
 
-@Component
+@Component("userUpdateProfileTask")
 public class UpdateProfileTask implements PipelineTask<UserPipelineContext> {
 
     @Override

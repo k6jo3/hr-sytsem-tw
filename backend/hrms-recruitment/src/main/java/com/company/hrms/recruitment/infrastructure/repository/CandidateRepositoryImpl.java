@@ -137,4 +137,13 @@ public class CandidateRepositoryImpl
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }
+
+    @Override
+    public boolean existsByEmailAndOpeningId(String email, OpeningId openingId) {
+        QueryGroup query = QueryBuilder.where()
+                .eq("email", email)
+                .eq("openingId", openingId.getValue())
+                .build();
+        return super.count(query) > 0;
+    }
 }

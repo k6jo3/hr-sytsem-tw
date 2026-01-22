@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBaseRepository;
+import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.recruitment.domain.model.aggregate.Offer;
@@ -22,15 +23,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  * Offer Repository 實作
  */
 @Repository
-public class OfferRepositoryImpl
-        extends CommandBaseRepository<OfferEntity, UUID>
-        implements IOfferRepository {
+public class OfferRepositoryImpl extends CommandBaseRepository<OfferEntity, UUID> implements IOfferRepository {
 
     private final EventPublisher eventPublisher;
 
-    public OfferRepositoryImpl(
-            JPAQueryFactory factory,
-            EventPublisher eventPublisher) {
+    public OfferRepositoryImpl(JPAQueryFactory factory, EventPublisher eventPublisher) {
         super(factory, OfferEntity.class);
         this.eventPublisher = eventPublisher;
     }
@@ -40,8 +37,11 @@ public class OfferRepositoryImpl
         OfferEntity entity = toEntity(offer);
         super.save(entity);
 
-        offer.getDomainEvents().forEach(eventPublisher::publish);
-        offer.clearDomainEvents();
+        // 發布領域事件
+        if (!offer.getDomainEvents().isEmpty()) {
+            eventPublisher.publishAll(offer.getDomainEvents());
+            offer.clearDomainEvents();
+        }
 
         return offer;
     }
@@ -65,7 +65,7 @@ public class OfferRepositoryImpl
     @Override
     public Optional<Offer> findByCandidateId(CandidateId candidateId) {
         QueryGroup query = QueryBuilder.where()
-                .and("candidateId", com.company.hrms.common.query.Operator.EQ, candidateId.getValue())
+                .and("candidateId", Operator.EQ, candidateId.getValue())
                 .build();
         return super.findAll(query).stream()
                 .map(this::toDomain)
@@ -76,19 +76,32 @@ public class OfferRepositoryImpl
 
     private OfferEntity toEntity(Offer domain) {
         OfferEntity entity = new OfferEntity();
-        entity.setOfferId(domain.getId().getValue());
-        entity.setCandidateId(domain.getCandidateId().getValue());
+        if (domain.getId() != null) {
+            entity.setOfferId(domain.getId().getValue());
+        }
+        if (domain.getCandidateId() != null) {
+            entity.setCandidateId(domain.getCandidateId().getValue());
+        }
         entity.setCandidateName(domain.getCandidateName());
         entity.setOfferedPosition(domain.getOfferedPosition());
         entity.setOfferedSalary(domain.getOfferedSalary());
         entity.setOfferedStartDate(domain.getOfferedStartDate());
         entity.setOfferDate(domain.getOfferDate());
         entity.setExpiryDate(domain.getExpiryDate());
+
+        // Enum: OfferStatus matches exactly (both use same enum class usually, but
+        // checking import)
         entity.setStatus(domain.getStatus());
+
         entity.setResponseDate(domain.getResponseDate());
         entity.setRejectionReason(domain.getRejectionReason());
-        entity.setCreatedAt(domain.getCreatedAt());
-        entity.setUpdatedAt(domain.getUpdatedAt());
+
+        if (domain.getCreatedAt() != null) {
+            entity.setCreatedAt(domain.getCreatedAt());
+        }
+        if (domain.getUpdatedAt() != null) {
+            entity.setUpdatedAt(domain.getUpdatedAt());
+        }
         return entity;
     }
 

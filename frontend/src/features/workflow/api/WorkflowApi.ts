@@ -27,7 +27,7 @@ import type {
   StartWorkflowResponse,
 } from './WorkflowTypes';
 
-const BASE_URL = '/workflows';
+const BASE_URL = '/workflow';
 
 export const WorkflowApi = {
   // ========== Workflow Definitions ==========
@@ -69,11 +69,11 @@ export const WorkflowApi = {
   },
 
   /**
-   * 取得流程實例詳情
+   * 取得流程實例詳情 (歷史)
    */
   getInstance: async (instanceId: string): Promise<GetWorkflowInstanceResponse> => {
     const response = await apiClient.get<GetWorkflowInstanceResponse>(
-      `${BASE_URL}/instances/${instanceId}`
+      `${BASE_URL}/${instanceId}/history`
     );
     return response.data;
   },
@@ -96,7 +96,7 @@ export const WorkflowApi = {
    * 取得待辦任務列表
    */
   getPendingTasks: async (params?: GetPendingTasksRequest): Promise<GetPendingTasksResponse> => {
-    const response = await apiClient.get<GetPendingTasksResponse>(`${BASE_URL}/tasks/pending`, {
+    const response = await apiClient.get<GetPendingTasksResponse>(`${BASE_URL}/pending-tasks`, {
       params,
     });
     return response.data;
@@ -106,9 +106,14 @@ export const WorkflowApi = {
    * 核准任務
    */
   approveTask: async (taskId: string, request?: ApproveTaskRequest): Promise<ApproveTaskResponse> => {
-    const response = await apiClient.put<ApproveTaskResponse>(
-      `${BASE_URL}/tasks/${taskId}/approve`,
-      request
+    // Backend expects body with taskId. If request is missing, construct minimal one.
+    const body = request || { taskId, approverId: '', comment: '' };
+    // Ensure taskId is in body
+    if (!body.taskId) body.taskId = taskId;
+    
+    const response = await apiClient.post<ApproveTaskResponse>(
+      `${BASE_URL}/approve`,
+      body
     );
     return response.data;
   },
@@ -117,15 +122,17 @@ export const WorkflowApi = {
    * 駁回任務
    */
   rejectTask: async (taskId: string, request: RejectTaskRequest): Promise<RejectTaskResponse> => {
-    const response = await apiClient.put<RejectTaskResponse>(
-      `${BASE_URL}/tasks/${taskId}/reject`,
-      request
+    const body = { ...request, taskId };
+    const response = await apiClient.post<RejectTaskResponse>(
+      `${BASE_URL}/reject`,
+      body
     );
     return response.data;
   },
 
   // ========== Delegations ==========
-
+  // Assumed to be unimplemented in backend yet, keeping as is but ensuring base url correctness if implementing later
+  
   /**
    * 建立代理人設定
    */

@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 更新個人資料 Task
  */
-@Component
+@Component("profileUpdateProfileTask")
 @RequiredArgsConstructor
 @Slf4j
 public class UpdateProfileTask implements PipelineTask<ProfileContext> {

@@ -51,4 +51,9 @@ public interface ICandidateRepository {
      * 計算職缺的應徵人數
      */
     long countByOpeningId(OpeningId openingId);
+
+    /**
+     * 檢查是否已應徵過同一職缺
+     */
+    boolean existsByEmailAndOpeningId(String email, OpeningId openingId);
 }

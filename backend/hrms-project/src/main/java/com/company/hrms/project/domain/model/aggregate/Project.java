@@ -177,6 +177,49 @@ public class Project extends AggregateRoot<ProjectId> {
         touch();
     }
 
+    /**
+     * 暫停專案
+     *
+     * @param reason 暫停原因
+     */
+    public void hold(String reason) {
+        if (this.status != ProjectStatus.IN_PROGRESS) {
+            throw new DomainException("只有進行中的專案可以暫停");
+        }
+        if (reason == null || reason.isBlank()) {
+            throw new DomainException("暫停原因為必填");
+        }
+        this.status = ProjectStatus.ON_HOLD;
+        touch();
+    }
+
+    /**
+     * 恢復專案
+     */
+    public void resume() {
+        if (this.status != ProjectStatus.ON_HOLD) {
+            throw new DomainException("只有暫停中的專案可以恢復");
+        }
+        this.status = ProjectStatus.IN_PROGRESS;
+        touch();
+    }
+
+    /**
+     * 移除成員
+     *
+     * @param memberId  成員 ID
+     * @param leaveDate 離開日期
+     */
+    public void removeMember(UUID memberId, LocalDate leaveDate) {
+        ProjectMember memberToRemove = members.stream()
+                .filter(m -> m.getId().equals(memberId))
+                .findFirst()
+                .orElseThrow(() -> new DomainException("成員不存在於此專案: " + memberId));
+
+        memberToRemove.setLeaveDate(leaveDate);
+        touch();
+    }
+
     public void update(UpdateProjectCommand cmd) {
         if (this.status == ProjectStatus.COMPLETED) {
             throw new DomainException("Cannot update a completed project");

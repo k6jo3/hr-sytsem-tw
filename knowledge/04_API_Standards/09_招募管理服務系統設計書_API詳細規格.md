@@ -38,16 +38,22 @@
 | 9 | `/api/v1/recruitment/candidates/{id}/status` | PUT | 更新應徵者狀態 | HR09CandidateCmdController |
 | 10 | `/api/v1/recruitment/candidates/{id}/reject` | PUT | 拒絕應徵者 | HR09CandidateCmdController |
 | 11 | `/api/v1/recruitment/candidates/{id}/hire` | PUT | 錄取應徵者 | HR09CandidateCmdController |
-| 12 | `/api/v1/recruitment/interviews/schedule` | POST | 安排面試 | HR09InterviewCmdController |
+| 12 | `/api/v1/recruitment/interviews` | POST | 安排面試 | HR09InterviewCmdController |
 | 13 | `/api/v1/recruitment/interviews` | GET | 查詢面試列表 | HR09InterviewQryController |
-| 14 | `/api/v1/recruitment/interviews/{id}/evaluation` | POST | 提交面試評估 | HR09InterviewCmdController |
-| 15 | `/api/v1/recruitment/interviews/{id}/cancel` | PUT | 取消面試 | HR09InterviewCmdController |
-| 16 | `/api/v1/recruitment/offers` | POST | 發送Offer | HR09OfferCmdController |
-| 17 | `/api/v1/recruitment/offers` | GET | 查詢Offer列表 | HR09OfferQryController |
-| 18 | `/api/v1/recruitment/offers/{id}/accept` | PUT | 接受Offer | HR09OfferCmdController |
-| 19 | `/api/v1/recruitment/offers/{id}/reject` | PUT | 拒絕Offer | HR09OfferCmdController |
-| 20 | `/api/v1/recruitment/dashboard` | GET | 招募儀表板 | HR09ReportQryController |
-| 21 | `/api/v1/recruitment/dashboard/export` | GET | 匯出招募報表 | HR09ReportQryController |
+| 14 | `/api/v1/recruitment/interviews/{id}` | GET | 查詢面試詳情 | HR09InterviewQryController |
+| 15 | `/api/v1/recruitment/interviews/{id}/reschedule` | PUT | 面試重新排程 | HR09InterviewCmdController |
+| 16 | `/api/v1/recruitment/interviews/{id}/evaluations` | POST | 提交面試評估 | HR09InterviewCmdController |
+| 17 | `/api/v1/recruitment/interviews/{id}/cancel` | POST | 取消面試 | HR09InterviewCmdController |
+| 18 | `/api/v1/recruitment/offers` | POST | 發送Offer | HR09OfferCmdController |
+| 19 | `/api/v1/recruitment/offers` | GET | 查詢Offer列表 | HR09OfferQryController |
+| 20 | `/api/v1/recruitment/offers/{id}` | GET | 查詢Offer詳情 | HR09OfferQryController |
+| 21 | `/api/v1/recruitment/offers/{id}/accept` | POST | 接受Offer | HR09OfferCmdController |
+| 22 | `/api/v1/recruitment/offers/{id}/reject` | POST | 拒絕Offer | HR09OfferCmdController |
+| 23 | `/api/v1/recruitment/offers/{id}/withdraw` | POST | 撤回Offer | HR09OfferCmdController |
+| 24 | `/api/v1/recruitment/offers/{id}/extend` | PUT | 延長Offer到期日 | HR09OfferCmdController |
+| 25 | `/api/v1/recruitment/dashboard` | GET | 招募儀表板 | HR09ReportQryController |
+| 26 | `/api/v1/recruitment/dashboard/export` | GET | 匯出招募報表 | HR09ReportQryController |
+
 
 ### 1.2 應徵者狀態流程
 

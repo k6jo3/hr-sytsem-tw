@@ -961,80 +961,62 @@ QueryGroup group = QueryBuilder.whereOr()  // 最外層用 OR
 // 產生：(a = 1 AND (b = 3 OR c = 5)) OR (d = 0 AND e = 100)
 ```
 
+#### 宣告式查詢 (推薦方式)
+
+```java
+/**
+ * 推薦方式：直接從 Request DTO 建構查詢條件
+ * Request DTO 上的 @QueryFilter 註解會自動解析成 WHERE 條件
+ */
+public Page<Employee> search(EmployeeSearchRequest request, Pageable pageable) {
+    // 宣告式：一行搞定，DTO 欄位的 @QueryFilter 註解自動處理
+    QueryGroup query = QueryBuilder.where()
+            .fromDto(request)
+            .build();
+
+    return repository.findPage(query, pageable);
+}
+```
+
 #### 動態條件組合
 
 ```java
 /**
- * 根據前端傳入參數動態組合條件
+ * 當需要額外的動態邏輯時，先用 fromDto() 解析基本條件，再加上額外條件
  */
-public Page<Employee> dynamicSearch(EmployeeSearchRequest req, Pageable pageable) {
-    QueryBuilder builder = QueryBuilder.where();
+public Page<Employee> dynamicSearch(EmployeeSearchRequest request, Pageable pageable) {
+    // 先從 DTO 解析基本條件
+    QueryGroup query = QueryBuilder.where()
+            .fromDto(request)
+            // 複雜條件：當有搜尋關鍵字時，同時搜尋 name 和 email
+            .orGroup(sub -> sub
+                .like("name", request.getKeyword())
+                .like("email", request.getKeyword())
+            )
+            .build();
 
-    // 動態加入條件 (只有當參數有值時才加入)
-    if (StringUtils.hasText(req.getName())) {
-        builder.like("name", req.getName());
-    }
-
-    if (req.getStatus() != null) {
-        builder.eq("status", req.getStatus());
-    }
-
-    if (req.getDepartmentIds() != null && !req.getDepartmentIds().isEmpty()) {
-        builder.in("departmentId", req.getDepartmentIds().toArray());
-    }
-
-    if (req.getHireDateFrom() != null && req.getHireDateTo() != null) {
-        builder.and("hireDate", Operator.BETWEEN,
-            new Object[]{req.getHireDateFrom(), req.getHireDateTo()});
-    }
-
-    // 複雜條件：當有搜尋關鍵字時，同時搜尋 name 和 email
-    if (StringUtils.hasText(req.getKeyword())) {
-        builder.orGroup(sub -> sub
-            .like("name", req.getKeyword())
-            .like("email", req.getKeyword())
-        );
-    }
-
-    return repository.findPage(builder.build(), pageable);
+    return repository.findPage(query, pageable);
 }
 ```
 
-#### 混合使用：註解 + 手動邏輯
+#### 混合使用：宣告式 + 額外邏輯
 
 ```java
 /**
- * 先從 DTO 解析基本條件，再手動加上複雜邏輯
+ * 推薦方式：先用 fromDto() 解析 DTO 條件，再鏈式加上額外邏輯
  */
 public Page<Employee> hybridSearch(EmployeeSearchCondition cond, Pageable pageable) {
 
-    // 從註解解析基本條件
-    QueryGroup baseGroup = QueryBuilder.fromCondition(cond);
+    // 宣告式：fromDto() + 額外條件一氣呵成
+    QueryGroup query = QueryBuilder.where()
+            .fromDto(cond)                           // 自動解析 DTO 上的註解
+            .orGroup(sub -> sub                      // 加上特殊商業邏輯
+                .eq("specialFlag", true)
+                .gte("priority", 10)
+            )
+            .build();
 
-    // 加上額外的複雜邏輯
-    QueryBuilder builder = QueryBuilder.where();
-
-    // 加入基本條件
-    for (FilterUnit unit : baseGroup.getConditions()) {
-        builder.and(unit.getField(), unit.getOp(), unit.getValue());
-    }
-    for (QueryGroup subGroup : baseGroup.getSubGroups()) {
-        if (subGroup.getJunction() == LogicalOp.OR) {
-            builder.orGroup(sub -> {
-                for (FilterUnit unit : subGroup.getConditions()) {
-                    sub.and(unit.getField(), unit.getOp(), unit.getValue());
-                }
-            });
-        }
-    }
-
-    // 加上特殊商業邏輯
-    builder.orGroup(sub -> sub
-        .eq("specialFlag", true)
-        .and("priority", Operator.GTE, 10)
-    );
-
-    return repository.findPage(builder.build(), pageable);
+    return repository.findPage(query, pageable);
 }
 ```
 
