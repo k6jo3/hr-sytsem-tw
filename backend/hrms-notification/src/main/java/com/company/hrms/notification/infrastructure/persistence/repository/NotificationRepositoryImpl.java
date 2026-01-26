@@ -1,19 +1,20 @@
 package com.company.hrms.notification.infrastructure.persistence.repository;
 
-import com.company.hrms.common.query.QueryGroup;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
 import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
 import com.company.hrms.notification.domain.model.aggregate.Notification;
 import com.company.hrms.notification.domain.model.valueobject.NotificationId;
 import com.company.hrms.notification.domain.repository.INotificationRepository;
-import com.company.hrms.notification.infrastructure.persistence.assembler.NotificationQueryAssembler;
 import com.company.hrms.notification.infrastructure.persistence.entity.NotificationPO;
+import com.company.hrms.notification.infrastructure.persistence.entity.QNotificationPO;
 import com.company.hrms.notification.infrastructure.persistence.mapper.NotificationMapper;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
-import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import jakarta.persistence.EntityManager;
 
 /**
  * 通知 Repository 實作
@@ -30,16 +31,13 @@ public class NotificationRepositoryImpl
         implements INotificationRepository {
 
     private final NotificationMapper mapper;
-    private final NotificationQueryAssembler assembler;
 
     public NotificationRepositoryImpl(
             EntityManager entityManager,
             JPAQueryFactory queryFactory,
-            NotificationMapper mapper,
-            NotificationQueryAssembler assembler) {
+            NotificationMapper mapper) {
         super(queryFactory, NotificationPO.class);
         this.mapper = mapper;
-        this.assembler = assembler;
     }
 
     @Override
@@ -57,22 +55,33 @@ public class NotificationRepositoryImpl
 
     @Override
     public List<Notification> findByRecipientId(String recipientId) {
-        QueryGroup query = assembler.queryByRecipient(recipientId);
-        List<NotificationPO> pos = super.findAll(query);
+        QNotificationPO qNotification = QNotificationPO.notificationPO;
+        List<NotificationPO> pos = factory.selectFrom(qNotification)
+                .where(qNotification.recipientId.eq(recipientId)
+                        .and(qNotification.isDeleted.isFalse()))
+                .fetch();
         return mapper.toDomainList(pos);
     }
 
     @Override
     public List<Notification> findUnreadByRecipientId(String recipientId) {
-        QueryGroup query = assembler.queryUnreadByRecipient(recipientId);
-        List<NotificationPO> pos = super.findAll(query);
+        QNotificationPO qNotification = QNotificationPO.notificationPO;
+        List<NotificationPO> pos = factory.selectFrom(qNotification)
+                .where(qNotification.recipientId.eq(recipientId)
+                        .and(qNotification.readAt.isNull())
+                        .and(qNotification.isDeleted.isFalse()))
+                .fetch();
         return mapper.toDomainList(pos);
     }
 
     @Override
     public long countUnreadByRecipientId(String recipientId) {
-        QueryGroup query = assembler.queryUnreadByRecipient(recipientId);
-        return super.count(query);
+        QNotificationPO qNotification = QNotificationPO.notificationPO;
+        return factory.selectFrom(qNotification)
+                .where(qNotification.recipientId.eq(recipientId)
+                        .and(qNotification.readAt.isNull())
+                        .and(qNotification.isDeleted.isFalse()))
+                .fetchCount();
     }
 
     @Override

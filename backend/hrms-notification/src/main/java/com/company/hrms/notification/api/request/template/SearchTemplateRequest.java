@@ -2,6 +2,7 @@ package com.company.hrms.notification.api.request.template;
 
 import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryFilter;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,7 +35,7 @@ public class SearchTemplateRequest {
     /**
      * 範本名稱關鍵字
      */
-    @QueryFilter(property = "name", operator = Operator.LIKE)
+    @QueryFilter(property = "template_name", operator = Operator.LIKE)
     @Schema(description = "範本名稱關鍵字", example = "請假")
     private String templateNameKeyword;
 
