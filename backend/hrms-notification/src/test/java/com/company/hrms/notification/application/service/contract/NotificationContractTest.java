@@ -64,7 +64,7 @@ public class NotificationContractTest extends BaseContractTest {
                     .notificationType("SYSTEM")
                     .build();
 
-            var query = assembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             // 驗證包含正確的過濾條件
             assertHasFilterForField(query, "notification_type");
@@ -80,7 +80,7 @@ public class NotificationContractTest extends BaseContractTest {
                     .templateNameKeyword("請假")
                     .build();
 
-            var query = assembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             // 驗證包含正確的過濾條件
             assertHasFilterForField(query, "template_name");
@@ -96,7 +96,7 @@ public class NotificationContractTest extends BaseContractTest {
                     .status("INACTIVE")
                     .build();
 
-            var query = assembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "NTF_T005");
         }
@@ -106,7 +106,7 @@ public class NotificationContractTest extends BaseContractTest {
         void searchAllTemplates_ShouldIncludeDeletedFilter() throws Exception {
             // 空查詢也必須包含 is_deleted = false
             var request = SearchTemplateRequest.builder().build();
-            var query = assembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertHasFilterForField(query, "is_deleted");
         }
