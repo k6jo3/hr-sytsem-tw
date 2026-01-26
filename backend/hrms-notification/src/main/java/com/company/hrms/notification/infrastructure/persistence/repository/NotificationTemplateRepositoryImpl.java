@@ -1,7 +1,7 @@
 package com.company.hrms.notification.infrastructure.persistence.repository;
 
-import com.company.hrms.common.querydsl.model.query.QueryGroup;
-import com.company.hrms.common.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
 import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate;
 import com.company.hrms.notification.domain.model.valueobject.TemplateId;
 import com.company.hrms.notification.domain.repository.INotificationTemplateRepository;
@@ -37,7 +37,7 @@ public class NotificationTemplateRepositoryImpl
             JPAQueryFactory queryFactory,
             TemplateMapper mapper,
             TemplateQueryAssembler assembler) {
-        super(NotificationTemplatePO.class, entityManager, queryFactory);
+        super(queryFactory, NotificationTemplatePO.class);
         this.mapper = mapper;
         this.assembler = assembler;
     }
@@ -71,7 +71,8 @@ public class NotificationTemplateRepositoryImpl
 
     @Override
     public List<NotificationTemplate> findAll() {
-        List<NotificationTemplatePO> pos = super.findAll();
+        QueryGroup query = assembler.queryAllTemplates();
+        List<NotificationTemplatePO> pos = super.findAll(query);
         return mapper.toDomainList(pos);
     }
 

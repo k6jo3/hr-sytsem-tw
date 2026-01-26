@@ -1,7 +1,7 @@
 package com.company.hrms.notification.infrastructure.persistence.repository;
 
-import com.company.hrms.common.querydsl.model.query.QueryGroup;
-import com.company.hrms.common.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
 import com.company.hrms.notification.domain.model.aggregate.NotificationPreference;
 import com.company.hrms.notification.domain.model.valueobject.PreferenceId;
 import com.company.hrms.notification.domain.repository.INotificationPreferenceRepository;
@@ -36,7 +36,7 @@ public class NotificationPreferenceRepositoryImpl
             JPAQueryFactory queryFactory,
             PreferenceMapper mapper,
             PreferenceQueryAssembler assembler) {
-        super(NotificationPreferencePO.class, entityManager, queryFactory);
+        super(queryFactory, NotificationPreferencePO.class);
         this.mapper = mapper;
         this.assembler = assembler;
     }

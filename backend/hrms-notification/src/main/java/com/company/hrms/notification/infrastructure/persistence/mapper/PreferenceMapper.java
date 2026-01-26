@@ -92,12 +92,13 @@ public class PreferenceMapper {
 
         // 設定靜音時段
         if (po.getQuietHoursEnabled() != null && po.getQuietHoursEnabled()) {
-            QuietHours quietHours = new QuietHours(
-                    true,
+            QuietHours quietHours = QuietHours.of(
                     po.getQuietHoursStart(),
                     po.getQuietHoursEnd()
             );
             preference.setQuietHours(quietHours);
+        } else {
+            preference.setQuietHours(QuietHours.disabled());
         }
 
         preference.setEmailAddress(po.getEmailAddress());
@@ -106,8 +107,6 @@ public class PreferenceMapper {
         preference.setTeamsWebhookUrl(po.getTeamsWebhookUrl());
 
         // 設定審計欄位
-        preference.setCreatedAt(po.getCreatedAt());
-        preference.setUpdatedAt(po.getUpdatedAt());
         preference.setCreatedBy(po.getCreatedBy());
         preference.setUpdatedBy(po.getUpdatedBy());
         preference.setVersion(po.getVersion());

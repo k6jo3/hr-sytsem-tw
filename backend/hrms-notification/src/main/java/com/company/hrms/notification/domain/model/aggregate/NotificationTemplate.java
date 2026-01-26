@@ -2,6 +2,8 @@ package com.company.hrms.notification.domain.model.aggregate;
 
 import com.company.hrms.common.domain.model.AggregateRoot;
 import com.company.hrms.notification.domain.model.valueobject.NotificationChannel;
+import com.company.hrms.notification.domain.model.valueobject.NotificationPriority;
+import com.company.hrms.notification.domain.model.valueobject.NotificationType;
 import com.company.hrms.notification.domain.model.valueobject.TemplateId;
 
 import java.util.List;
@@ -32,6 +34,21 @@ public class NotificationTemplate extends AggregateRoot<TemplateId> {
     private String templateName;
 
     /**
+     * 範本描述
+     */
+    private String description;
+
+    /**
+     * 通知類型
+     */
+    private NotificationType notificationType;
+
+    /**
+     * 預設優先級
+     */
+    private NotificationPriority defaultPriority;
+
+    /**
      * 主旨（用於 Email）
      */
     private String subject;
@@ -47,9 +64,34 @@ public class NotificationTemplate extends AggregateRoot<TemplateId> {
     private List<NotificationChannel> defaultChannels;
 
     /**
+     * 範本變數（從 body 中提取）
+     */
+    private Map<String, String> variables;
+
+    /**
      * 是否啟用
      */
     private boolean isActive;
+
+    /**
+     * 建立者
+     */
+    private String createdBy;
+
+    /**
+     * 最後更新者
+     */
+    private String updatedBy;
+
+    /**
+     * 版本號 (樂觀鎖)
+     */
+    private Long version;
+
+    /**
+     * 軟刪除標記
+     */
+    private Boolean isDeleted;
 
     /**
      * 變數替換的正則表達式模式 {{variableName}}
@@ -59,18 +101,20 @@ public class NotificationTemplate extends AggregateRoot<TemplateId> {
     /**
      * 私有建構子，強制使用 Factory Method
      */
-    private NotificationTemplate(TemplateId id) {
+    public NotificationTemplate(TemplateId id) {
         super(id);
     }
 
     /**
      * 建立通知範本 (Factory Method)
      *
-     * @param templateCode    範本代碼
-     * @param templateName    範本名稱
-     * @param subject         主旨
-     * @param body            內容範本
-     * @param defaultChannels 預設渠道
+     * @param templateCode     範本代碼
+     * @param templateName     範本名稱
+     * @param subject          主旨
+     * @param body             內容範本
+     * @param notificationType 通知類型
+     * @param defaultPriority  預設優先級
+     * @param defaultChannels  預設渠道
      * @return NotificationTemplate 實例
      */
     public static NotificationTemplate create(
@@ -78,6 +122,8 @@ public class NotificationTemplate extends AggregateRoot<TemplateId> {
             String templateName,
             String subject,
             String body,
+            NotificationType notificationType,
+            NotificationPriority defaultPriority,
             List<NotificationChannel> defaultChannels) {
 
         // 驗證必填欄位
@@ -101,10 +147,13 @@ public class NotificationTemplate extends AggregateRoot<TemplateId> {
         template.templateName = templateName;
         template.subject = subject;
         template.body = body;
+        template.notificationType = notificationType;
+        template.defaultPriority = defaultPriority != null ? defaultPriority : NotificationPriority.NORMAL;
         template.defaultChannels = (defaultChannels != null && !defaultChannels.isEmpty())
                 ? List.copyOf(defaultChannels)
                 : List.of(NotificationChannel.IN_APP);
         template.isActive = true;
+        template.isDeleted = false;
 
         return template;
     }
@@ -216,8 +265,24 @@ public class NotificationTemplate extends AggregateRoot<TemplateId> {
         return templateCode;
     }
 
+    public String getName() {
+        return templateName;
+    }
+
     public String getTemplateName() {
         return templateName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public NotificationType getNotificationType() {
+        return notificationType;
+    }
+
+    public NotificationPriority getDefaultPriority() {
+        return defaultPriority;
     }
 
     public String getSubject() {
@@ -232,7 +297,89 @@ public class NotificationTemplate extends AggregateRoot<TemplateId> {
         return defaultChannels;
     }
 
+    public Map<String, String> getVariables() {
+        return variables;
+    }
+
     public boolean isActive() {
         return isActive;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    // ========== Setters (for Mapper) ==========
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
+    }
+
+    public void setName(String name) {
+        this.templateName = name;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setNotificationType(NotificationType notificationType) {
+        this.notificationType = notificationType;
+    }
+
+    public void setDefaultPriority(NotificationPriority defaultPriority) {
+        this.defaultPriority = defaultPriority;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public void setDefaultChannels(List<NotificationChannel> defaultChannels) {
+        this.defaultChannels = defaultChannels;
+    }
+
+    public void setVariables(Map<String, String> variables) {
+        this.variables = variables;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }

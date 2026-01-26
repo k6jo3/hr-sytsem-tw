@@ -1,9 +1,9 @@
 package com.company.hrms.notification.infrastructure.persistence.repository;
 
-import com.company.hrms.common.querydsl.model.query.Operator;
-import com.company.hrms.common.querydsl.model.query.QueryBuilder;
-import com.company.hrms.common.querydsl.model.query.QueryGroup;
-import com.company.hrms.common.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
 import com.company.hrms.notification.domain.model.aggregate.Announcement;
 import com.company.hrms.notification.domain.model.valueobject.AnnouncementId;
 import com.company.hrms.notification.domain.repository.IAnnouncementRepository;
@@ -37,7 +37,7 @@ public class AnnouncementRepositoryImpl
             EntityManager entityManager,
             JPAQueryFactory queryFactory,
             AnnouncementMapper mapper) {
-        super(AnnouncementPO.class, entityManager, queryFactory);
+        super(queryFactory, AnnouncementPO.class);
         this.mapper = mapper;
     }
 
@@ -60,12 +60,12 @@ public class AnnouncementRepositoryImpl
 
         QueryGroup query = QueryBuilder.where()
                 .and("status", Operator.EQ, "PUBLISHED")
-                .and("effectiveFrom", Operator.LOE, now)
+                .and("effectiveFrom", Operator.LTE, now)
                 .and("isDeleted", Operator.EQ, false)
                 // effectiveTo 可以為 null (永久有效) 或大於現在
                 .orGroup(sub -> sub
                         .and("effectiveTo", Operator.IS_NULL, null)
-                        .and("effectiveTo", Operator.GOE, now)
+                        .and("effectiveTo", Operator.GTE, now)
                 )
                 .build();
 
@@ -97,12 +97,12 @@ public class AnnouncementRepositoryImpl
         // 3. 目標對象包含：ALL, DEPARTMENT (匹配部門), ROLE (匹配角色), SPECIFIC (匹配員工)
         QueryGroup query = QueryBuilder.where()
                 .and("status", Operator.EQ, "PUBLISHED")
-                .and("effectiveFrom", Operator.LOE, now)
+                .and("effectiveFrom", Operator.LTE, now)
                 .and("isDeleted", Operator.EQ, false)
                 // effectiveTo 可以為 null 或大於現在
                 .orGroup(sub -> sub
                         .and("effectiveTo", Operator.IS_NULL, null)
-                        .and("effectiveTo", Operator.GOE, now)
+                        .and("effectiveTo", Operator.GTE, now)
                 )
                 // 目標對象過濾
                 .orGroup(sub -> {

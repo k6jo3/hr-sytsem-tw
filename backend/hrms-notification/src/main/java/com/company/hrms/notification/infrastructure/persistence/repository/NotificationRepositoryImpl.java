@@ -1,7 +1,7 @@
 package com.company.hrms.notification.infrastructure.persistence.repository;
 
-import com.company.hrms.common.querydsl.model.query.QueryGroup;
-import com.company.hrms.common.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
 import com.company.hrms.notification.domain.model.aggregate.Notification;
 import com.company.hrms.notification.domain.model.valueobject.NotificationId;
 import com.company.hrms.notification.domain.repository.INotificationRepository;
@@ -37,7 +37,7 @@ public class NotificationRepositoryImpl
             JPAQueryFactory queryFactory,
             NotificationMapper mapper,
             NotificationQueryAssembler assembler) {
-        super(NotificationPO.class, entityManager, queryFactory);
+        super(queryFactory, NotificationPO.class);
         this.mapper = mapper;
         this.assembler = assembler;
     }
@@ -78,12 +78,5 @@ public class NotificationRepositoryImpl
     @Override
     public void deleteById(NotificationId id) {
         super.deleteById(id.getValue());
-    }
-
-    @Override
-    public List<Notification> saveAll(List<Notification> notifications) {
-        List<NotificationPO> pos = mapper.toPOList(notifications);
-        List<NotificationPO> savedPOs = super.saveAll(pos);
-        return mapper.toDomainList(savedPOs);
     }
 }

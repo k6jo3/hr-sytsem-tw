@@ -99,8 +99,6 @@ public class NotificationMapper {
         notification.setRetryCount(po.getRetryCount());
 
         // 設定審計欄位
-        notification.setCreatedAt(po.getCreatedAt());
-        notification.setUpdatedAt(po.getUpdatedAt());
         notification.setCreatedBy(po.getCreatedBy());
         notification.setUpdatedBy(po.getUpdatedBy());
         notification.setVersion(po.getVersion());

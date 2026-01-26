@@ -6,7 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.company.hrms.common.test.contract.BaseContractTest;
+import com.company.hrms.common.query.QueryBuilder;
 
 /**
  * 組織服務合約測試
@@ -18,7 +18,8 @@ public class OrganizationContractTest extends BaseContractTest {
     @DisplayName("員工查詢合約 (Employee Query Contract)")
     class EmployeeQueryContractTests {
 
-        private final com.company.hrms.organization.application.service.employee.assembler.EmployeeQueryAssembler queryAssembler = new com.company.hrms.organization.application.service.employee.assembler.EmployeeQueryAssembler();
+
+import com.company.hrms.common.test.contract.BaseContractTest;
 
         @Test
         @DisplayName("ORG_E001: 查詢在職員工")
@@ -28,7 +29,7 @@ public class OrganizationContractTest extends BaseContractTest {
                     .status("ACTIVE")
                     .build();
 
-            var query = queryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "ORG_E001");
         }
@@ -41,7 +42,7 @@ public class OrganizationContractTest extends BaseContractTest {
                     .deptId("D001")
                     .build();
 
-            var query = queryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "ORG_E003");
         }
@@ -54,7 +55,7 @@ public class OrganizationContractTest extends BaseContractTest {
                     .name("王")
                     .build();
 
-            var query = queryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "ORG_E004");
         }
@@ -67,7 +68,7 @@ public class OrganizationContractTest extends BaseContractTest {
                     .hireStartDate(LocalDate.parse("2025-01-01"))
                     .build();
 
-            var query = queryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "ORG_E011");
         }

@@ -6,6 +6,7 @@ import com.company.hrms.notification.domain.model.valueobject.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -80,10 +81,53 @@ public class Notification extends AggregateRoot<NotificationId> {
     private String relatedBusinessUrl;
 
     /**
-     * 私有建構子，強制使用 Factory Method
+     * 範本代碼
      */
-    private Notification(NotificationId id) {
+    private String templateCode;
+
+    /**
+     * 範本變數
+     */
+    private Map<String, Object> templateVariables;
+
+    /**
+     * 發送失敗原因
+     */
+    private String failureReason;
+
+    /**
+     * 重試次數
+     */
+    private int retryCount;
+
+    /**
+     * 建立者
+     */
+    private String createdBy;
+
+    /**
+     * 最後更新者
+     */
+    private String updatedBy;
+
+    /**
+     * 版本號 (樂觀鎖)
+     */
+    private Long version;
+
+    /**
+     * 軟刪除標記
+     */
+    private Boolean isDeleted;
+
+    /**
+     * Package-private 建構子，供 Mapper 重建物件使用
+     * 一般使用請使用 Factory Method (create)
+     */
+    public Notification(NotificationId id) {
         super(id);
+        this.retryCount = 0;
+        this.isDeleted = false;
     }
 
     /**
@@ -169,6 +213,8 @@ public class Notification extends AggregateRoot<NotificationId> {
      */
     public void markAsFailed(String errorMessage) {
         this.status = NotificationStatus.FAILED;
+        this.failureReason = errorMessage;
+        this.retryCount++;
         touch();
 
         // 發布通知發送失敗事件
@@ -297,5 +343,119 @@ public class Notification extends AggregateRoot<NotificationId> {
 
     public String getRelatedBusinessUrl() {
         return relatedBusinessUrl;
+    }
+
+    public String getTemplateCode() {
+        return templateCode;
+    }
+
+    public Map<String, Object> getTemplateVariables() {
+        return templateVariables;
+    }
+
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    // ========== Setters (for Mapper) ==========
+
+    public void setRecipientId(String recipientId) {
+        this.recipientId = recipientId;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setNotificationType(NotificationType notificationType) {
+        this.notificationType = notificationType;
+    }
+
+    public void setChannels(List<NotificationChannel> channels) {
+        this.channels = channels;
+    }
+
+    public void setPriority(NotificationPriority priority) {
+        this.priority = priority;
+    }
+
+    public void setStatus(NotificationStatus status) {
+        this.status = status;
+    }
+
+    public void setSentAt(LocalDateTime sentAt) {
+        this.sentAt = sentAt;
+    }
+
+    public void setReadAt(LocalDateTime readAt) {
+        this.readAt = readAt;
+    }
+
+    public void setRelatedBusinessType(String relatedBusinessType) {
+        this.relatedBusinessType = relatedBusinessType;
+    }
+
+    public void setRelatedBusinessId(String relatedBusinessId) {
+        this.relatedBusinessId = relatedBusinessId;
+    }
+
+    public void setRelatedBusinessUrl(String relatedBusinessUrl) {
+        this.relatedBusinessUrl = relatedBusinessUrl;
+    }
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
+    }
+
+    public void setTemplateVariables(Map<String, Object> templateVariables) {
+        this.templateVariables = templateVariables;
+    }
+
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
+    }
+
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }

@@ -11,10 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.company.hrms.common.application.service.AbstractQueryService;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.model.PageResponse;
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.organization.api.request.employee.GetEmployeeListRequest;
 import com.company.hrms.organization.api.response.employee.EmployeeListItemResponse;
-import com.company.hrms.organization.application.service.employee.assembler.EmployeeQueryAssembler;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
 import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 
@@ -32,12 +32,14 @@ public class GetEmployeeListServiceImpl
         extends AbstractQueryService<GetEmployeeListRequest, PageResponse<EmployeeListItemResponse>> {
 
     private final IEmployeeRepository employeeRepository;
-    private final EmployeeQueryAssembler queryAssembler;
 
     @Override
     protected QueryGroup buildQuery(GetEmployeeListRequest request, JWTModel currentUser) {
         log.info("Building query for employee list: {}", request);
-        return queryAssembler.toQueryGroup(request);
+        return QueryBuilder.where()
+                .fromDto(request)
+                // 如有需要可在此加入隱含過濾條件，例如 .eq("tenantId", currentUser.getTenantId())
+                .build();
     }
 
     @Override

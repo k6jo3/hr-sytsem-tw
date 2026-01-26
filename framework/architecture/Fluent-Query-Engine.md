@@ -729,74 +729,61 @@ public abstract class BaseRepository<T, ID> implements
 
 ## 5. 使用範例
 
-### 5.1 註解式查詢條件 (推薦方式)
+### 5.1 標準使用模式 (Standard Usage Pattern)
 
-#### 第一步：定義條件 DTO (使用 QueryCondition 註解)
+這是系統標準的查詢實作方式，所有 `Context` 或 `Service` 必須遵循此模式，嚴禁手動撰寫 `if (req.getField() != null) conditions.add(...)` 這種重複且易錯的程式碼。
+
+#### 1. 定義 Request DTO
+在 Request DTO 使用 `@QueryFilter` 註解來宣告查詢欄位。
 
 ```java
-import com.company.hrms.common.query.QueryCondition.*;
+import com.company.hrms.common.query.QueryFilter;
+import com.company.hrms.common.query.Operator;
 
-/**
- * 員工搜尋條件 DTO
- * 只需宣告欄位並標註運算子，即可自動建構 WHERE 條件
- */
-public class EmployeeSearchCondition {
+@Data
+public class SearchTemplateRequest {
+    // 宣告式查詢：自動對應到 WHERE template_code LIKE %?%
+    @QueryFilter(property = "template_code", operator = Operator.LIKE)
+    private String templateCodeKeyword;
 
-    // === 基本條件 ===
+    // 宣告式查詢：自動對應到 WHERE status = ?
+    @QueryFilter(property = "status", operator = Operator.EQ)
+    private String status;
+    
+    // 一般欄位：不加註解，不會被自動解析
+    private Integer page;
+    private Integer pageSize;
+}
+```
 
-    @EQ                           // 等於：WHERE employee_id = ?
-    private String employeeId;
+#### 2. 在 Service 中使用 QueryBuilder
+使用 `QueryBuilder` 的 `fromDto` 方法自動解析 DTO，並鏈式串接額外的業務邏輯過濾條件（如軟刪除檢查）。
 
-    @LIKE                         // 模糊查詢：WHERE name LIKE '%?%'
-    private String name;
+```java
+@Service
+public class GetTemplateListServiceImpl implements QueryApiService<SearchTemplateRequest, PageResponse<TemplateDto>> {
 
-    @EQ("status")                 // 指定資料庫欄位名稱
-    private String employeeStatus;
+    @Override
+    public PageResponse<TemplateDto> getResponse(SearchTemplateRequest request, JWTModel currentUser) {
+        
+        // 【標準寫法】
+        // 1. QueryBuilder.where() 起始
+        // 2. .fromDto(request) 自動載入 DTO 上的標註條件
+        // 3. .eq(...) 加入如 is_deleted = 0 等隱含條件
+        // 4. .build() 產生 QueryGroup
+        QueryGroup queryGroup = QueryBuilder.where()
+            .fromDto(request)
+            .eq("is_deleted", 0)  // 隱含的業務規則
+            .build();
 
-    // === 比較條件 ===
+        // 5. 傳入 Repository 查詢
+        return repository.findPage(queryGroup, request.getPageable());
+    }
+}
+```
 
-    @GTE("hireDate")              // 大於等於：WHERE hire_date >= ?
-    private LocalDate hireDateFrom;
-
-    @LTE("hireDate")              // 小於等於：WHERE hire_date <= ?
-    private LocalDate hireDateTo;
-
-    @GT("salary")                 // 大於：WHERE salary > ?
-    private BigDecimal minSalary;
-
-    // === 集合條件 ===
-
-    @IN("departmentId")           // IN 查詢：WHERE department_id IN (?, ?, ?)
-    private List<String> departmentIds;
-
-    @NOTIN("status")              // NOT IN：WHERE status NOT IN (?, ?)
-    private List<String> excludeStatuses;
-
-    // === 範圍條件 ===
-
-    @BETWEEN("age")               // 範圍查詢：WHERE age BETWEEN ? AND ?
-    private Integer[] ageRange;   // 必須是長度為 2 的陣列 [min, max]
-
-    // === NULL 條件 ===
-
-    @ISNULL("resignDate")         // IS NULL：WHERE resign_date IS NULL
-    private Boolean isActive;     // 當值為 true 時套用
-
-    @ISNOTNULL("email")           // IS NOT NULL：WHERE email IS NOT NULL
-    private Boolean hasEmail;
-
-    // === 關聯查詢 (自動 JOIN) ===
-
-    @EQ("department.name")        // 自動 LEFT JOIN department
-    private String departmentName;
-
-    @LIKE("department.manager.name")  // 多層關聯也支援
-    private String managerName;
-
-    // === OR 條件 ===
-
-    @OR @EQ("position")           // OR 條件：使用 @OR 標註
-    private String position;      // 與其他 @OR 欄位組成 OR 群組
+> [!IMPORTANT]
+> **嚴禁**在 Service 中額外注入 `Assembler` 來轉寫 `QueryGroup`。DTO 本身就是條件定義，不需要額外的 Assembler 層。
 
     @OR @EQ("title")
     private String title;

@@ -1,14 +1,18 @@
 package com.company.hrms.notification.infrastructure.persistence.assembler;
 
-import com.company.hrms.common.querydsl.model.query.Operator;
-import com.company.hrms.common.querydsl.model.query.QueryBuilder;
-import com.company.hrms.common.querydsl.model.query.QueryGroup;
+import com.company.hrms.common.query.QueryGroup;
 import org.springframework.stereotype.Component;
 
 /**
  * 通知偏好設定查詢條件組裝器
  * <p>
  * 負責將查詢條件轉換為 QueryGroup (Fluent-Query-Engine)
+ * </p>
+ * <p>
+ * 採用宣告式查詢模式（參考 HR03 Attendance）：
+ * - 使用 QueryGroup.and() 作為起點
+ * - 使用流暢方法鏈 (query.eq() 等)
+ * - 條件式添加過濾器
  * </p>
  *
  * @author Claude
@@ -24,10 +28,12 @@ public class PreferenceQueryAssembler {
      * @return QueryGroup
      */
     public QueryGroup queryByEmployeeId(String employeeId) {
-        return QueryBuilder.where()
-                .and("employeeId", Operator.EQ, employeeId)
-                .and("isDeleted", Operator.EQ, false)
-                .build();
+        QueryGroup query = QueryGroup.and();
+
+        query.eq("employee_id", employeeId);
+        query.eq("is_deleted", 0);
+
+        return query;
     }
 
     /**
@@ -37,10 +43,12 @@ public class PreferenceQueryAssembler {
      * @return QueryGroup
      */
     public QueryGroup existsByEmployeeId(String employeeId) {
-        return QueryBuilder.where()
-                .and("employeeId", Operator.EQ, employeeId)
-                .and("isDeleted", Operator.EQ, false)
-                .build();
+        QueryGroup query = QueryGroup.and();
+
+        query.eq("employee_id", employeeId);
+        query.eq("is_deleted", 0);
+
+        return query;
     }
 
     /**
@@ -49,10 +57,12 @@ public class PreferenceQueryAssembler {
      * @return QueryGroup
      */
     public QueryGroup queryEmailEnabledPreferences() {
-        return QueryBuilder.where()
-                .and("emailEnabled", Operator.EQ, true)
-                .and("isDeleted", Operator.EQ, false)
-                .build();
+        QueryGroup query = QueryGroup.and();
+
+        query.eq("email_enabled", 1);
+        query.eq("is_deleted", 0);
+
+        return query;
     }
 
     /**
@@ -61,9 +71,11 @@ public class PreferenceQueryAssembler {
      * @return QueryGroup
      */
     public QueryGroup queryPushEnabledPreferences() {
-        return QueryBuilder.where()
-                .and("pushEnabled", Operator.EQ, true)
-                .and("isDeleted", Operator.EQ, false)
-                .build();
+        QueryGroup query = QueryGroup.and();
+
+        query.eq("push_enabled", 1);
+        query.eq("is_deleted", 0);
+
+        return query;
     }
 }

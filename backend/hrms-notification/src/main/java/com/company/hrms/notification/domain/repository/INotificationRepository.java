@@ -63,12 +63,4 @@ public interface INotificationRepository {
      * @param id 通知 ID
      */
     void deleteById(NotificationId id);
-
-    /**
-     * 批次儲存通知
-     *
-     * @param notifications 通知列表
-     * @return 儲存後的通知列表
-     */
-    List<Notification> saveAll(List<Notification> notifications);
 }

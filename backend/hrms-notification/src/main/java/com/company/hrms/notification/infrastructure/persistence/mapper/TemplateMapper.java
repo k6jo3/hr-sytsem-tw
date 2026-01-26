@@ -89,8 +89,6 @@ public class TemplateMapper {
         template.setActive("ACTIVE".equals(po.getStatus()));
 
         // 設定審計欄位
-        template.setCreatedAt(po.getCreatedAt());
-        template.setUpdatedAt(po.getUpdatedAt());
         template.setCreatedBy(po.getCreatedBy());
         template.setUpdatedBy(po.getUpdatedBy());
         template.setVersion(po.getVersion());

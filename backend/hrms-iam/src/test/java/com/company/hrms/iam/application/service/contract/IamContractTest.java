@@ -4,13 +4,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.test.contract.BaseContractTest;
 import com.company.hrms.iam.api.request.permission.GetPermissionListRequest;
 import com.company.hrms.iam.api.request.role.GetRoleListRequest;
 import com.company.hrms.iam.api.request.user.GetUserListRequest;
-import com.company.hrms.iam.application.service.permission.assembler.PermissionQueryAssembler;
-import com.company.hrms.iam.application.service.role.assembler.RoleQueryAssembler;
-import com.company.hrms.iam.application.service.user.assembler.UserQueryAssembler;
 
 /**
  * IAM 服務合約測試
@@ -42,8 +40,6 @@ public class IamContractTest extends BaseContractTest {
     @DisplayName("使用者查詢合約 (User Query Contract)")
     class UserQueryContractTests {
 
-        private final UserQueryAssembler userQueryAssembler = new UserQueryAssembler();
-
         @Test
         @DisplayName("IAM_U001: 查詢啟用中的使用者應包含正確過濾條件")
         void searchActiveUsers_ShouldIncludeCorrectFilters() throws Exception {
@@ -56,7 +52,7 @@ public class IamContractTest extends BaseContractTest {
                     .build();
 
             // 3. 執行轉換
-            var query = userQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             // 4. 驗證合約
             assertContract(query, contract, "IAM_U001");
@@ -70,7 +66,7 @@ public class IamContractTest extends BaseContractTest {
                     .username("admin")
                     .build();
 
-            var query = userQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_U002");
         }
@@ -83,7 +79,7 @@ public class IamContractTest extends BaseContractTest {
                     .roleId("R001")
                     .build();
 
-            var query = userQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_U003");
         }
@@ -96,7 +92,7 @@ public class IamContractTest extends BaseContractTest {
                     .tenantId("T001")
                     .build();
 
-            var query = userQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_U005");
         }
@@ -108,8 +104,6 @@ public class IamContractTest extends BaseContractTest {
     @Nested
     @DisplayName("角色查詢合約 (Role Query Contract)")
     class RoleQueryContractTests {
-
-        private final RoleQueryAssembler roleQueryAssembler = new RoleQueryAssembler();
 
         @Test
         @DisplayName("IAM_R001: 查詢所有啟用角色應包含正確過濾條件")
@@ -123,7 +117,7 @@ public class IamContractTest extends BaseContractTest {
                     .build();
 
             // 3. 執行轉換
-            var query = roleQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             // 4. 驗證合約
             assertContract(query, contract, "IAM_R001");
@@ -137,7 +131,7 @@ public class IamContractTest extends BaseContractTest {
                     .name("管理")
                     .build();
 
-            var query = roleQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_R002");
         }
@@ -150,7 +144,7 @@ public class IamContractTest extends BaseContractTest {
                     .type("SYSTEM")
                     .build();
 
-            var query = roleQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_R003");
         }
@@ -163,7 +157,7 @@ public class IamContractTest extends BaseContractTest {
                     .tenantId("T001")
                     .build();
 
-            var query = roleQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_R005");
         }
@@ -176,8 +170,6 @@ public class IamContractTest extends BaseContractTest {
     @DisplayName("權限查詢合約 (Permission Query Contract)")
     class PermissionQueryContractTests {
 
-        private final PermissionQueryAssembler permissionQueryAssembler = new PermissionQueryAssembler();
-
         @Test
         @DisplayName("IAM_P001: 查詢所有權限應包含刪除標記過濾")
         void searchAllPermissions_ShouldIncludeDeleteFilter() throws Exception {
@@ -189,7 +181,7 @@ public class IamContractTest extends BaseContractTest {
                     .build();
 
             // 3. 執行轉換
-            var query = permissionQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             // 4. 驗證合約
             assertContract(query, contract, "IAM_P001");
@@ -203,7 +195,7 @@ public class IamContractTest extends BaseContractTest {
                     .module("EMPLOYEE")
                     .build();
 
-            var query = permissionQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_P002");
         }
@@ -216,7 +208,7 @@ public class IamContractTest extends BaseContractTest {
                     .type("MENU")
                     .build();
 
-            var query = permissionQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_P003");
         }
@@ -229,7 +221,7 @@ public class IamContractTest extends BaseContractTest {
                     .roleId("R001")
                     .build();
 
-            var query = permissionQueryAssembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_P004");
         }

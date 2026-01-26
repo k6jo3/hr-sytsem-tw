@@ -56,10 +56,52 @@ public class NotificationPreference extends AggregateRoot<PreferenceId> {
     private QuietHours quietHours;
 
     /**
+     * Email 地址
+     */
+    private String emailAddress;
+
+    /**
+     * 推播裝置 Token 列表
+     */
+    private List<String> pushTokens;
+
+    /**
+     * LINE User ID
+     */
+    private String lineUserId;
+
+    /**
+     * Teams Webhook URL
+     */
+    private String teamsWebhookUrl;
+
+    /**
+     * 建立者
+     */
+    private String createdBy;
+
+    /**
+     * 最後更新者
+     */
+    private String updatedBy;
+
+    /**
+     * 版本號 (樂觀鎖)
+     */
+    private Long version;
+
+    /**
+     * 軟刪除標記
+     */
+    private Boolean isDeleted;
+
+    /**
      * 私有建構子，強制使用 Factory Method
      */
-    private NotificationPreference(PreferenceId id) {
+    public NotificationPreference(PreferenceId id) {
         super(id);
+        this.pushTokens = new ArrayList<>();
+        this.isDeleted = false;
     }
 
     /**
@@ -234,5 +276,105 @@ public class NotificationPreference extends AggregateRoot<PreferenceId> {
 
     public QuietHours getQuietHours() {
         return quietHours;
+    }
+
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
+    public List<String> getPushTokens() {
+        return pushTokens;
+    }
+
+    public void setPushTokens(List<String> pushTokens) {
+        this.pushTokens = pushTokens;
+    }
+
+    public String getLineUserId() {
+        return lineUserId;
+    }
+
+    public void setLineUserId(String lineUserId) {
+        this.lineUserId = lineUserId;
+    }
+
+    public String getTeamsWebhookUrl() {
+        return teamsWebhookUrl;
+    }
+
+    public void setTeamsWebhookUrl(String teamsWebhookUrl) {
+        this.teamsWebhookUrl = teamsWebhookUrl;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public void setInAppEnabled(boolean inAppEnabled) {
+        this.inAppEnabled = inAppEnabled;
+    }
+
+    public void setEmailEnabled(boolean emailEnabled) {
+        this.emailEnabled = emailEnabled;
+    }
+
+    public void setPushEnabled(boolean pushEnabled) {
+        this.pushEnabled = pushEnabled;
+    }
+
+    public void setTeamsEnabled(boolean teamsEnabled) {
+        this.teamsEnabled = teamsEnabled;
+    }
+
+    public void setLineEnabled(boolean lineEnabled) {
+        this.lineEnabled = lineEnabled;
+    }
+
+    public void setQuietHours(QuietHours quietHours) {
+        this.quietHours = quietHours;
+    }
+
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(java.time.LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
