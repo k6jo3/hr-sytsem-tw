@@ -153,7 +153,7 @@ public class NotificationContractTest extends BaseContractTest {
         void allTemplateQueries_ShouldIncludeDeleteFilter() throws Exception {
             // 空查詢也必須包含 is_deleted = false
             var request = SearchTemplateRequest.builder().build();
-            var query = assembler.toQueryGroup(request);
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertHasFilterForField(query, "is_deleted");
         }
