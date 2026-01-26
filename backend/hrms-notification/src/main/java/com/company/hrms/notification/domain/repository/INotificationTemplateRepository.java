@@ -1,21 +1,13 @@
 package com.company.hrms.notification.domain.repository;
 
-import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate;
-import com.company.hrms.notification.domain.model.valueobject.TemplateId;
-
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 通知範本 Repository 介面
- * <p>
- * 定義通知範本聚合根的持久化操作
- * </p>
- *
- * @author Claude
- * @since 2025-01-23
- */
-public interface INotificationTemplateRepository {
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.IQueryRepository;
+import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate;
+import com.company.hrms.notification.domain.model.valueobject.TemplateId;
+
+public interface INotificationTemplateRepository extends IQueryRepository<NotificationTemplate, TemplateId> {
 
     /**
      * 儲存範本

@@ -55,8 +55,10 @@ public class GetNotificationTemplateListServiceImpl
                                 Sort.by(Sort.Direction.DESC, "createdAt"));
 
                 // 3. 執行查詢
-                // TODO: 需要在 Repository 增加分頁查詢方法
-                List<NotificationTemplate> templates = templateRepository.findAllActive();
+                // 3. 執行查詢
+                org.springframework.data.domain.Page<NotificationTemplate> pageResult = templateRepository
+                                .findPage(queryGroup, pageable);
+                List<NotificationTemplate> templates = pageResult.getContent();
 
                 // 4. 組裝回應
                 List<TemplateListResponse.TemplateItem> items = templates.stream()
