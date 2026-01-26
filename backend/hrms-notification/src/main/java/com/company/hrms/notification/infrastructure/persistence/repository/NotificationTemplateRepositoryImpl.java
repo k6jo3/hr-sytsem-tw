@@ -3,9 +3,12 @@ package com.company.hrms.notification.infrastructure.persistence.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.GroupByClause;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate;
@@ -13,6 +16,7 @@ import com.company.hrms.notification.domain.model.valueobject.TemplateId;
 import com.company.hrms.notification.domain.repository.INotificationTemplateRepository;
 import com.company.hrms.notification.infrastructure.persistence.entity.NotificationTemplatePO;
 import com.company.hrms.notification.infrastructure.persistence.mapper.TemplateMapper;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import jakarta.persistence.EntityManager;
@@ -110,10 +114,8 @@ public class NotificationTemplateRepositoryImpl implements INotificationTemplate
     // === IQueryRepository 介面實作 ===
 
     @Override
-    public org.springframework.data.domain.Page<NotificationTemplate> findPage(QueryGroup queryGroup,
-            org.springframework.data.domain.Pageable pageable) {
-        org.springframework.data.domain.Page<NotificationTemplatePO> poPage = baseRepository.findPage(queryGroup,
-                pageable);
+    public Page<NotificationTemplate> findPage(QueryGroup queryGroup, Pageable pageable) {
+        Page<NotificationTemplatePO> poPage = baseRepository.findPage(queryGroup, pageable);
         return poPage.map(mapper::toDomain);
     }
 
@@ -124,21 +126,18 @@ public class NotificationTemplateRepositoryImpl implements INotificationTemplate
 
     @Override
     public long count(QueryGroup queryGroup) {
-        // BaseRepository 原本方法可能是 countByQuery 或 count
         return baseRepository.countByQuery(queryGroup);
     }
 
     // === IAggregateRepository 介面實作 ===
 
     @Override
-    public java.util.List<com.querydsl.core.Tuple> aggregate(QueryGroup where,
-            com.company.hrms.common.query.GroupByClause groupBy) {
+    public List<Tuple> aggregate(QueryGroup where, GroupByClause groupBy) {
         return baseRepository.aggregate(where, groupBy);
     }
 
     @Override
-    public <R> java.util.List<R> aggregateToDto(QueryGroup where, com.company.hrms.common.query.GroupByClause groupBy,
-            Class<R> dtoClass) {
+    public <R> List<R> aggregateToDto(QueryGroup where, GroupByClause groupBy, Class<R> dtoClass) {
         return baseRepository.aggregateToDto(where, groupBy, dtoClass);
     }
 }
