@@ -33,17 +33,6 @@ import jakarta.persistence.EntityManager;
 @Repository
 public class NotificationTemplateRepositoryImpl implements INotificationTemplateRepository {
 
-    private final InternalRepository baseRepository;
-    private final TemplateMapper mapper;
-
-    public NotificationTemplateRepositoryImpl(
-            EntityManager entityManager,
-            JPAQueryFactory queryFactory,
-            TemplateMapper mapper) {
-        this.baseRepository = new InternalRepository(entityManager, queryFactory);
-        this.mapper = mapper;
-    }
-
     /**
      * 內部類別：繼承 BaseRepository 以複用基礎查詢邏輯
      * 解決介面衝突並手動注入 EntityManager
@@ -126,18 +115,6 @@ public class NotificationTemplateRepositoryImpl implements INotificationTemplate
 
     @Override
     public long count(QueryGroup queryGroup) {
-        return baseRepository.countByQuery(queryGroup);
-    }
-
-    // === IAggregateRepository 介面實作 ===
-
-    @Override
-    public List<Tuple> aggregate(QueryGroup where, GroupByClause groupBy) {
-        return baseRepository.aggregate(where, groupBy);
-    }
-
-    @Override
-    public <R> List<R> aggregateToDto(QueryGroup where, GroupByClause groupBy, Class<R> dtoClass) {
-        return baseRepository.aggregateToDto(where, groupBy, dtoClass);
+        return baseRepository
     }
 }
