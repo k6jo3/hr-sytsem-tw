@@ -127,4 +127,18 @@ public class NotificationTemplateRepositoryImpl implements INotificationTemplate
         // BaseRepository 原本方法可能是 countByQuery 或 count
         return baseRepository.countByQuery(queryGroup);
     }
+
+    // === IAggregateRepository 介面實作 ===
+
+    @Override
+    public java.util.List<com.querydsl.core.Tuple> aggregate(QueryGroup where,
+            com.company.hrms.common.query.GroupByClause groupBy) {
+        return baseRepository.aggregate(where, groupBy);
+    }
+
+    @Override
+    public <R> java.util.List<R> aggregateToDto(QueryGroup where, com.company.hrms.common.query.GroupByClause groupBy,
+            Class<R> dtoClass) {
+        return baseRepository.aggregateToDto(where, groupBy, dtoClass);
+    }
 }
