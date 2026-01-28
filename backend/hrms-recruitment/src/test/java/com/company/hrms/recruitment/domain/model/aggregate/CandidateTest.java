@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.company.hrms.recruitment.domain.model.valueobject.CandidateStatus;
 import com.company.hrms.recruitment.domain.model.valueobject.OpeningId;
 import com.company.hrms.recruitment.domain.model.valueobject.RecruitmentSource;
+import com.company.hrms.recruitment.domain.event.CandidateHiredEvent;
 
 /**
  * 應徵者聚合根測試
@@ -177,7 +178,7 @@ class CandidateTest {
             // Then
             assertEquals(1, candidate.getDomainEvents().size());
             assertTrue(candidate.getDomainEvents()
-                    .get(0) instanceof com.company.hrms.recruitment.domain.event.CandidateHiredEvent);
+                    .get(0) instanceof CandidateHiredEvent);
         }
 
         @Test

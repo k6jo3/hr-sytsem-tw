@@ -16,6 +16,7 @@ import com.company.hrms.iam.domain.model.valueobject.UserStatus;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 import com.company.hrms.iam.infrastructure.dao.UserDAO;
 import com.company.hrms.iam.infrastructure.po.UserPO;
+import com.company.hrms.common.query.QueryGroup;
 
 /**
  * User Repository 實作
@@ -61,14 +62,14 @@ public class UserRepositoryImpl implements IUserRepository {
     }
 
     @Override
-    public java.util.List<User> findByQuery(com.company.hrms.common.query.QueryGroup query,
+    public java.util.List<User> findByQuery(QueryGroup query,
             org.springframework.data.domain.Pageable pageable) {
         // TODO: 實作動態查詢 (目前返回空列表)
         return new ArrayList<>();
     }
 
     @Override
-    public long countByQuery(com.company.hrms.common.query.QueryGroup query) {
+    public long countByQuery(QueryGroup query) {
         // TODO: 實作動態查詢計數
         return 0;
     }

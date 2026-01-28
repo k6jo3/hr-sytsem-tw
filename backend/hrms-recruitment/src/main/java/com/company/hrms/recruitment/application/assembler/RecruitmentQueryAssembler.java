@@ -3,6 +3,7 @@ package com.company.hrms.recruitment.application.assembler;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.recruitment.domain.model.valueobject.CandidateStatus;
+import com.company.hrms.recruitment.domain.model.valueobject.InterviewStatus;
 import com.company.hrms.recruitment.domain.model.valueobject.JobStatus;
 
 /**
@@ -83,7 +84,7 @@ public class RecruitmentQueryAssembler {
 
         if (interviewStatus != null && !interviewStatus.isBlank()) {
             builder.eq("status",
-                    com.company.hrms.recruitment.domain.model.valueobject.InterviewStatus.valueOf(interviewStatus));
+                    InterviewStatus.valueOf(interviewStatus));
         }
 
         if (startDate != null) {

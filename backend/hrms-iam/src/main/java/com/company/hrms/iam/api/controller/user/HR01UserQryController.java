@@ -20,6 +20,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.company.hrms.common.model.PageResponse;
+import com.company.hrms.iam.api.request.user.GetUserListRequest;
 
 /**
  * IAM - 使用者管理 Query Controller
@@ -53,7 +55,7 @@ public class HR01UserQryController extends QueryBaseController {
         // 建立查詢請求物件
         // UserQueryRequest request = new UserQueryRequest(status, keyword);
         // 改用 GetUserListRequest 以支援進階查詢與統一 Service 介面
-        com.company.hrms.iam.api.request.user.GetUserListRequest request = com.company.hrms.iam.api.request.user.GetUserListRequest
+        GetUserListRequest request = GetUserListRequest
                 .builder()
                 .status(status)
                 .keyword(keyword)
@@ -61,7 +63,7 @@ public class HR01UserQryController extends QueryBaseController {
                 .size(100) // 預設查詢 100 筆 (相容舊 API 行為)
                 .build();
 
-        com.company.hrms.common.model.PageResponse<UserListResponse> response = getResponse(request, currentUser);
+        PageResponse<UserListResponse> response = getResponse(request, currentUser);
         return ResponseEntity.ok(response.getItems());
     }
 

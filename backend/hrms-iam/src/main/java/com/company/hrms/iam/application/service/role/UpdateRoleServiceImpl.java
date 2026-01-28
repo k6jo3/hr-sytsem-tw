@@ -20,6 +20,7 @@ import com.company.hrms.iam.domain.repository.IPermissionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.company.hrms.iam.domain.model.aggregate.Role;
 
 /**
  * 更新角色 Application Service (Pipeline 模式)
@@ -59,7 +60,7 @@ public class UpdateRoleServiceImpl
     }
 
     private RoleDetailResponse toDetailResponse(
-            com.company.hrms.iam.domain.model.aggregate.Role role,
+            Role role,
             List<Permission> permissions) {
 
         List<RoleDetailResponse.PermissionItem> permissionItems = permissions.stream()

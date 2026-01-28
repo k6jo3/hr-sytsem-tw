@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * <p>
  * 此流程單純、無副作用、無跨服務協調需求，因此<b>不需使用 Business Pipeline 模式</b>，
- * 直接使用 {@link com.company.hrms.common.application.service.AbstractQueryService}
+ * 直接使用 {@link AbstractQueryService}
  * 提供的 {@code buildQuery/executeQuery} 樣板方法即可。
  * </p>
  * 

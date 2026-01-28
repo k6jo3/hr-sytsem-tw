@@ -17,6 +17,7 @@ import com.company.hrms.iam.domain.model.entity.Permission;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.company.hrms.iam.domain.model.aggregate.Role;
 
 /**
  * 查詢單一角色 Application Service (Pipeline 模式)
@@ -53,7 +54,7 @@ public class GetRoleServiceImpl
         }
 
         private RoleDetailResponse buildDetailResponse(
-                        com.company.hrms.iam.domain.model.aggregate.Role role,
+                        Role role,
                         List<Permission> permissions) {
 
                 List<RoleDetailResponse.PermissionItem> permissionItems = permissions.stream()

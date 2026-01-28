@@ -14,7 +14,7 @@ import com.company.hrms.project.application.service.assembler.ProjectQueryAssemb
  * HR06 專案管理服務合約測試
  * 
  * <p>
- * 依據 knowledge/05_Testing_Standards/Contracts/project_contracts.md 定義的合約規格進行驗證
+ * 依據 contracts/project_contracts.md 定義的合約規格進行驗證
  * </p>
  * 
  * <p>

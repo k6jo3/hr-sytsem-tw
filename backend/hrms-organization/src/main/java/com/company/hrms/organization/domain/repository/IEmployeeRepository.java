@@ -10,6 +10,8 @@ import com.company.hrms.organization.domain.model.valueobject.Email;
 import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
 import com.company.hrms.organization.domain.model.valueobject.EmploymentStatus;
 import com.company.hrms.organization.domain.model.valueobject.NationalId;
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
 
 /**
  * 員工 Repository 介面
@@ -71,13 +73,13 @@ public interface IEmployeeRepository {
      * @param pageable 分頁資訊
      * @return 員工列表
      */
-    List<Employee> findByQuery(com.company.hrms.common.query.QueryGroup query,
+    List<Employee> findByQuery(QueryGroup query,
             org.springframework.data.domain.Pageable pageable);
 
     /**
      * 動態查詢筆數
      */
-    long countByQuery(com.company.hrms.common.query.QueryGroup query);
+    long countByQuery(QueryGroup query);
 
     /**
      * 儲存員工
@@ -156,7 +158,7 @@ public interface IEmployeeRepository {
      * @param organizationId 組織 ID
      * @return 員工數
      */
-    int countByOrganizationId(com.company.hrms.organization.domain.model.valueobject.OrganizationId organizationId);
+    int countByOrganizationId(OrganizationId organizationId);
 
     /**
      * 查詢條件類別

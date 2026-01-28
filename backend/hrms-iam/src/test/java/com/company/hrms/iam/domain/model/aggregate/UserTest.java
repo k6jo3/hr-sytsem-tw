@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.iam.domain.model.valueobject.Email;
+import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.model.valueobject.UserStatus;
 
 /**
@@ -100,9 +102,9 @@ class UserTest {
         void shouldNotActivateDeletedUser() {
             // Given
             User user = User.builder()
-                    .id(com.company.hrms.iam.domain.model.valueobject.UserId.generate())
+                    .id(UserId.generate())
                     .username("john.doe")
-                    .email(new com.company.hrms.iam.domain.model.valueobject.Email("john@example.com"))
+                    .email(new Email("john@example.com"))
                     .passwordHash("hashedPassword123")
                     .displayName("John Doe")
                     .status(UserStatus.DELETED)

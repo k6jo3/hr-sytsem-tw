@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.company.hrms.payroll.domain.model.aggregate.PayrollRun;
 import com.company.hrms.payroll.domain.model.valueobject.PayPeriod;
 import com.company.hrms.payroll.domain.model.valueobject.RunId;
+import com.company.hrms.common.query.QueryGroup;
 
 /**
  * 薪資批次 Repository 介面
@@ -52,6 +53,6 @@ public interface IPayrollRunRepository {
      * @param pageable 分頁資訊
      * @return 分頁結果
      */
-    org.springframework.data.domain.Page<PayrollRun> findAll(com.company.hrms.common.query.QueryGroup group,
+    org.springframework.data.domain.Page<PayrollRun> findAll(QueryGroup group,
             org.springframework.data.domain.Pageable pageable);
 }

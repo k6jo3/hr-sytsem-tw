@@ -25,6 +25,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import com.company.hrms.iam.api.request.auth.ForgotPasswordRequest;
+import com.company.hrms.iam.api.response.auth.ForgotPasswordResponse;
 
 /**
  * IAM - 認證管理 Command Controller
@@ -97,8 +99,8 @@ public class HR01AuthCmdController extends CommandBaseController {
                         @ApiResponse(responseCode = "400", description = "請求格式錯誤")
         })
         @PostMapping("/forgot-password")
-        public ResponseEntity<com.company.hrms.iam.api.response.auth.ForgotPasswordResponse> forgotPassword(
-                        @RequestBody @Valid com.company.hrms.iam.api.request.auth.ForgotPasswordRequest request)
+        public ResponseEntity<ForgotPasswordResponse> forgotPassword(
+                        @RequestBody @Valid ForgotPasswordRequest request)
                         throws Exception {
                 return ResponseEntity.ok(execCommand(request, null));
         }

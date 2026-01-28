@@ -14,7 +14,7 @@ import com.company.hrms.notification.infrastructure.persistence.assembler.Prefer
  * HR12 通知服務合約測試
  *
  * <p>
- * 依據 knowledge/05_Testing_Standards/Contracts/notification_contracts.md
+ * 依據 contracts/notification_contracts.md
  * 定義的合約規格進行驗證
  * </p>
  *

@@ -12,7 +12,7 @@ import com.company.hrms.insurance.application.service.query.assembler.Enrollment
  * HR05 保險管理服務合約測試
  *
  * <p>
- * 依據 knowledge/05_Testing_Standards/Contracts/insurance_contracts.md 定義的合約規格進行驗證
+ * 依據 contracts/insurance_contracts.md 定義的合約規格進行驗證
  * </p>
  *
  * <p>

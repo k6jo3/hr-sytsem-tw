@@ -30,6 +30,7 @@ import com.company.hrms.performance.application.service.task.SaveReviewForFinali
 import com.company.hrms.performance.domain.event.PerformanceReviewCompletedEvent;
 import com.company.hrms.performance.domain.model.aggregate.PerformanceReview;
 import com.company.hrms.performance.domain.model.valueobject.CycleId;
+import com.company.hrms.performance.domain.model.valueobject.ReviewId;
 import com.company.hrms.performance.domain.model.valueobject.ReviewStatus;
 import com.company.hrms.performance.domain.model.valueobject.ReviewType;
 
@@ -86,7 +87,7 @@ class FinalizeReviewServiceEventTest {
 
         // Create a Review aggregate in simulated PENDING_FINALIZE state
         PerformanceReview review = PerformanceReview.reconstitute(
-                com.company.hrms.performance.domain.model.valueobject.ReviewId.create(),
+                ReviewId.create(),
                 CycleId.create(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),

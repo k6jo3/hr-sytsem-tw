@@ -14,7 +14,7 @@ import com.company.hrms.iam.api.request.user.GetUserListRequest;
  * IAM 服務合約測試
  * 
  * <p>
- * 依據 knowledge/05_Testing_Standards/Contracts/iam_contracts.md 定義的合約規格進行驗證
+ * 依據 contracts/iam_contracts.md 定義的合約規格進行驗證
  * </p>
  * 
  * <p>

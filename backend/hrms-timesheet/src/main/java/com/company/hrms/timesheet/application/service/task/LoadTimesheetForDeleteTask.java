@@ -12,6 +12,7 @@ import com.company.hrms.timesheet.domain.model.valueobject.TimesheetId;
 import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.company.hrms.common.exception.DomainException;
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class LoadTimesheetForDeleteTask implements PipelineTask<DeleteTimesheetE
                 .orElseThrow(() -> new EntityNotFoundException("Timesheet", timesheetId.toString()));
 
         if (!timesheet.getEmployeeId().equals(context.getUserId())) {
-            throw new com.company.hrms.common.exception.DomainException("無權限修改此工時表");
+            throw new DomainException("無權限修改此工時表");
         }
 
         context.setTimesheet(timesheet);

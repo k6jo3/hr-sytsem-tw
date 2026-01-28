@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.company.hrms.payroll.domain.model.aggregate.Payslip;
 import com.company.hrms.payroll.domain.model.valueobject.PayslipId;
 import com.company.hrms.payroll.domain.model.valueobject.RunId;
+import com.company.hrms.common.query.QueryGroup;
 
 /**
  * 薪資單 Repository 介面
@@ -67,6 +68,6 @@ public interface IPayslipRepository {
      * @param pageable 分頁資訊
      * @return 分頁結果
      */
-    org.springframework.data.domain.Page<Payslip> findAll(com.company.hrms.common.query.QueryGroup group,
+    org.springframework.data.domain.Page<Payslip> findAll(QueryGroup group,
             org.springframework.data.domain.Pageable pageable);
 }

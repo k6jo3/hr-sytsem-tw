@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.company.hrms.performance.domain.model.valueobject.ReviewStatus;
 
 /**
  * 查詢我的考核列表請求
@@ -29,7 +30,7 @@ public class GetMyReviewsRequest {
 
     @QueryFilter(property = "status", operator = Operator.EQ)
     @Schema(description = "考核狀態")
-    private com.company.hrms.performance.domain.model.valueobject.ReviewStatus status;
+    private ReviewStatus status;
 
     @Schema(description = "頁碼", example = "1")
     private int page = 1;

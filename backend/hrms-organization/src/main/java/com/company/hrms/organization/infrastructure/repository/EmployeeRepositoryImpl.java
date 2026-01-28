@@ -25,6 +25,7 @@ import com.company.hrms.organization.infrastructure.dao.EmployeeDAO;
 import com.company.hrms.organization.infrastructure.po.EmployeePO;
 
 import lombok.RequiredArgsConstructor;
+import com.company.hrms.common.query.QueryGroup;
 
 /**
  * 員工倉儲實作
@@ -146,7 +147,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     }
 
     @Override
-    public List<Employee> findByQuery(com.company.hrms.common.query.QueryGroup query,
+    public List<Employee> findByQuery(QueryGroup query,
             org.springframework.data.domain.Pageable pageable) {
         // TODO: 實作動態查詢適配器 (QueryGroup -> Mybatis/JPA Criteria)
         // 目前僅返回空列表以通過編譯
@@ -154,7 +155,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     }
 
     @Override
-    public long countByQuery(com.company.hrms.common.query.QueryGroup query) {
+    public long countByQuery(QueryGroup query) {
         // TODO: 實作動態查詢計數
         return 0;
     }

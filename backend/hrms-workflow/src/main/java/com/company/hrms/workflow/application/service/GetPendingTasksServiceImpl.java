@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.workflow.api.request.GetPendingTasksRequest;
 import com.company.hrms.workflow.api.response.PendingTaskResponse;
@@ -51,7 +53,7 @@ public class GetPendingTasksServiceImpl implements QueryApiService<GetPendingTas
                 getOrDefault(request.getPage(), 0),
                 getOrDefault(request.getSize(), 20));
 
-        com.company.hrms.common.query.QueryGroup queryGroup = com.company.hrms.common.query.QueryBuilder.where()
+        QueryGroup queryGroup = QueryBuilder.where()
                 .fromDto(request)
                 .build();
 
