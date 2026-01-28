@@ -9,11 +9,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 
 import com.company.hrms.common.test.base.BaseServiceTest;
 import com.company.hrms.organization.api.request.employee.GetEmployeeListRequest;
-import com.company.hrms.organization.application.service.employee.assembler.EmployeeQueryAssembler;
 import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 
 @DisplayName("GetEmployeeListService 快照測試")
@@ -21,9 +19,6 @@ class GetEmployeeListServiceImplTest extends BaseServiceTest<GetEmployeeListServ
 
     @Mock
     private IEmployeeRepository repository;
-
-    @Spy
-    private EmployeeQueryAssembler assembler = new EmployeeQueryAssembler();
 
     @InjectMocks
     private GetEmployeeListServiceImpl service;

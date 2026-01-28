@@ -20,7 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.company.hrms.attendance.api.request.attendance.CheckOutRequest;
 import com.company.hrms.attendance.application.service.checkout.context.CheckOutContext;
 import com.company.hrms.attendance.domain.model.aggregate.AttendanceRecord;
+import com.company.hrms.attendance.domain.model.aggregate.Shift;
 import com.company.hrms.attendance.domain.model.valueobject.RecordId;
+import com.company.hrms.attendance.domain.model.valueobject.ShiftId;
+import com.company.hrms.attendance.domain.model.valueobject.ShiftType;
 import com.company.hrms.attendance.domain.repository.IAttendanceRecordRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -107,17 +110,17 @@ class ValidateCheckOutTaskTest {
 
             // Allow checkOut to set time
             record.checkIn(LocalDateTime.now().minusHours(9),
-                    new com.company.hrms.attendance.domain.model.aggregate.Shift(
-                            new com.company.hrms.attendance.domain.model.valueobject.ShiftId("S1"),
+                    new Shift(
+                            new ShiftId("S1"),
                             "Regular",
-                            com.company.hrms.attendance.domain.model.valueobject.ShiftType.REGULAR,
+                            ShiftType.REGULAR,
                             java.time.LocalTime.of(9, 0), java.time.LocalTime.of(18, 0)));
 
             record.checkOut(LocalDateTime.now(),
-                    new com.company.hrms.attendance.domain.model.aggregate.Shift(
-                            new com.company.hrms.attendance.domain.model.valueobject.ShiftId("S1"),
+                    new Shift(
+                            new ShiftId("S1"),
                             "Regular",
-                            com.company.hrms.attendance.domain.model.valueobject.ShiftType.REGULAR,
+                            ShiftType.REGULAR,
                             java.time.LocalTime.of(9, 0), java.time.LocalTime.of(18, 0)));
 
             when(attendanceRecordRepository.findByEmployeeIdAndDate(

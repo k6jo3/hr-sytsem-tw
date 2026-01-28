@@ -7,6 +7,7 @@ import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.model.valueobject.Email;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.model.valueobject.UserStatus;
+import com.company.hrms.common.query.QueryGroup;
 
 /**
  * User Repository 介面
@@ -60,10 +61,10 @@ public interface IUserRepository {
     /**
      * 動態查詢 (支援 QueryGroup)
      */
-    List<User> findByQuery(com.company.hrms.common.query.QueryGroup query,
+    List<User> findByQuery(QueryGroup query,
             org.springframework.data.domain.Pageable pageable);
 
-    long countByQuery(com.company.hrms.common.query.QueryGroup query);
+    long countByQuery(QueryGroup query);
 
     /**
      * 儲存使用者

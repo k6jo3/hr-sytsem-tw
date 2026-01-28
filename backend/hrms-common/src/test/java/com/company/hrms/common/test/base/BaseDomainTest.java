@@ -2,6 +2,8 @@ package com.company.hrms.common.test.base;
 
 import com.company.hrms.common.test.snapshot.FluentAssert;
 import com.company.hrms.common.test.snapshot.SnapshotConfig;
+import com.company.hrms.common.domain.event.DomainEvent;
+import com.company.hrms.common.domain.model.AggregateRoot;
 
 /**
  * Domain Entity 測試基類
@@ -63,8 +65,8 @@ public abstract class BaseDomainTest extends BaseUnitTest {
     /**
      * 驗證領域事件已產生
      */
-    protected void assertEventRegistered(com.company.hrms.common.domain.model.AggregateRoot<?> aggregate,
-                                          Class<? extends com.company.hrms.common.domain.event.DomainEvent> eventClass) {
+    protected void assertEventRegistered(AggregateRoot<?> aggregate,
+                                          Class<? extends DomainEvent> eventClass) {
         boolean found = aggregate.getDomainEvents().stream()
             .anyMatch(e -> eventClass.isInstance(e));
 
@@ -79,7 +81,7 @@ public abstract class BaseDomainTest extends BaseUnitTest {
     /**
      * 驗證沒有產生領域事件
      */
-    protected void assertNoEventsRegistered(com.company.hrms.common.domain.model.AggregateRoot<?> aggregate) {
+    protected void assertNoEventsRegistered(AggregateRoot<?> aggregate) {
         if (!aggregate.getDomainEvents().isEmpty()) {
             throw new AssertionError(String.format(
                 "預期聚合根沒有註冊任何事件，但找到了: %s",

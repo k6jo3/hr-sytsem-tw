@@ -27,6 +27,7 @@ import com.company.hrms.project.domain.model.valueobject.ProjectSchedule;
 import com.company.hrms.project.domain.model.valueobject.ProjectStatus;
 import com.company.hrms.project.domain.model.valueobject.ProjectType;
 import com.company.hrms.project.domain.repository.IProjectRepository;
+import com.company.hrms.project.domain.model.valueobject.CustomerId;
 
 @ExtendWith(MockitoExtension.class)
 public class GetProjectDetailServiceTest {
@@ -66,7 +67,7 @@ public class GetProjectDetailServiceTest {
         when(project.getBudget())
                 .thenReturn(new ProjectBudget(BudgetType.FIXED_PRICE, new BigDecimal("10000"), new BigDecimal("100")));
         when(project.getCustomerId()).thenReturn(
-                new com.company.hrms.project.domain.model.valueobject.CustomerId(UUID.randomUUID().toString()));
+                new CustomerId(UUID.randomUUID().toString()));
         when(project.getMembers()).thenReturn(Collections.emptyList());
 
         when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));

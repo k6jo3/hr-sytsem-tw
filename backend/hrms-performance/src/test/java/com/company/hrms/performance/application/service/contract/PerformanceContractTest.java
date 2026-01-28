@@ -8,6 +8,7 @@ import com.company.hrms.common.test.contract.BaseContractTest;
 import com.company.hrms.performance.api.request.GetCyclesRequest;
 import com.company.hrms.performance.api.request.GetMyReviewsRequest;
 import com.company.hrms.performance.application.service.assembler.PerformanceQueryAssembler;
+import com.company.hrms.performance.domain.model.valueobject.CycleStatus;
 
 /**
  * HR08 績效管理服務合約測試
@@ -29,7 +30,7 @@ public class PerformanceContractTest extends BaseContractTest {
         void searchDraftCycles_ShouldIncludeStatusFilter() throws Exception {
             String contract = loadContractSpec("performance_cycle");
             var request = new GetCyclesRequest();
-            request.setStatus(com.company.hrms.performance.domain.model.valueobject.CycleStatus.DRAFT);
+            request.setStatus(CycleStatus.DRAFT);
 
             var query = assembler.toQueryGroup(request);
 

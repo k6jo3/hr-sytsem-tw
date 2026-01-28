@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.company.hrms.common.infrastructure.persistence.querydsl.config.QuerydslConfig;
 import com.company.hrms.payroll.domain.model.aggregate.Payslip;
 import com.company.hrms.payroll.domain.model.entity.PayslipItem;
 import com.company.hrms.payroll.domain.model.valueobject.BankAccount;
@@ -22,8 +23,7 @@ import com.company.hrms.payroll.domain.model.valueobject.RunId;
 import com.company.hrms.payroll.domain.repository.IPayslipRepository;
 
 @DataJpaTest
-@Import({ PayslipRepositoryImpl.class,
-        com.company.hrms.common.infrastructure.persistence.querydsl.config.QuerydslConfig.class })
+@Import({ PayslipRepositoryImpl.class, QuerydslConfig.class })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @ActiveProfiles("test")
 class PayslipRepositoryTest {

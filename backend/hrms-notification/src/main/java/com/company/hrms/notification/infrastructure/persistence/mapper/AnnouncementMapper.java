@@ -98,8 +98,6 @@ public class AnnouncementMapper {
         announcement.setReadCount(po.getReadCount());
 
         // 設定審計欄位
-        announcement.setCreatedAt(po.getCreatedAt());
-        announcement.setUpdatedAt(po.getUpdatedAt());
         announcement.setCreatedBy(po.getCreatedBy());
         announcement.setUpdatedBy(po.getUpdatedBy());
         announcement.setVersion(po.getVersion());

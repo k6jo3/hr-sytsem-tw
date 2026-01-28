@@ -31,6 +31,7 @@ import com.company.hrms.project.domain.model.valueobject.ProjectSchedule;
 import com.company.hrms.project.domain.model.valueobject.ProjectStatus;
 import com.company.hrms.project.domain.model.valueobject.ProjectType;
 import com.company.hrms.project.domain.repository.IProjectRepository;
+import com.company.hrms.project.domain.model.valueobject.CustomerId;
 
 @ExtendWith(MockitoExtension.class)
 public class GetProjectListServiceTest {
@@ -68,7 +69,7 @@ public class GetProjectListServiceTest {
                 .thenReturn(new ProjectBudget(BudgetType.FIXED_PRICE, new BigDecimal("10000"), new BigDecimal("100")));
         // when(project.getOwnerId()).thenReturn(UUID.randomUUID());
         when(project.getCustomerId()).thenReturn(
-                new com.company.hrms.project.domain.model.valueobject.CustomerId(UUID.randomUUID().toString()));
+                new CustomerId(UUID.randomUUID().toString()));
 
         Page<Project> pageResult = new PageImpl<>(Collections.singletonList(project));
         when(projectRepository.findProjects(any(QueryGroup.class), any(Pageable.class))).thenReturn(pageResult);

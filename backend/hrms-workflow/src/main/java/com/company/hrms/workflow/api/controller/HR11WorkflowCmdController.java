@@ -19,6 +19,12 @@ import com.company.hrms.workflow.api.response.StartWorkflowResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.company.hrms.workflow.api.request.CreateDelegationRequest;
+import com.company.hrms.workflow.api.request.CreateWorkflowDefinitionRequest;
+import com.company.hrms.workflow.api.response.CreateDelegationResponse;
+import com.company.hrms.workflow.api.response.CreateWorkflowDefinitionResponse;
+import com.company.hrms.workflow.application.service.DeleteDelegationRequest;
+import com.company.hrms.workflow.application.service.PublishWorkflowDefinitionRequest;
 
 /**
  * HR11 簽核流程 Command Controller
@@ -54,8 +60,8 @@ public class HR11WorkflowCmdController extends CommandBaseController {
 
     @Operation(summary = "建立代理人", description = "設定特定期間的代理人")
     @PostMapping("/delegations")
-    public ResponseEntity<com.company.hrms.workflow.api.response.CreateDelegationResponse> createDelegation(
-            @RequestBody com.company.hrms.workflow.api.request.CreateDelegationRequest request,
+    public ResponseEntity<CreateDelegationResponse> createDelegation(
+            @RequestBody CreateDelegationRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(execCommand(request, currentUser));
     }
@@ -64,8 +70,8 @@ public class HR11WorkflowCmdController extends CommandBaseController {
 
     @Operation(summary = "建立流程定義", description = "建立新的流程定義草稿")
     @PostMapping("/definitions")
-    public ResponseEntity<com.company.hrms.workflow.api.response.CreateWorkflowDefinitionResponse> createDefinition(
-            @RequestBody com.company.hrms.workflow.api.request.CreateWorkflowDefinitionRequest request,
+    public ResponseEntity<CreateWorkflowDefinitionResponse> createDefinition(
+            @RequestBody CreateWorkflowDefinitionRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(execCommand(request, currentUser));
     }
@@ -76,7 +82,7 @@ public class HR11WorkflowCmdController extends CommandBaseController {
             @org.springframework.web.bind.annotation.PathVariable("definitionId") String definitionId,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity
-                .ok(execCommand(new com.company.hrms.workflow.application.service.PublishWorkflowDefinitionRequest(),
+                .ok(execCommand(new PublishWorkflowDefinitionRequest(),
                         currentUser, definitionId));
     }
 
@@ -90,7 +96,7 @@ public class HR11WorkflowCmdController extends CommandBaseController {
             @org.springframework.web.bind.annotation.PathVariable("delegationId") String delegationId,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity
-                .ok(execCommand(new com.company.hrms.workflow.application.service.DeleteDelegationRequest(),
+                .ok(execCommand(new DeleteDelegationRequest(),
                         currentUser, delegationId));
     }
 }

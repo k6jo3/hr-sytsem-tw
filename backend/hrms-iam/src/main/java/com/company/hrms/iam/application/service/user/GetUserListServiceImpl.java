@@ -9,13 +9,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.company.hrms.common.model.PageResponse;
 import com.company.hrms.common.application.service.AbstractQueryService;
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.model.PageResponse;
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.iam.api.request.user.GetUserListRequest;
 import com.company.hrms.iam.api.response.user.UserListResponse;
-import com.company.hrms.iam.application.service.user.assembler.UserQueryAssembler;
 import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 
@@ -34,12 +34,14 @@ public class GetUserListServiceImpl
         extends AbstractQueryService<GetUserListRequest, PageResponse<UserListResponse>> {
 
     private final IUserRepository userRepository;
-    private final UserQueryAssembler queryAssembler;
 
     @Override
     protected QueryGroup buildQuery(GetUserListRequest request, JWTModel currentUser) {
         log.info("Building query for user list: {}", request);
-        return queryAssembler.toQueryGroup(request);
+        return QueryBuilder.where()
+                .fromDto(request)
+                // 這裡可以加入其他隱含過濾條件，例如 .eq("tenantId", currentUser.getTenantId())
+                .build();
     }
 
     @Override

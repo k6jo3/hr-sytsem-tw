@@ -2,6 +2,10 @@ package com.company.hrms.notification.domain.event;
 
 import com.company.hrms.common.domain.event.DomainEvent;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 /**
  * 通知已讀事件
  * <p>
@@ -11,22 +15,13 @@ import com.company.hrms.common.domain.event.DomainEvent;
  * @author Claude
  * @since 2025-01-23
  */
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotificationReadEvent extends DomainEvent {
 
-    private final String notificationId;
-    private final String recipientId;
-
-    /**
-     * 建構子
-     *
-     * @param notificationId 通知 ID
-     * @param recipientId    收件人 ID
-     */
-    public NotificationReadEvent(String notificationId, String recipientId) {
-        super();
-        this.notificationId = notificationId;
-        this.recipientId = recipientId;
-    }
+    private String notificationId;
+    private String recipientId;
 
     @Override
     public String getAggregateId() {
@@ -36,13 +31,5 @@ public class NotificationReadEvent extends DomainEvent {
     @Override
     public String getAggregateType() {
         return "Notification";
-    }
-
-    public String getNotificationId() {
-        return notificationId;
-    }
-
-    public String getRecipientId() {
-        return recipientId;
     }
 }

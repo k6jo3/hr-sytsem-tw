@@ -12,13 +12,15 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.company.hrms.common.infrastructure.persistence.querydsl.config.QuerydslConfig;
 import com.company.hrms.payroll.domain.model.aggregate.PayrollRun;
 import com.company.hrms.payroll.domain.model.valueobject.PayPeriod;
+import com.company.hrms.payroll.domain.model.valueobject.PayrollSystem;
+import com.company.hrms.payroll.domain.model.valueobject.RunId;
 import com.company.hrms.payroll.domain.repository.IPayrollRunRepository;
 
 @DataJpaTest
-@Import({ PayrollRunRepositoryImpl.class,
-        com.company.hrms.common.infrastructure.persistence.querydsl.config.QuerydslConfig.class })
+@Import({ PayrollRunRepositoryImpl.class, QuerydslConfig.class })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @ActiveProfiles("test")
 class PayrollRunRepositoryTest {
@@ -31,10 +33,10 @@ class PayrollRunRepositoryTest {
         // Arrange
         PayPeriod period = PayPeriod.ofMonth(2025, 12);
         PayrollRun run = PayrollRun.create(
-                new com.company.hrms.payroll.domain.model.valueobject.RunId(java.util.UUID.randomUUID().toString()),
+                new RunId(java.util.UUID.randomUUID().toString()),
                 "Test Run",
                 "ORG001", period,
-                com.company.hrms.payroll.domain.model.valueobject.PayrollSystem.MONTHLY,
+                PayrollSystem.MONTHLY,
                 LocalDate.of(2026, 1, 5), "USER001");
 
         // Act

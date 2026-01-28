@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBaseRepository;
+import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.recruitment.domain.model.aggregate.Interview;
@@ -75,7 +76,7 @@ public class InterviewRepositoryImpl
     @Override
     public List<Interview> findByCandidateId(CandidateId candidateId) {
         QueryGroup query = QueryBuilder.where()
-                .and("candidateId", com.company.hrms.common.query.Operator.EQ, candidateId.getValue())
+                .and("candidateId", Operator.EQ, candidateId.getValue())
                 .build();
         return super.findAll(query).stream()
                 .map(this::toDomain)

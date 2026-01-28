@@ -8,6 +8,7 @@ import com.company.hrms.project.domain.model.valueobject.TaskId;
 import com.company.hrms.project.domain.repository.ITaskRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.company.hrms.project.domain.model.aggregate.Task;
 
 /**
  * 載入工項 Task
@@ -21,7 +22,7 @@ public class LoadTaskTask implements PipelineTask<TaskDetailContext> {
     @Override
     public void execute(TaskDetailContext context) throws Exception {
         TaskId taskId = new TaskId(context.getTaskId());
-        com.company.hrms.project.domain.model.aggregate.Task task = taskRepository.findById(taskId)
+        Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found: " + context.getTaskId()));
 
         context.setTask(task);

@@ -18,6 +18,7 @@ import com.company.hrms.attendance.application.service.correction.assembler.Corr
 import com.company.hrms.attendance.application.service.leave.assembler.LeaveQueryAssembler;
 import com.company.hrms.attendance.application.service.overtime.assembler.OvertimeQueryAssembler;
 import com.company.hrms.common.test.contract.BaseContractTest;
+import com.company.hrms.attendance.application.service.contract.AttendanceContractTest;
 
 /**
  * HR03 考勤服務 API 合約測試
@@ -74,7 +75,7 @@ import com.company.hrms.common.test.contract.BaseContractTest;
  * </tr>
  * </table>
  *
- * @see com.company.hrms.attendance.application.service.contract.AttendanceContractTest
+ * @see AttendanceContractTest
  *      Assembler 層級合約測試
  * @see BaseContractTest 合約測試基類
  */

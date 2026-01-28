@@ -1,7 +1,8 @@
 package com.company.hrms.notification.api.request.template;
 
-import com.company.hrms.common.querydsl.model.query.Operator;
-import com.company.hrms.common.querydsl.model.query.QueryFilter;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryFilter;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,21 +28,21 @@ public class SearchTemplateRequest {
     /**
      * 關鍵字搜尋（範本代碼或名稱）
      */
-    @QueryFilter(property = "templateCode", operator = Operator.LIKE)
+    @QueryFilter(property = "template_code", operator = Operator.LIKE)
     @Schema(description = "範本代碼關鍵字", example = "LEAVE")
     private String templateCodeKeyword;
 
     /**
      * 範本名稱關鍵字
      */
-    @QueryFilter(property = "name", operator = Operator.LIKE)
+    @QueryFilter(property = "template_name", operator = Operator.LIKE)
     @Schema(description = "範本名稱關鍵字", example = "請假")
     private String templateNameKeyword;
 
     /**
      * 通知類型
      */
-    @QueryFilter(property = "notificationType", operator = Operator.EQ)
+    @QueryFilter(property = "notification_type", operator = Operator.EQ)
     @Schema(description = "通知類型", example = "APPROVAL_RESULT")
     private String notificationType;
 

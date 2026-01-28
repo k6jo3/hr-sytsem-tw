@@ -23,6 +23,7 @@ import com.company.hrms.project.api.request.GetCustomerListRequest;
 import com.company.hrms.project.api.response.GetCustomerListResponse;
 import com.company.hrms.project.domain.model.aggregate.Customer;
 import com.company.hrms.project.domain.model.valueobject.CustomerId;
+import com.company.hrms.project.domain.model.valueobject.CustomerStatus;
 import com.company.hrms.project.domain.repository.ICustomerRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +56,7 @@ public class GetCustomerListServiceTest {
         when(customer.getId()).thenReturn(new CustomerId(UUID.randomUUID().toString()));
         when(customer.getCustomerCode()).thenReturn("C001");
         when(customer.getCustomerName()).thenReturn("Tech Corp");
-        when(customer.getStatus()).thenReturn(com.company.hrms.project.domain.model.valueobject.CustomerStatus.ACTIVE);
+        when(customer.getStatus()).thenReturn(CustomerStatus.ACTIVE);
         when(customer.getPhoneNumber()).thenReturn("123");
 
         Page<Customer> pageResult = new PageImpl<>(Collections.singletonList(customer));

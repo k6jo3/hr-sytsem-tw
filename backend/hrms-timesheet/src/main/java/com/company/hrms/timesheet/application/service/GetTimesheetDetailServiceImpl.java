@@ -18,6 +18,7 @@ import com.company.hrms.timesheet.domain.model.valueobject.TimesheetId;
 import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.company.hrms.common.exception.DomainException;
 
 @Service("getTimesheetDetailServiceImpl")
 @RequiredArgsConstructor
@@ -44,7 +45,7 @@ public class GetTimesheetDetailServiceImpl
                 // if (!isOwner && !isApprover) {
                 // 目前假設若持有 ID 即可查看 (或依賴 Gateway/Role)
                 // 或在此實作嚴格檢查
-                // throw new com.company.hrms.common.exception.DomainException("無權限查看此工時表");
+                // throw new DomainException("無權限查看此工時表");
                 // }
 
                 return toResponse(t);

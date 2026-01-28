@@ -8,6 +8,7 @@ import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBaseRepository;
 import com.company.hrms.training.domain.model.aggregate.TrainingEnrollment;
 import com.company.hrms.training.domain.model.valueobject.EnrollmentId;
+import com.company.hrms.training.domain.model.valueobject.EnrollmentStatus;
 import com.company.hrms.training.domain.repository.ITrainingEnrollmentRepository;
 import com.company.hrms.training.infrastructure.entity.QTrainingEnrollmentEntity;
 import com.company.hrms.training.infrastructure.entity.TrainingEnrollmentEntity;
@@ -59,7 +60,7 @@ public class TrainingEnrollmentRepositoryImpl
                 .from(qEnrollment)
                 .where(qEnrollment.employeeId.eq(employeeId)
                         .and(qEnrollment.status
-                                .eq(com.company.hrms.training.domain.model.valueobject.EnrollmentStatus.COMPLETED)))
+                                .eq(EnrollmentStatus.COMPLETED)))
                 .fetchOne();
 
         return sum != null ? sum : java.math.BigDecimal.ZERO;

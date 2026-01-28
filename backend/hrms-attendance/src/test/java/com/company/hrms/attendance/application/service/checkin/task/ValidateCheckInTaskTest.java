@@ -21,7 +21,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.company.hrms.attendance.api.request.attendance.CheckInRequest;
 import com.company.hrms.attendance.application.service.checkin.context.AttendanceContext;
 import com.company.hrms.attendance.domain.model.aggregate.AttendanceRecord;
+import com.company.hrms.attendance.domain.model.aggregate.Shift;
 import com.company.hrms.attendance.domain.model.valueobject.RecordId;
+import com.company.hrms.attendance.domain.model.valueobject.ShiftId;
+import com.company.hrms.attendance.domain.model.valueobject.ShiftType;
 import com.company.hrms.attendance.domain.repository.IAttendanceRecordRepository;
 
 /**
@@ -80,10 +83,10 @@ class ValidateCheckInTaskTest {
             // Need to set checkInTime - use a Shift to call checkIn
             existingRecord.checkIn(
                     java.time.LocalDateTime.now(),
-                    new com.company.hrms.attendance.domain.model.aggregate.Shift(
-                            new com.company.hrms.attendance.domain.model.valueobject.ShiftId("s1"),
+                    new Shift(
+                            new ShiftId("s1"),
                             "Standard",
-                            com.company.hrms.attendance.domain.model.valueobject.ShiftType.REGULAR,
+                            ShiftType.REGULAR,
                             java.time.LocalTime.of(9, 0),
                             java.time.LocalTime.of(18, 0)));
             when(attendanceRecordRepository.findByEmployeeIdAndDate(

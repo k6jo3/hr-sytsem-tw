@@ -20,6 +20,7 @@ import com.company.hrms.timesheet.api.request.LockTimesheetRequest;
 import com.company.hrms.timesheet.api.response.LockTimesheetResponse;
 import com.company.hrms.timesheet.domain.model.aggregate.Timesheet;
 import com.company.hrms.timesheet.domain.model.valueobject.TimesheetId;
+import com.company.hrms.timesheet.domain.model.valueobject.TimesheetStatus;
 import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +50,7 @@ public class LockTimesheetServiceTest {
                 LocalDate.now().plusDays(6),
                 null,
                 java.math.BigDecimal.ZERO,
-                com.company.hrms.timesheet.domain.model.valueobject.TimesheetStatus.APPROVED,
+                TimesheetStatus.APPROVED,
                 null,
                 null,
                 null,

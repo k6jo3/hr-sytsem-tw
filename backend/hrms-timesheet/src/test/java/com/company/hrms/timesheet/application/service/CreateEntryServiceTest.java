@@ -24,6 +24,8 @@ import com.company.hrms.timesheet.application.service.task.ValidateEntryTask;
 import com.company.hrms.timesheet.domain.model.aggregate.Timesheet;
 import com.company.hrms.timesheet.domain.model.valueobject.TimesheetStatus;
 import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
+import com.company.hrms.timesheet.infrastructure.client.ProjectServiceClient;
+import com.company.hrms.timesheet.infrastructure.client.dto.ProjectDto;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateEntryServiceTest {
@@ -32,7 +34,7 @@ public class CreateEntryServiceTest {
     private ITimesheetRepository timesheetRepository;
 
     @Mock
-    private com.company.hrms.timesheet.infrastructure.client.ProjectServiceClient projectServiceClient;
+    private ProjectServiceClient projectServiceClient;
 
     private CreateEntryServiceImpl createEntryService;
     private GetOrCreateTimesheetTask getOrCreateTimesheetTask;
@@ -72,7 +74,7 @@ public class CreateEntryServiceTest {
                 .thenReturn(Optional.empty());
 
         // Mock Project Service - Success
-        com.company.hrms.timesheet.infrastructure.client.dto.ProjectDto pDto = new com.company.hrms.timesheet.infrastructure.client.dto.ProjectDto();
+        ProjectDto pDto = new ProjectDto();
         pDto.setStatus("IN_PROGRESS");
         pDto.setProjectId(projectId);
         when(projectServiceClient.getProjectDetail(any())).thenReturn(org.springframework.http.ResponseEntity.ok(pDto));
@@ -114,7 +116,7 @@ public class CreateEntryServiceTest {
                 .thenReturn(Optional.of(existingTimesheet));
 
         // Mock Project Service - Success
-        com.company.hrms.timesheet.infrastructure.client.dto.ProjectDto pDto = new com.company.hrms.timesheet.infrastructure.client.dto.ProjectDto();
+        ProjectDto pDto = new ProjectDto();
         pDto.setStatus("IN_PROGRESS");
         pDto.setProjectId(projectId);
         when(projectServiceClient.getProjectDetail(any())).thenReturn(org.springframework.http.ResponseEntity.ok(pDto));

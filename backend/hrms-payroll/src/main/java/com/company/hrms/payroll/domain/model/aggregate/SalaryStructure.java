@@ -341,7 +341,7 @@ public class SalaryStructure {
             BigDecimal hourlyRate,
             PayrollSystem payrollSystem,
             PayrollCycle payrollCycle,
-            java.util.List<com.company.hrms.payroll.domain.model.entity.SalaryItem> items,
+            java.util.List<SalaryItem> items,
             java.time.LocalDate effectiveDate,
             java.time.LocalDate endDate,
             boolean active) {

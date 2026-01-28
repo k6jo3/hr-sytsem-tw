@@ -9,11 +9,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 
 import com.company.hrms.common.test.base.BaseServiceTest;
 import com.company.hrms.iam.api.request.user.GetUserListRequest;
-import com.company.hrms.iam.application.service.user.assembler.UserQueryAssembler;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 
 @DisplayName("GetUserListService 快照測試")
@@ -21,9 +19,6 @@ class GetUserListServiceImplTest extends BaseServiceTest<GetUserListServiceImpl>
 
     @Mock
     private IUserRepository repository;
-
-    @Spy
-    private UserQueryAssembler assembler = new UserQueryAssembler();
 
     @InjectMocks
     private GetUserListServiceImpl service;

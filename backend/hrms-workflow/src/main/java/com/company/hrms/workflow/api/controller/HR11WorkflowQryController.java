@@ -20,6 +20,14 @@ import com.company.hrms.workflow.api.response.WorkflowHistoryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.company.hrms.workflow.api.request.GetDelegationsRequest;
+import com.company.hrms.workflow.api.request.GetMyApplicationsRequest;
+import com.company.hrms.workflow.api.request.GetWorkflowDefinitionListRequest;
+import com.company.hrms.workflow.api.request.GetWorkflowInstanceDetailRequest;
+import com.company.hrms.workflow.api.response.GetDelegationsResponse;
+import com.company.hrms.workflow.api.response.MyApplicationsResponse;
+import com.company.hrms.workflow.api.response.WorkflowDefinitionResponse;
+import com.company.hrms.workflow.api.response.WorkflowInstanceDetailResponse;
 
 /**
  * HR11 簽核流程 Query Controller
@@ -51,8 +59,8 @@ public class HR11WorkflowQryController extends QueryBaseController {
 
     @Operation(summary = "查詢代理人", description = "查詢使用者(或自己)的代理人設定")
     @GetMapping("/delegations")
-    public ResponseEntity<com.company.hrms.workflow.api.response.GetDelegationsResponse> getDelegations(
-            @ParameterObject @ModelAttribute com.company.hrms.workflow.api.request.GetDelegationsRequest request,
+    public ResponseEntity<GetDelegationsResponse> getDelegations(
+            @ParameterObject @ModelAttribute GetDelegationsRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(getResponse(request, currentUser));
     }
@@ -61,8 +69,8 @@ public class HR11WorkflowQryController extends QueryBaseController {
 
     @Operation(summary = "查詢流程定義列表", description = "查詢系統中的流程定義")
     @GetMapping("/definitions")
-    public ResponseEntity<Page<com.company.hrms.workflow.api.response.WorkflowDefinitionResponse>> getDefinitions(
-            @ParameterObject @ModelAttribute com.company.hrms.workflow.api.request.GetWorkflowDefinitionListRequest request,
+    public ResponseEntity<Page<WorkflowDefinitionResponse>> getDefinitions(
+            @ParameterObject @ModelAttribute GetWorkflowDefinitionListRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(getResponse(request, currentUser));
     }
@@ -71,8 +79,8 @@ public class HR11WorkflowQryController extends QueryBaseController {
 
     @Operation(summary = "查詢我的申請", description = "查詢使用者提交的申請單")
     @GetMapping("/my/applications")
-    public ResponseEntity<Page<com.company.hrms.workflow.api.response.MyApplicationsResponse>> getMyApplications(
-            @ParameterObject @ModelAttribute com.company.hrms.workflow.api.request.GetMyApplicationsRequest request,
+    public ResponseEntity<Page<MyApplicationsResponse>> getMyApplications(
+            @ParameterObject @ModelAttribute GetMyApplicationsRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(getResponse(request, currentUser));
     }
@@ -81,10 +89,10 @@ public class HR11WorkflowQryController extends QueryBaseController {
 
     @Operation(summary = "查詢流程實例詳情", description = "查詢流程實例的詳細資訊與歷程")
     @GetMapping("/instances/{instanceId}")
-    public ResponseEntity<com.company.hrms.workflow.api.response.WorkflowInstanceDetailResponse> getInstanceDetail(
+    public ResponseEntity<WorkflowInstanceDetailResponse> getInstanceDetail(
             @PathVariable("instanceId") String instanceId,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(getResponse(
-                new com.company.hrms.workflow.api.request.GetWorkflowInstanceDetailRequest(), currentUser, instanceId));
+                new GetWorkflowInstanceDetailRequest(), currentUser, instanceId));
     }
 }

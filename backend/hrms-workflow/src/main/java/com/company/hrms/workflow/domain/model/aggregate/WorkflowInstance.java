@@ -11,6 +11,8 @@ import com.company.hrms.workflow.domain.event.WorkflowStartedEvent;
 import com.company.hrms.workflow.domain.model.entity.ApprovalTask;
 import com.company.hrms.workflow.domain.model.enums.FlowType;
 import com.company.hrms.workflow.domain.model.enums.InstanceStatus;
+import com.company.hrms.workflow.domain.model.enums.TaskStatus;
+import com.company.hrms.workflow.domain.model.valueobject.WorkflowDefinitionId;
 import com.company.hrms.workflow.domain.model.valueobject.WorkflowInstanceId;
 
 import lombok.Data;
@@ -61,7 +63,7 @@ public class WorkflowInstance extends AggregateRoot<WorkflowInstanceId> {
     }
 
     public static WorkflowInstance create(
-            com.company.hrms.workflow.domain.model.valueobject.WorkflowDefinitionId definitionId,
+            WorkflowDefinitionId definitionId,
             FlowType flowType,
             String applicantId,
             String businessId,
@@ -109,8 +111,8 @@ public class WorkflowInstance extends AggregateRoot<WorkflowInstanceId> {
         this.completedAt = LocalDateTime.now();
         // logic to cancel pending tasks
         this.tasks.stream()
-                .filter(t -> t.getStatus() == com.company.hrms.workflow.domain.model.enums.TaskStatus.PENDING)
-                .forEach(t -> t.setStatus(com.company.hrms.workflow.domain.model.enums.TaskStatus.CANCELLED));
+                .filter(t -> t.getStatus() == TaskStatus.PENDING)
+                .forEach(t -> t.setStatus(TaskStatus.CANCELLED));
 
         registerEvent(new WorkflowCompletedEvent(
                 this.getInstanceId(),
@@ -139,11 +141,11 @@ public class WorkflowInstance extends AggregateRoot<WorkflowInstanceId> {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
-        if (task.getStatus() != com.company.hrms.workflow.domain.model.enums.TaskStatus.PENDING) {
+        if (task.getStatus() != TaskStatus.PENDING) {
             throw new IllegalStateException("Task is not in PENDING state");
         }
 
-        task.setStatus(com.company.hrms.workflow.domain.model.enums.TaskStatus.APPROVED);
+        task.setStatus(TaskStatus.APPROVED);
         task.setApproverId(approverId);
         task.setComment(comment);
         task.setApprovedAt(LocalDateTime.now());
@@ -158,9 +160,9 @@ public class WorkflowInstance extends AggregateRoot<WorkflowInstanceId> {
         // Simple flow logic: Check if all tasks are completed
         // In a real engine, we would move the token here.
         boolean allCompleted = this.tasks.stream()
-                .allMatch(t -> t.getStatus() == com.company.hrms.workflow.domain.model.enums.TaskStatus.APPROVED
-                        || t.getStatus() == com.company.hrms.workflow.domain.model.enums.TaskStatus.REJECTED
-                        || t.getStatus() == com.company.hrms.workflow.domain.model.enums.TaskStatus.CANCELLED);
+                .allMatch(t -> t.getStatus() == TaskStatus.APPROVED
+                        || t.getStatus() == TaskStatus.REJECTED
+                        || t.getStatus() == TaskStatus.CANCELLED);
 
         if (allCompleted) {
             // For now, if all tasks are done, we assume the workflow is done.
@@ -175,11 +177,11 @@ public class WorkflowInstance extends AggregateRoot<WorkflowInstanceId> {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
-        if (task.getStatus() != com.company.hrms.workflow.domain.model.enums.TaskStatus.PENDING) {
+        if (task.getStatus() != TaskStatus.PENDING) {
             throw new IllegalStateException("Task is not in PENDING state");
         }
 
-        task.setStatus(com.company.hrms.workflow.domain.model.enums.TaskStatus.REJECTED);
+        task.setStatus(TaskStatus.REJECTED);
         task.setApproverId(approverId);
         task.setComment(reason);
         task.setApprovedAt(LocalDateTime.now()); // Using generic generic 'approvedAt' as completion time, or add
@@ -192,8 +194,8 @@ public class WorkflowInstance extends AggregateRoot<WorkflowInstanceId> {
 
         // Cancel other pending tasks
         this.tasks.stream()
-                .filter(t -> t.getStatus() == com.company.hrms.workflow.domain.model.enums.TaskStatus.PENDING)
-                .forEach(t -> t.setStatus(com.company.hrms.workflow.domain.model.enums.TaskStatus.CANCELLED));
+                .filter(t -> t.getStatus() == TaskStatus.PENDING)
+                .forEach(t -> t.setStatus(TaskStatus.CANCELLED));
 
         // Register Event
         registerEvent(new WorkflowCompletedEvent(

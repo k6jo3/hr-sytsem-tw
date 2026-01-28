@@ -1,17 +1,21 @@
 package com.company.hrms.common.test.contract;
 
-import com.company.hrms.common.query.QueryGroup;
-import org.mockito.ArgumentCaptor;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.mockito.ArgumentCaptor;
+
+import com.company.hrms.common.query.QueryGroup;
 
 /**
  * 合約測試基類
  * 提供合約驗證的共用方法
  *
- * <p>使用範例:
+ * <p>
+ * 使用範例:
+ * 
  * <pre>
  * class EmployeeQueryContractTest extends BaseContractTest {
  *
@@ -46,15 +50,25 @@ public abstract class BaseContractTest {
      */
     protected String loadContractSpec(String serviceName) throws IOException {
         String filename = String.format("%s_contracts.md", serviceName);
-        Path path = Path.of(CONTRACT_SPEC_ROOT, filename);
-
-        if (!Files.exists(path)) {
-            // 嘗試從 classpath 載入
-            return MarkdownContractEngine.loadContractFromResource(
-                String.format("contracts/%s_contracts.md", serviceName));
+        // 1. 嘗試直接從當前路徑載入
+        Path path = Paths.get("contracts/" + serviceName + "_contracts.md");
+        if (Files.exists(path)) {
+            return Files.readString(path);
         }
 
-        return Files.readString(path);
+        // 2. 嘗試向上尋找專案根目錄 (最多找 5 層)
+        Path current = Paths.get("").toAbsolutePath();
+        for (int i = 0; i < 5; i++) {
+            Path candidate = current.resolve("contracts/" + serviceName + "_contracts.md");
+            if (Files.exists(candidate)) {
+                return Files.readString(candidate);
+            }
+            current = current.getParent();
+            if (current == null)
+                break;
+        }
+
+        throw new RuntimeException("找不到合約檔案: " + serviceName + "_contracts.md (已嘗試從專案根目錄搜尋)");
     }
 
     /**
@@ -99,13 +113,11 @@ public abstract class BaseContractTest {
         System.out.println("=== QueryGroup Debug ===");
         System.out.println("Junction: " + queryGroup.getJunction());
         System.out.println("Conditions:");
-        queryGroup.getConditions().forEach(f ->
-            System.out.println("  - " + f.toString()));
+        queryGroup.getConditions().forEach(f -> System.out.println("  - " + f.toString()));
         System.out.println("SubGroups: " + queryGroup.getSubGroups().size());
         queryGroup.getSubGroups().forEach(sub -> {
             System.out.println("  SubGroup (" + sub.getJunction() + "):");
-            sub.getConditions().forEach(f ->
-                System.out.println("    - " + f.toString()));
+            sub.getConditions().forEach(f -> System.out.println("    - " + f.toString()));
         });
         System.out.println("========================");
     }
@@ -116,8 +128,8 @@ public abstract class BaseContractTest {
     protected void assertHasFilterForField(QueryGroup queryGroup, String field) {
         if (!queryGroup.hasFilterForField(field)) {
             throw new AssertionError(
-                String.format("QueryGroup 應包含欄位 [%s] 的過濾條件，但未找到。\n實際條件: %s",
-                    field, queryGroup.getConditions()));
+                    String.format("QueryGroup 應包含欄位 [%s] 的過濾條件，但未找到。\n實際條件: %s",
+                            field, queryGroup.getConditions()));
         }
     }
 
@@ -127,13 +139,14 @@ public abstract class BaseContractTest {
     protected void assertNotHasFilterForField(QueryGroup queryGroup, String field) {
         if (queryGroup.hasFilterForField(field)) {
             throw new AssertionError(
-                String.format("QueryGroup 不應包含欄位 [%s] 的過濾條件，但找到了。\n實際條件: %s",
-                    field, queryGroup.getFiltersForField(field)));
+                    String.format("QueryGroup 不應包含欄位 [%s] 的過濾條件，但找到了。\n實際條件: %s",
+                            field, queryGroup.getFiltersForField(field)));
         }
     }
 
     /**
      * 取得測試類別名稱
+     * 
      * @return 測試類別名稱
      */
     protected String getTestClassName() {

@@ -8,6 +8,7 @@ import com.company.hrms.common.application.pipeline.PipelineTask;
 import com.company.hrms.workflow.api.response.ApproveTaskResponse;
 import com.company.hrms.workflow.application.service.context.ApproveTaskContext;
 import com.company.hrms.workflow.domain.model.aggregate.WorkflowInstance;
+import com.company.hrms.workflow.domain.model.enums.TaskStatus;
 
 /**
  * Task: 執行核准邏輯 (Domain Logic)
@@ -33,7 +34,7 @@ public class ExecuteApprovalLogicTask implements PipelineTask<ApproveTaskContext
         ApproveTaskResponse response = ApproveTaskResponse.builder()
                 .instanceId(instance.getInstanceId())
                 .taskId(request.getTaskId())
-                .status(com.company.hrms.workflow.domain.model.enums.TaskStatus.APPROVED)
+                .status(TaskStatus.APPROVED)
                 .instanceStatus(instance.getStatus())
                 .completedAt(LocalDateTime.now())
                 .message("任務已核准")

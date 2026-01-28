@@ -14,6 +14,7 @@ import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.contract.BaseContractTest;
 import com.company.hrms.training.api.request.GetMyTrainingsRequest;
 import com.company.hrms.training.domain.model.valueobject.EnrollmentStatus;
+import com.company.hrms.training.application.service.contract.TrainingContractTest;
 
 /**
  * HR10 訓練管理服務 API 合約測試
@@ -46,7 +47,7 @@ import com.company.hrms.training.domain.model.valueobject.EnrollmentStatus;
  * <li>呼叫 assertContract() 驗證合約</li>
  * </ol>
  *
- * @see com.company.hrms.training.application.service.contract.TrainingContractTest
+ * @see TrainingContractTest
  *      Service 層級合約測試
  * @see BaseContractTest 合約測試基類
  */

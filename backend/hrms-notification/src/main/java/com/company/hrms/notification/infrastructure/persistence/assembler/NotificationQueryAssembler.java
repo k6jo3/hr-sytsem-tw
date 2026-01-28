@@ -1,103 +1,91 @@
 package com.company.hrms.notification.infrastructure.persistence.assembler;
 
-import com.company.hrms.common.querydsl.model.query.FilterUnit;
-import com.company.hrms.common.querydsl.model.query.Operator;
-import com.company.hrms.common.querydsl.model.query.QueryBuilder;
-import com.company.hrms.common.querydsl.model.query.QueryGroup;
-import com.company.hrms.notification.api.request.notification.SearchNotificationRequest;
-import org.springframework.stereotype.Component;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
 
 /**
- * 通知查詢條件組裝器
+ * 通知查詢組裝器
  * <p>
- * 負責將 Request DTO 轉換為 QueryGroup (Fluent-Query-Engine)
+ * 負責將業務查詢需求轉換為 QueryGroup
  * </p>
  *
  * @author Claude
- * @since 2025-01-23
+ * @since 2025-01-26
  */
-@Component
 public class NotificationQueryAssembler {
 
-    /**
-     * 將查詢請求轉換為 QueryGroup
-     * <p>
-     * 包含以下查詢條件：
-     * - 收件人 ID (必須)
-     * - 狀態過濾
-     * - 類型過濾
-     * - 優先級過濾
-     * - 時間範圍過濾
-     * - 軟刪除過濾 (預設 isDeleted = false)
-     * </p>
-     *
-     * @param request 查詢請求
-     * @return QueryGroup
-     */
-    public QueryGroup toQueryGroup(SearchNotificationRequest request) {
-        return QueryBuilder.where()
-                .fromDto(request)  // 自動解析 @QueryFilter 註解
-                .and("isDeleted", Operator.EQ, false)  // 預設過濾軟刪除
-                .build();
-    }
-
-    /**
-     * 查詢特定收件人的未讀通知
-     *
-     * @param recipientId 收件人 ID
-     * @return QueryGroup
-     */
-    public QueryGroup queryUnreadByRecipient(String recipientId) {
-        return QueryBuilder.where()
-                .and("recipientId", Operator.EQ, recipientId)
-                .and("status", Operator.EQ, "READ")
-                .and("isDeleted", Operator.EQ, false)
-                .build();
-    }
-
-    /**
-     * 查詢特定收件人的所有通知
-     *
-     * @param recipientId 收件人 ID
-     * @return QueryGroup
-     */
     public QueryGroup queryByRecipient(String recipientId) {
         return QueryBuilder.where()
-                .and("recipientId", Operator.EQ, recipientId)
-                .and("isDeleted", Operator.EQ, false)
+                .eq("recipient_id", recipientId)
+                .eq("is_deleted", 0)
                 .build();
     }
 
-    /**
-     * 查詢特定狀態的通知
-     *
-     * @param status 狀態
-     * @return QueryGroup
-     */
+    public QueryGroup queryUnreadByRecipient(String recipientId) {
+        return QueryBuilder.where()
+                .eq("recipient_id", recipientId)
+                .and("read_at", Operator.IS_NULL, null)
+                .eq("is_deleted", 0)
+                .build();
+    }
+
+    public QueryGroup queryReadByRecipient(String recipientId) {
+        return QueryBuilder.where()
+                .eq("recipient_id", recipientId)
+                .and("read_at", Operator.IS_NOT_NULL, null)
+                .eq("is_deleted", 0)
+                .build();
+    }
+
+    public QueryGroup queryByRecipientAndType(String recipientId, String type) {
+        return QueryBuilder.where()
+                .eq("recipient_id", recipientId)
+                .eq("notification_type", type)
+                .eq("is_deleted", 0)
+                .build();
+    }
+
+    public QueryGroup queryByRecipientAndPriority(String recipientId, String priority) {
+        return QueryBuilder.where()
+                .eq("recipient_id", recipientId)
+                .eq("priority", priority)
+                .eq("is_deleted", 0)
+                .build();
+    }
+
+    public QueryGroup queryRecentByRecipient(String recipientId, String dateStr) {
+        return QueryBuilder.where()
+                .eq("recipient_id", recipientId)
+                .and("created_at", Operator.GTE, dateStr)
+                .eq("is_deleted", 0)
+                .build();
+    }
+
+    public QueryGroup queryAllNotifications() {
+        return QueryBuilder.where()
+                .eq("is_deleted", 0)
+                .build();
+    }
+
     public QueryGroup queryByStatus(String status) {
         return QueryBuilder.where()
-                .and("status", Operator.EQ, status)
-                .and("isDeleted", Operator.EQ, false)
+                .eq("status", status)
+                .eq("is_deleted", 0)
                 .build();
     }
 
-    /**
-     * 組合複雜查詢條件
-     * <p>
-     * 示例：查詢特定收件人的「未讀」或「高優先級」通知
-     * </p>
-     *
-     * @param recipientId 收件人 ID
-     * @return QueryGroup
-     */
-    public QueryGroup queryUrgentOrUnread(String recipientId) {
+    public QueryGroup queryByChannel(String channel) {
         return QueryBuilder.where()
-                .and("recipientId", Operator.EQ, recipientId)
-                .and("isDeleted", Operator.EQ, false)
-                .orGroup(sub -> sub
-                        .and("status", Operator.EQ, "PENDING")
-                        .and("priority", Operator.EQ, "HIGH")
-                )
+                .and("channels", Operator.LIKE, "%" + channel + "%")
+                .eq("is_deleted", 0)
+                .build();
+    }
+
+    public QueryGroup querySentSinceDate(String dateStr) {
+        return QueryBuilder.where()
+                .and("sent_at", Operator.GTE, dateStr)
+                .eq("is_deleted", 0)
                 .build();
     }
 }

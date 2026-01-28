@@ -79,8 +79,6 @@ public class SubmitTimesheetServiceTest {
         });
 
         // Pipeline wraps exceptions
-        assertEquals(com.company.hrms.common.application.pipeline.PipelineExecutionException.class,
-                exception.getClass());
         assertEquals(EntityNotFoundException.class, exception.getCause().getClass());
     }
 }

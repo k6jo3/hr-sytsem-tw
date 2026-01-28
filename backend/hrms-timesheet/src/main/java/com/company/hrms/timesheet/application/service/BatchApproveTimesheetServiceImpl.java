@@ -14,6 +14,7 @@ import com.company.hrms.timesheet.domain.model.valueobject.TimesheetId;
 import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
 
 import lombok.RequiredArgsConstructor;
+import com.company.hrms.common.exception.EntityNotFoundException;
 
 @Service("batchApproveTimesheetServiceImpl")
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class BatchApproveTimesheetServiceImpl
         for (UUID timesheetId : request.getTimesheetIds()) {
             try {
                 Timesheet timesheet = timesheetRepository.findById(new TimesheetId(timesheetId))
-                        .orElseThrow(() -> new com.company.hrms.common.exception.EntityNotFoundException("Timesheet",
+                        .orElseThrow(() -> new EntityNotFoundException("Timesheet",
                                 timesheetId.toString()));
 
                 timesheet.approve(approverId);

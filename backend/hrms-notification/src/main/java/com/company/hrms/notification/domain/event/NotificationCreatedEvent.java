@@ -3,6 +3,10 @@ package com.company.hrms.notification.domain.event;
 import com.company.hrms.common.domain.event.DomainEvent;
 import com.company.hrms.notification.domain.model.valueobject.NotificationChannel;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 /**
@@ -14,28 +18,14 @@ import java.util.List;
  * @author Claude
  * @since 2025-01-23
  */
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotificationCreatedEvent extends DomainEvent {
 
-    private final String notificationId;
-    private final String recipientId;
-    private final List<NotificationChannel> channels;
-
-    /**
-     * 建構子
-     *
-     * @param notificationId 通知 ID
-     * @param recipientId    收件人 ID
-     * @param channels       發送渠道
-     */
-    public NotificationCreatedEvent(
-            String notificationId,
-            String recipientId,
-            List<NotificationChannel> channels) {
-        super();
-        this.notificationId = notificationId;
-        this.recipientId = recipientId;
-        this.channels = channels;
-    }
+    private String notificationId;
+    private String recipientId;
+    private List<NotificationChannel> channels;
 
     @Override
     public String getAggregateId() {
@@ -45,17 +35,5 @@ public class NotificationCreatedEvent extends DomainEvent {
     @Override
     public String getAggregateType() {
         return "Notification";
-    }
-
-    public String getNotificationId() {
-        return notificationId;
-    }
-
-    public String getRecipientId() {
-        return recipientId;
-    }
-
-    public List<NotificationChannel> getChannels() {
-        return channels;
     }
 }

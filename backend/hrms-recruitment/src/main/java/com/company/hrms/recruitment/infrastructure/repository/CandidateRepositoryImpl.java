@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.infrastructure.persistence.querydsl.repository.CommandBaseRepository;
+import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.recruitment.domain.model.aggregate.Candidate;
@@ -69,7 +70,7 @@ public class CandidateRepositoryImpl
     @Override
     public List<Candidate> findByOpeningId(OpeningId openingId) {
         QueryGroup query = QueryBuilder.where()
-                .and("openingId", com.company.hrms.common.query.Operator.EQ, openingId.getValue())
+                .and("openingId", Operator.EQ, openingId.getValue())
                 .build();
         return super.findAll(query).stream()
                 .map(this::toDomain)
@@ -79,8 +80,8 @@ public class CandidateRepositoryImpl
     @Override
     public List<Candidate> findByOpeningIdAndStatus(OpeningId openingId, CandidateStatus status) {
         QueryGroup query = QueryBuilder.where()
-                .and("openingId", com.company.hrms.common.query.Operator.EQ, openingId.getValue())
-                .and("status", com.company.hrms.common.query.Operator.EQ, status)
+                .and("openingId", Operator.EQ, openingId.getValue())
+                .and("status", Operator.EQ, status)
                 .build();
         return super.findAll(query).stream()
                 .map(this::toDomain)
@@ -90,7 +91,7 @@ public class CandidateRepositoryImpl
     @Override
     public long countByOpeningId(OpeningId openingId) {
         QueryGroup query = QueryBuilder.where()
-                .and("openingId", com.company.hrms.common.query.Operator.EQ, openingId.getValue())
+                .and("openingId", Operator.EQ, openingId.getValue())
                 .build();
         return super.count(query);
     }
