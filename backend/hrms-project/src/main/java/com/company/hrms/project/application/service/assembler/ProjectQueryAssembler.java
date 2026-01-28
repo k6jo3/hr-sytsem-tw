@@ -27,9 +27,12 @@ public class ProjectQueryAssembler {
         if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
             query.addSubGroup(
                     QueryGroup.or()
-                            .like("projectName", "%" + request.getKeyword() + "%")
-                            .like("projectCode", "%" + request.getKeyword() + "%"));
+                            .like("name", request.getKeyword())
+                            .like("code", request.getKeyword()));
         }
+
+        // 軟刪除過濾
+        query.eq("is_deleted", 0);
 
         return query;
     }

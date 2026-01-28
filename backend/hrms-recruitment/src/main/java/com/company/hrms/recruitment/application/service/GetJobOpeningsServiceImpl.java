@@ -23,7 +23,8 @@ public class GetJobOpeningsServiceImpl implements QueryApiService<JobOpeningSear
         // 1. Build QueryGroup from DTO
         QueryGroup queryGroup = QueryBuilder.fromCondition(request);
 
-        // 2. Add Security/Role Filters (if any)
+        // 2. Add Security/Role Filters - 軟刪除過濾
+        queryGroup.eq("is_deleted", 0);
 
         // 3. Pageable
         return jobOpeningRepository.findAll(queryGroup, org.springframework.data.domain.Pageable.unpaged())

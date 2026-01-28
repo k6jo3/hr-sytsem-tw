@@ -20,11 +20,11 @@ import com.company.hrms.performance.domain.model.valueobject.ReviewStatus;
 @Schema(description = "查詢我的考核列表請求")
 public class GetMyReviewsRequest {
 
-    @QueryFilter(property = "cycleId", operator = Operator.EQ)
+    @QueryFilter(property = "cycle_id", operator = Operator.EQ)
     @Schema(description = "週期ID")
     private String cycleId;
 
-    @QueryFilter(property = "employeeId", operator = Operator.EQ)
+    @QueryFilter(property = "employee_id", operator = Operator.EQ)
     @Schema(description = "員工ID (系統自動帶入 currentUser)")
     private String employeeId;
 

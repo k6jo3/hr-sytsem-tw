@@ -22,10 +22,13 @@ public class CustomerQueryAssembler {
         if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
             query.addSubGroup(
                     QueryGroup.or()
-                            .like("customerName", "%" + request.getKeyword() + "%")
-                            .like("customerCode", "%" + request.getKeyword() + "%")
-                            .like("taxId", "%" + request.getKeyword() + "%"));
+                            .like("name", request.getKeyword())
+                            .like("code", request.getKeyword())
+                            .like("tax_id", request.getKeyword()));
         }
+
+        // 軟刪除過濾
+        query.eq("is_deleted", 0);
 
         return query;
     }

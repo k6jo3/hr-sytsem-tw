@@ -26,11 +26,11 @@ public class PerformanceContractTest extends BaseContractTest {
     class CycleQueryContractTests {
 
         @Test
-        @DisplayName("PFM_C001: 查詢草稿狀態的週期應包含狀態過濾條件")
-        void searchDraftCycles_ShouldIncludeStatusFilter() throws Exception {
-            String contract = loadContractSpec("performance_cycle");
+        @DisplayName("PFM_C001: 查詢進行中週期應包含狀態過濾條件")
+        void searchInProgressCycles_ShouldIncludeStatusFilter() throws Exception {
+            String contract = loadContractSpec("performance");
             var request = new GetCyclesRequest();
-            request.setStatus(CycleStatus.DRAFT);
+            request.setStatus(CycleStatus.IN_PROGRESS);
 
             var query = assembler.toQueryGroup(request);
 
@@ -38,15 +38,15 @@ public class PerformanceContractTest extends BaseContractTest {
         }
 
         @Test
-        @DisplayName("PFM_C002: 查詢特定年份的週期")
+        @DisplayName("PFM_C003: 查詢特定年份的週期")
         void searchByYear_ShouldIncludeYearFilter() throws Exception {
-            String contract = loadContractSpec("performance_cycle");
+            String contract = loadContractSpec("performance");
             var request = new GetCyclesRequest();
             request.setYear(2025);
 
             var query = assembler.toQueryGroup(request);
 
-            assertContract(query, contract, "PFM_C002");
+            assertContract(query, contract, "PFM_C003");
         }
     }
 
@@ -60,9 +60,9 @@ public class PerformanceContractTest extends BaseContractTest {
         @Test
         @DisplayName("PFM_R001: 查詢我的考核應包含員工ID過濾條件")
         void searchMyReviews_ShouldIncludeEmployeeIdFilter() throws Exception {
-            String contract = loadContractSpec("performance_review");
+            String contract = loadContractSpec("performance");
             var request = new GetMyReviewsRequest();
-            request.setEmployeeId("EMP001");
+            request.setEmployeeId("E001");
 
             var query = assembler.toQueryGroup(request);
 

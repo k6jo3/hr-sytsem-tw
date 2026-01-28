@@ -13,7 +13,7 @@ import lombok.Data;
 public class JobOpeningSearchDto implements Serializable {
 
     @Schema(description = "職缺標題關鍵字")
-    @LIKE("jobTitle")
+    @LIKE("title")
     private String keyword;
 
     @Schema(description = "部門 ID")

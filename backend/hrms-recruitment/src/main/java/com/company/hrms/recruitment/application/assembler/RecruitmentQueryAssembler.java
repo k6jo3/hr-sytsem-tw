@@ -28,14 +28,17 @@ public class RecruitmentQueryAssembler {
         }
 
         if (departmentId != null && !departmentId.isBlank()) {
-            builder.eq("departmentId", java.util.UUID.fromString(departmentId));
+            builder.eq("department_id", java.util.UUID.fromString(departmentId));
         }
 
         if (keyword != null && !keyword.isBlank()) {
             builder.orGroup(group -> group
-                    .like("jobTitle", "%" + keyword + "%")
+                    .like("title", keyword)
                     .like("requirements", "%" + keyword + "%"));
         }
+
+        // 軟刪除過濾
+        builder.eq("is_deleted", 0);
 
         return builder.build();
     }

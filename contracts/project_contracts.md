@@ -19,7 +19,7 @@
 | PRJ_P002 | 查詢已完成專案 | PM | `{"status":"COMPLETED"}` | `status = 'COMPLETED'`, `is_deleted = 0` |
 | PRJ_P003 | 依客戶查詢專案 | PM | `{"customerId":"C001"}` | `customer_id = 'C001'`, `is_deleted = 0` |
 | PRJ_P004 | 依 PM 查詢專案 | PM | `{"pmId":"E001"}` | `pm_id = 'E001'`, `is_deleted = 0` |
-| PRJ_P005 | 依名稱模糊查詢 | PM | `{"name":"系統"}` | `name LIKE '系統'`, `is_deleted = 0` |
+| PRJ_P005 | 依名稱模糊查詢 | PM | `{"keyword":"系統"}` | `name LIKE '系統'`, `code LIKE '系統'`, `is_deleted = 0` |
 | PRJ_P006 | 查詢延遲專案 | PM | `{"isDelayed":true}` | `is_delayed = 1`, `is_deleted = 0` |
 | PRJ_P007 | 員工查詢參與專案 | EMPLOYEE | `{}` | `team_members.employee_id = '{currentUserId}'`, `is_deleted = 0` |
 | PRJ_P008 | 依部門查詢專案 | HR | `{"deptId":"D001"}` | `department_id = 'D001'`, `is_deleted = 0` |
@@ -33,7 +33,7 @@
 | 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
 | :--- | :--- | :--- | :--- | :--- |
 | PRJ_C001 | 查詢有效客戶 | PM | `{"status":"ACTIVE"}` | `status = 'ACTIVE'`, `is_deleted = 0` |
-| PRJ_C002 | 依名稱模糊查詢 | PM | `{"name":"科技"}` | `name LIKE '科技'`, `is_deleted = 0` |
+| PRJ_C002 | 依名稱模糊查詢 | PM | `{"keyword":"科技"}` | `name LIKE '科技'`, `code LIKE '科技'`, `tax_id LIKE '科技'`, `is_deleted = 0` |
 | PRJ_C003 | 依產業類型查詢 | PM | `{"industry":"IT"}` | `industry = 'IT'`, `is_deleted = 0` |
 | PRJ_C004 | 查詢有專案的客戶 | PM | `{"hasProjects":true}` | `project_count > 0`, `is_deleted = 0` |
 | PRJ_C005 | 依負責業務查詢 | PM | `{"salesRepId":"E001"}` | `sales_rep_id = 'E001'`, `is_deleted = 0` |

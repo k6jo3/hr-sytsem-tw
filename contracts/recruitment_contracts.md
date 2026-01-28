@@ -20,7 +20,7 @@
 | RCT_J003 | 依部門查詢職缺 | HR | `{"deptId":"D001"}` | `department_id = 'D001'`, `is_deleted = 0` |
 | RCT_J004 | 依職位查詢 | HR | `{"positionId":"P001"}` | `position_id = 'P001'`, `is_deleted = 0` |
 | RCT_J005 | 查詢急聘職缺 | HR | `{"priority":"URGENT"}` | `priority = 'URGENT'`, `is_deleted = 0` |
-| RCT_J006 | 依名稱模糊查詢 | HR | `{"title":"工程師"}` | `title LIKE '工程師'`, `is_deleted = 0` |
+| RCT_J006 | 依名稱模糊查詢 | HR | `{"title":"工程師"}` | `title LIKE '%工程師%'`, `is_deleted = 0` |
 | RCT_J007 | 查詢公開職缺 | PUBLIC | `{}` | `visibility = 'PUBLIC'`, `status = 'OPEN'`, `is_deleted = 0` |
 | RCT_J008 | 主管查詢部門職缺 | MANAGER | `{}` | `department_id IN ('{managedDeptIds}')`, `is_deleted = 0` |
 | RCT_J009 | 依招募負責人查詢 | HR | `{"recruiterId":"E001"}` | `recruiter_id = 'E001'`, `is_deleted = 0` |
@@ -36,7 +36,7 @@
 | RCT_C003 | 查詢面試中應徵者 | HR | `{"stage":"INTERVIEWING"}` | `stage = 'INTERVIEWING'`, `is_deleted = 0` |
 | RCT_C004 | 查詢已錄取應徵者 | HR | `{"stage":"HIRED"}` | `stage = 'HIRED'`, `is_deleted = 0` |
 | RCT_C005 | 查詢已拒絕應徵者 | HR | `{"stage":"REJECTED"}` | `stage = 'REJECTED'`, `is_deleted = 0` |
-| RCT_C006 | 依姓名模糊查詢 | HR | `{"name":"王"}` | `name LIKE '王'`, `is_deleted = 0` |
+| RCT_C006 | 依姓名模糊查詢 | HR | `{"name":"王"}` | `name LIKE '%王%'`, `is_deleted = 0` |
 | RCT_C007 | 依來源查詢 | HR | `{"source":"104"}` | `source = '104'`, `is_deleted = 0` |
 | RCT_C008 | 依學歷查詢 | HR | `{"education":"MASTER"}` | `education = 'MASTER'`, `is_deleted = 0` |
 | RCT_C009 | 查詢人才庫 | HR | `{"inTalentPool":true}` | `in_talent_pool = 1`, `is_deleted = 0` |
