@@ -1,0 +1,412 @@
+# 後端系統架構與開發規範書 (Strict Specification)
+
+> **重要:** 本文件為開發人員的快速參考指南。
+> 完整架構設計請參閱 [系統架構設計文件](../architecture/系統架構設計文件.md)
+> 命名規範詳細說明請參閱 [系統架構設計文件_命名規範](../architecture/系統架構設計文件_命名規範.md)
+
+---
+
+## 1. 系統概述 (System Overview)
+
+本專案為 **企業級人力資源管理系統 (HRMS)**，採用 **Spring Cloud 微服務架構**。
+開發遵循 **DDD (領域驅動設計)**、**CQRS (命令查詢職責分離)**、**SOLID 原則**。
+
+核心目標：**程式即文件 (Code as Documentation)**，透過嚴謹的命名與結構，使程式碼具備自解釋性。
+
+---
+
+## 2. 技術堆疊 (Technology Stack)
+
+| 類別 | 技術 | 版本 |
+|:---|:---|:---|
+| **框架** | Spring Boot | 3.1.x |
+| **微服務** | Spring Cloud | 2023.x |
+| **ORM (既有)** | MyBatis | 3.5.x |
+| **ORM (新功能)** | Querydsl + JPA | 5.0.0 |
+| **資料庫** | PostgreSQL | 15.x |
+| **快取** | Redis | 7.x |
+| **訊息佇列** | Kafka | 3.x |
+| **服務發現** | Eureka | - |
+| **API文檔** | Swagger/OpenAPI | 3.0 |
+| **測試** | JUnit 5 + Mockito | - |
+
+---
+
+## 3. Domain代號對照表
+
+| 代號 | Domain | 說明 |
+|:---:|:---|:---|
+| `01` | IAM | 身份認證與授權 |
+| `02` | ORG | 組織員工管理 |
+| `03` | ATT | 考勤管理 |
+| `04` | PAY | 薪資管理 |
+| `05` | INS | 保險管理 |
+| `06` | PRJ | 專案管理 |
+| `07` | TMS | 工時管理 |
+| `08` | PFM | 績效管理 |
+| `09` | RCT | 招募管理 |
+| `10` | TRN | 訓練發展 |
+| `11` | WFL | 簽核流程 |
+| `12` | NTF | 通知服務 |
+| `13` | DOC | 文件管理 |
+| `14` | RPT | 報表分析 |
+
+---
+
+## 4. DDD 分層架構 (嚴格執行)
+
+所有微服務 **必須** 遵循以下四層結構：
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ Interface Layer (介面層)                                │
+│ - REST Controller                                       │
+│ - 命名: HR{DD}{Screen}{Cmd/Qry}Controller               │
+├─────────────────────────────────────────────────────────┤
+│ Application Layer (應用層)                              │
+│ - Use Case 編排、Saga 流程控制                           │
+│ - 禁止包含核心業務規則                                   │
+├─────────────────────────────────────────────────────────┤
+│ Domain Layer (領域層 - 核心)                            │
+│ - 純淨 Java 物件 (POJO)                                 │
+│ - Aggregate Root, Entity, Value Object, Domain Service │
+├─────────────────────────────────────────────────────────┤
+│ Infrastructure Layer (基礎設施層)                       │
+│ - Repository實作、DAO、Mapper                           │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 5. 命名規範 (Critical)
+
+### 5.1 Controller 命名 (CQRS)
+
+| 類型 | 命名格式 | 繼承基類 | HTTP方法 |
+|:---|:---|:---|:---|
+| **Command** | `HR{DD}{Screen}CmdController` | `CommandBaseController` | POST, PUT, DELETE |
+| **Query** | `HR{DD}{Screen}QryController` | `QueryBaseController` | GET |
+
+**範例:**
+```java
+@RestController
+@RequestMapping("/api/v1/users")
+@Tag(name = "HR01-User-Command", description = "使用者管理寫入操作")
+public class HR01UserCmdController extends CommandBaseController {
+    // ...
+}
+```
+
+### 5.2 Service 命名 (自動對應)
+
+| Controller 方法名 | Service 類別名 | Spring Bean 名稱 |
+|:---|:---|:---|
+| `createUser` | `CreateUserServiceImpl` | `createUserServiceImpl` |
+| `updateUser` | `UpdateUserServiceImpl` | `updateUserServiceImpl` |
+| `getUserList` | `GetUserListServiceImpl` | `getUserListServiceImpl` |
+
+**Service 範例:**
+```java
+@Service("createUserServiceImpl") // 必須明確指定 Bean Name
+@Transactional
+public class CreateUserServiceImpl 
+        implements CommandApiService<CreateUserRequest, CreateUserResponse> {
+    
+    @Override
+    public CreateUserResponse execCommand(
+            CreateUserRequest req, 
+            JWTModel currentUser, 
+            String... args) throws Exception {
+        User user = User.create(req.getName(), req.getEmail());
+        userRepository.save(user);
+        return new CreateUserResponse(user.getId());
+    }
+}
+```
+
+### 5.3 命名規範總覽
+
+| 元件 | 命名格式 | 範例 |
+|:---|:---|:---|
+| Controller (Command) | `HR{DD}{Screen}CmdController` | `HR01UserCmdController` |
+| Controller (Query) | `HR{DD}{Screen}QryController` | `HR01UserQryController` |
+| Application Service | `{動詞}{名詞}ServiceImpl` | `CreateUserServiceImpl` |
+| Domain Service | `{業務事件}DomainService` | `AccountLockingDomainService` |
+| Request VO | `{動詞}{名詞}Request` | `CreateUserRequest` |
+| Response VO | `{名詞}{Type}Response` | `UserDetailResponse` |
+| Domain Event | `{Aggregate}{PastVerb}Event` | `UserCreatedEvent` |
+| Repository Interface | `I{名詞}Repository` | `IUserRepository` |
+| Repository Impl | `{名詞}RepositoryImpl` | `UserRepositoryImpl` |
+| DAO | `{名詞}DAO` | `UserDAO` |
+| PO | `{名詞}PO` | `UserPO` |
+| Mapper | `{名詞}Mapper` | `UserMapper` |
+| Exception | `{描述}Exception` | `AccountLockedException` |
+
+---
+
+## 6. 目錄結構範例
+
+```
+com.company.hrms.iam/
+├── api/
+│   ├── controller/
+│   │   ├── user/
+│   │   │   ├── HR01UserCmdController.java
+│   │   │   └── HR01UserQryController.java
+│   │   └── role/
+│   │       ├── HR01RoleCmdController.java
+│   │       └── HR01RoleQryController.java
+│   ├── request/
+│   │   └── user/
+│   │       ├── CreateUserRequest.java
+│   │       └── UpdateUserRequest.java
+│   └── response/
+│       └── user/
+│           ├── UserDetailResponse.java
+│           └── UserListResponse.java
+├── application/
+│   ├── service/
+│   │   └── user/
+│   │       ├── CreateUserServiceImpl.java
+│   │       └── GetUserListServiceImpl.java
+│   ├── factory/
+│   │   ├── CommandApiServiceFactory.java
+│   │   └── QueryApiServiceFactory.java
+│   └── aspect/
+│       └── ApiServiceAspect.java
+├── domain/
+│   ├── model/
+│   │   ├── aggregate/
+│   │   │   └── User.java
+│   │   └── valueobject/
+│   │       └── Email.java
+│   ├── repository/
+│   │   └── IUserRepository.java
+│   ├── service/
+│   │   └── AccountLockingDomainService.java
+│   └── event/
+│       └── UserCreatedEvent.java
+└── infrastructure/
+    ├── repository/
+    │   └── UserRepositoryImpl.java
+    ├── dao/
+    │   └── UserDAO.java
+    ├── po/
+    │   └── UserPO.java
+    └── mapper/
+        └── UserMapper.java
+```
+
+---
+
+## 7. Service 動態注入機制
+
+Controller 不直接依賴具體的 Service 實現，透過繼承 `BaseController` 自動調度：
+
+### 7.1 核心組件
+
+| 組件 | 職責 |
+|:---|:---|
+| `BeanNameConfig` (@RequestScope) | 儲存當前請求對應的 Service Bean 名稱 |
+| `ApiServiceAspect` (AOP) | 攔截 Controller 方法，設定目標 Bean 名稱 |
+| `CommandApiServiceFactory` | 根據 BeanNameConfig 查找對應 Service |
+| `BaseController` | 提供 `execCommand` 與 `getResponse` 方法 |
+
+### 7.2 Controller 範例
+
+```java
+@RestController
+@RequestMapping("/api/v1/users")
+public class HR01UserCmdController extends CommandBaseController {
+
+    // 方法名稱 "createUser" -> 對應 Service "createUserServiceImpl"
+    @PostMapping
+    public ResponseEntity<CreateUserResponse> createUser(
+            @RequestBody @Valid CreateUserRequest request,
+            @CurrentUser JWTModel currentUser) throws Exception {
+        return ResponseEntity.ok(execCommand(request, currentUser));
+    }
+}
+```
+
+---
+
+## 8. Business Pipeline 模式 (複雜業務邏輯)
+
+> **重要:** 完整 Pipeline 架構請參閱 [framework/architecture/03_Business_Pipeline.md](../architecture/03_Business_Pipeline.md)
+
+### 8.1 使用時機
+
+當 Service 邏輯包含 **3 個以上步驟** 或涉及 **多資料來源載入與計算** 時，使用 Pipeline 模式取代傳統寫法。
+
+| 適用場景 | 範例 |
+|:---|:---|
+| ✅ 複雜業務流程 | 薪資計算、訂單處理 |
+| ✅ 多步驟資料載入 | 載入員工→出勤→加班→計算 |
+| ❌ 簡單 CRUD | 單純新增/查詢 |
+
+### 8.2 核心組件
+
+| 組件 | 職責 | 命名格式 |
+|:---|:---|:---|
+| **Context** | 在 Pipeline 中傳遞數據 | `{UseCase}Context` |
+| **Task** | 單一步驟的執行邏輯 | `{動詞}{業務}Task` / `Load{Entity}Task` |
+| **Pipeline** | 連接並依序執行 Task | `BusinessPipeline` |
+
+### 8.3 實作範例
+
+```java
+@Service("calculateMonthlySalaryServiceImpl")
+@Transactional
+public class CalculateMonthlySalaryServiceImpl
+        extends BaseCommandService<CalculateSalaryRequest, SalaryResponse> {
+
+    private final LoadEmployeeTask loadEmployeeTask;
+    private final LoadAttendanceTask loadAttendanceTask;
+    private final CalculateTaxTask calculateTaxTask;
+
+    @Override
+    protected SalaryResponse doExecute(CalculateSalaryRequest req, JWTModel user) {
+        // 1. 建立 Context
+        SalaryContext ctx = new SalaryContext(req.getEmployeeId(), req.getMonth());
+
+        // 2. 執行 Pipeline
+        BusinessPipeline.start(ctx)
+            .next(loadEmployeeTask)
+            .next(loadAttendanceTask)
+            .nextIf(c -> c.hasOvertime(), loadOvertimeTask)
+            .next(calculateTaxTask)
+            .execute();
+
+        // 3. 轉換回應
+        return mapper.toResponse(ctx.getResult());
+    }
+}
+```
+
+### 8.4 目錄結構
+
+```
+application/service/{domain}/
+├── {動詞}{名詞}ServiceImpl.java     # Service (Pipeline 編排)
+├── context/
+│   └── {UseCase}Context.java        # 數據載體
+└── task/
+    ├── Load{Entity}Task.java        # Infrastructure Task
+    └── {動詞}{業務}Task.java        # Domain Task
+```
+
+### 8.5 Pipeline 命名規範
+
+| 元件 | 格式 | 範例 |
+|:---|:---|:---|
+| Context | `{UseCase}Context` | `SalaryContext`, `CreateUserContext` |
+| Infrastructure Task | `Load{Entity}Task` | `LoadEmployeeTask` |
+| Domain Task | `{動詞}{業務}Task` | `CalculateTaxTask` |
+| Integration Task | `{動詞}{Service}Task` | `SendNotificationTask` |
+
+---
+
+## 9. 測試規範
+
+> **重要:** 完整測試架構請參閱 [測試架構規範.md](../testing/測試架構規範.md)
+
+### 9.1 測試類型
+
+| 類型 | 工具 | 覆蓋率要求 |
+|:---|:---|:---:|
+| Unit Test | JUnit 5 + Mockito | 核心邏輯 100% |
+| Integration Test | @SpringBootTest | API 端點 |
+| Snapshot Test | FluentAssert + JSON | QueryGroup/Result |
+
+### 9.2 三階測試法
+
+1. **引擎契約測試**: 驗證 QueryEngine 所有 Operator（H2 固定資料集）
+2. **業務組裝測試**: 攔截 QueryGroup，快照比對驗證業務意圖
+3. **資料工廠自動化**: DTO 直接生成 QueryGroup
+
+### 9.3 TDD 循環
+
+1. **RED**: 撰寫失敗的單元測試
+2. **GREEN**: 撰寫最少量的程式碼通過測試
+3. **REFACTOR**: 重構程式碼，優化結構
+
+### 9.4 快照測試執行
+
+```bash
+# 驗證模式 (CI/CD)
+mvn test
+
+# 學習模式 (更新快照)
+mvn test -DupdateSnapshots=true
+```
+
+---
+
+## 10. API 路徑規範
+
+| 項目 | 規範 | 範例 |
+|:---|:---|:---|
+| **版本前綴** | `/api/v{版本號}` | `/api/v1` |
+| **資源名稱** | 複數名詞、小寫、kebab-case | `/employees`, `/leave-requests` |
+| **子資源** | `/{父資源ID}/{子資源}` | `/employees/{id}/educations` |
+| **操作Action** | 動詞放在資源後 | `/employees/{id}/terminate` |
+
+---
+
+## 11. Swagger 規範
+
+所有 Controller 方法 **必須** 包含 Swagger 註解：
+
+```java
+@Operation(summary = "新增使用者", operationId = "createUser")
+@ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "成功"),
+    @ApiResponse(responseCode = "400", description = "請求格式錯誤"),
+    @ApiResponse(responseCode = "401", description = "未授權")
+})
+@PostMapping
+public ResponseEntity<CreateUserResponse> createUser(...) { }
+```
+
+---
+
+## 12. 持久層技術選擇指引
+
+本專案採用 **MyBatis + Fluent-Query-Engine (Querydsl)** 雙軌並行策略。
+
+> **重要:** 詳細規範請參閱 [Fluent-Query-Engine.md](../architecture/Fluent-Query-Engine.md) 附錄 D
+
+### 12.1 技術選擇原則
+
+| 情境 | 選擇 | 原因 |
+|:---|:---|:---|
+| 既有功能維護 | **MyBatis** | 不改動已穩定的程式碼 |
+| 新增列表查詢 | **Fluent-Query-Engine** | 標準化、減少重複代碼 |
+| 新增統計報表 | **Fluent-Query-Engine** | GROUP BY 支援完善 |
+| 複雜子查詢/CTE | **MyBatis** | 表達能力更強 |
+| 效能關鍵路徑 | **MyBatis** | 可精確調優 SQL |
+
+### 12.2 套件結構
+
+```
+infrastructure/
+├── persistence/
+│   ├── mybatis/           # MyBatis 專用 (既有功能)
+│   │   ├── mapper/
+│   │   └── xml/
+│   └── querydsl/          # Fluent-Query-Engine (新功能)
+│       └── repository/
+└── repository/            # 統一 Repository Interface
+```
+
+### 12.3 禁止事項
+
+1. ❌ 同一 Service 方法混用兩種技術
+2. ❌ Querydsl Repository 中注入 MyBatis Mapper
+3. ❌ Service 直接依賴 Repository 實作類別
+
+---
+
+**文件版本:** 3.0
+**最後更新:** 2025-12-18
