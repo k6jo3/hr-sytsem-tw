@@ -1,5 +1,8 @@
 package com.company.hrms.notification.api.request.notification;
 
+import java.util.List;
+import java.util.Map;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -7,9 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 發送通知請求
@@ -28,7 +28,7 @@ public class SendNotificationRequest {
      * 收件人員工 ID
      */
     @NotBlank(message = "收件人 ID 不可為空")
-    @Schema(description = "收件人員工 ID", example = "emp-001", required = true)
+    @Schema(description = "收件人員工 ID", example = "emp-001")
     private String recipientId;
 
     /**
@@ -36,7 +36,7 @@ public class SendNotificationRequest {
      */
     @NotBlank(message = "通知標題不可為空")
     @Size(min = 1, max = 200, message = "通知標題長度必須在 1-200 字元之間")
-    @Schema(description = "通知標題", example = "請假申請待審核", required = true)
+    @Schema(description = "通知標題", example = "請假申請待審核")
     private String title;
 
     /**
@@ -50,7 +50,7 @@ public class SendNotificationRequest {
      * 通知類型
      */
     @NotBlank(message = "通知類型不可為空")
-    @Schema(description = "通知類型", example = "APPROVAL_REQUEST", required = true)
+    @Schema(description = "通知類型", example = "APPROVAL_REQUEST")
     private String notificationType;
 
     /**

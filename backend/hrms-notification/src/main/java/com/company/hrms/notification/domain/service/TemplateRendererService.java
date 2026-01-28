@@ -1,8 +1,8 @@
 package com.company.hrms.notification.domain.service;
 
-import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate;
-
 import java.util.Map;
+
+import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate;
 
 /**
  * 範本渲染領域服務
@@ -13,6 +13,7 @@ import java.util.Map;
  * @author Claude
  * @since 2025-01-23
  */
+@org.springframework.stereotype.Service
 public class TemplateRendererService {
 
     /**

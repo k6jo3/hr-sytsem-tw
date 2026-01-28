@@ -1,10 +1,11 @@
 package com.company.hrms.notification.infrastructure.channel;
 
+import org.springframework.stereotype.Component;
+
 import com.company.hrms.notification.domain.model.aggregate.Notification;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * LINE 通知發送器
@@ -19,10 +20,6 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @RequiredArgsConstructor
 public class LineChannelSender implements ChannelSender {
-
-    private final RestTemplate restTemplate;
-
-    private static final String LINE_NOTIFY_API = "https://notify-api.line.me/api/notify";
 
     @Override
     public void send(Notification notification, String recipientId) throws Exception {
@@ -41,7 +38,7 @@ public class LineChannelSender implements ChannelSender {
             }
 
             // 組裝訊息
-            String message = buildLineMessage(notification);
+            // String message = buildLineMessage(notification);
 
             // 發送（暫時註解，避免編譯錯誤）
             // HttpHeaders headers = new HttpHeaders();
@@ -49,7 +46,8 @@ public class LineChannelSender implements ChannelSender {
             // headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             // MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             // body.add("message", message);
-            // HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+            // HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body,
+            // headers);
             // restTemplate.postForEntity(LINE_NOTIFY_API, request, String.class);
 
             log.info("[LineChannelSender] LINE 通知發送成功（暫時實作） - 收件人: {}",

@@ -1,17 +1,19 @@
 package com.company.hrms.notification.application.service.send.task;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
 import com.company.hrms.common.application.pipeline.PipelineTask;
 import com.company.hrms.notification.application.service.send.context.SendNotificationContext;
 import com.company.hrms.notification.domain.model.aggregate.Notification;
 import com.company.hrms.notification.domain.model.valueobject.NotificationChannel;
 import com.company.hrms.notification.domain.model.valueobject.NotificationPriority;
 import com.company.hrms.notification.domain.model.valueobject.NotificationType;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 建立通知聚合根 Task
@@ -34,10 +36,15 @@ public class CreateNotificationTask implements PipelineTask<SendNotificationCont
     public void execute(SendNotificationContext ctx) {
         log.debug("[CreateNotificationTask] 開始建立通知聚合根");
 
+        // 驗證收件人 ID
+        String recipientId = ctx.getRequest().getRecipientId();
+        if (recipientId == null || recipientId.trim().isEmpty()) {
+            throw new IllegalArgumentException("收件人 ID 不可為空");
+        }
+
         // 轉換類型：String → Enum
         NotificationType notificationType = NotificationType.valueOf(
-                ctx.getRequest().getNotificationType()
-        );
+                ctx.getRequest().getNotificationType());
 
         // 轉換類型：List<String> → List<NotificationChannel>
         List<NotificationChannel> channels = ctx.getFilteredChannels().stream()
@@ -46,8 +53,7 @@ public class CreateNotificationTask implements PipelineTask<SendNotificationCont
 
         // 轉換類型：String → NotificationPriority
         NotificationPriority priority = NotificationPriority.valueOf(
-                ctx.getRequest().getPriority() != null ? ctx.getRequest().getPriority() : "NORMAL"
-        );
+                ctx.getRequest().getPriority() != null ? ctx.getRequest().getPriority() : "NORMAL");
 
         // 使用 Domain Model 的工廠方法建立通知（只傳 6 個核心參數）
         Notification notification = Notification.create(
@@ -56,15 +62,13 @@ public class CreateNotificationTask implements PipelineTask<SendNotificationCont
                 ctx.getRenderedContent(),
                 notificationType,
                 channels,
-                priority
-        );
+                priority);
 
         // 設定業務關聯（分別設定）
         if (ctx.getRequest().getBusinessType() != null) {
             notification.setBusinessRelation(
                     ctx.getRequest().getBusinessType(),
-                    ctx.getRequest().getBusinessId()
-            );
+                    ctx.getRequest().getBusinessId());
         }
         if (ctx.getRequest().getBusinessUrl() != null) {
             notification.setBusinessUrl(ctx.getRequest().getBusinessUrl());
@@ -75,8 +79,12 @@ public class CreateNotificationTask implements PipelineTask<SendNotificationCont
             notification.setTemplateCode(ctx.getRequest().getTemplateCode());
         }
 
-        // 設定建立者
-        notification.setCreatedBy(ctx.getCurrentUser().getEmployeeNumber());
+        // 設定審計欄位
+        if (ctx.getCurrentUser() != null) {
+            notification.setCreatedBy(ctx.getCurrentUser().getEmployeeNumber());
+        } else {
+            notification.setCreatedBy("SYSTEM");
+        }
 
         // 若在靜音時段且需延後，標記為 PENDING
         if (ctx.isShouldDelay()) {

@@ -1,10 +1,11 @@
 package com.company.hrms.notification.infrastructure.channel;
 
+import org.springframework.stereotype.Component;
+
 import com.company.hrms.notification.domain.model.aggregate.Notification;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Microsoft Teams 通知發送器
@@ -19,8 +20,6 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @RequiredArgsConstructor
 public class TeamsChannelSender implements ChannelSender {
-
-    private final RestTemplate restTemplate;
 
     @Override
     public void send(Notification notification, String recipientId) throws Exception {
@@ -39,7 +38,7 @@ public class TeamsChannelSender implements ChannelSender {
             }
 
             // 組裝訊息
-            var message = buildTeamsMessage(notification);
+            // var message = buildTeamsMessage(notification);
 
             // 發送（暫時註解，避免編譯錯誤）
             // restTemplate.postForEntity(webhookUrl, message, String.class);
@@ -89,8 +88,7 @@ public class TeamsChannelSender implements ChannelSender {
                 "title",
                 notification.getTitle(),
                 "text",
-                notification.getContent()
-        );
+                notification.getContent());
     }
 
     /**
@@ -106,7 +104,6 @@ public class TeamsChannelSender implements ChannelSender {
             String title,
             String titleValue,
             String text,
-            String textValue
-    ) {
+            String textValue) {
     }
 }

@@ -1,12 +1,19 @@
 package com.company.hrms.notification.infrastructure.persistence.entity;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 /**
  * 通知持久化物件 (Persistence Object)
@@ -89,6 +96,12 @@ public class NotificationPO {
      */
     @Column(name = "related_business_type", length = 50)
     private String relatedBusinessType;
+
+    /**
+     * 相關業務 URL
+     */
+    @Column(name = "related_business_url", length = 500)
+    private String relatedBusinessUrl;
 
     /**
      * 範本代碼

@@ -17,10 +17,10 @@
 | 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
 | :--- | :--- | :--- | :--- | :--- |
 | PAY_S001 | 查詢員工薪資結構 | HR_PAYROLL | `{"employeeId":"E001"}` | `employee_id = 'E001'`, `is_deleted = 0` |
-| PAY_S002 | 查詢生效中的薪資結構 | HR_PAYROLL | `{"status":"ACTIVE"}` | `status = 'ACTIVE'`, `is_deleted = 0` |
-| PAY_S003 | 依部門查詢薪資結構 | HR_PAYROLL | `{"deptId":"D001"}` | `department_id = 'D001'`, `is_deleted = 0` |
-| PAY_S004 | 查詢特定職等薪資 | HR_PAYROLL | `{"grade":"M1"}` | `grade = 'M1'`, `is_deleted = 0` |
-| PAY_S005 | 員工查詢自己薪資結構 | EMPLOYEE | `{}` | `employee_id = '{currentUserId}'`, `status = 'ACTIVE'`, `is_deleted = 0` |
+| PAY_S002 | 查詢有效薪資結構 | HR_PAYROLL | `{"isActive":true}` | `active = 'true'`, `is_deleted = 0` |
+| PAY_S003 | 查詢月薪制結構 | HR_PAYROLL | `{"payrollSystem":"MONTHLY"}` | `payroll_system = 'MONTHLY'`, `is_deleted = 0` |
+| PAY_S004 | 查詢時薪制結構 | HR_PAYROLL | `{"payrollSystem":"HOURLY"}` | `payroll_system = 'HOURLY'`, `is_deleted = 0` |
+| PAY_S005 | 組合條件查詢 | HR_PAYROLL | `{"employeeId":"E001","isActive":true}` | `employee_id = 'E001'`, `active = 'true'`, `is_deleted = 0` |
 
 ---
 
@@ -28,13 +28,13 @@
 
 | 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
 | :--- | :--- | :--- | :--- | :--- |
-| PAY_P001 | 查詢員工月薪資單 | HR_PAYROLL | `{"employeeId":"E001","yearMonth":"2025-01"}` | `employee_id = 'E001'`, `year_month = '2025-01'` |
-| PAY_P002 | 查詢部門月薪資單 | HR_PAYROLL | `{"deptId":"D001","yearMonth":"2025-01"}` | `department_id = 'D001'`, `year_month = '2025-01'` |
-| PAY_P003 | 查詢待發放薪資單 | HR_PAYROLL | `{"status":"PENDING"}` | `status = 'PENDING'` |
-| PAY_P004 | 查詢已發放薪資單 | HR_PAYROLL | `{"status":"PAID"}` | `status = 'PAID'` |
-| PAY_P005 | 員工查詢自己薪資單 | EMPLOYEE | `{"yearMonth":"2025-01"}` | `employee_id = '{currentUserId}'`, `year_month = '2025-01'` |
-| PAY_P006 | 員工查詢歷史薪資單 | EMPLOYEE | `{}` | `employee_id = '{currentUserId}'`, `status = 'PAID'` |
-| PAY_P007 | 依發放日期查詢 | HR_PAYROLL | `{"payDate":"2025-01-05"}` | `pay_date = '2025-01-05'` |
+| PAY_P001 | 查詢批次下薪資單 | HR_PAYROLL | `{"runId":"RUN001"}` | `payroll_run_id = 'RUN001'`, `is_deleted = 0` |
+| PAY_P002 | 員工查詢自己薪資單 | EMPLOYEE | `{"employeeId":"E001"}` | `employee_id = 'E001'`, `is_deleted = 0` |
+| PAY_P003 | HR 查詢特定員工薪資單 | HR_PAYROLL | `{"employeeId":"E001"}` | `employee_id = 'E001'`, `is_deleted = 0` |
+| PAY_P004 | 組合條件查詢薪資單 | HR_PAYROLL | `{"runId":"RUN001","employeeId":"E001"}` | `payroll_run_id = 'RUN001'`, `employee_id = 'E001'`, `is_deleted = 0` |
+| PAY_P005 | 員工查詢自己薪資單 | EMPLOYEE | `{"yearMonth":"2025-01"}` | `employee_id = '{currentUserId}'`, `year_month = '2025-01'`, `is_deleted = 0` |
+| PAY_P006 | 員工查詢歷史薪資單 | EMPLOYEE | `{}` | `employee_id = '{currentUserId}'`, `status = 'PAID'`, `is_deleted = 0` |
+| PAY_P007 | 依發放日期查詢 | HR_PAYROLL | `{"payDate":"2025-01-05"}` | `pay_date = '2025-01-05'`, `is_deleted = 0` |
 
 ---
 
@@ -68,6 +68,21 @@
 | PAY_O001 | 查詢員工加班費 | HR_PAYROLL | `{"employeeId":"E001","yearMonth":"2025-01"}` | `employee_id = 'E001'`, `year_month = '2025-01'` |
 | PAY_O002 | 查詢部門加班費 | HR_PAYROLL | `{"deptId":"D001","yearMonth":"2025-01"}` | `department_id = 'D001'`, `year_month = '2025-01'` |
 | PAY_O003 | 員工查詢自己加班費 | EMPLOYEE | `{"yearMonth":"2025-01"}` | `employee_id = '{currentUserId}'`, `year_month = '2025-01'` |
+
+---
+
+---
+
+## 6. 薪資批次查詢合約 (Payroll Run Query Contract)
+
+| 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
+| :--- | :--- | :--- | :--- | :--- |
+| PAY_R001 | HR 查詢特定組織薪資批次 | HR_PAYROLL | `{"organizationId":"ORG001"}` | `organization_id = 'ORG001'`, `is_deleted = 0` |
+| PAY_R002 | HR 查詢特定狀態薪資批次 | HR_PAYROLL | `{"status":"PENDING_APPROVAL"}` | `status = 'PENDING_APPROVAL'`, `is_deleted = 0` |
+| PAY_R003 | HR 查詢日期範圍內批次 | HR_PAYROLL | `{"startDate":"2025-01-01","endDate":"2025-01-31"}` | `pay_period_start >= '2025-01-01'`, `pay_period_end <= '2025-01-31'`, `is_deleted = 0` |
+| PAY_R004 | 查詢草稿狀態批次 | HR_PAYROLL | `{"status":"DRAFT"}` | `status = 'DRAFT'`, `is_deleted = 0` |
+| PAY_R005 | 查詢已核准批次 | HR_PAYROLL | `{"status":"APPROVED"}` | `status = 'APPROVED'`, `is_deleted = 0` |
+| PAY_R006 | 查詢已發薪批次 | HR_PAYROLL | `{"status":"PAID"}` | `status = 'PAID'`, `is_deleted = 0` |
 
 ---
 

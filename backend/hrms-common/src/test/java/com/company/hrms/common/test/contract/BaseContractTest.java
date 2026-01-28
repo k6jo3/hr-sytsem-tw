@@ -50,25 +50,34 @@ public abstract class BaseContractTest {
      */
     protected String loadContractSpec(String serviceName) throws IOException {
         String filename = String.format("%s_contracts.md", serviceName);
-        // 1. 嘗試直接從當前路徑載入
-        Path path = Paths.get("contracts/" + serviceName + "_contracts.md");
-        if (Files.exists(path)) {
-            return Files.readString(path);
-        }
 
-        // 2. 嘗試向上尋找專案根目錄 (最多找 5 層)
+        // Strategy 1: Check standard relative path candidates
+        // We look for "contracts" directory at various levels up to 6 parents
         Path current = Paths.get("").toAbsolutePath();
-        for (int i = 0; i < 5; i++) {
-            Path candidate = current.resolve("contracts/" + serviceName + "_contracts.md");
+        for (int i = 0; i < 6; i++) {
+            Path candidate = current.resolve("contracts/" + filename);
             if (Files.exists(candidate)) {
                 return Files.readString(candidate);
             }
+            // Also try looking in sibling directory "contracts" if we are in "backend"
+            Path candidateSibling = current.resolve("../contracts/" + filename);
+            if (Files.exists(candidateSibling)) {
+                return Files.readString(candidateSibling);
+            }
+
             current = current.getParent();
             if (current == null)
                 break;
         }
 
-        throw new RuntimeException("找不到合約檔案: " + serviceName + "_contracts.md (已嘗試從專案根目錄搜尋)");
+        // Strategy 2: Absolute fallback (finding workspace root)
+        // Try to find the "contracts" folder by searching for a marker (like "pom.xml"
+        // in backend root or just "contracts" folder)
+        // This is a last resort debug print to help diagnose
+        System.err.println("[BaseContractTest] Could not find contract file: " + filename);
+        System.err.println("[BaseContractTest] Current working directory: " + Paths.get("").toAbsolutePath());
+
+        throw new RuntimeException("找不到合約檔案: " + filename + " (已嘗試從多層父目錄搜尋)");
     }
 
     /**

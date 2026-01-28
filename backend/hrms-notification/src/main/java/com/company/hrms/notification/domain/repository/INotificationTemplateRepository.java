@@ -3,11 +3,12 @@ package com.company.hrms.notification.domain.repository;
 import java.util.List;
 import java.util.Optional;
 
-import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate;
-import com.company.hrms.notification.domain.model.valueobject.TemplateId;
-import com.company.hrms.common.query.QueryGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate;
+import com.company.hrms.notification.domain.model.valueobject.TemplateId;
 
 public interface INotificationTemplateRepository {
 
@@ -28,5 +29,5 @@ public interface INotificationTemplateRepository {
     /**
      * 動態分頁查詢
      */
-    Page<NotificationTemplate> findPage(QueryGroup queryGroup, Pageable pageable);
+    Page<NotificationTemplate> findTemplates(QueryGroup queryGroup, Pageable pageable);
 }

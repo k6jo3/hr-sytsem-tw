@@ -40,6 +40,7 @@ public class GetUserListServiceImpl
         log.info("Building query for user list: {}", request);
         return QueryBuilder.where()
                 .fromDto(request)
+                .eq("is_deleted", 0)
                 // 這裡可以加入其他隱含過濾條件，例如 .eq("tenantId", currentUser.getTenantId())
                 .build();
     }

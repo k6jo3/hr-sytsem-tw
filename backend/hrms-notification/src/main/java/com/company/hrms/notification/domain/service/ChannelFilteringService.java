@@ -1,11 +1,11 @@
 package com.company.hrms.notification.domain.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.company.hrms.notification.domain.model.aggregate.NotificationPreference;
 import com.company.hrms.notification.domain.model.valueobject.NotificationChannel;
 import com.company.hrms.notification.domain.model.valueobject.NotificationPriority;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 渠道過濾領域服務
@@ -16,6 +16,7 @@ import java.util.List;
  * @author Claude
  * @since 2025-01-23
  */
+@org.springframework.stereotype.Service
 public class ChannelFilteringService {
 
     /**

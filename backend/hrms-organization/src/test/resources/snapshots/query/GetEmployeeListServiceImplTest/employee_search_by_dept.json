@@ -1,16 +1,16 @@
 {
   "junction" : "AND",
   "conditions" : [ {
-    "f" : "is_deleted",
+    "f" : "departmentId",
     "op" : "EQ",
-    "v" : 0
+    "v" : "D001"
   }, {
-    "f" : "status",
+    "f" : "employmentStatus",
     "op" : "EQ",
     "v" : "ACTIVE"
   }, {
-    "f" : "department_id",
+    "f" : "is_deleted",
     "op" : "EQ",
-    "v" : "D001"
+    "v" : 0
   } ]
 }

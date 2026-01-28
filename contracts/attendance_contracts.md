@@ -68,6 +68,51 @@
 
 ---
 
+## 5. 補卡申請查詢合約 (Attendance Correction Query Contract)
+
+| 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
+| :--- | :--- | :--- | :--- | :--- |
+| ATT_C001 | 查詢待審核補卡 | HR | `{"status":"PENDING"}` | `status = 'PENDING'`, `is_deleted = 0` |
+| ATT_C002 | 查詢已核准補卡 | HR | `{"status":"APPROVED"}` | `status = 'APPROVED'`, `is_deleted = 0` |
+| ATT_C003 | 依員工查詢補卡 | HR | `{"employeeId":"E001"}` | `employee_id = 'E001'`, `is_deleted = 0` |
+| ATT_C004 | 依日期範圍查詢補卡 | HR | `{"startDate":"2025-01-01","endDate":"2025-01-31"}` | `correction_date >= '2025-01-01'`, `correction_date <= '2025-01-31'`, `is_deleted = 0` |
+
+---
+
+## 6. 假別設定查詢合約 (Leave Type Query Contract)
+
+| 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
+| :--- | :--- | :--- | :--- | :--- |
+| ATT_T001 | 查詢啟用假別 | HR | `{"status":"ACTIVE"}` | `is_active = 1`, `is_deleted = 0` |
+| ATT_T002 | 查詢有薪假別 | HR | `{"isPaid":true}` | `is_paid = 1`, `is_deleted = 0` |
+| ATT_T003 | 查詢無薪假別 | HR | `{"isPaid":false}` | `is_paid = 0`, `is_deleted = 0` |
+| ATT_T004 | 依組織查詢假別 | HR | `{"orgId":"ORG001"}` | `organization_id = 'ORG001'`, `is_deleted = 0` |
+
+---
+
+## 7. 班表查詢合約 (Shift Query Contract)
+
+| 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
+| :--- | :--- | :--- | :--- | :--- |
+| ATT_S001 | 查詢啟用班表 | HR | `{"status":"ACTIVE"}` | `is_active = 1`, `is_deleted = 0` |
+| ATT_S002 | 查詢停用班表 | HR | `{"status":"INACTIVE"}` | `is_active = 0`, `is_deleted = 0` |
+| ATT_S003 | 依組織查詢班表 | HR | `{"orgId":"ORG001"}` | `organization_id = 'ORG001'`, `is_deleted = 0` |
+| ATT_S004 | 依班別類型查詢 | HR | `{"type":"NORMAL"}` | `shift_type = 'NORMAL'`, `is_deleted = 0` |
+| ATT_S005 | 查詢彈性班表 | HR | `{"type":"FLEXIBLE"}` | `shift_type = 'FLEXIBLE'`, `is_deleted = 0` |
+
+---
+
+## 8. 報表查詢合約 (Report Query Contract)
+
+| 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
+| :--- | :--- | :--- | :--- | :--- |
+| ATT_R001 | 查詢月報表 | HR | `{"month":"2025-01"}` | `attendance_date >= '2025-01-01'`, `attendance_date <= '2025-01-31'`, `organization_id = 'ORG001'` |
+| ATT_R002 | 查詢部門月報表 | HR | `{"deptId":"D001","month":"2025-01"}` | `department_id = 'D001'`, `attendance_date >= '2025-01-01'`, `attendance_date <= '2025-01-31'`, `organization_id = 'ORG001'` |
+| ATT_R003 | 查詢日報表 | HR | `{"date":"2025-01-15"}` | `attendance_date = '2025-01-15'`, `organization_id = 'ORG001'` |
+| ATT_R004 | 查詢部門日報表 | HR | `{"deptId":"D001","date":"2025-01-15"}` | `department_id = 'D001'`, `attendance_date = '2025-01-15'`, `organization_id = 'ORG001'` |
+
+---
+
 ## 補充說明
 
 ### 通用安全規則
