@@ -10,6 +10,7 @@ import com.company.hrms.performance.domain.model.valueobject.ReviewId;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
  * 當 HR 確認最終評等後發布此事件，通知薪資服務進行調薪處理
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PerformanceReviewCompletedEvent extends DomainEvent {

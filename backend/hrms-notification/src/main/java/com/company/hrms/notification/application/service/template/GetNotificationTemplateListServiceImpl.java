@@ -57,7 +57,7 @@ public class GetNotificationTemplateListServiceImpl
                 // 3. 執行查詢
                 // 3. 執行查詢
                 org.springframework.data.domain.Page<NotificationTemplate> pageResult = templateRepository
-                                .findPage(queryGroup, pageable);
+                                .findTemplates(queryGroup, pageable);
                 List<NotificationTemplate> templates = pageResult.getContent();
 
                 // 4. 組裝回應

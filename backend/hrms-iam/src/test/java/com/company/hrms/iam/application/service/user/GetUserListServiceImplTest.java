@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.PageImpl;
 
 import com.company.hrms.common.test.base.BaseServiceTest;
 import com.company.hrms.iam.api.request.user.GetUserListRequest;
@@ -32,8 +33,7 @@ class GetUserListServiceImplTest extends BaseServiceTest<GetUserListServiceImpl>
                 .build();
 
         // Mock Repository
-        when(repository.findByQuery(any(), any())).thenReturn(Collections.emptyList());
-        when(repository.countByQuery(any())).thenReturn(0L);
+        when(repository.findPage(any(), any())).thenReturn(new PageImpl<>(Collections.emptyList()));
 
         // When
         executeAndCaptureWithResult(() -> {
@@ -56,8 +56,7 @@ class GetUserListServiceImplTest extends BaseServiceTest<GetUserListServiceImpl>
                 .username("john_doe")
                 .build();
 
-        when(repository.findByQuery(any(), any())).thenReturn(Collections.emptyList());
-        when(repository.countByQuery(any())).thenReturn(0L);
+        when(repository.findPage(any(), any())).thenReturn(new PageImpl<>(Collections.emptyList()));
 
         // When
         executeAndCaptureWithResult(() -> {

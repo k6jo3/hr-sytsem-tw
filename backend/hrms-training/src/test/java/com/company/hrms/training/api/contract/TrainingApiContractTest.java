@@ -79,6 +79,7 @@ public class TrainingApiContractTest extends BaseContractTest {
             // Given: 員工查詢開放報名中的課程
             QueryGroup query = QueryBuilder.where()
                     .eq("status", "OPEN")
+                    .eq("is_deleted", 0)
                     .build();
 
             // Then: 驗證合約 TRN_C001
@@ -94,6 +95,7 @@ public class TrainingApiContractTest extends BaseContractTest {
             // Given: 查詢技術類課程
             QueryGroup query = QueryBuilder.where()
                     .eq("category", "TECHNICAL")
+                    .eq("is_deleted", 0)
                     .build();
 
             // Then: 驗證合約 TRN_C005
@@ -109,6 +111,7 @@ public class TrainingApiContractTest extends BaseContractTest {
             // Given: 以關鍵字搜尋課程
             QueryGroup query = QueryBuilder.where()
                     .like("name", "領導")
+                    .eq("is_deleted", 0)
                     .build();
 
             // Then: 驗證合約 TRN_C006
@@ -143,6 +146,7 @@ public class TrainingApiContractTest extends BaseContractTest {
             QueryGroup query = QueryBuilder.where()
                     .fromDto(request)
                     .eq("employeeId", currentUserId) // 強制加入員工ID過濾
+                    .eq("is_deleted", 0)
                     .build();
 
             // Then: 驗證 QueryGroup 包含員工 ID 過濾
@@ -158,6 +162,7 @@ public class TrainingApiContractTest extends BaseContractTest {
             // Given: HR 查詢待審核的報名
             QueryGroup query = QueryBuilder.where()
                     .eq("status", "PENDING")
+                    .eq("is_deleted", 0)
                     .build();
 
             // Then: 驗證合約 TRN_E003
@@ -179,6 +184,7 @@ public class TrainingApiContractTest extends BaseContractTest {
             QueryGroup query = QueryBuilder.where()
                     .fromDto(request)
                     .eq("employeeId", currentUserId)
+                    .eq("is_deleted", 0)
                     .build();
 
             // Then: 驗證包含員工ID和狀態過濾
@@ -203,6 +209,7 @@ public class TrainingApiContractTest extends BaseContractTest {
             // Given: HR 查詢特定員工的證照
             QueryGroup query = QueryBuilder.where()
                     .eq("employee_id", "E001")
+                    .eq("is_deleted", 0)
                     .build();
 
             // Then: 驗證合約 TRN_CT001
@@ -224,6 +231,7 @@ public class TrainingApiContractTest extends BaseContractTest {
             QueryGroup query = QueryBuilder.where()
                     .and("expiry_date", Operator.LTE, threshold)
                     .eq("status", "VALID")
+                    .eq("is_deleted", 0)
                     .build();
 
             // Then: 驗證包含到期日和狀態過濾
@@ -242,6 +250,7 @@ public class TrainingApiContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("employee_id", currentUserId)
+                    .eq("is_deleted", 0)
                     .build();
 
             // Then: 驗證包含員工 ID 過濾

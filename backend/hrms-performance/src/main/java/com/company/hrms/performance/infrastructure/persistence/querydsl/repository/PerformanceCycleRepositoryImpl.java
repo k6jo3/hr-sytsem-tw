@@ -46,7 +46,11 @@ public class PerformanceCycleRepositoryImpl
         super.save(entity);
 
         // 發布 Domain Events（如果有的話）
-        // TODO: 實作 Domain Events 發布
+        // 實作 Domain Events 發布
+        if (cycle.getDomainEvents() != null) {
+            cycle.getDomainEvents().forEach(eventPublisher::publish);
+            cycle.clearDomainEvents();
+        }
 
         return cycle;
     }

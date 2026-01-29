@@ -1,13 +1,13 @@
 package com.company.hrms.notification.api.response.notification;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 發送通知回應
@@ -57,6 +57,12 @@ public class SendNotificationResponse {
      */
     @Schema(description = "發送時間", example = "2025-12-30T10:00:00")
     private LocalDateTime sentAt;
+
+    /**
+     * 業務連結 URL
+     */
+    @Schema(description = "業務連結 URL", example = "/attendance/leave/applications/leave-001")
+    private String businessUrl;
 
     /**
      * 各渠道發送結果

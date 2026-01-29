@@ -1,8 +1,11 @@
 package com.company.hrms.notification.application.service.send;
 
-import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.notification.api.request.notification.SendBatchNotificationRequest;
-import com.company.hrms.notification.api.response.notification.SendBatchNotificationResponse;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,22 +14,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.notification.api.request.notification.SendBatchNotificationRequest;
+import com.company.hrms.notification.api.response.notification.SendBatchNotificationResponse;
 
 /**
  * SendBatchNotificationServiceImpl 測試
  * <p>
  * 測試範圍：
  * <ol>
- *     <li>批次發送功能</li>
- *     <li>收件人數量驗證</li>
- *     <li>分批處理邏輯</li>
- *     <li>並行發送處理</li>
- *     <li>結果彙總</li>
+ * <li>批次發送功能</li>
+ * <li>收件人數量驗證</li>
+ * <li>分批處理邏輯</li>
+ * <li>並行發送處理</li>
+ * <li>結果彙總</li>
  * </ol>
  * </p>
  *
@@ -41,6 +42,30 @@ class SendBatchNotificationServiceTest {
 
     @Autowired
     private SendBatchNotificationServiceImpl sendBatchNotificationService;
+
+    @org.springframework.boot.test.context.TestConfiguration
+    static class MockConfig {
+        @org.springframework.context.annotation.Bean
+        public org.springframework.messaging.simp.SimpMessagingTemplate simpMessagingTemplate() {
+            return org.mockito.Mockito.mock(org.springframework.messaging.simp.SimpMessagingTemplate.class);
+        }
+
+        @org.springframework.context.annotation.Bean
+        public org.springframework.mail.javamail.JavaMailSender javaMailSender() {
+            return org.mockito.Mockito.mock(org.springframework.mail.javamail.JavaMailSender.class);
+        }
+
+        @org.springframework.context.annotation.Bean
+        public org.springframework.web.client.RestTemplate restTemplate() {
+            return org.mockito.Mockito.mock(org.springframework.web.client.RestTemplate.class);
+        }
+
+        @org.springframework.context.annotation.Bean
+        public com.company.hrms.notification.infrastructure.client.organization.OrganizationServiceClient organizationServiceClient() {
+            return org.mockito.Mockito.mock(
+                    com.company.hrms.notification.infrastructure.client.organization.OrganizationServiceClient.class);
+        }
+    }
 
     private JWTModel mockUser;
 
@@ -161,8 +186,7 @@ class SendBatchNotificationServiceTest {
                 "emp-002",
                 "emp-003",
                 "", // 無效收件人
-                "emp-004"
-        );
+                "emp-004");
 
         SendBatchNotificationRequest request = SendBatchNotificationRequest.builder()
                 .recipientIds(recipientIds)

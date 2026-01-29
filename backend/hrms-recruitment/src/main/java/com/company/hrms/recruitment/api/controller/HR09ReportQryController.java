@@ -59,15 +59,8 @@ public class HR09ReportQryController extends QueryBaseController {
         byte[] content = getResponse(searchDto, currentUser);
 
         // 決定 Content-Type 和檔名
-        String contentType;
-        String extension;
-        if (searchDto.getFormat() == ExportSearchDto.ExportFormat.PDF) {
-            contentType = "application/pdf";
-            extension = "pdf";
-        } else {
-            contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            extension = "xlsx";
-        }
+        String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        String extension = "xlsx";
 
         String filename = String.format("recruitment_report_%s.%s",
                 LocalDate.now().format(MONTH_FORMATTER), extension);

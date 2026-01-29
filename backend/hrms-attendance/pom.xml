@@ -26,9 +26,10 @@
         <dependency>
             <groupId>com.company.hrms</groupId>
             <artifactId>hrms-common</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
-            <version>1.0.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Spring Boot Web -->

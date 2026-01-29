@@ -1,15 +1,16 @@
 package com.company.hrms.iam.domain.model.aggregate;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.iam.domain.model.valueobject.Email;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.model.valueobject.UserStatus;
+
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User 聚合根
@@ -105,14 +106,15 @@ public class User {
 
     /**
      * 建立新使用者
-     * @param username 使用者名稱
-     * @param email Email
+     * 
+     * @param username     使用者名稱
+     * @param email        Email
      * @param passwordHash 密碼雜湊
-     * @param displayName 顯示名稱
+     * @param displayName  顯示名稱
      * @return 新的 User 實例
      */
     public static User create(String username, String email,
-                               String passwordHash, String displayName) {
+            String passwordHash, String displayName) {
         return User.builder()
                 .id(UserId.generate())
                 .username(username)
@@ -131,17 +133,18 @@ public class User {
 
     /**
      * 建立新使用者 (完整版)
-     * @param username 使用者名稱
-     * @param email Email
+     * 
+     * @param username     使用者名稱
+     * @param email        Email
      * @param passwordHash 密碼雜湊
-     * @param displayName 顯示名稱
-     * @param employeeId 員工 ID
-     * @param tenantId 租戶 ID
+     * @param displayName  顯示名稱
+     * @param employeeId   員工 ID
+     * @param tenantId     租戶 ID
      * @return 新的 User 實例
      */
     public static User createWithTenant(String username, String email,
-                                        String passwordHash, String displayName,
-                                        String employeeId, String tenantId) {
+            String passwordHash, String displayName,
+            String employeeId, String tenantId) {
         return User.builder()
                 .id(UserId.generate())
                 .username(username)
@@ -164,6 +167,7 @@ public class User {
 
     /**
      * 啟用使用者
+     * 
      * @throws DomainException 若使用者已被刪除
      */
     public void activate() {
@@ -186,6 +190,7 @@ public class User {
 
     /**
      * 鎖定使用者
+     * 
      * @param until 鎖定到期時間
      */
     public void lock(LocalDateTime until) {
@@ -225,7 +230,8 @@ public class User {
 
     /**
      * 更新基本資料
-     * @param email 新的 Email
+     * 
+     * @param email       新的 Email
      * @param displayName 新的顯示名稱
      */
     public void updateProfile(String email, String displayName) {
@@ -240,6 +246,7 @@ public class User {
 
     /**
      * 變更密碼
+     * 
      * @param newPasswordHash 新密碼雜湊
      */
     public void changePassword(String newPasswordHash) {
@@ -254,6 +261,7 @@ public class User {
 
     /**
      * 管理員重置密碼
+     * 
      * @param newPasswordHash 新密碼雜湊
      */
     public void resetPassword(String newPasswordHash) {
@@ -273,6 +281,7 @@ public class User {
 
     /**
      * 設定員工 ID
+     * 
      * @param employeeId 員工 ID
      */
     public void setEmployeeId(String employeeId) {
@@ -282,6 +291,7 @@ public class User {
 
     /**
      * 設定是否需要首次登入變更密碼
+     * 
      * @param mustChangePassword 是否需要變更密碼
      */
     public void setMustChangePassword(boolean mustChangePassword) {
@@ -291,6 +301,7 @@ public class User {
 
     /**
      * 檢查使用者是否已鎖定
+     * 
      * @return 是否已鎖定
      */
     public boolean isLocked() {
@@ -298,7 +309,8 @@ public class User {
     }
 
     /**
-     * 檢查使用者是否啟用
+     * 檢查使用者是否已啟用
+     * 
      * @return 是否啟用
      */
     public boolean isActive() {
@@ -306,7 +318,17 @@ public class User {
     }
 
     /**
+     * 檢查使用者是否已刪除
+     * 
+     * @return 是否已刪除
+     */
+    public boolean isDeleted() {
+        return this.status == UserStatus.DELETED;
+    }
+
+    /**
      * 檢查密碼是否過期 (預設 90 天)
+     * 
      * @param maxAgeDays 密碼最大使用天數
      * @return 是否已過期
      */
@@ -319,6 +341,7 @@ public class User {
 
     /**
      * 指派角色
+     * 
      * @param role 角色名稱
      */
     public void assignRole(String role) {
@@ -330,6 +353,7 @@ public class User {
 
     /**
      * 移除角色
+     * 
      * @param role 角色名稱
      */
     public void removeRole(String role) {
@@ -340,6 +364,7 @@ public class User {
 
     /**
      * 檢查是否擁有指定角色
+     * 
      * @param role 角色名稱
      * @return 是否擁有
      */

@@ -3,6 +3,7 @@ package com.company.hrms.iam.application.service.user;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,6 +41,7 @@ public class GetUserListServiceImpl
         log.info("Building query for user list: {}", request);
         return QueryBuilder.where()
                 .fromDto(request)
+                .eq("is_deleted", 0)
                 // 這裡可以加入其他隱含過濾條件，例如 .eq("tenantId", currentUser.getTenantId())
                 .build();
     }
@@ -57,14 +59,12 @@ public class GetUserListServiceImpl
 
         // 簡單處理排序
         Sort sort = Sort.by(Sort.Direction.DESC, "create_time");
-        if (request.getSort() != null && !request.getSort().isEmpty()) {
-            // TODO: 解析排序字串
-        }
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        List<User> users = userRepository.findByQuery(query, pageable);
-        long total = userRepository.countByQuery(query);
+        Page<User> userPage = userRepository.findPage(query, pageable);
+        List<User> users = userPage.getContent();
+        long total = userPage.getTotalElements();
 
         List<UserListResponse> items = users.stream()
                 .map(this::toListResponse)
@@ -75,7 +75,7 @@ public class GetUserListServiceImpl
                 .total(total)
                 .page(request.getPage())
                 .size(request.getSize())
-                .totalPages((int) Math.ceil((double) total / size))
+                .totalPages(userPage.getTotalPages())
                 .build();
     }
 

@@ -103,4 +103,11 @@ public class UserDAO {
     public void insertUserRole(String userId, String roleId) {
         userMapper.insertUserRole(userId, roleId);
     }
+
+    /**
+     * 查詢使用者的角色列表
+     */
+    public List<String> selectUserRoles(String userId) {
+        return userMapper.selectUserRoles(userId);
+    }
 }

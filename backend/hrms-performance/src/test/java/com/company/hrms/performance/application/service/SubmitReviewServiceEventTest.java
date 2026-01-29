@@ -115,10 +115,10 @@ class SubmitReviewServiceEventTest {
         // (Default void mock does nothing)
 
         // Capture events from EventPublisher
-        final List<DomainEvent>[] capturedEventsWrapper = new List[1];
+        final java.util.concurrent.atomic.AtomicReference<List<DomainEvent>> capturedEventsWrapper = new java.util.concurrent.atomic.AtomicReference<>();
         doAnswer(invocation -> {
             List<DomainEvent> events = invocation.getArgument(0);
-            capturedEventsWrapper[0] = new ArrayList<>(events);
+            capturedEventsWrapper.set(new ArrayList<>(events));
             return null;
         }).when(eventPublisher).publishAll(any());
 
@@ -130,7 +130,7 @@ class SubmitReviewServiceEventTest {
         verify(submitEvaluationTask).execute(any(SubmitReviewContext.class));
         verify(eventPublisher, times(1)).publishAll(any());
 
-        List<DomainEvent> publishedEvents = capturedEventsWrapper[0];
+        List<DomainEvent> publishedEvents = capturedEventsWrapper.get();
         assertNotNull(publishedEvents, "Events should have been published");
         assertEquals(1, publishedEvents.size());
         assertEquals(PerformanceReviewSubmittedEvent.class, publishedEvents.get(0).getClass());

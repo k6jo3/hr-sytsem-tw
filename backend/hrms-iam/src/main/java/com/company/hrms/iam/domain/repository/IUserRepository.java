@@ -3,11 +3,14 @@ package com.company.hrms.iam.domain.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.model.valueobject.Email;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.model.valueobject.UserStatus;
-import com.company.hrms.common.query.QueryGroup;
 
 /**
  * User Repository 介面
@@ -59,12 +62,19 @@ public interface IUserRepository {
     List<User> findAll();
 
     /**
-     * 動態查詢 (支援 QueryGroup)
+     * 動態分頁查詢
      */
-    List<User> findByQuery(QueryGroup query,
-            org.springframework.data.domain.Pageable pageable);
+    Page<User> findPage(QueryGroup query, Pageable pageable);
 
-    long countByQuery(QueryGroup query);
+    /**
+     * 動態查詢所有符合條件的人員
+     */
+    List<User> findAll(QueryGroup query);
+
+    /**
+     * 動態查詢符合條件的人數
+     */
+    long count(QueryGroup query);
 
     /**
      * 儲存使用者

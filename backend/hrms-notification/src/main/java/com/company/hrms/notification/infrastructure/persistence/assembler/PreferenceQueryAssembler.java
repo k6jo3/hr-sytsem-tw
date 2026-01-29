@@ -1,7 +1,8 @@
 package com.company.hrms.notification.infrastructure.persistence.assembler;
 
-import com.company.hrms.common.query.QueryGroup;
 import org.springframework.stereotype.Component;
+
+import com.company.hrms.common.query.QueryGroup;
 
 /**
  * 通知偏好設定查詢條件組裝器
@@ -13,6 +14,10 @@ import org.springframework.stereotype.Component;
  * - 使用 QueryGroup.and() 作為起點
  * - 使用流暢方法鏈 (query.eq() 等)
  * - 條件式添加過濾器
+ * </p>
+ * <p>
+ * 注意：QueryBuilder.eq() 使用 JPA entity 欄位名稱 (camelCase)，
+ * NOT database column names (snake_case)
  * </p>
  *
  * @author Claude
@@ -30,8 +35,8 @@ public class PreferenceQueryAssembler {
     public QueryGroup queryByEmployeeId(String employeeId) {
         QueryGroup query = QueryGroup.and();
 
-        query.eq("employee_id", employeeId);
-        query.eq("is_deleted", 0);
+        query.eq("employeeId", employeeId);
+        query.eq("isDeleted", false);
 
         return query;
     }
@@ -45,8 +50,8 @@ public class PreferenceQueryAssembler {
     public QueryGroup existsByEmployeeId(String employeeId) {
         QueryGroup query = QueryGroup.and();
 
-        query.eq("employee_id", employeeId);
-        query.eq("is_deleted", 0);
+        query.eq("employeeId", employeeId);
+        query.eq("isDeleted", false);
 
         return query;
     }
@@ -59,8 +64,8 @@ public class PreferenceQueryAssembler {
     public QueryGroup queryEmailEnabledPreferences() {
         QueryGroup query = QueryGroup.and();
 
-        query.eq("email_enabled", 1);
-        query.eq("is_deleted", 0);
+        query.eq("emailEnabled", true);
+        query.eq("isDeleted", false);
 
         return query;
     }
@@ -73,8 +78,8 @@ public class PreferenceQueryAssembler {
     public QueryGroup queryPushEnabledPreferences() {
         QueryGroup query = QueryGroup.and();
 
-        query.eq("push_enabled", 1);
-        query.eq("is_deleted", 0);
+        query.eq("pushEnabled", true);
+        query.eq("isDeleted", false);
 
         return query;
     }

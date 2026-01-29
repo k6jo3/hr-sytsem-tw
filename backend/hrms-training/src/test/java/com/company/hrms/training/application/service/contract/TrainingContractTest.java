@@ -54,6 +54,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("status", "OPEN")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_C001");
@@ -66,6 +67,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("status", "IN_PROGRESS")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_C002");
@@ -78,6 +80,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("status", "COMPLETED")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_C003");
@@ -90,6 +93,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("type", "MANDATORY")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_C004");
@@ -102,6 +106,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("category", "TECHNICAL")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_C005");
@@ -114,6 +119,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .like("name", "領導")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_C006");
@@ -126,6 +132,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("mode", "ONLINE")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_C007");
@@ -138,6 +145,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("mode", "OFFLINE")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_C008");
@@ -150,6 +158,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("instructor_id", "E001")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_C009");
@@ -170,6 +179,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("course_id", "C001")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_E001");
@@ -182,6 +192,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("employee_id", "E001")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_E002");
@@ -194,6 +205,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("status", "PENDING")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_E003");
@@ -206,6 +218,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("status", "APPROVED")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_E004");
@@ -223,6 +236,7 @@ public class TrainingContractTest extends BaseContractTest {
             QueryGroup query = QueryBuilder.where()
                     .fromDto(request)
                     .eq("employeeId", currentUserId) // 強制加入員工ID過濾
+                    .eq("is_deleted", 0)
                     .build();
 
             // 驗證包含員工 ID 過濾
@@ -240,6 +254,7 @@ public class TrainingContractTest extends BaseContractTest {
             QueryGroup query = QueryBuilder.where()
                     .fromDto(request)
                     .eq("employeeId", currentUserId)
+                    .eq("is_deleted", 0)
                     .build();
 
             // 驗證包含員工 ID 和狀態過濾
@@ -262,6 +277,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("employee_id", "E001")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_CT001");
@@ -274,6 +290,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("status", "VALID")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_CT002");
@@ -287,6 +304,7 @@ public class TrainingContractTest extends BaseContractTest {
             QueryGroup query = QueryBuilder.where()
                     .and("expiry_date", Operator.LTE, threshold)
                     .eq("status", "VALID")
+                    .eq("is_deleted", 0)
                     .build();
 
             // 驗證包含到期日和狀態過濾
@@ -301,6 +319,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("status", "EXPIRED")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_CT004");
@@ -313,6 +332,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("employee_id", currentUserId)
+                    .eq("is_deleted", 0)
                     .build();
 
             assertHasFilterForField(query, "employee_id");
@@ -325,6 +345,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("cert_type", "PROFESSIONAL")
+                    .eq("is_deleted", 0)
                     .build();
 
             assertContract(query, contract, "TRN_CT006");
@@ -404,6 +425,7 @@ public class TrainingContractTest extends BaseContractTest {
             QueryGroup query = QueryBuilder.where()
                     .fromDto(request)
                     .eq("employeeId", currentUserId)
+                    .eq("is_deleted", 0)
                     .build();
 
             // 驗證 QueryGroup 包含員工 ID 過濾
@@ -417,6 +439,7 @@ public class TrainingContractTest extends BaseContractTest {
 
             QueryGroup query = QueryBuilder.where()
                     .eq("employee_id", currentUserId)
+                    .eq("is_deleted", 0)
                     .build();
 
             assertHasFilterForField(query, "employee_id");
@@ -434,6 +457,7 @@ public class TrainingContractTest extends BaseContractTest {
             QueryGroup query = QueryBuilder.where()
                     .fromDto(request)
                     .eq("employeeId", currentUserId)
+                    .eq("is_deleted", 0)
                     .build();
 
             // 驗證 QueryGroup 包含所有需要的過濾條件

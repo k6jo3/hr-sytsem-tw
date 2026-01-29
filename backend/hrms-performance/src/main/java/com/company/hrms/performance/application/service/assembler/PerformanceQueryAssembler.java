@@ -16,6 +16,7 @@ public class PerformanceQueryAssembler {
     public QueryGroup toQueryGroup(GetCyclesRequest request) {
         return QueryBuilder.where()
                 .fromDto(request)
+                .eq("is_deleted", 0)
                 .build();
     }
 
@@ -25,6 +26,7 @@ public class PerformanceQueryAssembler {
     public QueryGroup toQueryGroup(GetMyReviewsRequest request) {
         return QueryBuilder.where()
                 .fromDto(request)
+                .eq("is_deleted", 0)
                 .build();
     }
 }

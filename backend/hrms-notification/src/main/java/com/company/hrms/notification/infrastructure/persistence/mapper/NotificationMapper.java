@@ -1,17 +1,22 @@
 package com.company.hrms.notification.infrastructure.persistence.mapper;
 
-import com.company.hrms.notification.domain.model.aggregate.Notification;
-import com.company.hrms.notification.domain.model.valueobject.*;
-import com.company.hrms.notification.infrastructure.persistence.entity.NotificationPO;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.company.hrms.notification.domain.model.aggregate.Notification;
+import com.company.hrms.notification.domain.model.valueobject.NotificationChannel;
+import com.company.hrms.notification.domain.model.valueobject.NotificationId;
+import com.company.hrms.notification.domain.model.valueobject.NotificationPriority;
+import com.company.hrms.notification.domain.model.valueobject.NotificationStatus;
+import com.company.hrms.notification.domain.model.valueobject.NotificationType;
+import com.company.hrms.notification.infrastructure.persistence.entity.NotificationPO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 通知領域物件與持久化物件轉換器
@@ -53,6 +58,7 @@ public class NotificationMapper {
                 .channels(serializeChannels(notification.getChannels()))
                 .relatedBusinessId(notification.getRelatedBusinessId())
                 .relatedBusinessType(notification.getRelatedBusinessType())
+                .relatedBusinessUrl(notification.getRelatedBusinessUrl())
                 .templateCode(notification.getTemplateCode())
                 .templateVariables(serializeTemplateVariables(notification.getTemplateVariables()))
                 .sentAt(notification.getSentAt())
@@ -91,6 +97,7 @@ public class NotificationMapper {
         notification.setChannels(deserializeChannels(po.getChannels()));
         notification.setRelatedBusinessId(po.getRelatedBusinessId());
         notification.setRelatedBusinessType(po.getRelatedBusinessType());
+        notification.setRelatedBusinessUrl(po.getRelatedBusinessUrl());
         notification.setTemplateCode(po.getTemplateCode());
         notification.setTemplateVariables(deserializeTemplateVariables(po.getTemplateVariables()));
         notification.setSentAt(po.getSentAt());
@@ -134,8 +141,8 @@ public class NotificationMapper {
         try {
             List<String> channelNames = objectMapper.readValue(
                     channelsJson,
-                    new TypeReference<List<String>>() {}
-            );
+                    new TypeReference<List<String>>() {
+                    });
             return channelNames.stream()
                     .map(NotificationChannel::valueOf)
                     .toList();
@@ -168,8 +175,8 @@ public class NotificationMapper {
         try {
             return objectMapper.readValue(
                     variablesJson,
-                    new TypeReference<Map<String, Object>>() {}
-            );
+                    new TypeReference<Map<String, Object>>() {
+                    });
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to deserialize template variables", e);
         }

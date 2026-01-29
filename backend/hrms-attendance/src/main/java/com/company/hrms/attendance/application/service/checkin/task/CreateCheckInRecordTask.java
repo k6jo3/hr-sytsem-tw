@@ -33,7 +33,7 @@ public class CreateCheckInRecordTask implements PipelineTask<AttendanceContext> 
 
         log.debug("建立打卡記錄: employeeId={}, time={}", employeeId, checkInTime);
 
-        // Get default shift (TODO: Get employee's assigned shift)
+        // Get default shift
         Shift shift = shiftRepository.findAll().stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("找不到班別設定"));

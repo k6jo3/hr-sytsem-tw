@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.controller.QueryBaseController;
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.performance.api.request.ExportReportRequest;
 import com.company.hrms.performance.api.request.GetDistributionRequest;
 import com.company.hrms.performance.api.response.GetDistributionResponse;
-import com.company.hrms.performance.api.response.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,11 +31,4 @@ public class HR08ReportQryController extends QueryBaseController {
         return ResponseEntity.ok(getResponse(request, currentUser));
     }
 
-    @Operation(summary = "匯出績效報表", operationId = "exportReport")
-    @GetMapping("/export/{cycleId}")
-    public ResponseEntity<SuccessResponse> exportReport(@PathVariable String cycleId,
-            @CurrentUser JWTModel currentUser) throws Exception {
-        ExportReportRequest request = ExportReportRequest.builder().cycleId(cycleId).build();
-        return ResponseEntity.ok(getResponse(request, currentUser));
-    }
 }

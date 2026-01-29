@@ -1,24 +1,23 @@
 package com.company.hrms.notification.api.request.notification;
 
+import java.util.List;
+import java.util.Map;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * 批次發送通知請求
  * <p>
  * 支援兩種收件人指定方式：
  * <ol>
- *     <li>直接指定收件人 ID 列表 (recipientIds)</li>
- *     <li>使用過濾條件查詢收件人 (recipientFilter)</li>
+ * <li>直接指定收件人 ID 列表 (recipientIds)</li>
+ * <li>使用過濾條件查詢收件人 (recipientFilter)</li>
  * </ol>
  * 批次上限：500 人
  * </p>
@@ -50,7 +49,7 @@ public class SendBatchNotificationRequest {
      */
     @NotBlank(message = "通知標題不可為空")
     @Size(min = 1, max = 200, message = "通知標題長度必須在 1-200 字元之間")
-    @Schema(description = "通知標題", example = "系統維護通知", required = true)
+    @Schema(description = "通知標題", example = "系統維護通知")
     private String title;
 
     /**
@@ -64,7 +63,7 @@ public class SendBatchNotificationRequest {
      * 通知類型
      */
     @NotBlank(message = "通知類型不可為空")
-    @Schema(description = "通知類型", example = "SYSTEM_NOTICE", required = true)
+    @Schema(description = "通知類型", example = "SYSTEM_NOTICE")
     private String notificationType;
 
     /**

@@ -1,7 +1,7 @@
 # CLAUDE.md - AI Assistant Guide
 
-**Version:** 3.1
-**Last Updated:** 2025-12-09
+**Version:** 3.2
+**Last Updated:** 2026-01-28
 **Purpose:** This document provides AI assistants with comprehensive guidance for understanding and working with this HR & Project Management System codebase.
 
 ---
@@ -95,41 +95,86 @@ hr-system-2/
 ├── CLAUDE.md                           # This file - AI assistant guide
 ├── LICENSE
 │
-├── SA/                                 # System Analysis documents
-│   ├── 人力資源暨專案管理系統_正式需求規格書.md
-│   ├── PM需求審查報告.md
-│   ├── 系統開發工作計畫書.md
-│   ├── 01_IAM服務需求分析書.md
-│   └── ... (14 service requirement docs)
-│
-├── spec/                               # System Design documents
-│   ├── 系統架構設計文件.md              # Overall architecture & DDD layers
-│   ├── 系統架構設計文件_命名規範.md      # Naming conventions
-│   ├── 系統實作合規性檢查報告.md        # Implementation compliance check report
-│   ├── 系統設計書與需求分析書合規性檢查報告.md  # Design vs requirements compliance
-│   ├── 系統設計書命名規範合規性檢查.md   # Naming convention compliance check
-│   ├── 01_IAM服務系統設計書*.md         # IAM service design (3 parts)
-│   ├── 02_組織員工服務系統設計書*.md    # Organization service (4 parts)
-│   ├── ... (All 14 microservices)
+├── knowledge/                          # 📚 知識庫 - 所有規格文件
+│   ├── README.md                       # 知識庫導覽
 │   │
-│   └── logic_spec/                     # Business Logic Specifications
-│       ├── variable_hours_rules.md              # Variable working hours
-│       ├── occupational_injury_compensation.md  # Work injury compensation
-│       ├── tax_insurance_tables_2025.md         # 2025 tax/insurance tables
-│       ├── sso_account_linking.md               # SSO account linking
-│       └── regulatory_parameters_and_audit.md   # Regulatory param management
+│   ├── 01_Client_Requirements/         # 客戶需求 (原 SA 根目錄)
+│   │   ├── 人力資源暨專案管理系統_正式需求規格書.md
+│   │   ├── PM需求審查報告.md
+│   │   └── 系統開發工作計畫書.md
+│   │
+│   ├── 02_Requirements_Analysis/       # 需求分析書 (14 服務)
+│   │   ├── 01_IAM服務需求分析書.md
+│   │   ├── 02_組織員工服務需求分析書.md
+│   │   └── ... (01-14 服務需求分析)
+│   │
+│   ├── 02_System_Design/               # 系統設計書 (14 服務)
+│   │   ├── 01_IAM服務系統設計書.md
+│   │   ├── 02_組織員工服務系統設計書.md
+│   │   └── ... (01-14 服務系統設計)
+│   │
+│   ├── 03_Logic_Specifications/        # 複雜業務邏輯規格
+│   │   ├── 01_IAM_Domain_Layer_and_Data.md     # IAM 領域層設計
+│   │   ├── variable_hours_rules.md              # 彈性工時規則
+│   │   ├── occupational_injury_compensation.md  # 職災補償
+│   │   ├── tax_insurance_tables_2025.md         # 2025 稅保表
+│   │   ├── sso_account_linking.md               # SSO 帳號連結
+│   │   └── regulatory_parameters_and_audit.md   # 法規參數管理
+│   │
+│   ├── 04_API_Specifications/          # API 詳細規格
+│   │   ├── 01_IAM服務系統設計書_API詳細規格.md
+│   │   └── ... (01-14 服務 API 規格)
+│   │
+│   └── 05_Reports/                     # 合規性檢查報告
+│       ├── 系統實作合規性檢查報告.md
+│       ├── 系統設計書命名規範合規性檢查.md
+│       └── 系統設計書與需求分析書合規性檢查報告.md
 │
-├── backend/                            # Backend microservices
-│   ├── 架構說明與開發規範.md
+├── framework/                          # 🏗️ 架構框架 - 開發規範與技術文件
+│   ├── README.md                       # 架構框架總覽
+│   │
+│   ├── architecture/                   # 架構設計規範
+│   │   ├── 01_核心架構原則.md          # 設計哲學與原則
+│   │   ├── 02_DDD分層設計.md           # 四層 DDD 架構說明
+│   │   ├── 03_Business_Pipeline.md     # ⭐ 宣告式業務流水線
+│   │   ├── Fluent-Query-Engine.md      # ⭐ 宣告式查詢引擎
+│   │   ├── Generic-Library-Architecture.md  # 泛型程式庫架構
+│   │   ├── 系統架構設計文件.md          # 整體架構 & DDD 層級
+│   │   └── 系統架構設計文件_命名規範.md  # 命名規範
+│   │
+│   ├── development/                    # 開發流程規範
+│   │   ├── 01_開發流程.md              # 五階段開發流程
+│   │   ├── 02_命名規範.md              # 統一命名標準
+│   │   ├── 03_Backend_Guide.md         # 後端實作指南
+│   │   └── 04_Frontend_Guide.md        # 前端實作指南
+│   │
+│   ├── testing/                        # 測試架構規範
+│   │   ├── 01_測試架構總覽.md          # 測試策略與金字塔
+│   │   ├── 02_三階測試法.md            # 引擎契約/業務組裝/資料工廠
+│   │   ├── 03_快照測試方法論.md        # JSON 快照比對方法
+│   │   ├── 04_合約驅動測試.md          # Markdown 合約斷言
+│   │   ├── 05_測試基類設計.md          # 測試基類說明
+│   │   └── 測試架構規範.md             # 完整測試架構規範
+│   │
+│   └── templates/                      # 專案模板
+│       └── backend-module-template/    # 後端模組模板
+│
+├── contracts/                          # 📋 合約測試規格
+│   ├── iam_contracts.md                # IAM 服務合約
+│   ├── organization_contracts.md       # 組織服務合約
+│   ├── attendance_contracts.md         # 考勤服務合約
+│   ├── payroll_contracts.md            # 薪資服務合約
+│   └── ... (14 服務合約測試規格)
+│
+├── backend/                            # 後端微服務
 │   ├── pom.xml                         # Parent POM
-│   ├── hrms-common/                    # Shared libraries
+│   ├── hrms-common/                    # 共用程式庫
 │   ├── hrms-iam/                       # IAM Service (01)
 │   ├── hrms-organization/              # Organization Service (02)
 │   └── ... (14 microservices total)
 │
-└── frontend/                           # React frontend
-    ├── 架構說明與開發規範.md
-    ├── TEST_SUMMARY.md                 # TDD test summary and progress
+└── frontend/                           # React 前端
+    ├── TEST_SUMMARY.md                 # TDD 測試摘要與進度
     ├── package.json
     ├── vite.config.ts
     ├── tsconfig.json
@@ -326,7 +371,8 @@ Organization → EmployeeCreatedEvent
 **When adding a new API endpoint:**
 
 1. **Read the Design Document** first:
-   - `spec/{NN}_{ServiceName}服務系統設計書.md`
+   - `knowledge/02_System_Design/{NN}_{ServiceName}服務系統設計書.md`
+   - `knowledge/04_API_Specifications/{NN}_{ServiceName}_API詳細規格.md`
    - Check API design section for endpoint specification
    - Review UX flow diagrams for business logic
 
@@ -371,7 +417,7 @@ Organization → EmployeeCreatedEvent
 **When adding a new page:**
 
 1. **Check Design Document**:
-   - `spec/{NN}_{ServiceName}服務系統設計書.md`
+   - `knowledge/02_System_Design/{NN}_{ServiceName}服務系統設計書.md`
    - Review UI wireframes and page codes (HR{DD}-P{XX})
 
 2. **Create Page Component** in `src/pages/`:
@@ -554,9 +600,9 @@ POST   /api/v1/employees/{id}/terminate  # Terminate employee (action)
 ### 1. Always Read Design Documents First
 
 **Before implementing any feature:**
-1. Check `spec/{NN}_{ServiceName}服務系統設計書.md`
-2. Review API specifications (Chapter 9)
-3. Study UX flow diagrams (Chapter 3)
+1. Check `knowledge/02_System_Design/{NN}_{ServiceName}服務系統設計書.md`
+2. Check `knowledge/04_API_Specifications/{NN}_{ServiceName}_API詳細規格.md`
+3. Review UX flow diagrams (Chapter 3)
 4. Understand domain models (Chapter 7)
 
 ### 2. Service-Method 1:1 Mapping
@@ -664,16 +710,16 @@ export class UserViewModelFactory {
 ### 5. Complex Business Logic Has Specifications
 
 **For complex rules (variable hours, tax calculation, etc.), check:**
-- `spec/logic_spec/variable_hours_rules.md` - Taiwan labor law variable hours
-- `spec/logic_spec/occupational_injury_compensation.md` - Work injury compensation
-- `spec/logic_spec/tax_insurance_tables_2025.md` - 2025 tax/insurance tables
-- `spec/logic_spec/sso_account_linking.md` - SSO account linking flow
-- `spec/logic_spec/regulatory_parameters_and_audit.md` - Regulatory parameters
+- `knowledge/03_Logic_Specifications/variable_hours_rules.md` - Taiwan labor law variable hours
+- `knowledge/03_Logic_Specifications/occupational_injury_compensation.md` - Work injury compensation
+- `knowledge/03_Logic_Specifications/tax_insurance_tables_2025.md` - 2025 tax/insurance tables
+- `knowledge/03_Logic_Specifications/sso_account_linking.md` - SSO account linking flow
+- `knowledge/03_Logic_Specifications/regulatory_parameters_and_audit.md` - Regulatory parameters
 
 **Example: Variable Hours Calculation**
 
 If implementing overtime calculation for 2-week variable hours:
-1. Read `spec/logic_spec/variable_hours_rules.md`
+1. Read `knowledge/03_Logic_Specifications/variable_hours_rules.md`
 2. Follow the exact calculation logic specified
 3. Use the provided formulas and rate tables
 
@@ -766,7 +812,8 @@ export function createUserViewModel(dto: UserDto): UserViewModel {
 1. **Check Design Document:**
    ```bash
    # Read the design spec
-   cat spec/03_考勤管理服務系統設計書.md
+   cat knowledge/02_System_Design/03_考勤管理服務系統設計書.md
+   cat knowledge/04_API_Specifications/03_考勤管理服務_API詳細規格.md
    ```
 
 2. **Create Response DTO:**
@@ -1184,26 +1231,36 @@ void clockIn_AsEmployee_ShouldSaveRecord() throws Exception {
 
 | File | Purpose | When to Read |
 |:---|:---|:---|
-| `spec/系統架構設計文件.md` | Overall architecture, DDD layers, tech stack | Starting development, architecture questions |
-| `spec/系統架構設計文件_命名規範.md` | Naming conventions for all components | Creating any new files/classes |
-| `spec/系統實作合規性檢查報告.md` | Implementation compliance check against specs | Before starting new features, reviewing progress |
-| `spec/系統設計書與需求分析書合規性檢查報告.md` | Design vs requirements compliance | Validating design decisions |
-| `spec/系統設計書命名規範合規性檢查.md` | Naming convention compliance check | Ensuring consistent naming |
-| `spec/{NN}_{Service}服務系統設計書.md` | Individual service design, API specs, domain models | Implementing features for that service |
-| `spec/logic_spec/*.md` | Complex business logic specifications | Implementing payroll, attendance, insurance features |
+| `framework/architecture/系統架構設計文件.md` | Overall architecture, DDD layers, tech stack | Starting development, architecture questions |
+| `framework/architecture/系統架構設計文件_命名規範.md` | Naming conventions for all components | Creating any new files/classes |
+| `framework/architecture/03_Business_Pipeline.md` | ⭐ 宣告式業務流水線 (Task/Step 模式) | Implementing complex business logic |
+| `framework/architecture/Fluent-Query-Engine.md` | ⭐ 宣告式查詢引擎 (QueryBuilder) | Writing repository queries |
+| `knowledge/02_System_Design/{NN}_{Service}服務系統設計書.md` | Individual service design, domain models | Implementing features for that service |
+| `knowledge/04_API_Specifications/{NN}_{Service}_API詳細規格.md` | Detailed API specs, request/response schemas | Implementing API endpoints |
+| `knowledge/03_Logic_Specifications/*.md` | Complex business logic specifications | Implementing payroll, attendance, insurance features |
+| `knowledge/05_Reports/系統實作合規性檢查報告.md` | Implementation compliance check | Before starting new features, reviewing progress |
 | `frontend/TEST_SUMMARY.md` | TDD test summary, progress tracking | Understanding test coverage, writing new tests |
 
 ### Development Guidelines
 
 | File | Purpose |
 |:---|:---|
-| `backend/架構說明與開發規範.md` | Backend quick reference guide |
-| `frontend/架構說明與開發規範.md` | Frontend quick reference guide |
-| `Fluent-Query-Engine.md` | **Querydsl 查詢引擎規範** - 新功能持久層技術選擇指引 |
-| `Generic-Library-Architecture.md` | **泛型程式庫架構規範** - 減少重複程式碼的泛型基類設計 |
-| `測試架構規範.md` | **測試方法論** - 三階測試法、快照測試、測試基類設計、合約驅動測試 |
-| `SA/人力資源暨專案管理系統_正式需求規格書.md` | Original business requirements |
-| `SA/PM需求審查報告.md` | PM review findings |
+| `framework/development/01_開發流程.md` | 五階段開發流程說明 |
+| `framework/development/02_命名規範.md` | 統一命名標準 |
+| `framework/development/03_Backend_Guide.md` | 後端實作指南 |
+| `framework/development/04_Frontend_Guide.md` | 前端實作指南 |
+| `framework/architecture/Fluent-Query-Engine.md` | **Querydsl 查詢引擎規範** - 新功能持久層技術選擇指引 |
+| `framework/architecture/Generic-Library-Architecture.md` | **泛型程式庫架構規範** - 減少重複程式碼的泛型基類設計 |
+| `framework/testing/測試架構規範.md` | **測試方法論** - 三階測試法、快照測試、測試基類設計、合約驅動測試 |
+| `knowledge/01_Client_Requirements/人力資源暨專案管理系統_正式需求規格書.md` | Original business requirements |
+| `knowledge/01_Client_Requirements/PM需求審查報告.md` | PM review findings |
+
+### Contract Testing Files
+
+| File | Purpose |
+|:---|:---|
+| `contracts/{service}_contracts.md` | 各服務合約測試規格 (SA 定義) |
+| `contracts/合約測試規格一致性檢查報告.md` | 合約測試規格合規性檢查 |
 
 ### Configuration Files
 
@@ -1297,9 +1354,9 @@ public class HR01UserCmdController extends CommandBaseController {
 ### Understanding the Codebase
 
 1. **Start with:** `README.md` - Project overview
-2. **Then read:** `spec/系統架構設計文件.md` - Architecture understanding
-3. **Study:** `spec/系統架構設計文件_命名規範.md` - Naming patterns
-4. **Review:** Individual service design docs for feature implementation
+2. **Then read:** `framework/architecture/系統架構設計文件.md` - Architecture understanding
+3. **Study:** `framework/development/02_命名規範.md` - Naming patterns
+4. **Review:** `knowledge/02_System_Design/` - Individual service design docs for feature implementation
 
 ### Key Architectural Concepts
 
@@ -1323,6 +1380,7 @@ public class HR01UserCmdController extends CommandBaseController {
 
 | Version | Date | Changes |
 |:---|:---|:---|
+| 3.2 | 2026-01-28 | **目錄結構更新:** 更新文件路徑以反映實際目錄結構，`SA/` 和 `spec/` 移至 `knowledge/` 目錄，新增 `framework/` (架構規範) 和 `contracts/` (合約測試規格) 目錄說明 |
 | 3.1 | 2025-12-09 | **Major Update:** Updated implementation status (9 frontend features complete), added compliance reports, updated microservices table with actual progress, improved git workflow documentation, added TEST_SUMMARY.md reference |
 | 3.0 | 2025-12-08 | Initial CLAUDE.md creation with comprehensive AI assistant guidance |
 | 2.0 | 2025-12-07 | All 14 services design completed |

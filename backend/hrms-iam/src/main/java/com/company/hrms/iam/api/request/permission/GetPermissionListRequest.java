@@ -1,5 +1,8 @@
 package com.company.hrms.iam.api.request.permission;
 
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryFilter;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,12 +20,15 @@ import lombok.NoArgsConstructor;
 public class GetPermissionListRequest {
 
     @Schema(description = "模組名稱 (EMPLOYEE/ATTENDANCE/PAYROLL etc)")
+    @QueryFilter(property = "module", operator = Operator.EQ)
     private String module;
 
     @Schema(description = "權限類型 (MENU/BUTTON/API)")
+    @QueryFilter(property = "type", operator = Operator.EQ)
     private String type;
 
     @Schema(description = "角色 ID (查詢特定角色的權限)")
+    @QueryFilter(property = "roles.id", operator = Operator.EQ)
     private String roleId;
 
     @Schema(description = "頁碼 (預設 1)")

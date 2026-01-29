@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.test.contract.BaseContractTest;
 import com.company.hrms.notification.api.request.template.SearchTemplateRequest;
+import com.company.hrms.notification.infrastructure.persistence.assembler.AnnouncementQueryAssembler;
 import com.company.hrms.notification.infrastructure.persistence.assembler.NotificationQueryAssembler;
 import com.company.hrms.notification.infrastructure.persistence.assembler.PreferenceQueryAssembler;
 
@@ -200,8 +201,8 @@ public class NotificationContractTest extends BaseContractTest {
             // 對應官方合約 NTF_S001: 查詢個人訂閱
             var query = assembler.queryByEmployeeId("E001");
 
-            assertHasFilterForField(query, "employee_id");
-            assertHasFilterForField(query, "is_deleted");
+            assertHasFilterForField(query, "employeeId");
+            assertHasFilterForField(query, "isDeleted");
         }
 
         @Test
@@ -209,8 +210,8 @@ public class NotificationContractTest extends BaseContractTest {
         void existsByEmployeeId_ShouldIncludeEmployeeIdAndDeletedFilter() throws Exception {
             var query = assembler.existsByEmployeeId("E001");
 
-            assertHasFilterForField(query, "employee_id");
-            assertHasFilterForField(query, "is_deleted");
+            assertHasFilterForField(query, "employeeId");
+            assertHasFilterForField(query, "isDeleted");
         }
 
         @Test
@@ -219,8 +220,8 @@ public class NotificationContractTest extends BaseContractTest {
             // 對應官方合約 NTF_S002: 查詢啟用訂閱 (改為 Email 渠道)
             var query = assembler.queryEmailEnabledPreferences();
 
-            assertHasFilterForField(query, "email_enabled");
-            assertHasFilterForField(query, "is_deleted");
+            assertHasFilterForField(query, "emailEnabled");
+            assertHasFilterForField(query, "isDeleted");
         }
 
         @Test
@@ -229,8 +230,8 @@ public class NotificationContractTest extends BaseContractTest {
             // 對應官方合約 NTF_S003: 依通知類型查詢 (改為 Push 渠道)
             var query = assembler.queryPushEnabledPreferences();
 
-            assertHasFilterForField(query, "push_enabled");
-            assertHasFilterForField(query, "is_deleted");
+            assertHasFilterForField(query, "pushEnabled");
+            assertHasFilterForField(query, "isDeleted");
         }
     }
 
@@ -390,6 +391,52 @@ public class NotificationContractTest extends BaseContractTest {
             var query = assembler.queryByRecipient("E001");
 
             assertHasFilterForField(query, "recipient_id");
+            assertHasFilterForField(query, "is_deleted");
+        }
+    }
+
+    /**
+     * 公告查詢合約測試
+     */
+    @Nested
+    @DisplayName("公告查詢合約 (Announcement Query Contract)")
+    class AnnouncementQueryContractTests {
+
+        private final AnnouncementQueryAssembler assembler = new AnnouncementQueryAssembler();
+
+        @Test
+        @DisplayName("NTF_A001: 查詢已發布公告應包含狀態與刪除標記過濾")
+        void queryPublished_ShouldIncludeStatusAndDeletedFilter() throws Exception {
+            var query = assembler.queryPublishedAnnouncements(true);
+
+            assertHasFilterForField(query, "status");
+            assertHasFilterForField(query, "is_deleted");
+        }
+
+        @Test
+        @DisplayName("NTF_A002: 查詢未過期公告應包含 effective_to >= NOW 過濾")
+        void queryActive_ShouldIncludeEffectiveToFilter() throws Exception {
+            var query = assembler.queryPublishedAnnouncements(false);
+
+            assertHasFilterForField(query, "status");
+            assertHasFilterForField(query, "effective_to");
+            assertHasFilterForField(query, "is_deleted");
+        }
+
+        @Test
+        @DisplayName("NTF_A003: HR 查詢全部公告應僅包含刪除標記過濾")
+        void queryAll_ShouldIncludeOnlyDeletedFilter() throws Exception {
+            var query = assembler.queryAllAnnouncements();
+
+            assertHasFilterForField(query, "is_deleted");
+        }
+
+        @Test
+        @DisplayName("NTF_A004: 依標題查詢公告應包含 title LIKE 過濾")
+        void queryByTitle_ShouldIncludeTitleLikeFilter() throws Exception {
+            var query = assembler.queryByTitle("放假");
+
+            assertHasFilterForField(query, "title");
             assertHasFilterForField(query, "is_deleted");
         }
     }
