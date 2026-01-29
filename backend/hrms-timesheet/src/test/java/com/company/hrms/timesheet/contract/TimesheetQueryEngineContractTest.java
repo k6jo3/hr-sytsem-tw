@@ -9,9 +9,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -29,7 +27,8 @@ import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
 /**
  * Timesheet QueryEngine 契約測試
  *
- * <p>驗證 QueryEngine 各種操作符在 Timesheet 實體上的正確運作
+ * <p>
+ * 驗證 QueryEngine 各種操作符在 Timesheet 實體上的正確運作
  * 使用 H2 資料庫實際執行 SQL 查詢
  *
  * @author SA Team
@@ -62,41 +61,40 @@ class TimesheetQueryEngineContractTest extends BaseQueryEngineContractTest<Times
      */
     static Stream<Arguments> operatorTestCases() {
         return Stream.of(
-            // EQ 操作符測試
-            Arguments.of("EQ", "status", "DRAFT", 2),
-            Arguments.of("EQ", "status", "PENDING", 3),
-            Arguments.of("EQ", "status", "APPROVED", 3),
-            Arguments.of("EQ", "status", "REJECTED", 2),
+                // EQ 操作符測試
+                Arguments.of("EQ", "status", "DRAFT", 2),
+                Arguments.of("EQ", "status", "PENDING", 3),
+                Arguments.of("EQ", "status", "APPROVED", 3),
+                Arguments.of("EQ", "status", "REJECTED", 2),
 
-            // NE 操作符測試
-            Arguments.of("NE", "status", "DRAFT", 8),
-            Arguments.of("NE", "status", "APPROVED", 7),
+                // NE 操作符測試
+                Arguments.of("NE", "status", "DRAFT", 8),
+                Arguments.of("NE", "status", "APPROVED", 7),
 
-            // IN 操作符測試
-            Arguments.of("IN", "status", List.of("PENDING", "REJECTED"), 5),
-            Arguments.of("IN", "status", List.of("DRAFT", "APPROVED"), 5),
+                // IN 操作符測試
+                Arguments.of("IN", "status", List.of("PENDING", "REJECTED"), 5),
+                Arguments.of("IN", "status", List.of("DRAFT", "APPROVED"), 5),
 
-            // NOT_IN 操作符測試
-            Arguments.of("NOT_IN", "status", List.of("DRAFT", "REJECTED"), 6),
+                // NOT_IN 操作符測試
+                Arguments.of("NOT_IN", "status", List.of("DRAFT", "REJECTED"), 6),
 
-            // GTE 操作符測試 (total_hours >= 40)
-            Arguments.of("GTE", "total_hours", new BigDecimal("40.00"), 7),
+                // GTE 操作符測試 (total_hours >= 40)
+                Arguments.of("GTE", "total_hours", new BigDecimal("40.00"), 7),
 
-            // LTE 操作符測試 (total_hours <= 38.5)
-            Arguments.of("LTE", "total_hours", new BigDecimal("38.50"), 4),
+                // LTE 操作符測試 (total_hours <= 38.5)
+                Arguments.of("LTE", "total_hours", new BigDecimal("38.50"), 4),
 
-            // GT 操作符測試 (total_hours > 40)
-            Arguments.of("GT", "total_hours", new BigDecimal("40.00"), 3),
+                // GT 操作符測試 (total_hours > 40)
+                Arguments.of("GT", "total_hours", new BigDecimal("40.00"), 3),
 
-            // LT 操作符測試 (total_hours < 40)
-            Arguments.of("LT", "total_hours", new BigDecimal("40.00"), 4),
+                // LT 操作符測試 (total_hours < 40)
+                Arguments.of("LT", "total_hours", new BigDecimal("40.00"), 4),
 
-            // IS_NOT_NULL 操作符測試 (approved_by 不為空)
-            Arguments.of("IS_NOT_NULL", "approved_by", null, 5),
+                // IS_NOT_NULL 操作符測試 (approved_by 不為空)
+                Arguments.of("IS_NOT_NULL", "approved_by", null, 5),
 
-            // IS_NULL 操作符測試 (approved_by 為空)
-            Arguments.of("IS_NULL", "approved_by", null, 5)
-        );
+                // IS_NULL 操作符測試 (approved_by 為空)
+                Arguments.of("IS_NULL", "approved_by", null, 5));
     }
 
     @Nested
@@ -160,7 +158,7 @@ class TimesheetQueryEngineContractTest extends BaseQueryEngineContractTest<Times
                     .allMatch(ts -> {
                         BigDecimal hours = ts.getTotalHours();
                         return hours.compareTo(new BigDecimal("35.00")) >= 0
-                            && hours.compareTo(new BigDecimal("42.00")) <= 0;
+                                && hours.compareTo(new BigDecimal("42.00")) <= 0;
                     });
         }
     }
@@ -184,9 +182,8 @@ class TimesheetQueryEngineContractTest extends BaseQueryEngineContractTest<Times
             // Then
             assertThat(result.getContent())
                     .as("應找到 APPROVED 且 total_hours >= 40 的工時單")
-                    .allMatch(ts ->
-                        "APPROVED".equals(ts.getStatus().name()) &&
-                        ts.getTotalHours().compareTo(new BigDecimal("40.00")) >= 0);
+                    .allMatch(ts -> "APPROVED".equals(ts.getStatus().name()) &&
+                            ts.getTotalHours().compareTo(new BigDecimal("40.00")) >= 0);
         }
 
         @Test

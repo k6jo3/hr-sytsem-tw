@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ContractExpiryJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
-    // TODO: 注入 EmployeeRepository 或 ContractRepository
+    // TODO: 未來應透過 Feign Client 呼叫 Organization Service 取得即將到期的合約列表
 
     /**
      * 每日 09:00 執行
@@ -39,6 +39,7 @@ public class ContractExpiryJob {
 
         try {
             LocalDate today = LocalDate.now();
+            log.info("[ContractExpiryJob] 正在執行日期 {} 的合約到期檢查", today);
 
             // 檢查三個時間點：30天後、7天後、明天
             sendRemindersForDaysAhead(30, "即將到期");

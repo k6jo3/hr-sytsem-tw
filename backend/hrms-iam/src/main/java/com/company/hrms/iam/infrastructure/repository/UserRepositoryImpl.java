@@ -7,8 +7,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.company.hrms.common.infrastructure.persistence.querydsl.engine.UltimateQueryEngine;
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.model.valueobject.Email;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
@@ -16,7 +21,7 @@ import com.company.hrms.iam.domain.model.valueobject.UserStatus;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 import com.company.hrms.iam.infrastructure.dao.UserDAO;
 import com.company.hrms.iam.infrastructure.po.UserPO;
-import com.company.hrms.common.query.QueryGroup;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 /**
  * User Repository 實作
@@ -30,9 +35,11 @@ import com.company.hrms.common.query.QueryGroup;
 public class UserRepositoryImpl implements IUserRepository {
 
     private final UserDAO userDAO;
+    private final JPAQueryFactory queryFactory;
 
-    public UserRepositoryImpl(UserDAO userDAO) {
+    public UserRepositoryImpl(UserDAO userDAO, JPAQueryFactory queryFactory) {
         this.userDAO = userDAO;
+        this.queryFactory = queryFactory;
     }
 
     @Override
@@ -62,16 +69,41 @@ public class UserRepositoryImpl implements IUserRepository {
     }
 
     @Override
-    public java.util.List<User> findByQuery(QueryGroup query,
-            org.springframework.data.domain.Pageable pageable) {
-        // TODO: 實作動態查詢 (目前返回空列表)
-        return new ArrayList<>();
+    public Page<User> findPage(QueryGroup query, Pageable pageable) {
+        UltimateQueryEngine<User> engine = new UltimateQueryEngine<>(queryFactory, User.class);
+        com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(query);
+
+        long total = count(query);
+        if (total == 0) {
+            return new PageImpl<>(new java.util.ArrayList<>(), pageable, 0);
+        }
+
+        List<User> users = engine.getQuery()
+                .where(predicate)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return new PageImpl<>(users, pageable, total);
     }
 
     @Override
-    public long countByQuery(QueryGroup query) {
-        // TODO: 實作動態查詢計數
-        return 0;
+    public List<User> findAll(QueryGroup query) {
+        UltimateQueryEngine<User> engine = new UltimateQueryEngine<>(queryFactory, User.class);
+        com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(query);
+        return engine.getQuery().where(predicate).fetch();
+    }
+
+    @Override
+    public long count(QueryGroup query) {
+        UltimateQueryEngine<User> engine = new UltimateQueryEngine<>(queryFactory, User.class);
+        com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(query);
+
+        Long total = queryFactory.select(engine.getEntityPath().count())
+                .from(engine.getEntityPath())
+                .where(predicate)
+                .fetchOne();
+        return total != null ? total : 0L;
     }
 
     @Override

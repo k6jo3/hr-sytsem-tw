@@ -3,9 +3,7 @@ package com.company.hrms.iam.infrastructure.repository;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,12 +22,13 @@ import com.company.hrms.iam.domain.repository.IUserRepository;
  * User Repository 整合測試
  * 使用 H2 記憶體資料庫驗證 Repository 查詢邏輯
  *
- * <p>測試重點:
+ * <p>
+ * 測試重點:
  * <ul>
- *   <li>QueryGroup 各種操作符轉 SQL</li>
- *   <li>分頁查詢</li>
- *   <li>排序</li>
- *   <li>軟刪除過濾</li>
+ * <li>QueryGroup 各種操作符轉 SQL</li>
+ * <li>分頁查詢</li>
+ * <li>排序</li>
+ * <li>軟刪除過濾</li>
  * </ul>
  *
  * @author SA Team
@@ -57,7 +56,7 @@ class UserRepositoryIntegrationTest extends BaseRepositoryTest {
                     .build();
 
             // When
-            Page<User> result = userRepository.findAll(query, PageRequest.of(0, 100));
+            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
 
             // Then
             assertThat(result.getContent())
@@ -75,7 +74,7 @@ class UserRepositoryIntegrationTest extends BaseRepositoryTest {
                     .build();
 
             // When
-            Page<User> result = userRepository.findAll(query, PageRequest.of(0, 100));
+            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
 
             // Then
             assertThat(result.getContent())
@@ -93,14 +92,13 @@ class UserRepositoryIntegrationTest extends BaseRepositoryTest {
                     .build();
 
             // When
-            Page<User> result = userRepository.findAll(query, PageRequest.of(0, 100));
+            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
 
             // Then
             assertThat(result.getContent())
                     .isNotEmpty()
-                    .allMatch(user ->
-                        "ACTIVE".equals(user.getStatus().name()) ||
-                        "LOCKED".equals(user.getStatus().name()));
+                    .allMatch(user -> "ACTIVE".equals(user.getStatus().name()) ||
+                            "LOCKED".equals(user.getStatus().name()));
         }
     }
 
@@ -117,7 +115,7 @@ class UserRepositoryIntegrationTest extends BaseRepositoryTest {
                     .build();
 
             // When
-            Page<User> result = userRepository.findAll(query, PageRequest.of(0, 5));
+            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 5));
 
             // Then
             assertThat(result.getNumber()).isEqualTo(0);
@@ -134,8 +132,8 @@ class UserRepositoryIntegrationTest extends BaseRepositoryTest {
                     .build();
 
             // When
-            Page<User> page0 = userRepository.findAll(query, PageRequest.of(0, 5));
-            Page<User> page1 = userRepository.findAll(query, PageRequest.of(1, 5));
+            Page<User> page0 = userRepository.findPage(query, PageRequest.of(0, 5));
+            Page<User> page1 = userRepository.findPage(query, PageRequest.of(1, 5));
 
             // Then
             assertThat(page1.getNumber()).isEqualTo(1);
@@ -158,7 +156,7 @@ class UserRepositoryIntegrationTest extends BaseRepositoryTest {
                     .build();
 
             // When
-            Page<User> result = userRepository.findAll(query, PageRequest.of(0, 100));
+            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
 
             // Then
             // 驗證沒有已刪除的資料 (假設測試資料中有軟刪除資料)
@@ -173,10 +171,10 @@ class UserRepositoryIntegrationTest extends BaseRepositoryTest {
             QueryGroup query = QueryBuilder.where().build();
 
             // When
-            Page<User> withFilter = userRepository.findAll(
+            Page<User> withFilter = userRepository.findPage(
                     QueryBuilder.where().eq("is_deleted", 0).build(),
                     PageRequest.of(0, 100));
-            Page<User> withoutFilter = userRepository.findAll(query, PageRequest.of(0, 100));
+            Page<User> withoutFilter = userRepository.findPage(query, PageRequest.of(0, 100));
 
             // Then
             // 不含過濾的結果應 >= 含過濾的結果
@@ -200,7 +198,7 @@ class UserRepositoryIntegrationTest extends BaseRepositoryTest {
                     .build();
 
             // When
-            Page<User> result = userRepository.findAll(query, PageRequest.of(0, 100));
+            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
 
             // Then
             assertThat(result.getContent())

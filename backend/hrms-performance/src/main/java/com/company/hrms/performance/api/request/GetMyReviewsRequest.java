@@ -2,13 +2,13 @@ package com.company.hrms.performance.api.request;
 
 import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryFilter;
+import com.company.hrms.performance.domain.model.valueobject.ReviewStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.company.hrms.performance.domain.model.valueobject.ReviewStatus;
 
 /**
  * 查詢我的考核列表請求
@@ -32,9 +32,11 @@ public class GetMyReviewsRequest {
     @Schema(description = "考核狀態")
     private ReviewStatus status;
 
+    @Builder.Default
     @Schema(description = "頁碼", example = "1")
     private int page = 1;
 
+    @Builder.Default
     @Schema(description = "每頁筆數", example = "20")
     private int size = 20;
 }

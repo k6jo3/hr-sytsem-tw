@@ -7,6 +7,7 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.document.api.response.FileDownloadResponse;
 import com.company.hrms.document.domain.model.DocumentId;
+import com.company.hrms.document.domain.model.IDocumentAccessLogRepository;
 import com.company.hrms.document.domain.model.IDocumentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -16,10 +17,11 @@ import lombok.RequiredArgsConstructor;
  */
 @Service("downloadDocumentServiceImpl")
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class DownloadDocumentServiceImpl implements QueryApiService<String, FileDownloadResponse> {
 
     private final IDocumentRepository repository;
+    private final IDocumentAccessLogRepository accessLogRepository;
 
     @Override
     public FileDownloadResponse getResponse(String documentId, JWTModel currentUser, String... args) {
@@ -30,7 +32,9 @@ public class DownloadDocumentServiceImpl implements QueryApiService<String, File
             throw new IllegalStateException("Document has been deleted.");
         }
 
-        // TODO: 實際應從 Storage (Local/S3) 讀取檔案
+        // 紀錄存取日誌
+        accessLogRepository.save(com.company.hrms.document.domain.model.DocumentAccessLog.create(
+                documentId, currentUser.getUserId(), "DOWNLOAD", "127.0.0.1"));
         // 這裡暫時模擬回傳
         byte[] mockContent = "File content mock".getBytes();
 

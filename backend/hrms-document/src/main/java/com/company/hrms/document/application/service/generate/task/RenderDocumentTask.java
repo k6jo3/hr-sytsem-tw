@@ -25,15 +25,29 @@ public class RenderDocumentTask implements PipelineTask<GenerateDocumentContext>
 
         log.info("Rendering document using template: {} with data: {}", template.getCode(), dataModel);
 
-        // TODO: 具體實作應使用 Apache POI (Word) 或 Thymeleaf/iText (HTML/PDF) 產生真實檔案
-        // 目前模擬產生過程
-        String generatedFileName = template.getName() + "_" + dataModel.get("employeeName") + "_"
+        // 模擬變數替換邏輯
+        String content = template.getContent();
+        if (content != null) {
+            for (java.util.Map.Entry<String, Object> entry : dataModel.entrySet()) {
+                String key = "{{" + entry.getKey() + "}}";
+                String value = String.valueOf(entry.getValue());
+                content = content.replace(key, value);
+            }
+        }
+
+        String generatedFileName = template.getName() + "_" + dataModel.getOrDefault("employeeName", "Unknown") + "_"
                 + System.currentTimeMillis() + ".pdf";
-        String storagePath = "/storage/generated/" + UUID.randomUUID().toString() + ".pdf";
+        String storageId = UUID.randomUUID().toString();
+        String storagePath = "/shared/documents/generated/" + storageId + ".pdf";
 
         context.setFileName(generatedFileName);
         context.setGeneratedFilePath(storagePath);
         context.setMimeType("application/pdf");
-        context.setFileSize(102400L); // 模擬 100KB
+
+        // 模擬生成檔案大小
+        byte[] finalContent = (content != null ? content : "PDF Mock Content").getBytes();
+        context.setFileSize((long) finalContent.length);
+
+        log.info("Document rendered successfully: {}, size: {} bytes", generatedFileName, finalContent.length);
     }
 }

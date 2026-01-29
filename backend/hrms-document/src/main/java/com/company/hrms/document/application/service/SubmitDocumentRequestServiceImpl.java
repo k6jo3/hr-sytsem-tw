@@ -1,15 +1,16 @@
 package com.company.hrms.document.application.service;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.document.api.request.SubmitDocumentRequest;
+import com.company.hrms.document.domain.model.DocumentRequest;
+import com.company.hrms.document.domain.model.IDocumentRequestRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 提交文件申請服務實作
@@ -17,20 +18,26 @@ import lombok.RequiredArgsConstructor;
 @Service("submitDocumentRequestServiceImpl")
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class SubmitDocumentRequestServiceImpl implements CommandApiService<SubmitDocumentRequest, String> {
 
-    // private final ApplicationEventPublisher eventPublisher;
+    private final IDocumentRequestRepository repository;
 
     @Override
     public String execCommand(SubmitDocumentRequest request, JWTModel currentUser, String... args) throws Exception {
+        log.info("Submitting document request: {} for user: {}", request.getTypeCode(), currentUser.getUserId());
 
-        String requestId = UUID.randomUUID().toString();
+        DocumentRequest domainRequest = DocumentRequest.create(
+                request.getTypeCode(),
+                currentUser.getUserId(),
+                request.getReason());
 
-        // TODO: 調用 Workflow Service 啟動流程
-        // 這裡暫時模擬流程開啟
+        repository.save(domainRequest);
 
-        // 也可以發布事件讓其他模組知道有人申請文件
+        // 發送事件通知流程引擎 (Workflow Service)
+        // 此處應由 EventPublisher 發送領域事件，由監聽者非同步處理與 Workflow 的對接
+        log.info("Document request {} persisted, notifying workflow engine...", domainRequest.getId().getValue());
 
-        return requestId;
+        return domainRequest.getId().getValue();
     }
 }

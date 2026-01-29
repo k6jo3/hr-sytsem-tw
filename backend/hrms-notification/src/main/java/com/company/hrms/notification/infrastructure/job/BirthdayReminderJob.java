@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BirthdayReminderJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
-    // TODO: 注入 EmployeeRepository 查詢今日生日員工
+    // TODO: 未來應透過 Feign Client 呼叫 Organization Service 取得今日生日員工列表
 
     /**
      * 每日 08:00 執行
@@ -39,6 +39,7 @@ public class BirthdayReminderJob {
 
         try {
             LocalDate today = LocalDate.now();
+            log.info("[BirthdayReminderJob] 正在檢查日期 {} 的生日提醒", today);
 
             // TODO: 查詢今日生日的員工
             // List<Employee> birthdayEmployees =

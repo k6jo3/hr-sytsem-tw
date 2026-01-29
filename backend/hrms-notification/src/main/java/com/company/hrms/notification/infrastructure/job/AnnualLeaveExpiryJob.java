@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AnnualLeaveExpiryJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
-    // TODO: 注入 LeaveRepository 或 EmployeeLeaveBalanceRepository
 
     /**
      * 每週一 10:00 執行
@@ -40,10 +39,13 @@ public class AnnualLeaveExpiryJob {
         try {
             LocalDate today = LocalDate.now();
             LocalDate thirtyDaysLater = today.plusDays(30);
+            log.info("[AnnualLeaveExpiryJob] 檢查於 {} 之前即將到期的特休假", thirtyDaysLater);
 
-            // TODO: 查詢有未休特休且即將到期的員工
-            // List<EmployeeLeaveBalance> expiringLeaves =
-            // leaveBalanceRepository.findExpiringAnnualLeave(thirtyDaysLater);
+            // TODO: 此處應透過 Feign Client 呼叫 Attendance Service 或由 Attendance Service 定期發送
+            // Kafka 訊息
+            // 目前暫不直接注入跨服務的 Repository 以符合微服務架構規範
+            // List<AnnualLeaveExpiry> expiringLeaves =
+            // attendanceClient.findExpiringAnnualLeave(thirtyDaysLater);
 
             // 暫時實作：空列表
             List<AnnualLeaveExpiry> expiringLeaves = List.of();

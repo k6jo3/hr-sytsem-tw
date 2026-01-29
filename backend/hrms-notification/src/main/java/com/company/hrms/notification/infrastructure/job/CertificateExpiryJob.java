@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CertificateExpiryJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
-    // TODO: 注入 CertificateRepository
+    // TODO: 未來應透過 Feign Client 呼叫 Training Service 取得即將到期的證照列表
 
     /**
      * 每週一 09:00 執行
@@ -56,6 +56,7 @@ public class CertificateExpiryJob {
     private void sendRemindersForDaysAhead(int daysAhead, String urgencyLabel) {
         try {
             LocalDate expiryDate = LocalDate.now().plusDays(daysAhead);
+            log.info("[CertificateExpiryJob] 檢查於 {} 到期的證照", expiryDate);
 
             // TODO: 查詢指定日期範圍內到期的證照
             // List<Certificate> expiringCertificates =

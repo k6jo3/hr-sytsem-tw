@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TimesheetReminderJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
-    // TODO: 注入 TimesheetRepository 和 EmployeeRepository
+    // TODO: 未來應透過 Feign Client 呼叫 Timesheet Service 取得未填報工時的員工列表
 
     /**
      * 每日 18:00 執行

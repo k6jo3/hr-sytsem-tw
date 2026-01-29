@@ -40,7 +40,9 @@ public class CreateDocumentTemplateServiceImpl implements CommandApiService<Crea
                 request.getName(),
                 request.getCategory());
 
-        // TODO: 處理範本內容 (儲存到 Blob 或 Storage)
+        if (request.getContent() != null) {
+            template.setContent(request.getContent());
+        }
 
         var saved = repository.save(template);
         return saved.getId().getValue();
