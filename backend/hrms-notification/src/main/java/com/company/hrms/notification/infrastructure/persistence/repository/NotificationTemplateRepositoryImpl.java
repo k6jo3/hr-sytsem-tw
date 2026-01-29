@@ -15,7 +15,6 @@ import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate
 import com.company.hrms.notification.domain.model.valueobject.TemplateId;
 import com.company.hrms.notification.domain.repository.INotificationTemplateRepository;
 import com.company.hrms.notification.infrastructure.persistence.entity.NotificationTemplatePO;
-import com.company.hrms.notification.infrastructure.persistence.entity.QNotificationTemplatePO;
 import com.company.hrms.notification.infrastructure.persistence.mapper.TemplateMapper;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -57,12 +56,14 @@ public class NotificationTemplateRepositoryImpl
 
     @Override
     public Optional<NotificationTemplate> findByTemplateCode(String templateCode) {
-        QNotificationTemplatePO qTemplate = QNotificationTemplatePO.notificationTemplatePO;
-        NotificationTemplatePO po = factory.selectFrom(qTemplate)
-                .where(qTemplate.templateCode.eq(templateCode)
-                        .and(qTemplate.isDeleted.isFalse()))
-                .fetchOne();
-        return Optional.ofNullable(po).map(mapper::toDomain);
+        // 使用宣告式 QueryBuilder 建立查詢條件
+        QueryGroup query = QueryBuilder.where()
+                .and("templateCode", Operator.EQ, templateCode)
+                .and("isDeleted", Operator.EQ, false)
+                .build();
+
+        Optional<NotificationTemplatePO> po = super.findOne(query);
+        return po.map(mapper::toDomain);
     }
 
     @Override
@@ -88,11 +89,13 @@ public class NotificationTemplateRepositoryImpl
 
     @Override
     public boolean existsByTemplateCode(String templateCode) {
-        QNotificationTemplatePO qTemplate = QNotificationTemplatePO.notificationTemplatePO;
-        return factory.selectFrom(qTemplate)
-                .where(qTemplate.templateCode.eq(templateCode)
-                        .and(qTemplate.isDeleted.isFalse()))
-                .fetchCount() > 0;
+        // 使用宣告式 QueryBuilder 建立查詢條件
+        QueryGroup query = QueryBuilder.where()
+                .and("templateCode", Operator.EQ, templateCode)
+                .and("isDeleted", Operator.EQ, false)
+                .build();
+
+        return super.exists(query);
     }
 
     @Override

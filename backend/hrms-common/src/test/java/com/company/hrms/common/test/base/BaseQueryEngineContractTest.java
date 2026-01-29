@@ -3,19 +3,13 @@ package com.company.hrms.common.test.base;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.List;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.query.QueryBuilder;
@@ -24,12 +18,16 @@ import com.company.hrms.common.query.QueryGroup;
 /**
  * QueryEngine 引擎契約測試基類
  *
- * <p>目的：一次性驗證 QueryEngine 的所有操作符（EQ, NE, LIKE, IN, GTE 等），
+ * <p>
+ * 目的：一次性驗證 QueryEngine 的所有操作符（EQ, NE, LIKE, IN, GTE 等），
  * 確保 QueryGroup → SQL 翻譯機制正確運作。
  *
- * <p>測試通過後，後續業務測試不再需要跑 DB，只需驗證 QueryGroup 組裝邏輯。
+ * <p>
+ * 測試通過後，後續業務測試不再需要跑 DB，只需驗證 QueryGroup 組裝邏輯。
  *
- * <p>使用方式：
+ * <p>
+ * 使用方式：
+ * 
  * <pre>
  * class EmployeeQueryEngineContractTest extends BaseQueryEngineContractTest&lt;Employee&gt; {
  *
@@ -70,12 +68,14 @@ public abstract class BaseQueryEngineContractTest<T> extends BaseTest {
 
     /**
      * 取得測試資料 SQL 腳本路徑
+     * 
      * @return SQL 腳本路徑，例如 "classpath:test-data/employee_data.sql"
      */
     protected abstract String getTestDataScript();
 
     /**
      * 執行查詢
+     * 
      * @param query QueryGroup 查詢條件
      * @return 查詢結果分頁
      */
@@ -84,16 +84,16 @@ public abstract class BaseQueryEngineContractTest<T> extends BaseTest {
     /**
      * 參數化測試：驗證各種操作符
      *
-     * @param operatorName 操作符名稱 (EQ, NE, LIKE, IN, GTE, LTE, IS_NULL, IS_NOT_NULL)
-     * @param field 欄位名稱
-     * @param value 測試值
+     * @param operatorName  操作符名稱 (EQ, NE, LIKE, IN, GTE, LTE, IS_NULL, IS_NOT_NULL)
+     * @param field         欄位名稱
+     * @param value         測試值
      * @param expectedCount 預期結果數量
      */
     @ParameterizedTest(name = "{0}: {1} = {2} → 預期 {3} 筆")
     @MethodSource("operatorTestCases")
     @DisplayName("QueryEngine 操作符契約測試")
     void operator_ShouldProduceCorrectResult(String operatorName, String field,
-                                              Object value, int expectedCount) {
+            Object value, int expectedCount) {
         // 1. Build QueryGroup
         QueryGroup query = buildQueryByOperator(operatorName, field, value);
 
@@ -102,9 +102,9 @@ public abstract class BaseQueryEngineContractTest<T> extends BaseTest {
 
         // 3. Assert
         assertThat(result.getContent())
-            .as("操作符 [%s] 對欄位 [%s] 值 [%s] 應返回 %d 筆",
-                operatorName, field, value, expectedCount)
-            .hasSize(expectedCount);
+                .as("操作符 [%s] 對欄位 [%s] 值 [%s] 應返回 %d 筆",
+                        operatorName, field, value, expectedCount)
+                .hasSize(expectedCount);
     }
 
     /**
@@ -169,8 +169,8 @@ public abstract class BaseQueryEngineContractTest<T> extends BaseTest {
     protected void assertAndConditions(QueryGroup query, int expectedCount) {
         Page<T> result = executeQuery(query);
         assertThat(result.getContent())
-            .as("AND 組合條件應返回 %d 筆", expectedCount)
-            .hasSize(expectedCount);
+                .as("AND 組合條件應返回 %d 筆", expectedCount)
+                .hasSize(expectedCount);
     }
 
     /**
@@ -179,8 +179,8 @@ public abstract class BaseQueryEngineContractTest<T> extends BaseTest {
     protected void assertOrConditions(QueryGroup query, int expectedCount) {
         Page<T> result = executeQuery(query);
         assertThat(result.getContent())
-            .as("OR 組合條件應返回 %d 筆", expectedCount)
-            .hasSize(expectedCount);
+                .as("OR 組合條件應返回 %d 筆", expectedCount)
+                .hasSize(expectedCount);
     }
 
     /**
@@ -189,7 +189,7 @@ public abstract class BaseQueryEngineContractTest<T> extends BaseTest {
     protected void assertNestedConditions(QueryGroup query, int expectedCount) {
         Page<T> result = executeQuery(query);
         assertThat(result.getContent())
-            .as("巢狀條件應返回 %d 筆", expectedCount)
-            .hasSize(expectedCount);
+                .as("巢狀條件應返回 %d 筆", expectedCount)
+                .hasSize(expectedCount);
     }
 }

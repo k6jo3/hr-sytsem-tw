@@ -1,19 +1,22 @@
 package com.company.hrms.common.test.contract;
 
-import com.company.hrms.common.query.FilterUnit;
-import com.company.hrms.common.query.Operator;
-import com.company.hrms.common.query.QueryGroup;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import com.company.hrms.common.query.FilterUnit;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryGroup;
 
 /**
  * Markdown 合約解析與斷言引擎
  * 用於驗證 QueryGroup 是否符合 SA 定義的業務合約
  *
- * <p>合約格式範例:
+ * <p>
+ * 合約格式範例:
+ * 
  * <pre>
  * | 場景 ID | 測試描述 | 模擬角色 | 輸入 | 必須包含的過濾條件 |
  * | :--- | :--- | :--- | :--- | :--- |
@@ -27,8 +30,7 @@ public class MarkdownContractEngine {
      * 支援格式: field = 'value', field LIKE '%value%', field > 100
      */
     private static final Pattern CRITERIA_PATTERN = Pattern.compile(
-        "([\\w.]+)\\s*([=!<>]+|LIKE|IN|IS\\s+NULL|IS\\s+NOT\\s+NULL)\\s*'?([^']*)'?"
-    );
+            "([\\w.]+)\\s*([=!<>]+|LIKE|IN|IS\\s+NULL|IS\\s+NOT\\s+NULL)\\s*'?([^']*)'?");
 
     /**
      * 數值模式
@@ -48,20 +50,20 @@ public class MarkdownContractEngine {
 
         if (requiredFilters.isEmpty()) {
             throw new IllegalArgumentException(
-                String.format("找不到場景 ID [%s] 的合約定義，請檢查 Markdown 表格", scenarioId));
+                    String.format("找不到場景 ID [%s] 的合約定義，請檢查 Markdown 表格", scenarioId));
         }
 
         // 取得實際過濾條件的字串表示
         List<String> actualFilterStrings = actualQuery.getAllFilters().stream()
-            .map(FilterUnit::toString)
-            .collect(Collectors.toList());
+                .map(FilterUnit::toString)
+                .collect(Collectors.toList());
 
         // 收集缺失的過濾條件
         List<String> missingFilters = new ArrayList<>();
 
         for (String criteria : requiredFilters) {
             boolean isMatched = actualQuery.getAllFilters().stream()
-                .anyMatch(filter -> verifyFilterMatch(filter, criteria));
+                    .anyMatch(filter -> verifyFilterMatch(filter, criteria));
 
             if (!isMatched) {
                 missingFilters.add(criteria);
@@ -69,6 +71,10 @@ public class MarkdownContractEngine {
         }
 
         if (!missingFilters.isEmpty()) {
+            System.err.println("DEBUG SCENARIO: " + scenarioId);
+            System.err.println("DEBUG REQUIRED: " + requiredFilters);
+            System.err.println("DEBUG MISSING: " + missingFilters);
+            System.err.println("DEBUG ACTUAL: " + actualFilterStrings);
             throw new ContractViolationException(scenarioId, missingFilters, actualFilterStrings);
         }
 
@@ -153,11 +159,11 @@ public class MarkdownContractEngine {
      */
     protected List<String> parseFiltersFromTable(String table, String scenarioId) {
         return table.lines()
-            .filter(line -> line.contains(scenarioId))
-            .map(this::extractFiltersColumn)
-            .flatMap(s -> parseFilterList(s).stream())
-            .filter(s -> !s.isEmpty())
-            .collect(Collectors.toList());
+                .filter(line -> line.contains(scenarioId))
+                .map(this::extractFiltersColumn)
+                .flatMap(s -> parseFilterList(s).stream())
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
     }
 
     /**
@@ -182,8 +188,11 @@ public class MarkdownContractEngine {
         // 移除 markdown 的 backtick
         String cleaned = filterColumn.replaceAll("`", "");
 
-        // 以逗號分隔
-        for (String part : cleaned.split(",")) {
+        // 以逗號分隔，但忽略中括號 [...] 內的逗號 (用於 List/Array)
+        // Regex logic: Match comma only if not followed by a closing bracket without an
+        // opening one
+        // simple heuristic: ,(?![^\[]*\]) - matches comma if not inside brackets
+        for (String part : cleaned.split(",(?![^\\[]*\\])")) {
             String trimmed = part.trim();
             if (!trimmed.isEmpty()) {
                 result.add(trimmed);

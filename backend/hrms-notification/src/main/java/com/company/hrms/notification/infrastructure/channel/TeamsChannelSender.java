@@ -1,6 +1,14 @@
 package com.company.hrms.notification.infrastructure.channel;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.company.hrms.notification.domain.model.aggregate.Notification;
 
@@ -21,30 +29,37 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TeamsChannelSender implements ChannelSender {
 
+    private final RestTemplate restTemplate;
+
+    @Value("${notification.channel.teams.webhook-url:}")
+    private String defaultWebhookUrl;
+
     @Override
     public void send(Notification notification, String recipientId) throws Exception {
         log.debug("[TeamsChannelSender] 發送 Teams 通知 - 收件人: {}", recipientId);
 
         try {
-            // TODO: 實作 Teams Incoming Webhook
-            // 1. 從設定檔或資料庫取得 Webhook URL
-            // 2. 組裝 Adaptive Card 訊息
-            // 3. POST 到 Webhook URL
-
+            // 取得 Webhook URL（優先使用收件人設定，否則使用預設值）
             String webhookUrl = getTeamsWebhookUrl(recipientId);
 
             if (webhookUrl == null || webhookUrl.isBlank()) {
-                throw new Exception("收件人未設定 Teams Webhook");
+                log.warn("[TeamsChannelSender] 收件人 {} 未設定 Teams Webhook，跳過發送", recipientId);
+                return;
             }
 
-            // 組裝訊息
-            // var message = buildTeamsMessage(notification);
+            // 組裝 Adaptive Card 訊息
+            Map<String, Object> message = buildTeamsMessage(notification);
 
-            // 發送（暫時註解，避免編譯錯誤）
-            // restTemplate.postForEntity(webhookUrl, message, String.class);
+            // 設定 HTTP Headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-            log.info("[TeamsChannelSender] Teams 通知發送成功（暫時實作） - 收件人: {}",
-                    recipientId);
+            // 發送 POST 請求到 Webhook URL
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(message, headers);
+            restTemplate.postForEntity(webhookUrl, request, String.class);
+
+            log.info("[TeamsChannelSender] Teams 通知發送成功 - 收件人: {}, 標題: {}",
+                    recipientId, notification.getTitle());
 
         } catch (Exception e) {
             log.error("[TeamsChannelSender] Teams 通知發送失敗 - 收件人: {}, 錯誤: {}",
@@ -59,51 +74,64 @@ public class TeamsChannelSender implements ChannelSender {
     }
 
     /**
-     * 取得 Teams Webhook URL（暫時實作）
-     * TODO: 整合設定管理
+     * 取得 Teams Webhook URL
+     * <p>
+     * 優先順序：收件人個人設定 > 系統預設值
+     * </p>
      *
      * @param recipientId 收件人 ID
      * @return Webhook URL
      */
     private String getTeamsWebhookUrl(String recipientId) {
-        // 暫時實作：回傳空值（表示未設定）
-        return null;
+        // TODO: 未來可從 NotificationPreference 取得收件人的個人 Webhook URL
+        // 目前使用系統預設值
+        return defaultWebhookUrl;
     }
 
     /**
-     * 組裝 Teams 訊息（Adaptive Card 格式）
+     * 組裝 Teams 訊息（MessageCard 格式）
+     * <p>
+     * 使用 Office 365 Connector Card 格式
+     * </p>
      *
      * @param notification 通知聚合根
-     * @return 訊息物件
+     * @return 訊息 Map 物件
      */
-    private Object buildTeamsMessage(Notification notification) {
-        // TODO: 建立 Adaptive Card JSON 結構
-        return new TeamsMessage(
-                "@type",
-                "MessageCard",
-                "@context",
-                "http://schema.org/extensions",
-                "summary",
-                notification.getTitle(),
-                "title",
-                notification.getTitle(),
-                "text",
-                notification.getContent());
+    private Map<String, Object> buildTeamsMessage(Notification notification) {
+        Map<String, Object> message = new HashMap<>();
+        message.put("@type", "MessageCard");
+        message.put("@context", "http://schema.org/extensions");
+        message.put("themeColor", getThemeColor(notification));
+        message.put("summary", notification.getTitle());
+        message.put("title", notification.getTitle());
+        message.put("text", notification.getContent());
+
+        // 如果有相關業務連結，加入 potentialAction
+        if (notification.getRelatedBusinessUrl() != null && !notification.getRelatedBusinessUrl().isBlank()) {
+            Map<String, Object> action = new HashMap<>();
+            action.put("@type", "OpenUri");
+            action.put("name", "查看詳情");
+            action.put("targets", new Object[] {
+                    Map.of("os", "default", "uri", notification.getRelatedBusinessUrl())
+            });
+            message.put("potentialAction", new Object[] { action });
+        }
+
+        return message;
     }
 
     /**
-     * Teams 訊息物件（簡化版）
+     * 根據通知優先級取得主題顏色
+     *
+     * @param notification 通知聚合根
+     * @return 主題顏色 (hex)
      */
-    private record TeamsMessage(
-            String type,
-            String typeValue,
-            String context,
-            String contextValue,
-            String summary,
-            String summaryValue,
-            String title,
-            String titleValue,
-            String text,
-            String textValue) {
+    private String getThemeColor(Notification notification) {
+        return switch (notification.getPriority()) {
+            case URGENT -> "FF0000"; // 紅色
+            case HIGH -> "FFA500"; // 橘色
+            case NORMAL -> "0078D7"; // 藍色
+            case LOW -> "808080"; // 灰色
+        };
     }
 }

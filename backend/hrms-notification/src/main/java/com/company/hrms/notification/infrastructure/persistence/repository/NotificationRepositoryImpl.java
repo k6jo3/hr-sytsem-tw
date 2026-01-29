@@ -6,11 +6,13 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.notification.domain.model.aggregate.Notification;
 import com.company.hrms.notification.domain.model.valueobject.NotificationId;
 import com.company.hrms.notification.domain.repository.INotificationRepository;
 import com.company.hrms.notification.infrastructure.persistence.entity.NotificationPO;
-import com.company.hrms.notification.infrastructure.persistence.entity.QNotificationPO;
 import com.company.hrms.notification.infrastructure.persistence.mapper.NotificationMapper;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -55,33 +57,39 @@ public class NotificationRepositoryImpl
 
     @Override
     public List<Notification> findByRecipientId(String recipientId) {
-        QNotificationPO qNotification = QNotificationPO.notificationPO;
-        List<NotificationPO> pos = factory.selectFrom(qNotification)
-                .where(qNotification.recipientId.eq(recipientId)
-                        .and(qNotification.isDeleted.isFalse()))
-                .fetch();
+        // 使用宣告式 QueryBuilder 建立查詢條件
+        QueryGroup query = QueryBuilder.where()
+                .and("recipientId", Operator.EQ, recipientId)
+                .and("isDeleted", Operator.EQ, false)
+                .build();
+
+        List<NotificationPO> pos = super.findAll(query);
         return mapper.toDomainList(pos);
     }
 
     @Override
     public List<Notification> findUnreadByRecipientId(String recipientId) {
-        QNotificationPO qNotification = QNotificationPO.notificationPO;
-        List<NotificationPO> pos = factory.selectFrom(qNotification)
-                .where(qNotification.recipientId.eq(recipientId)
-                        .and(qNotification.readAt.isNull())
-                        .and(qNotification.isDeleted.isFalse()))
-                .fetch();
+        // 使用宣告式 QueryBuilder 建立查詢條件
+        QueryGroup query = QueryBuilder.where()
+                .and("recipientId", Operator.EQ, recipientId)
+                .and("readAt", Operator.IS_NULL, null)
+                .and("isDeleted", Operator.EQ, false)
+                .build();
+
+        List<NotificationPO> pos = super.findAll(query);
         return mapper.toDomainList(pos);
     }
 
     @Override
     public long countUnreadByRecipientId(String recipientId) {
-        QNotificationPO qNotification = QNotificationPO.notificationPO;
-        return factory.selectFrom(qNotification)
-                .where(qNotification.recipientId.eq(recipientId)
-                        .and(qNotification.readAt.isNull())
-                        .and(qNotification.isDeleted.isFalse()))
-                .fetchCount();
+        // 使用宣告式 QueryBuilder 建立查詢條件並使用 count() 方法
+        QueryGroup query = QueryBuilder.where()
+                .and("recipientId", Operator.EQ, recipientId)
+                .and("readAt", Operator.IS_NULL, null)
+                .and("isDeleted", Operator.EQ, false)
+                .build();
+
+        return super.count(query);
     }
 
     @Override

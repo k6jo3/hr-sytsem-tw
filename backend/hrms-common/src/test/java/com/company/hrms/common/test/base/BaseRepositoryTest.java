@@ -17,7 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.assertion.QueryGroupAssert;
 
@@ -25,15 +24,18 @@ import com.company.hrms.common.test.assertion.QueryGroupAssert;
  * Repository 整合測試基類
  * 使用 H2 記憶體資料庫進行 Repository 整合測試
  *
- * <p>測試重點:
+ * <p>
+ * 測試重點:
  * <ul>
- *   <li>QueryGroup → SQL 轉換</li>
- *   <li>分頁與排序</li>
- *   <li>Auto-Join 機制</li>
- *   <li>軟刪除過濾</li>
+ * <li>QueryGroup → SQL 轉換</li>
+ * <li>分頁與排序</li>
+ * <li>Auto-Join 機制</li>
+ * <li>軟刪除過濾</li>
  * </ul>
  *
- * <p>使用範例:
+ * <p>
+ * 使用範例:
+ * 
  * <pre>
  * {@literal @}Sql(scripts = "classpath:test-data/employee_test_data.sql")
  * class EmployeeRepositoryIntegrationTest extends BaseRepositoryTest {
@@ -149,16 +151,16 @@ public abstract class BaseRepositoryTest extends BaseTest {
      * 驗證分頁結果
      */
     protected <T> void assertPageResult(Page<T> page, int expectedPageNumber,
-                                         int expectedPageSize, long expectedTotalElements) {
+            int expectedPageSize, long expectedTotalElements) {
         assertThat(page.getNumber())
-            .as("頁碼應為 %d", expectedPageNumber)
-            .isEqualTo(expectedPageNumber);
+                .as("頁碼應為 %d", expectedPageNumber)
+                .isEqualTo(expectedPageNumber);
         assertThat(page.getSize())
-            .as("每頁筆數應為 %d", expectedPageSize)
-            .isEqualTo(expectedPageSize);
+                .as("每頁筆數應為 %d", expectedPageSize)
+                .isEqualTo(expectedPageSize);
         assertThat(page.getTotalElements())
-            .as("總筆數應為 %d", expectedTotalElements)
-            .isEqualTo(expectedTotalElements);
+                .as("總筆數應為 %d", expectedTotalElements)
+                .isEqualTo(expectedTotalElements);
     }
 
     /**
@@ -170,8 +172,8 @@ public abstract class BaseRepositoryTest extends BaseTest {
             C current = keyExtractor.apply(list.get(i));
             C next = keyExtractor.apply(list.get(i + 1));
             assertThat(current.compareTo(next))
-                .as("索引 %d 與 %d 的順序應為升冪", i, i + 1)
-                .isLessThanOrEqualTo(0);
+                    .as("索引 %d 與 %d 的順序應為升冪", i, i + 1)
+                    .isLessThanOrEqualTo(0);
         }
     }
 
@@ -184,8 +186,8 @@ public abstract class BaseRepositoryTest extends BaseTest {
             C current = keyExtractor.apply(list.get(i));
             C next = keyExtractor.apply(list.get(i + 1));
             assertThat(current.compareTo(next))
-                .as("索引 %d 與 %d 的順序應為降冪", i, i + 1)
-                .isGreaterThanOrEqualTo(0);
+                    .as("索引 %d 與 %d 的順序應為降冪", i, i + 1)
+                    .isGreaterThanOrEqualTo(0);
         }
     }
 
