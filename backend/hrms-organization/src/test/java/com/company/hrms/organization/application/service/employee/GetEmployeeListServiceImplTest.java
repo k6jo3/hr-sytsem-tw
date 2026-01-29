@@ -28,8 +28,8 @@ class GetEmployeeListServiceImplTest extends BaseServiceTest<GetEmployeeListServ
     void searchByDepartment_ShouldMatchSnapshot() throws Exception {
         // Given
         GetEmployeeListRequest request = GetEmployeeListRequest.builder()
-                .deptId("D001")
-                .status("ACTIVE")
+                .departmentIds(java.util.List.of("D001"))
+                .statuses(java.util.List.of("ACTIVE"))
                 .build();
 
         // Mock Repository behavior to avoid NPE if service calls it

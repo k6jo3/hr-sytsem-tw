@@ -9,15 +9,12 @@ import com.company.hrms.common.application.pipeline.PipelineTask;
 import com.company.hrms.workflow.application.service.context.UserDelegationContext;
 import com.company.hrms.workflow.domain.model.aggregate.UserDelegation;
 import com.company.hrms.workflow.domain.model.valueobject.UserDelegationId;
-import com.company.hrms.workflow.domain.repository.IUserDelegationRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class ValidateAndCreateDelegationTask implements PipelineTask<UserDelegationContext> {
-
-    private final IUserDelegationRepository repository;
 
     @Override
     public void execute(UserDelegationContext context) {

@@ -8,9 +8,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -28,7 +26,8 @@ import com.company.hrms.workflow.domain.repository.IWorkflowInstanceRepository;
 /**
  * Workflow QueryEngine 契約測試
  *
- * <p>驗證 QueryEngine 各種操作符在 WorkflowInstance 實體上的正確運作
+ * <p>
+ * 驗證 QueryEngine 各種操作符在 WorkflowInstance 實體上的正確運作
  * 使用 H2 資料庫實際執行 SQL 查詢
  *
  * @author SA Team
@@ -77,35 +76,34 @@ class WorkflowQueryEngineContractTest extends BaseQueryEngineContractTest<Workfl
      */
     static Stream<Arguments> operatorTestCases() {
         return Stream.of(
-            // EQ 操作符測試
-            Arguments.of("EQ", "status", "RUNNING", 4),
-            Arguments.of("EQ", "status", "COMPLETED", 3),
-            Arguments.of("EQ", "status", "CANCELLED", 2),
-            Arguments.of("EQ", "status", "REJECTED", 1),
-            Arguments.of("EQ", "business_type", "LEAVE", 5),
-            Arguments.of("EQ", "business_type", "OVERTIME", 3),
-            Arguments.of("EQ", "business_type", "EXPENSE", 2),
-            Arguments.of("EQ", "department_id", "D001", 6),
+                // EQ 操作符測試
+                Arguments.of("EQ", "status", "RUNNING", 4),
+                Arguments.of("EQ", "status", "COMPLETED", 3),
+                Arguments.of("EQ", "status", "CANCELLED", 2),
+                Arguments.of("EQ", "status", "REJECTED", 1),
+                Arguments.of("EQ", "business_type", "LEAVE", 5),
+                Arguments.of("EQ", "business_type", "OVERTIME", 3),
+                Arguments.of("EQ", "business_type", "EXPENSE", 2),
+                Arguments.of("EQ", "department_id", "D001", 6),
 
-            // NE 操作符測試
-            Arguments.of("NE", "status", "RUNNING", 6),
-            Arguments.of("NE", "status", "COMPLETED", 7),
+                // NE 操作符測試
+                Arguments.of("NE", "status", "RUNNING", 6),
+                Arguments.of("NE", "status", "COMPLETED", 7),
 
-            // IN 操作符測試
-            Arguments.of("IN", "status", List.of("RUNNING", "COMPLETED"), 7),
-            Arguments.of("IN", "status", List.of("CANCELLED", "REJECTED"), 3),
-            Arguments.of("IN", "business_type", List.of("LEAVE", "OVERTIME"), 8),
+                // IN 操作符測試
+                Arguments.of("IN", "status", List.of("RUNNING", "COMPLETED"), 7),
+                Arguments.of("IN", "status", List.of("CANCELLED", "REJECTED"), 3),
+                Arguments.of("IN", "business_type", List.of("LEAVE", "OVERTIME"), 8),
 
-            // NOT_IN 操作符測試
-            Arguments.of("NOT_IN", "status", List.of("RUNNING", "COMPLETED"), 3),
-            Arguments.of("NOT_IN", "business_type", List.of("EXPENSE"), 8),
+                // NOT_IN 操作符測試
+                Arguments.of("NOT_IN", "status", List.of("RUNNING", "COMPLETED"), 3),
+                Arguments.of("NOT_IN", "business_type", List.of("EXPENSE"), 8),
 
-            // IS_NOT_NULL 操作符測試 (completed_at 不為空)
-            Arguments.of("IS_NOT_NULL", "completed_at", null, 6),
+                // IS_NOT_NULL 操作符測試 (completed_at 不為空)
+                Arguments.of("IS_NOT_NULL", "completed_at", null, 6),
 
-            // IS_NULL 操作符測試 (completed_at 為空 = RUNNING 狀態)
-            Arguments.of("IS_NULL", "completed_at", null, 4)
-        );
+                // IS_NULL 操作符測試 (completed_at 為空 = RUNNING 狀態)
+                Arguments.of("IS_NULL", "completed_at", null, 4));
     }
 
     @Nested

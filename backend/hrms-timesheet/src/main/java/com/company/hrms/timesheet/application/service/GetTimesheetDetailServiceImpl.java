@@ -18,7 +18,6 @@ import com.company.hrms.timesheet.domain.model.valueobject.TimesheetId;
 import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
 
 import lombok.RequiredArgsConstructor;
-import com.company.hrms.common.exception.DomainException;
 
 @Service("getTimesheetDetailServiceImpl")
 @RequiredArgsConstructor

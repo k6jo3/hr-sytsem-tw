@@ -2,7 +2,6 @@ package com.company.hrms.iam.infrastructure.repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -167,7 +166,7 @@ public class UserRepositoryImpl implements IUserRepository {
                         : false)
                 .createdAt(toLocalDateTime(po.getCreatedAt()))
                 .updatedAt(toLocalDateTime(po.getUpdatedAt()))
-                .roles(new ArrayList<>()) // TODO: 從關聯表載入
+                .roles(userDAO.selectUserRoles(po.getUserId()))
                 .build();
     }
 

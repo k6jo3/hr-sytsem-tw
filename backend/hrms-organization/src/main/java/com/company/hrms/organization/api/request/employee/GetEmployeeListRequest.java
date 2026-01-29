@@ -1,6 +1,7 @@
 package com.company.hrms.organization.api.request.employee;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryFilter;
@@ -32,9 +33,9 @@ public class GetEmployeeListRequest {
     @QueryFilter(property = "employeeNumber", operator = Operator.EQ)
     private String employeeNo;
 
-    @Schema(description = "部門 ID")
-    @QueryFilter(property = "departmentId", operator = Operator.EQ)
-    private String deptId;
+    @Schema(description = "部門 ID 列表")
+    @QueryFilter(property = "departmentId", operator = Operator.IN)
+    private List<String> departmentIds;
 
     @Schema(description = "職位 ID")
     @QueryFilter(property = "jobTitle", operator = Operator.EQ) // Assuming positionId maps to jobTitle or similar? No,
@@ -50,9 +51,9 @@ public class GetEmployeeListRequest {
                                                                 // error, as I don't see positionId on Entity.
     private String positionId;
 
-    @Schema(description = "員工狀態 (ACTIVE/RESIGNED/ON_LEAVE etc)")
-    @QueryFilter(property = "employmentStatus", operator = Operator.EQ)
-    private String status;
+    @Schema(description = "員工狀態列表 (ACTIVE/RESIGNED/ON_LEAVE etc)")
+    @QueryFilter(property = "employmentStatus", operator = Operator.IN)
+    private List<String> statuses;
 
     @Schema(description = "僱用類型 (REGULAR/PROBATION/CONTRACT)")
     @QueryFilter(property = "employmentType", operator = Operator.EQ)

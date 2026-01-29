@@ -7,6 +7,7 @@ import com.company.hrms.performance.domain.model.valueobject.CycleId;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
  * 當考核週期啟動時發布此事件，通知相關服務
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PerformanceCycleStartedEvent extends DomainEvent {

@@ -6,19 +6,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.base.BaseApiContractTest;
-import com.company.hrms.recruitment.application.service.GetJobOpeningsServiceImpl;
 import com.company.hrms.recruitment.domain.repository.IJobOpeningRepository;
 
 public class JobOpeningContractTest extends BaseApiContractTest {
-
-    @Autowired
-    private GetJobOpeningsServiceImpl getJobOpeningsService;
 
     @MockBean
     private IJobOpeningRepository jobOpeningRepository;

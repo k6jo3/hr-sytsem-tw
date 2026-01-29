@@ -10,6 +10,7 @@ import com.company.hrms.performance.domain.model.valueobject.ReviewId;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
  * 當員工提交自評或主管提交主管評時發布此事件
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PerformanceReviewSubmittedEvent extends DomainEvent {

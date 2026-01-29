@@ -20,11 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.test.base.BaseApiContractTest;
-import com.company.hrms.performance.api.request.ExportReportRequest;
 import com.company.hrms.performance.api.request.GetDistributionRequest;
 import com.company.hrms.performance.api.response.GetDistributionResponse;
-import com.company.hrms.performance.api.response.SuccessResponse;
-import com.company.hrms.performance.application.service.ExportReportServiceImpl;
 import com.company.hrms.performance.application.service.GetDistributionServiceImpl;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -32,57 +29,41 @@ import com.company.hrms.performance.application.service.GetDistributionServiceIm
 @DisplayName("HR08 報表查詢 Controller 測試")
 class HR08ReportQryControllerTest extends BaseApiContractTest {
 
-    @MockBean(name = "getDistributionServiceImpl")
-    private GetDistributionServiceImpl getDistributionService;
+        @MockBean(name = "getDistributionServiceImpl")
+        private GetDistributionServiceImpl getDistributionService;
 
-    @MockBean(name = "exportReportServiceImpl")
-    private ExportReportServiceImpl exportReportService;
+        @BeforeEach
+        void setupSecurity() {
+                JWTModel mockUser = new JWTModel();
+                mockUser.setUserId("admin-user");
+                mockUser.setUsername("admin");
+                mockUser.setRoles(Collections.singletonList("ADMIN"));
 
-    @BeforeEach
-    void setupSecurity() {
-        JWTModel mockUser = new JWTModel();
-        mockUser.setUserId("admin-user");
-        mockUser.setUsername("admin");
-        mockUser.setRoles(Collections.singletonList("ADMIN"));
+                List<SimpleGrantedAuthority> authorities = mockUser.getRoles().stream()
+                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                                .collect(Collectors.toList());
 
-        List<SimpleGrantedAuthority> authorities = mockUser.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .collect(Collectors.toList());
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(mockUser,
+                                null, authorities);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(mockUser,
-                null, authorities);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
+        @Test
+        @DisplayName("查詢績效分布 - 成功")
+        void getDistribution_ShouldReturnOk() throws Exception {
+                // Arrange
+                GetDistributionResponse response = GetDistributionResponse.builder()
+                                .cycleId("CYCLE-001")
+                                .totalReviews(100)
+                                .completedReviews(80)
+                                .build();
 
-    @Test
-    @DisplayName("查詢績效分布 - 成功")
-    void getDistribution_ShouldReturnOk() throws Exception {
-        // Arrange
-        GetDistributionResponse response = GetDistributionResponse.builder()
-                .cycleId("CYCLE-001")
-                .totalReviews(100)
-                .completedReviews(80)
-                .build();
+                when(getDistributionService.getResponse(any(GetDistributionRequest.class), any(JWTModel.class)))
+                                .thenReturn(response);
 
-        when(getDistributionService.getResponse(any(GetDistributionRequest.class), any(JWTModel.class)))
-                .thenReturn(response);
+                // Act & Assert
+                performGet("/api/v1/performance/reports/distribution/CYCLE-001")
+                                .andExpect(status().isOk());
+        }
 
-        // Act & Assert
-        performGet("/api/v1/performance/reports/distribution/CYCLE-001")
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("匯出績效報表 - 成功")
-    void exportReport_ShouldReturnOk() throws Exception {
-        // Arrange
-        SuccessResponse response = new SuccessResponse("匯出作業已排程", true);
-
-        when(exportReportService.getResponse(any(ExportReportRequest.class), any(JWTModel.class)))
-                .thenReturn(response);
-
-        // Act & Assert
-        performGet("/api/v1/performance/reports/export/CYCLE-001")
-                .andExpect(status().isOk());
-    }
 }

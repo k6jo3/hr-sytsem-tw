@@ -12,6 +12,7 @@ import com.company.hrms.notification.api.response.announcement.AnnouncementDetai
 import com.company.hrms.notification.domain.model.aggregate.Announcement;
 import com.company.hrms.notification.domain.model.valueobject.AnnouncementId;
 import com.company.hrms.notification.domain.repository.IAnnouncementRepository;
+import com.company.hrms.notification.infrastructure.client.organization.OrganizationServiceClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class GetAnnouncementDetailServiceImpl
                 implements QueryApiService<Void, AnnouncementDetailResponse> {
 
         private final IAnnouncementRepository announcementRepository;
+        private final OrganizationServiceClient organizationServiceClient;
 
         @Override
         public AnnouncementDetailResponse getResponse(
@@ -43,7 +45,19 @@ public class GetAnnouncementDetailServiceImpl
                                 .findById(AnnouncementId.of(announcementIdStr))
                                 .orElseThrow(() -> new EntityNotFoundException("Announcement", announcementIdStr));
 
-                // TODO: 驗證使用者是否有權限查看此公告（根據目標對象）
+                // 1. 驗證使用者是否有權限查看此公告（根據目標對象）
+                validatePermission(announcement, currentUser);
+
+                // 2. 查詢發布者姓名
+                String publishedByName = announcement.getPublishedBy();
+                try {
+                        var employee = organizationServiceClient.getEmployeeDetail(announcement.getPublishedBy());
+                        if (employee != null) {
+                                publishedByName = employee.getFullName();
+                        }
+                } catch (Exception e) {
+                        log.warn("無法取得發布者姓名: {}", e.getMessage());
+                }
 
                 // 組裝回應
                 return AnnouncementDetailResponse.builder()
@@ -68,12 +82,53 @@ public class GetAnnouncementDetailServiceImpl
                                                 : Collections.emptyList())
                                 .publishedAt(announcement.getPublishedAt())
                                 .expireAt(announcement.getEffectiveTo())
-                                .isRead(false) // TODO: 查詢使用者是否已讀
+                                .isRead(false) // TODO: 查詢使用者是否已讀 (需串接 AnnouncementReadRecord)
                                 .publishedBy(AnnouncementDetailResponse.PublishedBy.builder()
                                                 .employeeId(announcement.getPublishedBy())
-                                                .fullName(announcement.getPublishedBy()) // TODO: 查詢員工姓名
+                                                .fullName(publishedByName)
                                                 .build())
                                 .createdAt(announcement.getCreatedAt())
                                 .build();
+        }
+
+        private void validatePermission(Announcement announcement, JWTModel currentUser) {
+                // 如果是全員公告，所有人都有權限
+                if (announcement.getTargetAudience() == Announcement.TargetAudience.ALL) {
+                        return;
+                }
+
+                // 如果是特定部門公告
+                if (announcement.getTargetAudience() == Announcement.TargetAudience.DEPARTMENT) {
+                        if (announcement.getTargetDepartmentIds() != null &&
+                                        announcement.getTargetDepartmentIds().contains(currentUser.getDepartmentId())) {
+                                return;
+                        }
+                }
+
+                // 如果是特定角色公告
+                if (announcement.getTargetAudience() == Announcement.TargetAudience.ROLE) {
+                        if (announcement.getTargetRoleIds() != null && currentUser.getRoles() != null) {
+                                for (String role : currentUser.getRoles()) {
+                                        if (announcement.getTargetRoleIds().contains(role)) {
+                                                return;
+                                        }
+                                }
+                        }
+                }
+
+                // 如果是特定員工公告
+                if (announcement.getTargetAudience() == Announcement.TargetAudience.SPECIFIC) {
+                        if (announcement.getTargetEmployeeIds() != null &&
+                                        announcement.getTargetEmployeeIds().contains(currentUser.getUserId())) {
+                                return;
+                        }
+                }
+
+                // 如果發布者是自己
+                if (currentUser.getUserId().equals(announcement.getPublishedBy())) {
+                        return;
+                }
+
+                throw new IllegalArgumentException("您無權查看此公告");
         }
 }

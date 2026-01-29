@@ -59,6 +59,12 @@ class SendBatchNotificationServiceTest {
         public org.springframework.web.client.RestTemplate restTemplate() {
             return org.mockito.Mockito.mock(org.springframework.web.client.RestTemplate.class);
         }
+
+        @org.springframework.context.annotation.Bean
+        public com.company.hrms.notification.infrastructure.client.organization.OrganizationServiceClient organizationServiceClient() {
+            return org.mockito.Mockito.mock(
+                    com.company.hrms.notification.infrastructure.client.organization.OrganizationServiceClient.class);
+        }
     }
 
     private JWTModel mockUser;

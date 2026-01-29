@@ -13,7 +13,6 @@ import com.company.hrms.common.application.pipeline.PipelineTask;
 import com.company.hrms.workflow.api.response.WorkflowInstanceListItemResponse;
 import com.company.hrms.workflow.application.service.context.GetWorkflowInstanceListContext;
 import com.company.hrms.workflow.domain.model.aggregate.WorkflowInstance;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,8 +23,6 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class MapWorkflowInstanceToResponseTask implements PipelineTask<GetWorkflowInstanceListContext> {
-
-    private final ObjectMapper objectMapper;
 
     @Override
     public void execute(GetWorkflowInstanceListContext ctx) throws Exception {

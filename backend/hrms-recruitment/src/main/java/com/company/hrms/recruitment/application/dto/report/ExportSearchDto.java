@@ -21,7 +21,7 @@ public class ExportSearchDto {
     @Schema(description = "結束日期", example = "2025-12-31")
     private LocalDate dateTo;
 
-    @Schema(description = "匯出格式 (EXCEL/PDF)", example = "EXCEL")
+    @Schema(description = "匯出格式 (EXCEL)", example = "EXCEL")
     private ExportFormat format = ExportFormat.EXCEL;
 
     @Schema(description = "報表類型 (SUMMARY/DETAIL)", example = "SUMMARY")
@@ -31,7 +31,7 @@ public class ExportSearchDto {
      * 匯出格式
      */
     public enum ExportFormat {
-        EXCEL, PDF
+        EXCEL
     }
 
     /**

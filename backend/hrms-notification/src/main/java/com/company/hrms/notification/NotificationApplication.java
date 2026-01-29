@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 })
 @EnableDiscoveryClient
 @EnableScheduling
+@org.springframework.cloud.openfeign.EnableFeignClients
 public class NotificationApplication {
     public static void main(String[] args) {
         SpringApplication.run(NotificationApplication.class, args);

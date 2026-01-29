@@ -119,4 +119,10 @@ public interface UserMapper {
         @Insert("INSERT INTO user_roles (user_role_id, user_id, role_id, assigned_at) " +
                         "VALUES (gen_random_uuid(), #{userId}, #{roleId}, CURRENT_TIMESTAMP)")
         void insertUserRole(@Param("userId") String userId, @Param("roleId") String roleId);
+
+        /**
+         * 查詢使用者的角色 ID 列表
+         */
+        @Select("SELECT role_id FROM user_roles WHERE user_id = #{userId}")
+        List<String> selectUserRoles(@Param("userId") String userId);
 }

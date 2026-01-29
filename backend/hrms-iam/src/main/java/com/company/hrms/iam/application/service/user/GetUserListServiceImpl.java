@@ -59,9 +59,6 @@ public class GetUserListServiceImpl
 
         // 簡單處理排序
         Sort sort = Sort.by(Sort.Direction.DESC, "create_time");
-        if (request.getSort() != null && !request.getSort().isEmpty()) {
-            // TODO: 解析排序字串
-        }
 
         Pageable pageable = PageRequest.of(page, size, sort);
 

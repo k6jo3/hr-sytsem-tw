@@ -131,13 +131,13 @@ class StartCycleServiceEventTest {
         }).when(startCycleTask).execute(any(StartCycleContext.class));
 
         // Capture events when published (before they are cleared)
-        final List<DomainEvent>[] capturedEventsWrapper = new List[1];
+        final java.util.concurrent.atomic.AtomicReference<List<DomainEvent>> capturedEventsWrapper = new java.util.concurrent.atomic.AtomicReference<>();
         doAnswer(invocation -> {
             List<DomainEvent> events = invocation.getArgument(0);
             // Create a copy because correct implementation of publishAll should consume
             // them instantly
             // and the source list will be cleared immediately after
-            capturedEventsWrapper[0] = new java.util.ArrayList<>(events);
+            capturedEventsWrapper.set(new java.util.ArrayList<>(events));
             return null;
         }).when(eventPublisher).publishAll(any());
 
@@ -148,7 +148,7 @@ class StartCycleServiceEventTest {
         verify(loadCycleTask).execute(any(StartCycleContext.class));
         verify(eventPublisher, times(1)).publishAll(any());
 
-        List<DomainEvent> publishedEvents = capturedEventsWrapper[0];
+        List<DomainEvent> publishedEvents = capturedEventsWrapper.get();
         org.junit.jupiter.api.Assertions.assertNotNull(publishedEvents, "Events should have been published");
         assertEquals(1, publishedEvents.size());
         assertEquals(PerformanceCycleStartedEvent.class, publishedEvents.get(0).getClass());
