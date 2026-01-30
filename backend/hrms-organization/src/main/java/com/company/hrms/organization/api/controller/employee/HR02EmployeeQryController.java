@@ -1,24 +1,36 @@
 package com.company.hrms.organization.api.controller.employee;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.controller.QueryBaseController;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.organization.api.request.employee.EmployeeQueryRequest;
-import com.company.hrms.organization.api.response.employee.*;
+import com.company.hrms.organization.api.response.employee.CheckUniqueResponse;
+import com.company.hrms.organization.api.response.employee.EmployeeDetailResponse;
+import com.company.hrms.organization.api.response.employee.EmployeeListResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 /**
  * HR02 - 員工管理 Query Controller
  * 負責員工資料的查詢操作
  *
- * <p>命名規範：HR{DD}{Screen}QryController</p>
- * <p>DD = 02 (Organization Domain)</p>
+ * <p>
+ * 命名規範：HR{DD}{Screen}QryController
+ * </p>
+ * <p>
+ * DD = 02 (Organization Domain)
+ * </p>
  */
 @RestController
 @RequestMapping("/api/v1/employees")
@@ -30,8 +42,8 @@ public class HR02EmployeeQryController extends QueryBaseController {
      */
     @Operation(summary = "查詢員工列表", operationId = "getEmployeeList")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權")
     })
     @GetMapping
     public ResponseEntity<EmployeeListResponse> getEmployeeList(
@@ -61,9 +73,9 @@ public class HR02EmployeeQryController extends QueryBaseController {
      */
     @Operation(summary = "查詢員工詳細資料", operationId = "getEmployeeDetail")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權"),
-        @ApiResponse(responseCode = "404", description = "員工不存在")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權"),
+            @ApiResponse(responseCode = "404", description = "員工不存在")
     })
     @GetMapping("/{employeeId}")
     public ResponseEntity<EmployeeDetailResponse> getEmployeeDetail(
@@ -77,9 +89,9 @@ public class HR02EmployeeQryController extends QueryBaseController {
      */
     @Operation(summary = "查詢員工人事歷程", operationId = "getEmployeeHistory")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權"),
-        @ApiResponse(responseCode = "404", description = "員工不存在")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權"),
+            @ApiResponse(responseCode = "404", description = "員工不存在")
     })
     @GetMapping("/{employeeId}/history")
     public ResponseEntity<Object> getEmployeeHistory(
@@ -93,9 +105,9 @@ public class HR02EmployeeQryController extends QueryBaseController {
      */
     @Operation(summary = "查詢員工學歷", operationId = "getEmployeeEducations")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權"),
-        @ApiResponse(responseCode = "404", description = "員工不存在")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權"),
+            @ApiResponse(responseCode = "404", description = "員工不存在")
     })
     @GetMapping("/{employeeId}/educations")
     public ResponseEntity<Object> getEmployeeEducations(
@@ -109,9 +121,9 @@ public class HR02EmployeeQryController extends QueryBaseController {
      */
     @Operation(summary = "查詢員工工作經歷", operationId = "getEmployeeExperiences")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權"),
-        @ApiResponse(responseCode = "404", description = "員工不存在")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權"),
+            @ApiResponse(responseCode = "404", description = "員工不存在")
     })
     @GetMapping("/{employeeId}/experiences")
     public ResponseEntity<Object> getEmployeeExperiences(
@@ -125,8 +137,8 @@ public class HR02EmployeeQryController extends QueryBaseController {
      */
     @Operation(summary = "檢查員工編號唯一性", operationId = "checkEmployeeNumber")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權")
     })
     @GetMapping("/check-number")
     public ResponseEntity<CheckUniqueResponse> checkEmployeeNumber(
@@ -140,8 +152,8 @@ public class HR02EmployeeQryController extends QueryBaseController {
      */
     @Operation(summary = "檢查身分證號唯一性", operationId = "checkNationalId")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權")
     })
     @GetMapping("/check-national-id")
     public ResponseEntity<CheckUniqueResponse> checkNationalId(
@@ -155,8 +167,8 @@ public class HR02EmployeeQryController extends QueryBaseController {
      */
     @Operation(summary = "檢查Email唯一性", operationId = "checkEmail")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權")
     })
     @GetMapping("/check-email")
     public ResponseEntity<CheckUniqueResponse> checkEmail(
@@ -170,13 +182,16 @@ public class HR02EmployeeQryController extends QueryBaseController {
      */
     @Operation(summary = "匯出員工資料", operationId = "exportEmployees")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "成功"),
-        @ApiResponse(responseCode = "401", description = "未授權")
+            @ApiResponse(responseCode = "200", description = "成功"),
+            @ApiResponse(responseCode = "401", description = "未授權")
     })
     @GetMapping("/export")
-    public ResponseEntity<Void> exportEmployees(
+    public ResponseEntity<byte[]> exportEmployees(
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-        // TODO: 實作 Excel 匯出
-        return ResponseEntity.noContent().build();
+        byte[] content = getResponse(null, currentUser);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"employees.csv\"")
+                .header("Content-Type", "text/csv; charset=UTF-8")
+                .body(content);
     }
 }

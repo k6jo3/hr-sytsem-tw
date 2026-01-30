@@ -56,7 +56,7 @@ public class GetCertificatesServiceImpl implements QueryApiService<GetCertificat
     private CertificateResponse toResponse(CertificateEntity cert) {
         CertificateResponse res = new CertificateResponse();
         res.setCertificateId(cert.getCertificateId());
-        res.setEmployeeId(cert.getEmployeeId());
+        res.setEmployeeId(cert.getEmployee_id());
         res.setCertificateName(cert.getCertificateName());
         res.setIssuingOrganization(cert.getIssuingOrganization());
         res.setCertificateNumber(cert.getCertificateNumber());

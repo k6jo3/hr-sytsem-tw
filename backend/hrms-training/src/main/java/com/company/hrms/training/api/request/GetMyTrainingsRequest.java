@@ -19,6 +19,9 @@ public class GetMyTrainingsRequest extends PageRequest {
 
     // 不需要 employeeId，因為這是從當前登入者取得
 
+    @QueryFilter(property = "is_deleted", operator = Operator.EQ)
+    private Integer is_deleted = 0;
+
     @QueryFilter(property = "status", operator = Operator.EQ)
     private EnrollmentStatus status;
 

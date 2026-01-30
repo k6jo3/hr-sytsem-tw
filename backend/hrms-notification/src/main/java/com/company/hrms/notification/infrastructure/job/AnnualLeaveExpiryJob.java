@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.notification.api.request.notification.SendNotificationRequest;
 import com.company.hrms.notification.application.service.send.SendNotificationServiceImpl;
+import com.company.hrms.notification.infrastructure.client.attendance.AttendanceServiceClient;
+import com.company.hrms.notification.infrastructure.client.attendance.dto.AnnualLeaveExpiryDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AnnualLeaveExpiryJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
+    private final AttendanceServiceClient attendanceServiceClient;
 
     /**
      * 每週一 10:00 執行
@@ -41,27 +44,21 @@ public class AnnualLeaveExpiryJob {
             LocalDate thirtyDaysLater = today.plusDays(30);
             log.info("[AnnualLeaveExpiryJob] 檢查於 {} 之前即將到期的特休假", thirtyDaysLater);
 
-            // TODO: 此處應透過 Feign Client 呼叫 Attendance Service 或由 Attendance Service 定期發送
-            // Kafka 訊息
-            // 目前暫不直接注入跨服務的 Repository 以符合微服務架構規範
-            // List<AnnualLeaveExpiry> expiringLeaves =
-            // attendanceClient.findExpiringAnnualLeave(thirtyDaysLater);
-
-            // 暫時實作：空列表
-            List<AnnualLeaveExpiry> expiringLeaves = List.of();
+            List<AnnualLeaveExpiryDto> expiringLeaves = attendanceServiceClient
+                    .getExpiringAnnualLeaves(thirtyDaysLater.toString());
 
             int successCount = 0;
             int failCount = 0;
 
-            for (AnnualLeaveExpiry leave : expiringLeaves) {
+            for (AnnualLeaveExpiryDto leave : expiringLeaves) {
                 try {
                     SendNotificationRequest request = SendNotificationRequest.builder()
-                            .recipientId(leave.employeeId())
+                            .recipientId(leave.getEmployeeId())
                             .notificationType("REMINDER")
                             .priority("NORMAL")
                             .title("🏖️ 特休假即將到期提醒")
                             .content(String.format("您還有 %.1f 天特休假尚未使用，將於 %s 到期失效，請儘速安排休假。",
-                                    leave.remainingDays(), leave.expiryDate()))
+                                    leave.getRemainingDays(), leave.getExpiryDate()))
                             .channels(List.of("IN_APP", "EMAIL"))
                             .businessUrl("/hr/leaves/balance")
                             .build();
@@ -71,7 +68,7 @@ public class AnnualLeaveExpiryJob {
 
                 } catch (Exception e) {
                     log.error("[AnnualLeaveExpiryJob] 發送特休到期提醒失敗 - 員工: {}, 錯誤: {}",
-                            leave.employeeId(), e.getMessage(), e);
+                            leave.getEmployeeId(), e.getMessage(), e);
                     failCount++;
                 }
             }
@@ -88,14 +85,5 @@ public class AnnualLeaveExpiryJob {
         systemUser.setEmployeeNumber("SYSTEM");
         systemUser.setDisplayName("系統自動通知");
         return systemUser;
-    }
-
-    /**
-     * 特休到期資訊（暫時用 record）
-     */
-    private record AnnualLeaveExpiry(
-            String employeeId,
-            double remainingDays,
-            LocalDate expiryDate) {
     }
 }

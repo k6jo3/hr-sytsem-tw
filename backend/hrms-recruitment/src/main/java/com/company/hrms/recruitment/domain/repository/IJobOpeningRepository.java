@@ -33,4 +33,9 @@ public interface IJobOpeningRepository {
      * 分頁查詢
      */
     Page<JobOpening> findAll(QueryGroup query, Pageable pageable);
+
+    /**
+     * 查詢總數
+     */
+    long count(QueryGroup query);
 }

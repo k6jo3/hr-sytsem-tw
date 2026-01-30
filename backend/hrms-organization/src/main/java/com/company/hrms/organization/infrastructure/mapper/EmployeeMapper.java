@@ -126,4 +126,6 @@ public interface EmployeeMapper {
          * 計算組織下的員工數量
          */
         int countByOrganizationId(@Param("organizationId") String organizationId);
+
+        List<EmployeePO> selectAll();
 }

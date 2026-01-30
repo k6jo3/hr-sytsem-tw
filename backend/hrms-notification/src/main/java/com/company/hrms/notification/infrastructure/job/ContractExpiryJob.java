@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.notification.api.request.notification.SendNotificationRequest;
 import com.company.hrms.notification.application.service.send.SendNotificationServiceImpl;
+import com.company.hrms.notification.infrastructure.client.organization.OrganizationServiceClient;
+import com.company.hrms.notification.infrastructure.client.organization.dto.ContractDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ContractExpiryJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
-    // TODO: 未來應透過 Feign Client 呼叫 Organization Service 取得即將到期的合約列表
+    private final OrganizationServiceClient organizationServiceClient;
 
     /**
      * 每日 09:00 執行
@@ -60,33 +62,28 @@ public class ContractExpiryJob {
         try {
             LocalDate expiryDate = LocalDate.now().plusDays(daysAhead);
 
-            // TODO: 查詢指定日期到期的合約
-            // List<Contract> expiringContracts =
-            // contractRepository.findByExpiryDate(expiryDate);
+            List<ContractDto> expiringContracts = organizationServiceClient.getExpiringContracts(expiryDate.toString());
 
-            // 暫時實作：空列表
-            List<ContractExpiry> expiringContracts = List.of();
-
-            for (ContractExpiry contract : expiringContracts) {
+            for (ContractDto contract : expiringContracts) {
                 try {
                     String priority = daysAhead <= 7 ? "HIGH" : "NORMAL";
 
                     SendNotificationRequest request = SendNotificationRequest.builder()
-                            .recipientId(contract.employeeId())
+                            .recipientId(contract.getEmployeeId())
                             .notificationType("REMINDER")
                             .priority(priority)
                             .title(String.format("⚠️ 合約%s提醒", urgencyLabel))
                             .content(String.format("您的勞動合約將於 %d 天後（%s）到期，請儘速辦理續約或離職手續。",
                                     daysAhead, expiryDate))
                             .channels(List.of("IN_APP", "EMAIL"))
-                            .businessUrl("/hr/contracts/" + contract.contractId())
+                            .businessUrl("/hr/contracts/" + contract.getContractId())
                             .build();
 
                     sendNotificationService.execCommand(request, createSystemUser());
 
                 } catch (Exception e) {
                     log.error("[ContractExpiryJob] 發送合約到期提醒失敗 - 員工: {}, 錯誤: {}",
-                            contract.employeeId(), e.getMessage(), e);
+                            contract.getEmployeeId(), e.getMessage(), e);
                 }
             }
 
@@ -100,11 +97,5 @@ public class ContractExpiryJob {
         systemUser.setEmployeeNumber("SYSTEM");
         systemUser.setDisplayName("系統自動通知");
         return systemUser;
-    }
-
-    /**
-     * 合約到期資訊（暫時用 record）
-     */
-    private record ContractExpiry(String contractId, String employeeId, LocalDate expiryDate) {
     }
 }

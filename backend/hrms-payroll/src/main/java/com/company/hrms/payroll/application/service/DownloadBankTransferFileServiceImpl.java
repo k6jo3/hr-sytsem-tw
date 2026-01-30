@@ -51,7 +51,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class DownloadBankTransferFileServiceImpl extends AbstractQueryService<String, String> {
 
-    // TODO: 注入 DocumentService 客戶端
+    private final com.company.hrms.payroll.infrastructure.client.document.DocumentServiceClient documentServiceClient;
+
+    // Note: DocumentService 客戶端待整合
 
     @Override
     protected QueryGroup buildQuery(String request, JWTModel currentUser) {
@@ -67,10 +69,16 @@ public class DownloadBankTransferFileServiceImpl extends AbstractQueryService<St
             throw new IllegalArgumentException("檔案 ID 為必填");
         }
 
-        // TODO: 實際從 Document Service 取得檔案 URL
-        // String downloadUrl = documentService.getDownloadUrl(targetFileId);
-        String downloadUrl = "/api/v1/documents/bank-transfers/" + targetFileId + "/download";
+        // Verify file exists
+        try {
+            documentServiceClient.getDocument(targetFileId);
+        } catch (Exception e) {
+            log.error("Document not found: {}", targetFileId);
+            throw new IllegalArgumentException("File not found or not accessible: " + targetFileId);
+        }
 
+        // Return connection URL
+        String downloadUrl = "/api/v1/documents/" + targetFileId + "/download";
         log.info("取得銀行薪轉檔下載 URL: {}", downloadUrl);
 
         return downloadUrl;

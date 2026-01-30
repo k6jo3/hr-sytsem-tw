@@ -1,6 +1,8 @@
 package com.company.hrms.training.infrastructure.repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
@@ -46,8 +48,8 @@ public class TrainingEnrollmentRepositoryImpl
     public boolean existsByCourseIdAndEmployeeId(String courseId, String employeeId) {
         QTrainingEnrollmentEntity qEnrollment = QTrainingEnrollmentEntity.trainingEnrollmentEntity;
         return factory.selectFrom(qEnrollment)
-                .where(qEnrollment.courseId.eq(courseId)
-                        .and(qEnrollment.employeeId.eq(employeeId)))
+                .where(qEnrollment.course_id.eq(courseId)
+                        .and(qEnrollment.employee_id.eq(employeeId)))
                 .fetchFirst() != null;
     }
 
@@ -58,7 +60,7 @@ public class TrainingEnrollmentRepositoryImpl
 
         java.math.BigDecimal sum = factory.select(qEnrollment.completedHours.sum())
                 .from(qEnrollment)
-                .where(qEnrollment.employeeId.eq(employeeId)
+                .where(qEnrollment.employee_id.eq(employeeId)
                         .and(qEnrollment.status
                                 .eq(EnrollmentStatus.COMPLETED)))
                 .fetchOne();
@@ -73,18 +75,18 @@ public class TrainingEnrollmentRepositoryImpl
 
         // Assume createdAt or completedAt. Let's filter by completedAt for stats.
         // Or generic date range if specified. Let's use createdAt for general range.
-        java.util.List<TrainingEnrollmentEntity> entities = factory.selectFrom(qEnrollment)
+        List<TrainingEnrollmentEntity> entities = factory.selectFrom(qEnrollment)
                 .where(qEnrollment.createdAt.between(startDate.atStartOfDay(), endDate.atTime(java.time.LocalTime.MAX)))
                 .fetch();
 
-        return entities.stream().map(this::toDomain).collect(java.util.stream.Collectors.toList());
+        return entities.stream().map(this::toDomain).collect(Collectors.toList());
     }
 
     private TrainingEnrollmentEntity toEntity(TrainingEnrollment domain) {
         TrainingEnrollmentEntity entity = new TrainingEnrollmentEntity();
         entity.setEnrollmentId(domain.getId().toString());
-        entity.setCourseId(domain.getCourseId());
-        entity.setEmployeeId(domain.getEmployeeId());
+        entity.setCourse_id(domain.getCourseId());
+        entity.setEmployee_id(domain.getEmployeeId());
         entity.setStatus(domain.getStatus());
         entity.setReason(domain.getReason());
         entity.setRemarks(domain.getRemarks());
@@ -112,8 +114,8 @@ public class TrainingEnrollmentRepositoryImpl
     private TrainingEnrollment toDomain(TrainingEnrollmentEntity entity) {
         return TrainingEnrollment.reconstitute(
                 EnrollmentId.from(entity.getEnrollmentId()),
-                entity.getCourseId(),
-                entity.getEmployeeId(),
+                entity.getCourse_id(),
+                entity.getEmployee_id(),
                 entity.getStatus(),
                 entity.getReason(),
                 entity.getRemarks(),

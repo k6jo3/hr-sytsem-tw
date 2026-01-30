@@ -43,7 +43,7 @@ class ShiftTest {
         void shouldThrowExceptionWhenNameIsBlank() {
             // When & Then
             assertThrows(IllegalArgumentException.class,
-                    () -> new Shift(new ShiftId("shift-001"), "", ShiftType.REGULAR,
+                    () -> new Shift(new ShiftId("shift-001"), "ORG001", "", ShiftType.REGULAR,
                             LocalTime.of(9, 0), LocalTime.of(18, 0)));
         }
     }
@@ -118,6 +118,7 @@ class ShiftTest {
     private Shift createRegularShift() {
         return new Shift(
                 new ShiftId("shift-001"),
+                "ORG001",
                 "常規班",
                 ShiftType.REGULAR,
                 LocalTime.of(9, 0),

@@ -44,8 +44,17 @@ public class DashboardMapper {
             dashboard.setAsDefault();
         }
 
-        // TODO: 解析 widgetsConfig JSON 並設定 widgets
-        // dashboard.updateWidgets(parseWidgets(po.getWidgetsConfig()));
+        if (po.getWidgetsConfig() != null) {
+            try {
+                java.util.List<com.company.hrms.reporting.domain.model.dashboard.DashboardWidget> widgets = objectMapper
+                        .readValue(po.getWidgetsConfig(), new com.fasterxml.jackson.core.type.TypeReference<>() {
+                        });
+                dashboard.updateWidgets(widgets);
+            } catch (JsonProcessingException e) {
+                // Log error or ignore if config is invalid
+                // System.err.println("Failed to parse widgets config: " + e.getMessage());
+            }
+        }
 
         return dashboard;
     }

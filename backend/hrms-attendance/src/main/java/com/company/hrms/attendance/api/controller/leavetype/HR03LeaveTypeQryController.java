@@ -1,5 +1,13 @@
 package com.company.hrms.attendance.api.controller.leavetype;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.company.hrms.attendance.api.request.leavetype.GetLeaveTypeListRequest;
 import com.company.hrms.attendance.api.response.leavetype.LeaveTypeListResponse;
 import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.controller.QueryBaseController;
@@ -10,13 +18,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * HR03 - 假別管理 Query Controller
@@ -37,16 +38,8 @@ public class HR03LeaveTypeQryController extends QueryBaseController {
     })
     @GetMapping
     public ResponseEntity<List<LeaveTypeListResponse>> getLeaveTypeList(
-            @RequestParam(required = false) String organizationId,
-            @RequestParam(required = false) Boolean isPaid,
-            @RequestParam(required = false) Boolean isActive,
+            GetLeaveTypeListRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-        LeaveTypeQueryRequest request = new LeaveTypeQueryRequest(organizationId, isPaid, isActive);
         return ResponseEntity.ok(getResponse(request, currentUser));
     }
-
-    /**
-     * 假別查詢請求 (內部類別)
-     */
-    public record LeaveTypeQueryRequest(String organizationId, Boolean isPaid, Boolean isActive) {}
 }

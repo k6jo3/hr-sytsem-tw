@@ -25,7 +25,7 @@ public class GetUnreportedEmployeesServiceImpl
         // 簡化實作：實際應該查詢所有員工，然後比對工時表
         // 這需要整合 Organization Service 來取得員工清單
         // 目前回傳空列表
-
+        // TODO: 邏輯未實作
         List<GetUnreportedEmployeesResponse.UnreportedEmployee> employees = new ArrayList<>();
 
         return GetUnreportedEmployeesResponse.builder()

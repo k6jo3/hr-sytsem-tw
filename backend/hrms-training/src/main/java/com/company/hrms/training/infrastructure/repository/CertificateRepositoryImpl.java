@@ -69,7 +69,7 @@ public class CertificateRepositoryImpl
     private CertificateEntity toEntity(Certificate domain) {
         CertificateEntity entity = new CertificateEntity();
         entity.setCertificateId(domain.getId().toString());
-        entity.setEmployeeId(domain.getEmployeeId());
+        entity.setEmployee_id(domain.getEmployeeId());
         entity.setCertificateName(domain.getCertificateName());
         entity.setIssuingOrganization(domain.getIssuingOrganization());
         entity.setCertificateNumber(domain.getCertificateNumber());
@@ -91,7 +91,7 @@ public class CertificateRepositoryImpl
     private Certificate toDomain(CertificateEntity entity) {
         return Certificate.reconstitute(
                 CertificateId.from(entity.getCertificateId()),
-                entity.getEmployeeId(),
+                entity.getEmployee_id(),
                 entity.getCertificateName(),
                 entity.getIssuingOrganization(),
                 entity.getCertificateNumber(),

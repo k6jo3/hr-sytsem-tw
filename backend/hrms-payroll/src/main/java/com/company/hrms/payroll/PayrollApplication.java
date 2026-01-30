@@ -9,10 +9,11 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * Domain Code: HR04
  */
 @SpringBootApplication(scanBasePackages = {
-    "com.company.hrms.payroll",
-    "com.company.hrms.common"
+        "com.company.hrms.payroll",
+        "com.company.hrms.common"
 })
 @EnableDiscoveryClient
+@org.springframework.cloud.openfeign.EnableFeignClients(basePackages = "com.company.hrms.payroll.infrastructure.client")
 public class PayrollApplication {
     public static void main(String[] args) {
         SpringApplication.run(PayrollApplication.class, args);

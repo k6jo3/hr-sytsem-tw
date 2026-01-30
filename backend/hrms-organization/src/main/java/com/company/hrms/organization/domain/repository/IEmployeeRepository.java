@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
 import com.company.hrms.organization.domain.model.valueobject.Email;
 import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
 import com.company.hrms.organization.domain.model.valueobject.EmploymentStatus;
 import com.company.hrms.organization.domain.model.valueobject.NationalId;
-import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
 
 /**
@@ -159,6 +159,13 @@ public interface IEmployeeRepository {
      * @return 員工數
      */
     int countByOrganizationId(OrganizationId organizationId);
+
+    /**
+     * 查詢所有員工
+     * 
+     * @return 員工列表
+     */
+    List<Employee> findAll();
 
     /**
      * 查詢條件類別

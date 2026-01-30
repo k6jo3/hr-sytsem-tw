@@ -93,6 +93,18 @@ public class NotificationRepositoryImpl
     }
 
     @Override
+    public boolean existsByTemplateCodeAndStatus(String templateCode,
+            com.company.hrms.notification.domain.model.valueobject.NotificationStatus status) {
+        QueryGroup query = QueryBuilder.where()
+                .and("templateCode", Operator.EQ, templateCode)
+                .and("status", Operator.EQ, status)
+                .and("isDeleted", Operator.EQ, false)
+                .build();
+
+        return super.count(query) > 0;
+    }
+
+    @Override
     public void deleteById(NotificationId id) {
         super.deleteById(id.getValue());
     }

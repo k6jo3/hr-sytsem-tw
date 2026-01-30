@@ -21,20 +21,23 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class GetCoursesRequest extends PageRequest {
 
+    @QueryFilter(property = "is_deleted", operator = Operator.EQ)
+    private Integer is_deleted = 0;
+
     @QueryFilter(property = "status", operator = Operator.EQ)
     private CourseStatus status;
 
-    @QueryFilter(property = "courseType", operator = Operator.EQ)
-    private CourseType courseType;
+    @QueryFilter(property = "type", operator = Operator.EQ)
+    private CourseType type;
 
-    @QueryFilter(property = "deliveryMode", operator = Operator.EQ)
-    private DeliveryMode deliveryMode;
+    @QueryFilter(property = "mode", operator = Operator.EQ)
+    private DeliveryMode mode;
 
     @QueryFilter(property = "category", operator = Operator.EQ)
     private CourseCategory category;
 
-    @QueryFilter(property = "courseName", operator = Operator.LIKE)
-    private String courseName;
+    @QueryFilter(property = "name", operator = Operator.LIKE)
+    private String name;
 
     @QueryFilter(property = "instructor", operator = Operator.LIKE)
     private String instructor;

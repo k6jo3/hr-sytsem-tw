@@ -9,8 +9,8 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * Domain Code: HR14
  */
 @SpringBootApplication(scanBasePackages = {
-    "com.company.hrms.reporting",
-    "com.company.hrms.common"
+        "com.company.hrms.reporting",
+        "com.company.hrms.common"
 })
 @EnableDiscoveryClient
 public class ReportingApplication {

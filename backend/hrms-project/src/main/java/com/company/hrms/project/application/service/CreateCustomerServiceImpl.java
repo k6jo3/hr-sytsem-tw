@@ -28,6 +28,7 @@ public class CreateCustomerServiceImpl implements CommandApiService<CreateCustom
         Customer customer = Customer.create(cmd);
         customerRepository.save(customer);
 
+        // TODO: 未實作邏輯
         // Customer domain model might publish event later but currently doesn't use
         // EventPublisher deeply yet
         // If we add EventPublisher, we should inject it here.

@@ -18,7 +18,10 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class GetCertificatesRequest extends PageRequest {
 
-    @QueryFilter(property = "employeeId", operator = Operator.EQ)
+    @QueryFilter(property = "is_deleted", operator = Operator.EQ)
+    private Integer is_deleted = 0;
+
+    @QueryFilter(property = "employee_id", operator = Operator.EQ)
     private String employeeId;
 
     @QueryFilter(property = "certificateName", operator = Operator.LIKE)

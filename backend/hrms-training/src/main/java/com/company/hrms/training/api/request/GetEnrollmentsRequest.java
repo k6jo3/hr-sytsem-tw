@@ -18,10 +18,13 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class GetEnrollmentsRequest extends PageRequest {
 
-    @QueryFilter(property = "courseId", operator = Operator.EQ)
+    @QueryFilter(property = "is_deleted", operator = Operator.EQ)
+    private Integer is_deleted = 0;
+
+    @QueryFilter(property = "course_id", operator = Operator.EQ)
     private String courseId;
 
-    @QueryFilter(property = "employeeId", operator = Operator.EQ)
+    @QueryFilter(property = "employee_id", operator = Operator.EQ)
     private String employeeId;
 
     @QueryFilter(property = "status", operator = Operator.EQ)

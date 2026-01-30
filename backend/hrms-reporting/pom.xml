@@ -23,6 +23,12 @@
             <groupId>com.company.hrms</groupId>
             <artifactId>hrms-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.company.hrms</groupId>
+            <artifactId>hrms-common</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Spring Boot Web -->
         <dependency>

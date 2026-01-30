@@ -25,7 +25,7 @@ public class DeleteDelegationServiceImpl implements CommandApiService<DeleteDele
     @Override
     public Void execCommand(DeleteDelegationRequest req, JWTModel currentUser, String... args) throws Exception {
         String id = (args.length > 0) ? args[0] : req.getDelegationId();
-
+        // TODO: id如果是null呢?
         if (id != null) {
             repository.deleteById(id);
         }

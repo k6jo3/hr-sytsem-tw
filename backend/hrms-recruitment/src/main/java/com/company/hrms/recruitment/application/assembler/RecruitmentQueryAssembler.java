@@ -20,7 +20,7 @@ public class RecruitmentQueryAssembler {
             JobStatus status,
             String departmentId,
             String keyword) {
-
+        // TODO: 未符合Fluent-Query-Engine設計
         QueryBuilder builder = QueryBuilder.where();
 
         if (status != null) {

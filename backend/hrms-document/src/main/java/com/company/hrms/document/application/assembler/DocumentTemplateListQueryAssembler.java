@@ -14,6 +14,7 @@ import com.company.hrms.document.api.request.GetDocumentTemplateListRequest;
 public class DocumentTemplateListQueryAssembler {
 
     public QueryGroup toQueryGroup(GetDocumentTemplateListRequest request) {
+        // TODO: 未符合Fluent-Query-Engine的設計
         var query = QueryBuilder.where();
 
         // 1. Soft Delete (Always required)

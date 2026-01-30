@@ -60,7 +60,7 @@ public class EmployeeRosterReadModel {
     @Column(name = "hire_date")
     private LocalDate hireDate;
 
-    @Column(name = "service_years", precision = 10, scale = 2)
+    @Column(name = "service_years")
     private Double serviceYears;
 
     @Column(name = "status", length = 20)

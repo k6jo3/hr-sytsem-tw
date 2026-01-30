@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.notification.api.request.notification.SendNotificationRequest;
 import com.company.hrms.notification.application.service.send.SendNotificationServiceImpl;
+import com.company.hrms.notification.infrastructure.client.training.TrainingServiceClient;
+import com.company.hrms.notification.infrastructure.client.training.dto.CertificateExpiryDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CertificateExpiryJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
-    // TODO: 未來應透過 Feign Client 呼叫 Training Service 取得即將到期的證照列表
+    private final TrainingServiceClient trainingServiceClient;
 
     /**
      * 每週一 09:00 執行
@@ -58,34 +60,30 @@ public class CertificateExpiryJob {
             LocalDate expiryDate = LocalDate.now().plusDays(daysAhead);
             log.info("[CertificateExpiryJob] 檢查於 {} 到期的證照", expiryDate);
 
-            // TODO: 查詢指定日期範圍內到期的證照
-            // List<Certificate> expiringCertificates =
-            // certificateRepository.findExpiringBetween(
-            // expiryDate.minusDays(3), expiryDate.plusDays(3));
+            // 查詢範圍: 到期日當天 (簡化邏輯，實際可擴大範圍)
+            List<CertificateExpiryDto> expiringCertificates = trainingServiceClient.getExpiringCertificates(
+                    expiryDate.toString(), expiryDate.toString());
 
-            // 暫時實作：空列表
-            List<CertificateExpiry> expiringCertificates = List.of();
-
-            for (CertificateExpiry cert : expiringCertificates) {
+            for (CertificateExpiryDto cert : expiringCertificates) {
                 try {
                     String priority = daysAhead <= 30 ? "HIGH" : "NORMAL";
 
                     SendNotificationRequest request = SendNotificationRequest.builder()
-                            .recipientId(cert.employeeId())
+                            .recipientId(cert.getEmployeeId())
                             .notificationType("REMINDER")
                             .priority(priority)
                             .title(String.format("📜 證照%s提醒", urgencyLabel))
                             .content(String.format("您的「%s」證照將於 %d 天後（%s）到期，請儘速辦理展延或換證。",
-                                    cert.certificateName(), daysAhead, cert.expiryDate()))
+                                    cert.getCertificateName(), daysAhead, cert.getExpiryDate()))
                             .channels(List.of("IN_APP", "EMAIL"))
-                            .businessUrl("/hr/certificates/" + cert.certificateId())
+                            .businessUrl("/hr/certificates/" + cert.getCertificateId())
                             .build();
 
                     sendNotificationService.execCommand(request, createSystemUser());
 
                 } catch (Exception e) {
                     log.error("[CertificateExpiryJob] 發送證照到期提醒失敗 - 員工: {}, 證照: {}, 錯誤: {}",
-                            cert.employeeId(), cert.certificateName(), e.getMessage(), e);
+                            cert.getEmployeeId(), cert.getCertificateName(), e.getMessage(), e);
                 }
             }
 
@@ -99,15 +97,5 @@ public class CertificateExpiryJob {
         systemUser.setEmployeeNumber("SYSTEM");
         systemUser.setDisplayName("系統自動通知");
         return systemUser;
-    }
-
-    /**
-     * 證照到期資訊（暫時用 record）
-     */
-    private record CertificateExpiry(
-            String certificateId,
-            String employeeId,
-            String certificateName,
-            LocalDate expiryDate) {
     }
 }

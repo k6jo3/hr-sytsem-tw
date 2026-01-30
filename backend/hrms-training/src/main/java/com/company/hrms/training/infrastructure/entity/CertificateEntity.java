@@ -26,7 +26,7 @@ public class CertificateEntity {
     private String certificateId;
 
     @Column(name = "employee_id")
-    private String employeeId;
+    private String employee_id;
 
     @Column(name = "certificate_name")
     private String certificateName;
@@ -74,4 +74,7 @@ public class CertificateEntity {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "is_deleted")
+    private Integer is_deleted = 0;
 }

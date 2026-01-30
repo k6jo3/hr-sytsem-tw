@@ -1,10 +1,10 @@
 package com.company.hrms.notification.domain.repository;
 
-import com.company.hrms.notification.domain.model.aggregate.Notification;
-import com.company.hrms.notification.domain.model.valueobject.NotificationId;
-
 import java.util.List;
 import java.util.Optional;
+
+import com.company.hrms.notification.domain.model.aggregate.Notification;
+import com.company.hrms.notification.domain.model.valueobject.NotificationId;
 
 /**
  * 通知 Repository 介面
@@ -56,6 +56,16 @@ public interface INotificationRepository {
      * @return 未讀數量
      */
     long countUnreadByRecipientId(String recipientId);
+
+    /**
+     * 查詢是否有特定狀態的通知使用該範本
+     *
+     * @param templateCode 範本代碼
+     * @param status       通知狀態
+     * @return true 表示存在
+     */
+    boolean existsByTemplateCodeAndStatus(String templateCode,
+            com.company.hrms.notification.domain.model.valueobject.NotificationStatus status);
 
     /**
      * 刪除通知

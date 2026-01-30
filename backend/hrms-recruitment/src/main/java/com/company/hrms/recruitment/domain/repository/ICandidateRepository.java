@@ -56,4 +56,9 @@ public interface ICandidateRepository {
      * 檢查是否已應徵過同一職缺
      */
     boolean existsByEmailAndOpeningId(String email, OpeningId openingId);
+
+    /**
+     * 查詢總數
+     */
+    long count(QueryGroup query);
 }

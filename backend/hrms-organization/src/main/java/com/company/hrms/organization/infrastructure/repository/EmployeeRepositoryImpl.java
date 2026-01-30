@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
 import com.company.hrms.organization.domain.model.valueobject.Address;
 import com.company.hrms.organization.domain.model.valueobject.BankAccount;
@@ -25,13 +26,14 @@ import com.company.hrms.organization.infrastructure.dao.EmployeeDAO;
 import com.company.hrms.organization.infrastructure.po.EmployeePO;
 
 import lombok.RequiredArgsConstructor;
-import com.company.hrms.common.query.QueryGroup;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 員工倉儲實作
  */
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class EmployeeRepositoryImpl implements IEmployeeRepository {
 
     private final EmployeeDAO employeeDAO;
@@ -40,6 +42,13 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     public Optional<Employee> findById(EmployeeId id) {
         return employeeDAO.findById(id.getValue().toString())
                 .map(this::toDomain);
+    }
+
+    @Override
+    public List<Employee> findAll() {
+        return employeeDAO.findAll().stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -149,14 +158,15 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     @Override
     public List<Employee> findByQuery(QueryGroup query,
             org.springframework.data.domain.Pageable pageable) {
-        // TODO: 實作動態查詢適配器 (QueryGroup -> Mybatis/JPA Criteria)
-        // 目前僅返回空列表以通過編譯
+        // 目前尚未完整實作 QueryGroup 到 Criteria 的轉換
+        // 暫時僅支援空的查詢或回傳空列表
+        log.warn("Dynamic query (QueryGroup) is not fully supported yet. Returning empty list.");
         return java.util.Collections.emptyList();
     }
 
     @Override
     public long countByQuery(QueryGroup query) {
-        // TODO: 實作動態查詢計數
+        log.warn("Dynamic count (QueryGroup) is not fully supported yet. Returning 0.");
         return 0;
     }
 

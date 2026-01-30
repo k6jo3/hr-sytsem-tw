@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.company.hrms.attendance.domain.model.aggregate.LeaveType;
 import com.company.hrms.attendance.domain.model.valueobject.LeaveTypeId;
+import com.company.hrms.common.query.QueryGroup;
 
 public interface ILeaveTypeRepository {
     void save(LeaveType leaveType);
@@ -14,6 +15,8 @@ public interface ILeaveTypeRepository {
     Optional<LeaveType> findByCode(String code);
 
     List<LeaveType> findAll();
+
+    List<LeaveType> findByQuery(QueryGroup query);
 
     void delete(LeaveTypeId id);
 }

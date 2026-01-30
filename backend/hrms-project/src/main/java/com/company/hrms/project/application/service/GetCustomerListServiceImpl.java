@@ -26,53 +26,54 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class GetCustomerListServiceImpl implements QueryApiService<GetCustomerListRequest, GetCustomerListResponse> {
 
-    private final ICustomerRepository customerRepository;
+        private final ICustomerRepository customerRepository;
 
-    @Override
-    public GetCustomerListResponse getResponse(GetCustomerListRequest req, JWTModel currentUser, String... args)
-            throws Exception {
+        @Override
+        public GetCustomerListResponse getResponse(GetCustomerListRequest req, JWTModel currentUser, String... args)
+                        throws Exception {
+                // TODO: 未符合Fluent-Query-Engine
+                // Build QueryGroup
+                QueryGroup query = QueryGroup.and();
 
-        // Build QueryGroup
-        QueryGroup query = QueryGroup.and();
+                if (req.getKeyword() != null && !req.getKeyword().isEmpty()) {
+                        query.addSubGroup(
+                                        QueryGroup.or()
+                                                        .like("customerName", "%" + req.getKeyword() + "%")
+                                                        .like("customerCode", "%" + req.getKeyword() + "%")
+                                                        .like("taxId", "%" + req.getKeyword() + "%"));
+                }
 
-        if (req.getKeyword() != null && !req.getKeyword().isEmpty()) {
-            query.addSubGroup(
-                    QueryGroup.or()
-                            .like("customerName", "%" + req.getKeyword() + "%")
-                            .like("customerCode", "%" + req.getKeyword() + "%")
-                            .like("taxId", "%" + req.getKeyword() + "%"));
+                // Build Pageable (Default sort by CustomerCode ASC)
+                Pageable pageable = PageRequest.of(req.getPage(), req.getSize(),
+                                Sort.by(Sort.Direction.ASC, "customerCode"));
+
+                // Execute Query
+                Page<Customer> pageResult = customerRepository.findCustomers(query, pageable);
+
+                // Map to Response
+                List<CustomerListItemResponse> items = pageResult.getContent().stream()
+                                .map(this::toDto)
+                                .collect(Collectors.toList());
+
+                return GetCustomerListResponse.builder()
+                                .items(items)
+                                .total(pageResult.getTotalElements())
+                                .page(pageResult.getNumber())
+                                .size(pageResult.getSize())
+                                .totalPages(pageResult.getTotalPages())
+                                .build();
         }
 
-        // Build Pageable (Default sort by CustomerCode ASC)
-        Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), Sort.by(Sort.Direction.ASC, "customerCode"));
-
-        // Execute Query
-        Page<Customer> pageResult = customerRepository.findCustomers(query, pageable);
-
-        // Map to Response
-        List<CustomerListItemResponse> items = pageResult.getContent().stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-
-        return GetCustomerListResponse.builder()
-                .items(items)
-                .total(pageResult.getTotalElements())
-                .page(pageResult.getNumber())
-                .size(pageResult.getSize())
-                .totalPages(pageResult.getTotalPages())
-                .build();
-    }
-
-    private CustomerListItemResponse toDto(Customer customer) {
-        return CustomerListItemResponse.builder()
-                .customerId(customer.getId().getValue())
-                .customerCode(customer.getCustomerCode())
-                .customerName(customer.getCustomerName())
-                .taxId(customer.getTaxId())
-                .industry(customer.getIndustry())
-                .email(customer.getEmail())
-                .phoneNumber(customer.getPhoneNumber())
-                .status(customer.getStatus().name())
-                .build();
-    }
+        private CustomerListItemResponse toDto(Customer customer) {
+                return CustomerListItemResponse.builder()
+                                .customerId(customer.getId().getValue())
+                                .customerCode(customer.getCustomerCode())
+                                .customerName(customer.getCustomerName())
+                                .taxId(customer.getTaxId())
+                                .industry(customer.getIndustry())
+                                .email(customer.getEmail())
+                                .phoneNumber(customer.getPhoneNumber())
+                                .status(customer.getStatus().name())
+                                .build();
+        }
 }

@@ -6,36 +6,42 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.company.hrms.attendance.api.contract.AttendanceApiContractTest;
+import com.company.hrms.attendance.api.controller.attendance.HR03CheckInQryController.CorrectionQueryRequest;
 import com.company.hrms.attendance.api.request.attendance.GetAttendanceListRequest;
 import com.company.hrms.attendance.api.request.attendance.GetLeaveBalanceRequest;
 import com.company.hrms.attendance.api.request.leave.GetLeaveListRequest;
+import com.company.hrms.attendance.api.request.leavetype.GetLeaveTypeListRequest;
 import com.company.hrms.attendance.api.request.overtime.GetOvertimeListRequest;
-import com.company.hrms.attendance.api.controller.shift.HR03ShiftQryController.ShiftQueryRequest;
-import com.company.hrms.attendance.api.controller.leavetype.HR03LeaveTypeQryController.LeaveTypeQueryRequest;
-import com.company.hrms.attendance.api.controller.attendance.HR03CheckInQryController.CorrectionQueryRequest;
-import com.company.hrms.attendance.api.controller.report.HR03ReportQryController.MonthlyReportQueryRequest;
-import com.company.hrms.attendance.api.controller.report.HR03ReportQryController.DailyReportQueryRequest;
+import com.company.hrms.attendance.api.request.report.GetDailyReportRequest;
+import com.company.hrms.attendance.api.request.report.GetMonthlyReportRequest;
+import com.company.hrms.attendance.api.request.shift.GetShiftListRequest;
 import com.company.hrms.attendance.application.service.checkin.assembler.AttendanceQueryAssembler;
 import com.company.hrms.attendance.application.service.checkin.assembler.LeaveBalanceQueryAssembler;
-import com.company.hrms.attendance.application.service.leave.assembler.LeaveQueryAssembler;
-import com.company.hrms.attendance.application.service.overtime.assembler.OvertimeQueryAssembler;
-import com.company.hrms.attendance.application.service.shift.assembler.ShiftQueryAssembler;
-import com.company.hrms.attendance.application.service.leavetype.assembler.LeaveTypeQueryAssembler;
 import com.company.hrms.attendance.application.service.correction.assembler.CorrectionQueryAssembler;
+import com.company.hrms.attendance.application.service.leave.assembler.LeaveQueryAssembler;
+import com.company.hrms.attendance.application.service.leavetype.assembler.LeaveTypeQueryAssembler;
+import com.company.hrms.attendance.application.service.overtime.assembler.OvertimeQueryAssembler;
 import com.company.hrms.attendance.application.service.report.assembler.ReportQueryAssembler;
+import com.company.hrms.attendance.application.service.shift.assembler.ShiftQueryAssembler;
 import com.company.hrms.common.test.contract.BaseContractTest;
 
 /**
  * HR03 考勤服務 Assembler 單元合約測試
  *
- * <p>本測試類別驗證所有查詢 Assembler 產出的 QueryGroup 符合業務合約規格。
+ * <p>
+ * 本測試類別驗證所有查詢 Assembler 產出的 QueryGroup 符合業務合約規格。
  * 合約規格定義於 resources/contracts/attendance_contracts.md
  *
- * <p><b>測試層級:</b> Assembler 單元測試
- * <p><b>測試範圍:</b> 僅驗證 Assembler.toQueryGroup() 的條件組裝邏輯
- * <p><b>使用基類:</b> BaseContractTest
+ * <p>
+ * <b>測試層級:</b> Assembler 單元測試
+ * <p>
+ * <b>測試範圍:</b> 僅驗證 Assembler.toQueryGroup() 的條件組裝邏輯
+ * <p>
+ * <b>使用基類:</b> BaseContractTest
  *
- * <p>注意：此為快速驗證測試，不涉及 Spring Context、MockMvc 或角色權限。
+ * <p>
+ * 注意：此為快速驗證測試，不涉及 Spring Context、MockMvc 或角色權限。
  * 完整的 API 合約測試請參考 {@link AttendanceApiContractTest}。
  *
  * @see AttendanceApiContractTest API 層級合約測試
@@ -369,7 +375,9 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_S001: 查詢啟用中班別")
         void searchActiveShifts_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new ShiftQueryRequest(null, null, true);
+            var request = GetShiftListRequest.builder()
+                    .isActive(true)
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_S001");
@@ -379,7 +387,9 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_S002: 查詢停用班別")
         void searchInactiveShifts_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new ShiftQueryRequest(null, null, false);
+            var request = GetShiftListRequest.builder()
+                    .isActive(false)
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_S002");
@@ -389,7 +399,9 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_S003: 依組織查詢班別")
         void searchByOrganization_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new ShiftQueryRequest("ORG001", null, null);
+            var request = GetShiftListRequest.builder()
+                    .organizationId("ORG001")
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_S003");
@@ -399,7 +411,9 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_S004: 依班別類型查詢")
         void searchByShiftType_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new ShiftQueryRequest(null, "NORMAL", null);
+            var request = GetShiftListRequest.builder()
+                    .shiftType("NORMAL")
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_S004");
@@ -409,7 +423,9 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_S005: 查詢彈性班別")
         void searchFlexibleShifts_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new ShiftQueryRequest(null, "FLEXIBLE", null);
+            var request = GetShiftListRequest.builder()
+                    .shiftType("FLEXIBLE")
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_S005");
@@ -429,7 +445,9 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_T001: 查詢啟用中假別")
         void searchActiveLeaveTypes_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new LeaveTypeQueryRequest(null, null, true);
+            var request = GetLeaveTypeListRequest.builder()
+                    .isActive(true)
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_T001");
@@ -439,7 +457,9 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_T002: 查詢支薪假別")
         void searchPaidLeaveTypes_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new LeaveTypeQueryRequest(null, true, null);
+            var request = GetLeaveTypeListRequest.builder()
+                    .isPaid(true)
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_T002");
@@ -449,7 +469,9 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_T003: 查詢無薪假別")
         void searchUnpaidLeaveTypes_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new LeaveTypeQueryRequest(null, false, null);
+            var request = GetLeaveTypeListRequest.builder()
+                    .isPaid(false)
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_T003");
@@ -459,7 +481,9 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_T004: 依組織查詢假別")
         void searchByOrganization_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new LeaveTypeQueryRequest("ORG001", null, null);
+            var request = GetLeaveTypeListRequest.builder()
+                    .organizationId("ORG001")
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_T004");
@@ -532,7 +556,11 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_R001: 查詢月報表")
         void searchMonthlyReport_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new MonthlyReportQueryRequest("ORG001", 2025, 1, null);
+            var request = GetMonthlyReportRequest.builder()
+                    .organizationId("ORG001")
+                    .year(2025)
+                    .month(1)
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_R001");
@@ -542,7 +570,12 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_R002: 查詢部門月報表")
         void searchDeptMonthlyReport_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new MonthlyReportQueryRequest("ORG001", 2025, 1, "D001");
+            var request = GetMonthlyReportRequest.builder()
+                    .organizationId("ORG001")
+                    .year(2025)
+                    .month(1)
+                    .departmentId("D001")
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_R002");
@@ -552,8 +585,10 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_R003: 查詢日報表")
         void searchDailyReport_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new DailyReportQueryRequest(
-                    "ORG001", LocalDate.parse("2025-01-15"), null);
+            var request = GetDailyReportRequest.builder()
+                    .organizationId("ORG001")
+                    .date(LocalDate.parse("2025-01-15"))
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_R003");
@@ -563,8 +598,11 @@ public class AttendanceContractTest extends BaseContractTest {
         @DisplayName("ATT_R004: 查詢部門日報表")
         void searchDeptDailyReport_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
-            var request = new DailyReportQueryRequest(
-                    "ORG001", LocalDate.parse("2025-01-15"), "D001");
+            var request = GetDailyReportRequest.builder()
+                    .organizationId("ORG001")
+                    .date(LocalDate.parse("2025-01-15"))
+                    .departmentId("D001")
+                    .build();
 
             var query = assembler.toQueryGroup(request);
             assertContract(query, contract, "ATT_R004");

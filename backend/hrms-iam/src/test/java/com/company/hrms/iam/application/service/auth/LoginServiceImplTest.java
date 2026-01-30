@@ -4,224 +4,96 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.iam.api.request.auth.LoginRequest;
 import com.company.hrms.iam.api.response.auth.LoginResponse;
+import com.company.hrms.iam.application.service.auth.context.AuthContext;
+import com.company.hrms.iam.application.service.auth.task.CheckUserStatusTask;
+import com.company.hrms.iam.application.service.auth.task.GenerateTokenTask;
+import com.company.hrms.iam.application.service.auth.task.LoadUserByUsernameTask;
+import com.company.hrms.iam.application.service.auth.task.RecordLoginTask;
+import com.company.hrms.iam.application.service.auth.task.ValidatePasswordTask;
 import com.company.hrms.iam.domain.model.aggregate.User;
-import com.company.hrms.iam.domain.repository.IUserRepository;
-import com.company.hrms.iam.domain.service.AccountLockingDomainService;
-import com.company.hrms.iam.domain.service.JwtTokenDomainService;
-import com.company.hrms.iam.domain.service.PasswordHashingDomainService;
 
 /**
- * LoginServiceImpl 單元測試
- * 
- * <p>
- * 注意: 此測試目前需要重構以匹配 BusinessPipeline 架構
- * </p>
- * <p>
- * LoginServiceImpl 已改為使用 Pipeline 模式 (Tasks 注入)，
- * 而非直接使用 Repository/DomainService，需要更新測試策略：
- * </p>
- * <ul>
- * <li>選項1: 使用 @SpringBootTest 進行整合測試</li>
- * <li>選項2: 單獨測試各個 Task (LoadUserByUsernameTask, ValidatePasswordTask 等)</li>
- * </ul>
+ * LoginServiceImpl 測試 (Pipeline 模式)
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LoginServiceImpl 測試")
-@Disabled("待重構 - 測試設計與 Pipeline 架構不匹配，需改為測試各個 Task 或使用整合測試")
 class LoginServiceImplTest {
 
     @Mock
-    private IUserRepository userRepository;
-
+    private LoadUserByUsernameTask loadUserByUsernameTask;
     @Mock
-    private PasswordHashingDomainService passwordHashingService;
-
+    private CheckUserStatusTask checkUserStatusTask;
     @Mock
-    private JwtTokenDomainService jwtTokenService;
-
+    private ValidatePasswordTask validatePasswordTask;
     @Mock
-    private AccountLockingDomainService accountLockingService;
+    private RecordLoginTask recordLoginTask;
+    @Mock
+    private GenerateTokenTask generateTokenTask;
 
     @InjectMocks
     private LoginServiceImpl loginService;
 
-    private User testUser;
-    private LoginRequest loginRequest;
-
     @BeforeEach
     void setUp() {
-        // 建立測試用使用者
-        testUser = User.create("john.doe", "john@example.com",
-                "hashedPassword", "John Doe");
-        testUser.activate();
-        testUser.assignRole("USER");
+        ReflectionTestUtils.setField(loginService, "accessTokenExpiry", 3600000L);
+        lenient().when(loadUserByUsernameTask.shouldExecute(any())).thenReturn(true);
+        lenient().when(checkUserStatusTask.shouldExecute(any())).thenReturn(true);
+        lenient().when(validatePasswordTask.shouldExecute(any())).thenReturn(true);
+        lenient().when(recordLoginTask.shouldExecute(any())).thenReturn(true);
+        lenient().when(generateTokenTask.shouldExecute(any())).thenReturn(true);
+    }
 
-        // 建立登入請求
-        loginRequest = LoginRequest.builder()
+    @Test
+    @DisplayName("應成功執行登入 Pipeline")
+    void shouldLoginSuccessfully() throws Exception {
+        // Given
+        LoginRequest request = LoginRequest.builder()
                 .username("john.doe")
                 .password("Password1!")
                 .build();
-    }
 
-    @Nested
-    @DisplayName("登入成功")
-    class LoginSuccessTests {
+        User testUser = User.create("john.doe", "john@example.com", "hashed", "John Doe");
+        testUser.assignRole("USER");
 
-        @Test
-        @DisplayName("應成功登入並返回 Token")
-        void shouldLoginSuccessfully() throws Exception {
-            // Given
-            when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(testUser));
-            when(passwordHashingService.verify("Password1!", "hashedPassword")).thenReturn(true);
-            when(jwtTokenService.generateAccessToken(any(User.class))).thenReturn("access-token");
-            when(jwtTokenService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
+        // Mock tasks to populate context
+        doAnswer(invocation -> {
+            AuthContext ctx = invocation.getArgument(0);
+            ctx.setUser(testUser);
+            return null;
+        }).when(loadUserByUsernameTask).execute(any());
 
-            // When
-            LoginResponse response = loginService.execCommand(loginRequest, null);
+        doAnswer(invocation -> {
+            AuthContext ctx = invocation.getArgument(0);
+            ctx.setAccessToken("access-token");
+            ctx.setRefreshToken("refresh-token");
+            return null;
+        }).when(generateTokenTask).execute(any());
 
-            // Then
-            assertNotNull(response);
-            assertEquals("access-token", response.getAccessToken());
-            assertEquals("refresh-token", response.getRefreshToken());
-            assertEquals("Bearer", response.getTokenType());
-            assertNotNull(response.getUser());
-            assertEquals("john.doe", response.getUser().getUsername());
-            assertEquals("John Doe", response.getUser().getDisplayName());
+        // When
+        LoginResponse response = loginService.execCommand(request, null);
 
-            // 驗證登入成功後記錄
-            verify(userRepository).update(any(User.class));
-        }
+        // Then
+        assertNotNull(response);
+        assertEquals("access-token", response.getAccessToken());
+        assertEquals("refresh-token", response.getRefreshToken());
+        assertEquals("john.doe", response.getUser().getUsername());
 
-        @Test
-        @DisplayName("登入成功應重置失敗次數")
-        void shouldResetFailedAttemptsOnSuccess() throws Exception {
-            // Given
-            when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(testUser));
-            when(passwordHashingService.verify(anyString(), anyString())).thenReturn(true);
-            when(jwtTokenService.generateAccessToken(any())).thenReturn("access-token");
-            when(jwtTokenService.generateRefreshToken(any())).thenReturn("refresh-token");
-
-            // When
-            loginService.execCommand(loginRequest, null);
-
-            // Then
-            assertEquals(0, testUser.getFailedLoginAttempts());
-            assertNotNull(testUser.getLastLoginAt());
-        }
-    }
-
-    @Nested
-    @DisplayName("登入失敗")
-    class LoginFailureTests {
-
-        @Test
-        @DisplayName("使用者不存在應拋出例外")
-        void shouldThrowExceptionWhenUserNotFound() {
-            // Given
-            when(userRepository.findByUsername("john.doe")).thenReturn(Optional.empty());
-
-            // When & Then
-            DomainException exception = assertThrows(DomainException.class,
-                    () -> loginService.execCommand(loginRequest, null));
-            assertEquals("LOGIN_FAILED", exception.getErrorCode());
-        }
-
-        @Test
-        @DisplayName("密碼錯誤應拋出例外並記錄失敗")
-        void shouldThrowExceptionWhenPasswordIncorrect() {
-            // Given
-            when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(testUser));
-            when(passwordHashingService.verify(anyString(), anyString())).thenReturn(false);
-            when(accountLockingService.recordFailureAndCheckLock(any())).thenReturn(false);
-
-            // When & Then
-            DomainException exception = assertThrows(DomainException.class,
-                    () -> loginService.execCommand(loginRequest, null));
-            assertEquals("LOGIN_FAILED", exception.getErrorCode());
-
-            // 驗證記錄失敗
-            verify(accountLockingService).recordFailureAndCheckLock(testUser);
-            verify(userRepository).update(testUser);
-        }
-
-        @Test
-        @DisplayName("帳號已停用應拋出例外")
-        void shouldThrowExceptionWhenUserInactive() {
-            // Given
-            testUser.deactivate();
-            when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(testUser));
-
-            // When & Then
-            DomainException exception = assertThrows(DomainException.class,
-                    () -> loginService.execCommand(loginRequest, null));
-            assertEquals("USER_INACTIVE", exception.getErrorCode());
-        }
-
-        @Test
-        @DisplayName("帳號已鎖定應拋出例外")
-        void shouldThrowExceptionWhenUserLocked() {
-            // Given
-            testUser.lock(LocalDateTime.now().plusMinutes(30));
-            when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(testUser));
-            when(accountLockingService.checkAndUnlock(testUser)).thenReturn(false);
-
-            // When & Then
-            DomainException exception = assertThrows(DomainException.class,
-                    () -> loginService.execCommand(loginRequest, null));
-            assertEquals("USER_LOCKED", exception.getErrorCode());
-        }
-
-        @Test
-        @DisplayName("鎖定時間已過應自動解鎖並允許登入")
-        void shouldAutoUnlockWhenLockExpired() throws Exception {
-            // Given
-            testUser.lock(LocalDateTime.now().minusMinutes(1)); // 鎖定時間已過
-            when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(testUser));
-            when(accountLockingService.checkAndUnlock(testUser)).thenAnswer(inv -> {
-                testUser.unlock();
-                return true;
-            });
-            when(passwordHashingService.verify(anyString(), anyString())).thenReturn(true);
-            when(jwtTokenService.generateAccessToken(any())).thenReturn("access-token");
-            when(jwtTokenService.generateRefreshToken(any())).thenReturn("refresh-token");
-
-            // When
-            LoginResponse response = loginService.execCommand(loginRequest, null);
-
-            // Then
-            assertNotNull(response);
-            verify(accountLockingService).checkAndUnlock(testUser);
-        }
-
-        @Test
-        @DisplayName("連續失敗 5 次應鎖定帳號")
-        void shouldLockAccountAfterFiveFailedAttempts() {
-            // Given
-            when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(testUser));
-            when(passwordHashingService.verify(anyString(), anyString())).thenReturn(false);
-            when(accountLockingService.recordFailureAndCheckLock(any())).thenReturn(true);
-
-            // When & Then
-            DomainException exception = assertThrows(DomainException.class,
-                    () -> loginService.execCommand(loginRequest, null));
-            assertEquals("USER_LOCKED", exception.getErrorCode());
-            assertTrue(exception.getMessage().contains("鎖定"));
-        }
+        // Verify all tasks were called
+        verify(loadUserByUsernameTask).execute(any());
+        verify(checkUserStatusTask).execute(any());
+        verify(validatePasswordTask).execute(any());
+        verify(recordLoginTask).execute(any());
+        verify(generateTokenTask).execute(any());
     }
 }

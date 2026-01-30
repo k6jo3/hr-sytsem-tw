@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class GetWorkflowDefinitionListServiceImpl
         @Override
         public Page<WorkflowDefinitionResponse> getResponse(GetWorkflowDefinitionListRequest req, JWTModel currentUser,
                         String... args) throws Exception {
-
+                // TODO: 不符合business pipeline以及Fluent-Query-Engine設計
                 UltimateQueryEngine<WorkflowDefinitionEntity> engine = new UltimateQueryEngine<>(factory,
                                 WorkflowDefinitionEntity.class);
                 BooleanExpression predicate = engine.parse(req);
@@ -70,6 +71,6 @@ public class GetWorkflowDefinitionListServiceImpl
                                                 .build())
                                 .collect(Collectors.toList());
 
-                return new org.springframework.data.domain.PageImpl<>(content, req.getPageable(), total);
+                return new PageImpl<>(content, req.getPageable(), total);
         }
 }

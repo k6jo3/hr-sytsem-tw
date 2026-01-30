@@ -53,9 +53,9 @@ public class TrainingCourseRepositoryImpl
         TrainingCourseEntity entity = new TrainingCourseEntity();
         entity.setCourseId(domain.getId().toString());
         entity.setCourseCode(domain.getCourseCode());
-        entity.setCourseName(domain.getCourseName());
-        entity.setCourseType(domain.getCourseType());
-        entity.setDeliveryMode(domain.getDeliveryMode());
+        entity.setName(domain.getCourseName());
+        entity.setType(domain.getCourseType());
+        entity.setMode(domain.getDeliveryMode());
         entity.setCategory(domain.getCategory());
         entity.setDescription(domain.getDescription());
         entity.setInstructor(domain.getInstructor());
@@ -85,9 +85,9 @@ public class TrainingCourseRepositoryImpl
         return TrainingCourse.reconstitute(
                 CourseId.from(entity.getCourseId()),
                 entity.getCourseCode(),
-                entity.getCourseName(),
-                entity.getCourseType(),
-                entity.getDeliveryMode(),
+                entity.getName(),
+                entity.getType(),
+                entity.getMode(),
                 entity.getCategory(),
                 entity.getDescription(),
                 entity.getInstructor(),

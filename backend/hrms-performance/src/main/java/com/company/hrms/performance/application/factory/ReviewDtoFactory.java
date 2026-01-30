@@ -12,9 +12,9 @@ public class ReviewDtoFactory {
         return GetReviewsResponse.ReviewSummary.builder()
                 .reviewId(review.getReviewId().getValue().toString())
                 .cycleId(review.getCycleId().getValue().toString())
-                .cycleName("") // TODO: 需關聯查詢或從 View 取得
+                .cycleName("Cycle-" + review.getCycleId()) // Note: 暫時使用 ID，實際名稱需由 Service 層組裝
                 .employeeId(review.getEmployeeId().toString())
-                .employeeName("") // TODO: 需關聯查詢或從 View 取得
+                .employeeName("Emp-" + review.getEmployeeId()) // Note: 暫時使用 ID，實際名稱需由 Service 層組裝
                 .reviewType(review.getReviewType())
                 .status(review.getStatus())
                 .overallScore(review.getOverallScore())

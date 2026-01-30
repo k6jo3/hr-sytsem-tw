@@ -42,7 +42,7 @@ public class ApprovalTaskRepositoryImpl implements IApprovalTaskRepository {
         // Manual Join for Projection data (WorkflowInstance)
         QApprovalTaskEntity qTask = QApprovalTaskEntity.approvalTaskEntity;
         QWorkflowInstanceEntity qInst = QWorkflowInstanceEntity.workflowInstanceEntity;
-
+        // TODO: 這堆的註解是什麼意思?有缺什麼東西嗎?
         // Careful: engine uses PathBuilder, we use Q-Class. They should alias to same
         // if default naming used.
         // QApprovalTaskEntity variable is "approvalTaskEntity".

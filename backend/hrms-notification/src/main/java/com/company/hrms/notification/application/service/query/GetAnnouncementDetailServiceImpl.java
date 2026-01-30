@@ -11,6 +11,7 @@ import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.notification.api.response.announcement.AnnouncementDetailResponse;
 import com.company.hrms.notification.domain.model.aggregate.Announcement;
 import com.company.hrms.notification.domain.model.valueobject.AnnouncementId;
+import com.company.hrms.notification.domain.repository.IAnnouncementReadRecordRepository;
 import com.company.hrms.notification.domain.repository.IAnnouncementRepository;
 import com.company.hrms.notification.infrastructure.client.organization.OrganizationServiceClient;
 
@@ -31,6 +32,7 @@ public class GetAnnouncementDetailServiceImpl
 
         private final IAnnouncementRepository announcementRepository;
         private final OrganizationServiceClient organizationServiceClient;
+        private final IAnnouncementReadRecordRepository readRecordRepository;
 
         @Override
         public AnnouncementDetailResponse getResponse(
@@ -59,6 +61,10 @@ public class GetAnnouncementDetailServiceImpl
                         log.warn("無法取得發布者姓名: {}", e.getMessage());
                 }
 
+                // 3. 查詢是否已讀
+                boolean isRead = readRecordRepository.existsByAnnouncementIdAndEmployeeId(
+                                announcementIdStr, currentUser.getUserId());
+
                 // 組裝回應
                 return AnnouncementDetailResponse.builder()
                                 .announcementId(announcement.getId().getValue())
@@ -82,7 +88,7 @@ public class GetAnnouncementDetailServiceImpl
                                                 : Collections.emptyList())
                                 .publishedAt(announcement.getPublishedAt())
                                 .expireAt(announcement.getEffectiveTo())
-                                .isRead(false) // TODO: 查詢使用者是否已讀 (需串接 AnnouncementReadRecord)
+                                .isRead(isRead)
                                 .publishedBy(AnnouncementDetailResponse.PublishedBy.builder()
                                                 .employeeId(announcement.getPublishedBy())
                                                 .fullName(publishedByName)

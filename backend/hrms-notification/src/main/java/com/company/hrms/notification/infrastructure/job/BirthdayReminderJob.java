@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.notification.api.request.notification.SendNotificationRequest;
 import com.company.hrms.notification.application.service.send.SendNotificationServiceImpl;
+import com.company.hrms.notification.infrastructure.client.organization.OrganizationServiceClient;
+import com.company.hrms.notification.infrastructure.client.organization.dto.EmployeeDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BirthdayReminderJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
-    // TODO: 未來應透過 Feign Client 呼叫 Organization Service 取得今日生日員工列表
+    private final OrganizationServiceClient organizationServiceClient;
 
     /**
      * 每日 08:00 執行
@@ -41,21 +43,16 @@ public class BirthdayReminderJob {
             LocalDate today = LocalDate.now();
             log.info("[BirthdayReminderJob] 正在檢查日期 {} 的生日提醒", today);
 
-            // TODO: 查詢今日生日的員工
-            // List<Employee> birthdayEmployees =
-            // employeeRepository.findByBirthday(today.getMonthValue(),
-            // today.getDayOfMonth());
-
-            // 暫時實作：模擬查詢結果
-            List<String> birthdayEmployeeIds = List.of(); // 空列表，避免實際發送
+            List<EmployeeDto> birthdayEmployees = organizationServiceClient.getEmployeesByBirthday(
+                    today.getMonthValue(), today.getDayOfMonth());
 
             int successCount = 0;
             int failCount = 0;
 
-            for (String employeeId : birthdayEmployeeIds) {
+            for (EmployeeDto employee : birthdayEmployees) {
                 try {
                     SendNotificationRequest request = SendNotificationRequest.builder()
-                            .recipientId(employeeId)
+                            .recipientId(employee.getEmployeeId())
                             .notificationType("ANNOUNCEMENT")
                             .priority("NORMAL")
                             .title("🎂 生日快樂！")
@@ -70,7 +67,7 @@ public class BirthdayReminderJob {
                     successCount++;
                 } catch (Exception e) {
                     log.error("[BirthdayReminderJob] 發送生日祝福失敗 - 員工: {}, 錯誤: {}",
-                            employeeId, e.getMessage(), e);
+                            employee.getEmployeeId(), e.getMessage(), e);
                     failCount++;
                 }
             }

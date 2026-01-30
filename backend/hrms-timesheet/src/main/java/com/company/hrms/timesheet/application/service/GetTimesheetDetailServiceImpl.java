@@ -32,6 +32,7 @@ public class GetTimesheetDetailServiceImpl
                         String... args)
                         throws Exception {
 
+                // TODO: 邏輯未實作，確認此功能到底要幹嘛
                 Timesheet t = timesheetRepository.findById(new TimesheetId(UUID.fromString(request.getTimesheetId())))
                                 .orElseThrow(() -> new EntityNotFoundException("Timesheet", request.getTimesheetId()));
 

@@ -40,6 +40,7 @@ public class GetInterviewServiceImpl
         }
 
         private InterviewResponse toResponse(Interview interview) {
+                // TODO: 程式過長，縮排太多，建立改用objectMapper或structMapper
                 return InterviewResponse.builder()
                                 .id(interview.getId().getValue().toString())
                                 .candidateId(interview.getCandidateId().getValue().toString())

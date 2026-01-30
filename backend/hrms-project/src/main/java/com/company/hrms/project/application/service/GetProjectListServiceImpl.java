@@ -27,66 +27,68 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class GetProjectListServiceImpl implements QueryApiService<GetProjectListRequest, GetProjectListResponse> {
 
-    private final IProjectRepository projectRepository;
+        private final IProjectRepository projectRepository;
 
-    @Override
-    public GetProjectListResponse getResponse(GetProjectListRequest req, JWTModel currentUser, String... args)
-            throws Exception {
+        @Override
+        public GetProjectListResponse getResponse(GetProjectListRequest req, JWTModel currentUser, String... args)
+                        throws Exception {
+                // TODO: 未符合Fluent-Query-Engine的設計
+                // Build QueryGroup
+                QueryGroup query = QueryGroup.and();
 
-        // Build QueryGroup
-        QueryGroup query = QueryGroup.and();
+                if (req.getStatus() != null && !req.getStatus().isEmpty()) {
+                        query.eq("status", req.getStatus());
+                }
 
-        if (req.getStatus() != null && !req.getStatus().isEmpty()) {
-            query.eq("status", req.getStatus());
+                // if (req.getOwnerId() != null && !req.getOwnerId().isEmpty()) {
+                // query.eq("ownerId", req.getOwnerId());
+                // }
+
+                if (req.getKeyword() != null && !req.getKeyword().isEmpty()) {
+                        query.addSubGroup(
+                                        QueryGroup.or()
+                                                        .like("projectName", "%" + req.getKeyword() + "%")
+                                                        .like("projectCode", "%" + req.getKeyword() + "%"));
+                }
+
+                // Build Pageable
+                Sort.Direction direction = "ASC".equalsIgnoreCase(req.getSortDirection()) ? Sort.Direction.ASC
+                                : Sort.Direction.DESC;
+                Sort sort = Sort.by(direction, req.getSortBy());
+                Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sort);
+
+                // Execute Query
+                Page<Project> pageResult = projectRepository.findProjects(query, pageable);
+
+                // Map to Response
+                List<ProjectListItemResponse> items = pageResult.getContent().stream()
+                                .map(this::toDto)
+                                .collect(Collectors.toList());
+
+                return GetProjectListResponse.builder()
+                                .items(items)
+                                .total(pageResult.getTotalElements())
+                                .page(pageResult.getNumber())
+                                .size(pageResult.getSize())
+                                .totalPages(pageResult.getTotalPages())
+                                .build();
         }
 
-        // if (req.getOwnerId() != null && !req.getOwnerId().isEmpty()) {
-        // query.eq("ownerId", req.getOwnerId());
-        // }
-
-        if (req.getKeyword() != null && !req.getKeyword().isEmpty()) {
-            query.addSubGroup(
-                    QueryGroup.or()
-                            .like("projectName", "%" + req.getKeyword() + "%")
-                            .like("projectCode", "%" + req.getKeyword() + "%"));
+        private ProjectListItemResponse toDto(Project project) {
+                return ProjectListItemResponse.builder()
+                                .projectId(project.getId().getValue())
+                                .projectCode(project.getProjectCode())
+                                .projectName(project.getProjectName())
+                                .projectType(project.getProjectType())
+                                .status(project.getStatus())
+                                .startDate(project.getSchedule().getPlannedStartDate())
+                                .endDate(project.getSchedule().getPlannedEndDate())
+                                .totalBudget(project.getBudget().getBudgetAmount())
+                                // .ownerId(project.getOwnerId())
+                                .customerId(
+                                                project.getCustomerId() != null
+                                                                ? UUID.fromString(project.getCustomerId().getValue())
+                                                                : null)
+                                .build();
         }
-
-        // Build Pageable
-        Sort.Direction direction = "ASC".equalsIgnoreCase(req.getSortDirection()) ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, req.getSortBy());
-        Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sort);
-
-        // Execute Query
-        Page<Project> pageResult = projectRepository.findProjects(query, pageable);
-
-        // Map to Response
-        List<ProjectListItemResponse> items = pageResult.getContent().stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-
-        return GetProjectListResponse.builder()
-                .items(items)
-                .total(pageResult.getTotalElements())
-                .page(pageResult.getNumber())
-                .size(pageResult.getSize())
-                .totalPages(pageResult.getTotalPages())
-                .build();
-    }
-
-    private ProjectListItemResponse toDto(Project project) {
-        return ProjectListItemResponse.builder()
-                .projectId(project.getId().getValue())
-                .projectCode(project.getProjectCode())
-                .projectName(project.getProjectName())
-                .projectType(project.getProjectType())
-                .status(project.getStatus())
-                .startDate(project.getSchedule().getPlannedStartDate())
-                .endDate(project.getSchedule().getPlannedEndDate())
-                .totalBudget(project.getBudget().getBudgetAmount())
-                // .ownerId(project.getOwnerId())
-                .customerId(
-                        project.getCustomerId() != null ? UUID.fromString(project.getCustomerId().getValue()) : null)
-                .build();
-    }
 }

@@ -8,9 +8,13 @@ import com.company.hrms.common.domain.model.AggregateRoot;
 
 import lombok.Getter;
 
+/**
+ * 班別 (Shift) 聚合根
+ */
 @Getter
 public class Shift extends AggregateRoot<ShiftId> {
 
+    private String organizationId;
     private String name;
     private ShiftType type;
     private LocalTime workStartTime;
@@ -19,17 +23,34 @@ public class Shift extends AggregateRoot<ShiftId> {
     private LocalTime breakEndTime;
     private int lateToleranceMinutes;
     private int earlyLeaveToleranceMinutes;
+    private boolean isActive;
+    private boolean isDeleted;
 
-    public Shift(ShiftId id, String name, ShiftType type,
+    public Shift(ShiftId id, String organizationId, String name, ShiftType type,
             LocalTime workStartTime, LocalTime workEndTime) {
         super(id);
+        this.organizationId = organizationId;
         this.name = name;
         this.type = type;
         this.workStartTime = workStartTime;
         this.workEndTime = workEndTime;
         this.lateToleranceMinutes = 0;
         this.earlyLeaveToleranceMinutes = 0;
+        this.isActive = true;
+        this.isDeleted = false;
         validate();
+    }
+
+    public void activate() {
+        this.isActive = true;
+    }
+
+    public void deactivate() {
+        this.isActive = false;
+    }
+
+    public void markAsDeleted() {
+        this.isDeleted = true;
     }
 
     public void setBreakTime(LocalTime start, LocalTime end) {
@@ -49,6 +70,9 @@ public class Shift extends AggregateRoot<ShiftId> {
     }
 
     private void validate() {
+        if (organizationId == null || organizationId.isBlank()) {
+            throw new IllegalArgumentException("Organization ID cannot be empty");
+        }
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Shift name cannot be empty");
         }
@@ -58,17 +82,15 @@ public class Shift extends AggregateRoot<ShiftId> {
         if (workStartTime == null || workEndTime == null) {
             throw new IllegalArgumentException("Work start/end time cannot be null");
         }
-        // Simple check, overnight shifts might make start > end, allowing for now if
-        // logic handles it
-        // But usually standard shift start < end. For robustness assuming same day for
-        // now or logic handles cross-day.
     }
 
-    private Shift(ShiftId id, String name, ShiftType type,
+    private Shift(ShiftId id, String organizationId, String name, ShiftType type,
             LocalTime workStartTime, LocalTime workEndTime,
             LocalTime breakStartTime, LocalTime breakEndTime,
-            int lateToleranceMinutes, int earlyLeaveToleranceMinutes) {
+            int lateToleranceMinutes, int earlyLeaveToleranceMinutes,
+            boolean isActive, boolean isDeleted) {
         super(id);
+        this.organizationId = organizationId;
         this.name = name;
         this.type = type;
         this.workStartTime = workStartTime;
@@ -77,13 +99,17 @@ public class Shift extends AggregateRoot<ShiftId> {
         this.breakEndTime = breakEndTime;
         this.lateToleranceMinutes = lateToleranceMinutes;
         this.earlyLeaveToleranceMinutes = earlyLeaveToleranceMinutes;
+        this.isActive = isActive;
+        this.isDeleted = isDeleted;
     }
 
-    public static Shift reconstitute(ShiftId id, String name, ShiftType type,
+    public static Shift reconstitute(ShiftId id, String organizationId, String name, ShiftType type,
             LocalTime workStartTime, LocalTime workEndTime,
             LocalTime breakStartTime, LocalTime breakEndTime,
-            int lateToleranceMinutes, int earlyLeaveToleranceMinutes) {
-        return new Shift(id, name, type, workStartTime, workEndTime,
-                breakStartTime, breakEndTime, lateToleranceMinutes, earlyLeaveToleranceMinutes);
+            int lateToleranceMinutes, int earlyLeaveToleranceMinutes,
+            boolean isActive, boolean isDeleted) {
+        return new Shift(id, organizationId, name, type, workStartTime, workEndTime,
+                breakStartTime, breakEndTime, lateToleranceMinutes, earlyLeaveToleranceMinutes,
+                isActive, isDeleted);
     }
 }

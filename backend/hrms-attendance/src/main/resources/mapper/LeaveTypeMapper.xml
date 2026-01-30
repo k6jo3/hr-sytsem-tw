@@ -4,10 +4,20 @@
 
     <resultMap id="LeaveTypeResultMap" type="com.company.hrms.attendance.infrastructure.po.LeaveTypePO">
         <id column="id" property="id"/>
+        <result column="organization_id" property="organizationId"/>
         <result column="name" property="name"/>
         <result column="code" property="code"/>
         <result column="unit" property="unit"/>
         <result column="is_paid" property="isPaid"/>
+        <result column="pay_rate" property="payRate"/>
+        <result column="is_active" property="isActive"/>
+        <result column="is_statutory_leave" property="isStatutoryLeave"/>
+        <result column="statutory_type" property="statutoryType"/>
+        <result column="requires_proof" property="requiresProof"/>
+        <result column="proof_description" property="proofDescription"/>
+        <result column="max_days_per_year" property="maxDaysPerYear"/>
+        <result column="can_carryover" property="canCarryover"/>
+        <result column="is_deleted" property="isDeleted"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="created_by" property="createdBy"/>
@@ -15,47 +25,65 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, name, code, unit, is_paid, created_at, updated_at, created_by, updated_by
+        id, organization_id, name, code, unit, is_paid, pay_rate, is_active, is_statutory_leave, 
+        statutory_type, requires_proof, proof_description, max_days_per_year, can_carryover,
+        is_deleted, created_at, updated_at, created_by, updated_by
     </sql>
 
     <select id="selectById" resultMap="LeaveTypeResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM leave_types
-        WHERE id = #{id}
+        WHERE id = #{id} AND is_deleted = 0
     </select>
 
     <select id="selectByCode" resultMap="LeaveTypeResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM leave_types
-        WHERE code = #{code}
+        WHERE code = #{code} AND is_deleted = 0
     </select>
 
     <select id="selectAll" resultMap="LeaveTypeResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM leave_types
+        WHERE is_deleted = 0
     </select>
 
     <insert id="insert">
         INSERT INTO leave_types (
-            id, name, code, unit, is_paid, created_at, updated_at, created_by, updated_by
+            id, organization_id, name, code, unit, is_paid, pay_rate, is_active, 
+            is_statutory_leave, statutory_type, requires_proof, proof_description,
+            max_days_per_year, can_carryover, is_deleted, 
+            created_at, updated_at, created_by, updated_by
         ) VALUES (
-            #{id}, #{name}, #{code}, #{unit}, #{isPaid}, #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+            #{id}, #{organizationId}, #{name}, #{code}, #{unit}, #{isPaid}, #{payRate}, #{isActive},
+            #{isStatutoryLeave}, #{statutoryType}, #{requiresProof}, #{proofDescription},
+            #{maxDaysPerYear}, #{canCarryover}, 0,
+            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
         )
     </insert>
 
     <update id="update">
         UPDATE leave_types SET
+            organization_id = #{organizationId},
             name = #{name},
             code = #{code},
             unit = #{unit},
             is_paid = #{isPaid},
+            pay_rate = #{payRate},
+            is_active = #{isActive},
+            is_statutory_leave = #{isStatutoryLeave},
+            statutory_type = #{statutoryType},
+            requires_proof = #{requiresProof},
+            proof_description = #{proofDescription},
+            max_days_per_year = #{maxDaysPerYear},
+            can_carryover = #{canCarryover},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}
     </update>
 
     <delete id="deleteById">
-        DELETE FROM leave_types WHERE id = #{id}
+        UPDATE leave_types SET is_deleted = 1 WHERE id = #{id}
     </delete>
 
 </mapper>

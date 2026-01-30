@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,7 +56,6 @@ class HR08CycleQryControllerTest extends BaseApiContractTest {
         }
 
         @Test
-        @Disabled("Failing with 500 error - mismatch in return type or bean resolution")
         @DisplayName("查詢考核週期列表 - 成功")
         void getCycles_ShouldReturnOk() throws Exception {
                 // Arrange
@@ -70,7 +68,7 @@ class HR08CycleQryControllerTest extends BaseApiContractTest {
                 PageResponse<GetCyclesResponse.CycleSummary> response = PageResponse.of(
                                 Collections.singletonList(summary), 1, 20, 1);
 
-                when(getCyclesService.getResponse(any(GetCyclesRequest.class), any(JWTModel.class)))
+                when(getCyclesService.getResponse(any(GetCyclesRequest.class), any(JWTModel.class), any()))
                                 .thenReturn(response);
 
                 // Act & Assert
@@ -87,7 +85,7 @@ class HR08CycleQryControllerTest extends BaseApiContractTest {
                                 .cycleName("2026 Q1 Review")
                                 .build();
 
-                when(getCycleDetailService.getResponse(any(GetCycleDetailRequest.class), any(JWTModel.class)))
+                when(getCycleDetailService.getResponse(any(GetCycleDetailRequest.class), any(JWTModel.class), any()))
                                 .thenReturn(response);
 
                 // Act & Assert

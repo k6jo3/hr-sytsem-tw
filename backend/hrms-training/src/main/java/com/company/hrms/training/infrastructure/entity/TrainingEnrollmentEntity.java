@@ -25,10 +25,10 @@ public class TrainingEnrollmentEntity {
     private String enrollmentId;
 
     @Column(name = "course_id")
-    private String courseId;
+    private String course_id;
 
     @Column(name = "employee_id")
-    private String employeeId;
+    private String employee_id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -93,4 +93,7 @@ public class TrainingEnrollmentEntity {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "is_deleted")
+    private Integer is_deleted = 0;
 }
