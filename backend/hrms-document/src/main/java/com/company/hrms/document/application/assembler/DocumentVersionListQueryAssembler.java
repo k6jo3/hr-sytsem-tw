@@ -14,6 +14,7 @@ import com.company.hrms.document.api.request.GetDocumentVersionListRequest;
 public class DocumentVersionListQueryAssembler {
 
     public QueryGroup toQueryGroup(GetDocumentVersionListRequest request) {
+        // TODO: 未符合Fluent-Query-Engine的設計
         var query = QueryBuilder.where();
 
         // 1. Document ID Filter (Required for most cases)

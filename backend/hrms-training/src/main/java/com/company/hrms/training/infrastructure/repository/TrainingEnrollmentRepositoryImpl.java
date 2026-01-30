@@ -1,6 +1,8 @@
 package com.company.hrms.training.infrastructure.repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
@@ -73,11 +75,11 @@ public class TrainingEnrollmentRepositoryImpl
 
         // Assume createdAt or completedAt. Let's filter by completedAt for stats.
         // Or generic date range if specified. Let's use createdAt for general range.
-        java.util.List<TrainingEnrollmentEntity> entities = factory.selectFrom(qEnrollment)
+        List<TrainingEnrollmentEntity> entities = factory.selectFrom(qEnrollment)
                 .where(qEnrollment.createdAt.between(startDate.atStartOfDay(), endDate.atTime(java.time.LocalTime.MAX)))
                 .fetch();
 
-        return entities.stream().map(this::toDomain).collect(java.util.stream.Collectors.toList());
+        return entities.stream().map(this::toDomain).collect(Collectors.toList());
     }
 
     private TrainingEnrollmentEntity toEntity(TrainingEnrollment domain) {

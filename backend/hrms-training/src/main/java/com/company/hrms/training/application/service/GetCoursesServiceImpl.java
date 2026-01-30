@@ -55,6 +55,7 @@ public class GetCoursesServiceImpl implements QueryApiService<GetCoursesRequest,
 
     // TODO: 重構此方法為 Factory 或 Mapper
     private TrainingCourseResponse toResponse(TrainingCourseEntity course) {
+        // TODO: 程式太長，建議使用 Factory 或 Mapper
         TrainingCourseResponse res = new TrainingCourseResponse();
         res.setCourseId(course.getCourseId());
         res.setCourseCode(course.getCourseCode());

@@ -1,3 +1,8 @@
 package com.company.hrms.organization.application.service.employee;
+
 import org.springframework.stereotype.Service;
-@Service public class GetEmployeeHistoryServiceImpl {}
+
+// TODO: 未實作邏輯
+@Service
+public class GetEmployeeHistoryServiceImpl {
+}

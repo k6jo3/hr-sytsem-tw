@@ -85,6 +85,7 @@ class ValidateCheckInTaskTest {
                     java.time.LocalDateTime.now(),
                     new Shift(
                             new ShiftId("s1"),
+                            "ORG001",
                             "Standard",
                             ShiftType.REGULAR,
                             java.time.LocalTime.of(9, 0),

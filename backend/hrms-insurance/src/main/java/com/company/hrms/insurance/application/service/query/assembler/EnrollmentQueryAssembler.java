@@ -20,6 +20,7 @@ public class EnrollmentQueryAssembler {
      */
     public QueryGroup toQueryGroup(GetEnrollmentListRequest request) {
         QueryGroup query = QueryGroup.and();
+        // TODO: 未符合Fluent-Query-Engine的設計
 
         // 1. 基礎過濾: 未刪除
         query.eq("is_deleted", 0);

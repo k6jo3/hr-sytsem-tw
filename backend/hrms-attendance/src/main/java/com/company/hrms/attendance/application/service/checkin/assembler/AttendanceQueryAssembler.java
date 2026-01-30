@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.attendance.api.request.attendance.GetAttendanceListRequest;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 
 /**
@@ -14,52 +16,25 @@ import com.company.hrms.common.query.QueryGroup;
 public class AttendanceQueryAssembler {
 
     public QueryGroup toQueryGroup(GetAttendanceListRequest request) {
-        QueryGroup query = QueryGroup.and();
+        // 1. 使用 QueryBuilder 自動解析 DTO 上的 @QueryFilter / @EQ 註解
+        QueryBuilder builder = QueryBuilder.where().fromDto(request);
 
-        // 1. 基礎過濾
-        // AttendanceRecord 可能沒有軟刪除，暫不加 is_deleted
-
-        // 2. 員工 ID
-        if (request.getEmployeeId() != null && !request.getEmployeeId().isBlank()) {
-            query.eq("employee_id", request.getEmployeeId());
-        }
-
-        // 3. 日期 (單日)
-        if (request.getDate() != null) {
-            query.eq("attendance_date", request.getDate().toString());
-        }
-
-        // 4. 月份查詢 (YYYY-MM)
+        // 2. 月份查詢 (YYYY-MM) - 需手動處理範圍
         if (request.getMonth() != null && !request.getMonth().isBlank()) {
             String yearMonth = request.getMonth(); // 2025-01
             String start = yearMonth + "-01";
-            LocalDate startDate = java.time.LocalDate.parse(start);
+            LocalDate startDate = LocalDate.parse(start);
             LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-            query.gte("attendance_date", startDate.toString());
-            query.lte("attendance_date", endDate.toString());
+            builder.and("date", Operator.GTE, startDate);
+            builder.and("date", Operator.LTE, endDate);
         }
 
-        // 5. 部門 ID
+        // 3. 部門 ID - PO可能有缺失，暫保留手動加入 (假設 Entity 支援此欄位路徑或透過 Join)
         if (request.getDeptId() != null && !request.getDeptId().isBlank()) {
-            query.eq("department_id", request.getDeptId());
+            builder.and("department_id", Operator.EQ, request.getDeptId());
         }
 
-        // 6. 狀態
-        if (request.getStatus() != null && !request.getStatus().isBlank()) {
-            query.eq("status", request.getStatus());
-        }
-
-        // 7. 遲到
-        if (request.getLateFlag() != null && request.getLateFlag()) {
-            query.eq("late_flag", 1);
-        }
-
-        // 8. 早退
-        if (request.getEarlyLeaveFlag() != null && request.getEarlyLeaveFlag()) {
-            query.eq("early_leave_flag", 1);
-        }
-
-        return query;
+        return builder.build();
     }
 }

@@ -14,6 +14,7 @@ public class DocumentListQueryAssembler {
     public static final String NULL_MARKER = "__NULL__";
 
     public QueryGroup toQueryGroup(GetDocumentListRequest request) {
+        // TODO: 未符合Fluent-Query-Engine的設計
         var query = QueryBuilder.where();
 
         // 1. Soft Delete (Always required)

@@ -29,6 +29,7 @@ public class GetDocumentListServiceImpl implements QueryApiService<GetDocumentLi
 
         // Populate implicit filters from currentUser if needed
         if (currentUser != null) {
+            // TODO: 未實作邏輯
             // Logic handled in Assembler or here
         }
 

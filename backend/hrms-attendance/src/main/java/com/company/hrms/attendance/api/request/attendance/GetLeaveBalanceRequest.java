@@ -1,5 +1,7 @@
 package com.company.hrms.attendance.api.request.attendance;
 
+import com.company.hrms.common.query.QueryCondition.EQ;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,14 +19,18 @@ import lombok.NoArgsConstructor;
 public class GetLeaveBalanceRequest {
 
     @Schema(description = "員工 ID")
+    @EQ
     private String employeeId;
 
     @Schema(description = "部門 ID")
+    @EQ("departmentId")
     private String deptId;
 
     @Schema(description = "年度 (YYYY)")
+    @EQ
     private Integer year;
 
     @Schema(description = "假別代碼")
+    @EQ("leaveTypeId")
     private String leaveType;
 }

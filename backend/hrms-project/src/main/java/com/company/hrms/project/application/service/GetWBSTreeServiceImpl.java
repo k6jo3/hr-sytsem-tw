@@ -29,6 +29,7 @@ public class GetWBSTreeServiceImpl implements QueryApiService<GetWBSTreeRequest,
     @Override
     public GetWBSTreeResponse getResponse(GetWBSTreeRequest req, JWTModel currentUser, String... args)
             throws Exception {
+        // TODO: 未符合buisness pipeline設計
         String projectIdStr = (args.length > 0 && args[0] != null) ? args[0] : req.getProjectId();
 
         List<Task> allTasks = taskRepository.findByProjectId(UUID.fromString(projectIdStr));
@@ -42,7 +43,7 @@ public class GetWBSTreeServiceImpl implements QueryApiService<GetWBSTreeRequest,
             TaskTreeNodeDto dto = toDto(task);
             dtoMap.put(task.getId().getValue(), dto);
         }
-
+        // TODO: 過多層，不符合clean code
         // Second pass: Build hierarchy
         for (Task task : allTasks) {
             TaskTreeNodeDto dto = dtoMap.get(task.getId().getValue());

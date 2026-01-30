@@ -31,7 +31,7 @@ public class GetMyApplicationsServiceImpl
         public Page<MyApplicationsResponse> getResponse(GetMyApplicationsRequest req, JWTModel currentUser,
                         String... args)
                         throws Exception {
-
+                // TODO: 不符合business pipeline以及Fluent-Query-Engine設計
                 UltimateQueryEngine<WorkflowInstanceEntity> engine = new UltimateQueryEngine<>(factory,
                                 WorkflowInstanceEntity.class);
 

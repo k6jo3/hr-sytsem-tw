@@ -21,22 +21,22 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class LockTimesheetServiceImpl implements CommandApiService<LockTimesheetRequest, LockTimesheetResponse> {
 
-    private final ITimesheetRepository timesheetRepository;
+        private final ITimesheetRepository timesheetRepository;
 
-    @Override
-    public LockTimesheetResponse execCommand(LockTimesheetRequest request, JWTModel currentUser, String... args)
-            throws Exception {
+        @Override
+        public LockTimesheetResponse execCommand(LockTimesheetRequest request, JWTModel currentUser, String... args)
+                        throws Exception {
+                // TODO: 參數命名不符合clean code
+                Timesheet t = timesheetRepository.findById(new TimesheetId(UUID.fromString(request.getTimesheetId())))
+                                .orElseThrow(() -> new EntityNotFoundException("Timesheet", request.getTimesheetId()));
 
-        Timesheet t = timesheetRepository.findById(new TimesheetId(UUID.fromString(request.getTimesheetId())))
-                .orElseThrow(() -> new EntityNotFoundException("Timesheet", request.getTimesheetId()));
+                t.lock();
 
-        t.lock();
+                timesheetRepository.save(t);
 
-        timesheetRepository.save(t);
-
-        return LockTimesheetResponse.builder()
-                .timesheetId(t.getId().getValue().toString())
-                .locked(t.isLocked())
-                .build();
-    }
+                return LockTimesheetResponse.builder()
+                                .timesheetId(t.getId().getValue().toString())
+                                .locked(t.isLocked())
+                                .build();
+        }
 }

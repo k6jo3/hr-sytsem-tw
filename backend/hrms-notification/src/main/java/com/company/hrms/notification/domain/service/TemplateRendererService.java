@@ -1,6 +1,8 @@
 package com.company.hrms.notification.domain.service;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.company.hrms.notification.domain.model.aggregate.NotificationTemplate;
 
@@ -71,8 +73,8 @@ public class TemplateRendererService {
 
         // 提取範本中的所有變數名稱
         String body = template.getBody();
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\{\\{([^}]+)\\}\\}");
-        java.util.regex.Matcher matcher = pattern.matcher(body);
+        Pattern pattern = Pattern.compile("\\{\\{([^}]+)\\}\\}");
+        Matcher matcher = pattern.matcher(body);
 
         while (matcher.find()) {
             String variableName = matcher.group(1).trim();

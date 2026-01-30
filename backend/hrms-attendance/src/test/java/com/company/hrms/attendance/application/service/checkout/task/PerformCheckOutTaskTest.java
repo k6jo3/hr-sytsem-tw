@@ -52,7 +52,7 @@ class PerformCheckOutTaskTest {
                 new RecordId("rec-001"), "EMP-001", LocalDate.now());
 
         // Mock check-in (needed for working hours calculation)
-        Shift shift = new Shift(new ShiftId("S1"), "Regular", ShiftType.REGULAR, LocalTime.of(9, 0),
+        Shift shift = new Shift(new ShiftId("S1"), "ORG001", "Regular", ShiftType.REGULAR, LocalTime.of(9, 0),
                 LocalTime.of(18, 0));
         record.checkIn(LocalDateTime.now().withHour(9).withMinute(0), shift);
 
@@ -68,6 +68,7 @@ class PerformCheckOutTaskTest {
             // Given
             Shift shift = new Shift(
                     new ShiftId("shift-001"),
+                    "ORG001",
                     "常規班",
                     ShiftType.REGULAR,
                     LocalTime.of(9, 0),

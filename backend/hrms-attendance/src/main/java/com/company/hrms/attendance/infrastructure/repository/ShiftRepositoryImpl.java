@@ -12,25 +12,39 @@ import com.company.hrms.attendance.domain.model.aggregate.Shift;
 import com.company.hrms.attendance.domain.model.valueobject.ShiftId;
 import com.company.hrms.attendance.domain.model.valueobject.ShiftType;
 import com.company.hrms.attendance.domain.repository.IShiftRepository;
-import com.company.hrms.attendance.infrastructure.dao.ShiftDAO;
 import com.company.hrms.attendance.infrastructure.po.ShiftPO;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import lombok.RequiredArgsConstructor;
-
+/**
+ * 班別 Repository 實作
+ */
 @Repository
-@RequiredArgsConstructor
-public class ShiftRepositoryImpl implements IShiftRepository {
+public class ShiftRepositoryImpl extends BaseRepository<ShiftPO, String> implements IShiftRepository {
 
-    private final ShiftDAO shiftDAO;
+    public ShiftRepositoryImpl(JPAQueryFactory queryFactory) {
+        super(queryFactory, ShiftPO.class);
+    }
 
     @Override
     public Optional<Shift> findById(ShiftId id) {
-        return shiftDAO.findById(id.getValue()).map(this::toDomain);
+        return super.findById(id.getValue()).map(this::toDomain);
     }
 
     @Override
     public List<Shift> findAll() {
-        return shiftDAO.findAll().stream()
+        QueryGroup query = QueryBuilder.where()
+                .and("isDeleted", Operator.EQ, 0)
+                .build();
+        return findByQuery(query);
+    }
+
+    @Override
+    public List<Shift> findByQuery(QueryGroup query) {
+        return super.findAll(query).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -38,29 +52,33 @@ public class ShiftRepositoryImpl implements IShiftRepository {
     @Override
     public void save(Shift shift) {
         ShiftPO po = toPO(shift);
-        if (shiftDAO.findById(po.getId()).isPresent()) {
+        Optional<ShiftPO> existing = super.findById(po.getId());
+
+        if (existing.isPresent()) {
+            po.setCreatedAt(existing.get().getCreatedAt());
             po.setUpdatedAt(LocalDateTime.now());
-            // createdBy/At should keep original? DAO logic implies overwrite or fetch
-            // first.
-            // Simplified: Just update fields.
-            // Better: use update specific method which doesn't touch created_at.
-            // My Mapper update method updates updated_at.
-            shiftDAO.update(po);
+            super.update(po);
         } else {
             po.setCreatedAt(LocalDateTime.now());
             po.setUpdatedAt(LocalDateTime.now());
-            shiftDAO.insert(po);
+            super.save(po);
         }
     }
 
     @Override
     public void delete(ShiftId id) {
-        shiftDAO.deleteById(id.getValue());
+        Optional<ShiftPO> poOpt = super.findById(id.getValue());
+        poOpt.ifPresent(po -> {
+            po.setIsDeleted(1);
+            po.setUpdatedAt(LocalDateTime.now());
+            super.update(po);
+        });
     }
 
     private Shift toDomain(ShiftPO po) {
         return Shift.reconstitute(
                 new ShiftId(po.getId()),
+                po.getOrganizationId(),
                 po.getName(),
                 ShiftType.valueOf(po.getType()),
                 LocalTime.parse(po.getStartTime()),
@@ -68,25 +86,25 @@ public class ShiftRepositoryImpl implements IShiftRepository {
                 po.getBreakStartTime() != null ? LocalTime.parse(po.getBreakStartTime()) : null,
                 po.getBreakEndTime() != null ? LocalTime.parse(po.getBreakEndTime()) : null,
                 po.getLateToleranceMinutes() != null ? po.getLateToleranceMinutes() : 0,
-                po.getEarlyLeaveToleranceMinutes() != null ? po.getEarlyLeaveToleranceMinutes() : 0);
+                po.getEarlyLeaveToleranceMinutes() != null ? po.getEarlyLeaveToleranceMinutes() : 0,
+                po.getIsActive() != null && po.getIsActive() == 1,
+                po.getIsDeleted() != null && po.getIsDeleted() == 1);
     }
 
     private ShiftPO toPO(Shift shift) {
-        ShiftPO po = new ShiftPO();
-        po.setId(shift.getId().getValue());
-        po.setName(shift.getName());
-        po.setType(shift.getType().name());
-        po.setStartTime(shift.getWorkStartTime().toString());
-        po.setEndTime(shift.getWorkEndTime().toString());
-        if (shift.getBreakStartTime() != null) {
-            po.setBreakStartTime(shift.getBreakStartTime().toString());
-        }
-        if (shift.getBreakEndTime() != null) {
-            po.setBreakEndTime(shift.getBreakEndTime().toString());
-        }
-        po.setLateToleranceMinutes(shift.getLateToleranceMinutes());
-        po.setEarlyLeaveToleranceMinutes(shift.getEarlyLeaveToleranceMinutes());
-        // Auditing handled in save
-        return po;
+        return ShiftPO.builder()
+                .id(shift.getId().getValue())
+                .organizationId(shift.getOrganizationId())
+                .name(shift.getName())
+                .type(shift.getType().name())
+                .startTime(shift.getWorkStartTime().toString())
+                .endTime(shift.getWorkEndTime().toString())
+                .breakStartTime(shift.getBreakStartTime() != null ? shift.getBreakStartTime().toString() : null)
+                .breakEndTime(shift.getBreakEndTime() != null ? shift.getBreakEndTime().toString() : null)
+                .lateToleranceMinutes(shift.getLateToleranceMinutes())
+                .earlyLeaveToleranceMinutes(shift.getEarlyLeaveToleranceMinutes())
+                .isActive(shift.isActive() ? 1 : 0)
+                .isDeleted(shift.isDeleted() ? 1 : 0)
+                .build();
     }
 }

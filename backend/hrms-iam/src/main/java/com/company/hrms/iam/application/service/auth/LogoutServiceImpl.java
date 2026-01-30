@@ -3,6 +3,7 @@ package com.company.hrms.iam.application.service.auth;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 
 /**
@@ -18,9 +19,9 @@ import com.company.hrms.common.service.CommandApiService;
 @Service("logoutServiceImpl")
 @Transactional
 public class LogoutServiceImpl implements CommandApiService<Void, Void> {
-
+    // TODO: 實作登出邏輯
     @Override
-    public Void execCommand(Void request, com.company.hrms.common.model.JWTModel currentUser, String... args)
+    public Void execCommand(Void request, JWTModel currentUser, String... args)
             throws Exception {
         // Stateless JWT: No server-side state to clear. Client should discard the
         // token.

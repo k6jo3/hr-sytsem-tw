@@ -1,0 +1,44 @@
+# Test Configuration for Attendance Service
+spring:
+  datasource:
+    url: jdbc:h2:mem:attendance_testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+  kafka:
+    enabled: false
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+# JWT Configuration for Testing
+jwt:
+  secret: test-secret-key-for-jwt-token-generation-must-be-long-enough-256-bits
+  access-token-expiry: 3600000
+  refresh-token-expiry: 604800000
+
+# Disable Eureka for Tests
+eureka:
+  client:
+    enabled: false
+
+# Logging
+logging:
+  level:
+    com.company.hrms: DEBUG
+    org.springframework.web: DEBUG

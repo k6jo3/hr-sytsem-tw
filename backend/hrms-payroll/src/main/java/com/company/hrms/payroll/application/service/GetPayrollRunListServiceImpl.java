@@ -64,6 +64,7 @@ public class GetPayrollRunListServiceImpl
 
     @Override
     protected QueryGroup buildQuery(GetPayrollRunListRequest request, JWTModel currentUser) {
+        // TODO: 未符合Fluent-Query-Engine
         QueryBuilder builder = QueryBuilder.where();
 
         if (request.getOrganizationId() != null) {

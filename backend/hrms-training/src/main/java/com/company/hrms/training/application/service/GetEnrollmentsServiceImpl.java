@@ -56,6 +56,7 @@ public class GetEnrollmentsServiceImpl
     }
 
     private TrainingEnrollmentResponse toResponse(TrainingEnrollmentEntity enrollment) {
+        // TODO: 程式太長，建議用objectMapper或structMapper
         TrainingEnrollmentResponse res = new TrainingEnrollmentResponse();
         res.setEnrollmentId(enrollment.getEnrollmentId());
         res.setCourseId(enrollment.getCourse_id());

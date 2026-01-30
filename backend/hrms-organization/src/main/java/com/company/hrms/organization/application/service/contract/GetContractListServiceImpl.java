@@ -1,3 +1,8 @@
 package com.company.hrms.organization.application.service.contract;
+
 import org.springframework.stereotype.Service;
-@Service public class GetContractListServiceImpl {}
+
+// TODO: 未實作邏輯
+@Service
+public class GetContractListServiceImpl {
+}

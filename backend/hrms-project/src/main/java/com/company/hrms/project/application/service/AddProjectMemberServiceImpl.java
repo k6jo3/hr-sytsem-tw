@@ -27,6 +27,7 @@ public class AddProjectMemberServiceImpl
     @Override
     public AddProjectMemberResponse execCommand(AddProjectMemberRequest req, JWTModel currentUser, String... args)
             throws Exception {
+        // TODO: 未符合business pipeline的設計
         if (req.getProjectId() == null) {
             throw new IllegalArgumentException("Project ID is required");
         }

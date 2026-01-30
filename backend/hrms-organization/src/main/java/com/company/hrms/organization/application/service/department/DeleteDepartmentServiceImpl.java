@@ -46,7 +46,7 @@ public class DeleteDepartmentServiceImpl implements CommandApiService<Object, Vo
     @Override
     public Void execCommand(Object request, JWTModel currentUser, String... args)
             throws Exception {
-
+        // TODO: 不符合business pipeline的設計，應該要拆成多個task
         String departmentId = args[0];
         log.info("刪除部門: departmentId={}", departmentId);
 

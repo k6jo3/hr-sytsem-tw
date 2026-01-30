@@ -1,3 +1,8 @@
 package com.company.hrms.organization.application.service.ess;
+
 import org.springframework.stereotype.Service;
-@Service public class GetMyCertificateRequestsServiceImpl {}
+
+// TODO: 未實作邏輯
+@Service
+public class GetMyCertificateRequestsServiceImpl {
+}

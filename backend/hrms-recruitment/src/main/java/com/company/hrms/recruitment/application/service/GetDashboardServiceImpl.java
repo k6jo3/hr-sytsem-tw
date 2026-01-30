@@ -8,9 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.recruitment.application.dto.report.DashboardResponse;
 import com.company.hrms.recruitment.application.dto.report.DashboardSearchDto;
+import com.company.hrms.recruitment.domain.repository.ICandidateRepository;
+import com.company.hrms.recruitment.domain.repository.IJobOpeningRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +27,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class GetDashboardServiceImpl
                 implements QueryApiService<DashboardSearchDto, DashboardResponse> {
+        private final IJobOpeningRepository jobOpeningRepository;
+        private final ICandidateRepository candidateRepository;
 
         @Override
         public DashboardResponse getResponse(
                         DashboardSearchDto request,
                         JWTModel currentUser,
                         String... args) throws Exception {
-
+                // TODO: 未符合business pipeline以及Fluent-Query-Engine設計
                 // 處理預設日期範圍
                 LocalDate dateFrom = request.getDateFrom();
                 LocalDate dateTo = request.getDateTo();
@@ -44,15 +49,14 @@ public class GetDashboardServiceImpl
 
                 log.info("取得招募儀表板: from={}, to={}", dateFrom, dateTo);
 
-                long openJobs = jobOpeningRepository
-                                .count(com.company.hrms.common.query.QueryBuilder.where().eq("status", "OPEN").build());
-                long totalApplications = candidateRepository.count(com.company.hrms.common.query.QueryBuilder.where()
+                long openJobs = jobOpeningRepository.count(QueryBuilder.where().eq("status", "OPEN").build());
+                long totalApplications = candidateRepository.count(QueryBuilder.where()
                                 .between("applicationDate", dateFrom, dateTo).build());
-                long interviews = candidateRepository.count(com.company.hrms.common.query.QueryBuilder.where()
+                long interviews = candidateRepository.count(QueryBuilder.where()
                                 .eq("status", "INTERVIEWING").between("applicationDate", dateFrom, dateTo).build());
-                long offers = candidateRepository.count(com.company.hrms.common.query.QueryBuilder.where()
+                long offers = candidateRepository.count(QueryBuilder.where()
                                 .eq("status", "OFFERED").between("applicationDate", dateFrom, dateTo).build());
-                long hired = candidateRepository.count(com.company.hrms.common.query.QueryBuilder.where()
+                long hired = candidateRepository.count(QueryBuilder.where()
                                 .eq("status", "HIRED").between("applicationDate", dateFrom, dateTo).build());
 
                 // Note: 進階統計 (AvgTimeToHire, OfferAcceptanceRate) 需實作 Aggregation Query，目前暫回傳 0
@@ -92,6 +96,4 @@ public class GetDashboardServiceImpl
                                 .build();
         }
 
-        private final com.company.hrms.recruitment.domain.repository.IJobOpeningRepository jobOpeningRepository;
-        private final com.company.hrms.recruitment.domain.repository.ICandidateRepository candidateRepository;
 }

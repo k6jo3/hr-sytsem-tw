@@ -6,6 +6,7 @@ import com.company.hrms.common.infrastructure.persistence.querydsl.repository.Qu
 import com.company.hrms.workflow.infrastructure.entity.WorkflowDefinitionEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+// TODO: 這是在domain有定義的repository嗎?
 @Repository
 public class WorkflowDefinitionQueryRepository extends QueryBaseRepository<WorkflowDefinitionEntity, String> {
 

@@ -58,6 +58,7 @@ class CreateCheckInRecordTaskTest {
             // Given
             Shift shift = new Shift(
                     new ShiftId("shift-001"),
+                    "ORG001",
                     "常規班",
                     ShiftType.REGULAR,
                     LocalTime.of(9, 0),

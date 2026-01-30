@@ -38,7 +38,7 @@ public class GetHeadcountReportServiceImpl
                         GetHeadcountReportRequest request,
                         JWTModel currentUser,
                         String... args) throws Exception {
-
+                // TODO: 不符合business pipeline設計以及clean code
                 request.setTenantId(currentUser.getTenantId());
                 String dimension = request.getDimension(); // e.g., "DEPARTMENT", "POSITION"
 

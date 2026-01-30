@@ -58,6 +58,7 @@ public class GetMyTrainingsServiceImpl
     // 移除不必要的 overload 方法，因為 Pageable 已包含在 request 中
 
     private TrainingEnrollmentResponse toResponse(TrainingEnrollmentEntity enrollment) {
+        // TODO: 程式太長，建議用objectMapper或structMapper
         TrainingEnrollmentResponse res = new TrainingEnrollmentResponse();
         res.setEnrollmentId(enrollment.getEnrollmentId());
         res.setCourseId(enrollment.getCourse_id());

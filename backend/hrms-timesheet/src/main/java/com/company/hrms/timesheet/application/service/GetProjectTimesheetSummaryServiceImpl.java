@@ -34,7 +34,7 @@ public class GetProjectTimesheetSummaryServiceImpl
             JWTModel currentUser, String... args)
             throws Exception {
 
-        // 建構查詢條件
+        // TODO: 不符合Fluent-Query-Engine設計
         QueryBuilder builder = QueryBuilder.where();
 
         if (request.getStartDate() != null) {

@@ -45,6 +45,7 @@ public class UpdateCourseServiceImpl implements CommandApiService<UpdateCourseRe
     }
 
     private TrainingCourseResponse toResponse(TrainingCourse course) {
+        // TODO: 程式太長，建議用objectMapper或structMapper
         TrainingCourseResponse res = new TrainingCourseResponse();
         res.setCourseId(course.getId().toString());
         res.setCourseCode(course.getCourseCode());
