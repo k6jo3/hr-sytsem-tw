@@ -33,15 +33,15 @@ public class TrainingCourseEntity {
     private String courseCode;
 
     @Column(name = "course_name")
-    private String courseName;
+    private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "course_type")
-    private CourseType courseType;
+    private CourseType type;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_mode")
-    private DeliveryMode deliveryMode;
+    private DeliveryMode mode;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category")
@@ -110,4 +110,7 @@ public class TrainingCourseEntity {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "is_deleted")
+    private Integer is_deleted = 0;
 }

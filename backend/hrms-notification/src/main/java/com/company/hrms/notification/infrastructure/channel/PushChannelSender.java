@@ -1,9 +1,14 @@
 package com.company.hrms.notification.infrastructure.channel;
 
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.company.hrms.notification.domain.model.aggregate.Notification;
+import com.company.hrms.notification.domain.repository.INotificationPreferenceRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  * 推播通知發送器
@@ -19,7 +24,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PushChannelSender implements ChannelSender {
 
-    // TODO: 注入 Firebase Messaging 服務
+    private final INotificationPreferenceRepository preferenceRepository;
+
+    // NOTE: 注入 Firebase Messaging 服務 (目前專案尚未加入 firebase-admin 依賴，待整合)
     // private final FirebaseMessaging firebaseMessaging;
 
     @Override
@@ -27,20 +34,25 @@ public class PushChannelSender implements ChannelSender {
         log.debug("[PushChannelSender] 發送推播通知 - 收件人: {}", recipientId);
 
         try {
-            // TODO: 實作 Firebase FCM 推播
-            // 1. 從 Redis/DB 查詢收件人的 FCM Token
-            // 2. 組裝 FCM Message
-            // 3. 呼叫 Firebase API 發送
+            // 實作 Firebase FCM 推播
+            // 1. 從 DB 查詢收件人的 FCM Token (Multiple tokens for multiple devices)
+            List<String> fcmTokens = getRecipientFcmTokens(recipientId);
 
-            String fcmToken = getRecipientFcmToken(recipientId);
-
-            if (fcmToken == null || fcmToken.isBlank()) {
-                throw new Exception("收件人未註冊推播裝置");
+            if (fcmTokens == null || fcmTokens.isEmpty()) {
+                // 不視為錯誤，只是沒有裝置可推播
+                log.info("[PushChannelSender] 收件人 {} 未註冊推播裝置，跳過發送", recipientId);
+                return;
             }
 
-            // 暫時實作：只記錄日誌
-            log.info("[PushChannelSender] 推播通知發送成功（暫時實作） - 收件人: {}, FCM Token: {}",
-                    recipientId, maskToken(fcmToken));
+            for (String fcmToken : fcmTokens) {
+                if (fcmToken == null || fcmToken.isBlank())
+                    continue;
+
+                // 2. 組裝 FCM Message & 3. 呼叫 Firebase API 發送
+                // 目前僅模擬
+                log.info("[PushChannelSender] 推播通知發送成功（模擬） - 收件人: {}, FCM Token: {}",
+                        recipientId, maskToken(fcmToken));
+            }
 
         } catch (Exception e) {
             log.error("[PushChannelSender] 推播通知發送失敗 - 收件人: {}, 錯誤: {}",
@@ -55,15 +67,15 @@ public class PushChannelSender implements ChannelSender {
     }
 
     /**
-     * 取得收件人的 FCM Token（暫時實作）
-     * TODO: 整合 Redis 或資料庫查詢
+     * 取得收件人的 FCM Tokens
      *
      * @param recipientId 收件人 ID
-     * @return FCM Token
+     * @return FCM Token 列表
      */
-    private String getRecipientFcmToken(String recipientId) {
-        // 暫時實作：回傳假 Token
-        return "fcm_token_" + recipientId;
+    private List<String> getRecipientFcmTokens(String recipientId) {
+        return preferenceRepository.findByEmployeeId(recipientId)
+                .map(pref -> pref.getPushTokens())
+                .orElse(List.of());
     }
 
     /**

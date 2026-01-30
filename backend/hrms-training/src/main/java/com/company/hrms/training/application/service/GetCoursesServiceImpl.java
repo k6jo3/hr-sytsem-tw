@@ -58,10 +58,10 @@ public class GetCoursesServiceImpl implements QueryApiService<GetCoursesRequest,
         TrainingCourseResponse res = new TrainingCourseResponse();
         res.setCourseId(course.getCourseId());
         res.setCourseCode(course.getCourseCode());
-        res.setCourseName(course.getCourseName());
+        res.setCourseName(course.getName());
 
-        res.setCourseType(course.getCourseType());
-        res.setDeliveryMode(course.getDeliveryMode());
+        res.setCourseType(course.getType());
+        res.setDeliveryMode(course.getMode());
         res.setCategory(course.getCategory());
         res.setDescription(course.getDescription());
         res.setInstructor(course.getInstructor());

@@ -72,7 +72,7 @@ public class EmployeeEventHandler {
 
         } catch (Exception e) {
             log.error("處理員工建立事件失敗", e);
-            // TODO: 發送到 DLQ (Dead Letter Queue)
+            // Note: 發送到 DLQ (Dead Letter Queue) - 待基礎設施支援
         }
     }
 

@@ -10,6 +10,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.company.hrms.notification.domain.model.aggregate.Notification;
+import com.company.hrms.notification.domain.repository.INotificationPreferenceRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class LineChannelSender implements ChannelSender {
     private static final String LINE_NOTIFY_API = "https://notify-api.line.me/api/notify";
 
     private final RestTemplate restTemplate;
+    private final INotificationPreferenceRepository preferenceRepository;
 
     @Value("${notification.channel.line.default-token:}")
     private String defaultLineToken;
@@ -82,16 +84,19 @@ public class LineChannelSender implements ChannelSender {
     /**
      * 取得收件人的 LINE Token
      * <p>
-     * 優先順序：收件人個人綁定 Token > 系統預設 Token
+     * 優先順序：收件人個人綁定 Token (目前使用 LineUserId 欄位替代) > 系統預設 Token
      * </p>
      *
      * @param recipientId 收件人 ID
      * @return LINE Token
      */
     private String getRecipientLineToken(String recipientId) {
-        // TODO: 未來可從 NotificationPreference 或使用者設定取得個人 LINE Token
-        // 目前使用系統預設值
-        return defaultLineToken;
+        return preferenceRepository.findByEmployeeId(recipientId)
+                .map(pref -> {
+                    String token = pref.getLineUserId(); // 注意：目前假設 LineUserId 欄位存放 Token
+                    return (token != null && !token.isBlank()) ? token : defaultLineToken;
+                })
+                .orElse(defaultLineToken);
     }
 
     /**

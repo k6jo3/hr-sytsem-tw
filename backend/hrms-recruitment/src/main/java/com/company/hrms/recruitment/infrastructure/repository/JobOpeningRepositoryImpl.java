@@ -62,6 +62,11 @@ public class JobOpeningRepositoryImpl
         return super.findPage(query, pageable).map(this::toDomain);
     }
 
+    @Override
+    public long count(QueryGroup query) {
+        return super.count(query);
+    }
+
     // ================= Entity 映射 =================
 
     private JobOpeningEntity toEntity(JobOpening domain) {

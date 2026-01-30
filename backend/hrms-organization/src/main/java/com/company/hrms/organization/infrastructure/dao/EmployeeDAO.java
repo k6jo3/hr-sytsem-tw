@@ -109,4 +109,8 @@ public class EmployeeDAO {
     public int countByOrganizationId(String organizationId) {
         return employeeMapper.countByOrganizationId(organizationId);
     }
+
+    public List<EmployeePO> findAll() {
+        return employeeMapper.selectAll();
+    }
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.company.hrms.notification.domain.model.aggregate.Notification;
+import com.company.hrms.notification.domain.repository.INotificationPreferenceRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TeamsChannelSender implements ChannelSender {
 
     private final RestTemplate restTemplate;
+    private final INotificationPreferenceRepository preferenceRepository;
 
     @Value("${notification.channel.teams.webhook-url:}")
     private String defaultWebhookUrl;
@@ -83,9 +85,12 @@ public class TeamsChannelSender implements ChannelSender {
      * @return Webhook URL
      */
     private String getTeamsWebhookUrl(String recipientId) {
-        // TODO: 未來可從 NotificationPreference 取得收件人的個人 Webhook URL
-        // 目前使用系統預設值
-        return defaultWebhookUrl;
+        return preferenceRepository.findByEmployeeId(recipientId)
+                .map(pref -> {
+                    String url = pref.getTeamsWebhookUrl();
+                    return (url != null && !url.isBlank()) ? url : defaultWebhookUrl;
+                })
+                .orElse(defaultWebhookUrl);
     }
 
     /**

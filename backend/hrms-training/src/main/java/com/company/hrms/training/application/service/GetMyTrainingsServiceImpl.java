@@ -37,7 +37,7 @@ public class GetMyTrainingsServiceImpl
         // 使用 QueryBuilder 從 Request DTO 自動建構查詢條件 (宣告式查詢)
         QueryGroup query = QueryBuilder.where()
                 .fromDto(request)
-                .eq("employeeId", currentUser.getUserId()) // 強制加入員工ID過濾
+                .eq("employee_id", currentUser.getUserId()) // 強制加入員工ID過濾
                 .build();
 
         // 取得分頁資訊 (從 BaseRequest 轉換)
@@ -60,8 +60,8 @@ public class GetMyTrainingsServiceImpl
     private TrainingEnrollmentResponse toResponse(TrainingEnrollmentEntity enrollment) {
         TrainingEnrollmentResponse res = new TrainingEnrollmentResponse();
         res.setEnrollmentId(enrollment.getEnrollmentId());
-        res.setCourseId(enrollment.getCourseId());
-        res.setEmployeeId(enrollment.getEmployeeId());
+        res.setCourseId(enrollment.getCourse_id());
+        res.setEmployeeId(enrollment.getEmployee_id());
         res.setStatus(enrollment.getStatus());
         res.setReason(enrollment.getReason());
         res.setRemarks(enrollment.getRemarks());

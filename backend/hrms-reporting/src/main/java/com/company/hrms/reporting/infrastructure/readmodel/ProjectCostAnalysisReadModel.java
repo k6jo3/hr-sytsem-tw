@@ -82,13 +82,13 @@ public class ProjectCostAnalysisReadModel {
     @Column(name = "cost_variance", precision = 15, scale = 2)
     private BigDecimal costVariance;
 
-    @Column(name = "cost_variance_rate", precision = 5, scale = 2)
+    @Column(name = "cost_variance_rate")
     private Double costVarianceRate;
 
-    @Column(name = "total_hours", precision = 10, scale = 2)
+    @Column(name = "total_hours")
     private Double totalHours;
 
-    @Column(name = "utilization_rate", precision = 5, scale = 2)
+    @Column(name = "utilization_rate")
     private Double utilizationRate;
 
     @Column(name = "updated_at")

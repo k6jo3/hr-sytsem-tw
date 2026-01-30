@@ -10,6 +10,9 @@ import com.company.hrms.recruitment.application.dto.job.CreateJobOpeningRequest;
 @Component
 public class ValidateJobOpeningTask implements PipelineTask<CreateJobOpeningContext> {
 
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.company.hrms.recruitment.infrastructure.client.organization.OrganizationServiceClient organizationServiceClient;
+
     @Override
     public void execute(CreateJobOpeningContext context) throws Exception {
         CreateJobOpeningRequest request = context.getRequest();
@@ -18,8 +21,15 @@ public class ValidateJobOpeningTask implements PipelineTask<CreateJobOpeningCont
             throw new IllegalArgumentException("Job Title is required");
         }
 
-        // TODO: Validate Department ID via Organization Service Feign Client
-        // String deptId = request.getDepartmentId();
-        // orgService.getDepartment(deptId);
+        // Validate Department ID via Organization Service
+        String deptId = request.getDepartmentId();
+        if (StringUtils.hasText(deptId)) {
+            try {
+                organizationServiceClient.getDepartment(deptId);
+            } catch (Exception e) {
+                // Assuming Feign throws exception on 404 or connection error
+                throw new IllegalArgumentException("Invalid Department ID: " + deptId);
+            }
+        }
     }
 }

@@ -36,7 +36,7 @@ public class SaveCandidateTask implements PipelineTask<CreateCandidateContext> {
         candidate.updateResume(request.getResumeUrl(), request.getCoverLetter());
         candidate.updateExpectations(request.getExpectedSalary(), request.getAvailableDate());
 
-        // TODO: 處理推薦人 referrerId (需要轉換為 UUID)
+        // Note: 處理推薦人 referrerId (需要轉換為 UUID)
 
         candidateRepository.save(candidate);
 

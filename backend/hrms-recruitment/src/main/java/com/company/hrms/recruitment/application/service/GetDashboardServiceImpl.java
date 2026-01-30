@@ -23,128 +23,75 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class GetDashboardServiceImpl
-        implements QueryApiService<DashboardSearchDto, DashboardResponse> {
+                implements QueryApiService<DashboardSearchDto, DashboardResponse> {
 
-    // TODO: 注入相關 Repository
+        @Override
+        public DashboardResponse getResponse(
+                        DashboardSearchDto request,
+                        JWTModel currentUser,
+                        String... args) throws Exception {
 
-    @Override
-    public DashboardResponse getResponse(
-            DashboardSearchDto request,
-            JWTModel currentUser,
-            String... args) throws Exception {
+                // 處理預設日期範圍
+                LocalDate dateFrom = request.getDateFrom();
+                LocalDate dateTo = request.getDateTo();
 
-        // 處理預設日期範圍
-        LocalDate dateFrom = request.getDateFrom();
-        LocalDate dateTo = request.getDateTo();
+                if (dateFrom == null) {
+                        dateFrom = LocalDate.now().withDayOfMonth(1); // 預設當月第一天
+                }
+                if (dateTo == null) {
+                        dateTo = LocalDate.now(); // 預設今天
+                }
 
-        if (dateFrom == null) {
-            dateFrom = LocalDate.now().withDayOfMonth(1); // 預設當月第一天
+                log.info("取得招募儀表板: from={}, to={}", dateFrom, dateTo);
+
+                long openJobs = jobOpeningRepository
+                                .count(com.company.hrms.common.query.QueryBuilder.where().eq("status", "OPEN").build());
+                long totalApplications = candidateRepository.count(com.company.hrms.common.query.QueryBuilder.where()
+                                .between("applicationDate", dateFrom, dateTo).build());
+                long interviews = candidateRepository.count(com.company.hrms.common.query.QueryBuilder.where()
+                                .eq("status", "INTERVIEWING").between("applicationDate", dateFrom, dateTo).build());
+                long offers = candidateRepository.count(com.company.hrms.common.query.QueryBuilder.where()
+                                .eq("status", "OFFERED").between("applicationDate", dateFrom, dateTo).build());
+                long hired = candidateRepository.count(com.company.hrms.common.query.QueryBuilder.where()
+                                .eq("status", "HIRED").between("applicationDate", dateFrom, dateTo).build());
+
+                // Note: 進階統計 (AvgTimeToHire, OfferAcceptanceRate) 需實作 Aggregation Query，目前暫回傳 0
+                // 或僅算數值
+                BigDecimal acceptanceRate = BigDecimal.ZERO;
+                if (offers > 0) {
+                        acceptanceRate = BigDecimal.valueOf(hired)
+                                        .divide(BigDecimal.valueOf(offers), 2, java.math.RoundingMode.HALF_UP)
+                                        .multiply(BigDecimal.valueOf(100));
+                }
+
+                return DashboardResponse.builder()
+                                .period(DashboardResponse.Period.builder()
+                                                .from(dateFrom)
+                                                .to(dateTo)
+                                                .build())
+                                .kpis(DashboardResponse.KPIs.builder()
+                                                .openJobsCount((int) openJobs)
+                                                .totalApplications((int) totalApplications)
+                                                .interviewsScheduled((int) interviews)
+                                                .offersExtended((int) offers)
+                                                .hiredCount((int) hired)
+                                                .avgTimeToHire(0) // 需複雜查詢
+                                                .offerAcceptanceRate(acceptanceRate)
+                                                .build())
+                                .sourceAnalytics(List.of()) // 需 GroupBy 查詢
+                                .conversionFunnel(DashboardResponse.ConversionFunnel.builder()
+                                                .applied((int) totalApplications)
+                                                .screened(0) // New -> Screening
+                                                .interviewed((int) interviews)
+                                                .offered((int) offers)
+                                                .hired((int) hired)
+                                                .rates(DashboardResponse.ConversionRates.builder().build())
+                                                .build())
+                                .openingsByDepartment(List.of()) // 需 GroupBy
+                                .monthlyTrend(List.of()) // 需 GroupBy
+                                .build();
         }
-        if (dateTo == null) {
-            dateTo = LocalDate.now(); // 預設今天
-        }
 
-        log.info("取得招募儀表板: from={}, to={}", dateFrom, dateTo);
-
-        // TODO: 實際從 Repository 查詢資料，以下為模擬資料
-        return buildMockDashboard(dateFrom, dateTo);
-    }
-
-    /**
-     * 建立模擬儀表板資料（待實際實作時替換為真實查詢）
-     */
-    private DashboardResponse buildMockDashboard(LocalDate dateFrom, LocalDate dateTo) {
-        return DashboardResponse.builder()
-                .period(DashboardResponse.Period.builder()
-                        .from(dateFrom)
-                        .to(dateTo)
-                        .build())
-                .kpis(DashboardResponse.KPIs.builder()
-                        .openJobsCount(12)
-                        .totalApplications(85)
-                        .interviewsScheduled(23)
-                        .offersExtended(8)
-                        .hiredCount(5)
-                        .avgTimeToHire(28)
-                        .offerAcceptanceRate(BigDecimal.valueOf(62.5))
-                        .build())
-                .sourceAnalytics(List.of(
-                        DashboardResponse.SourceAnalytics.builder()
-                                .source("JOB_BANK")
-                                .sourceLabel("人力銀行")
-                                .count(38)
-                                .percentage(BigDecimal.valueOf(44.7))
-                                .hiredCount(2)
-                                .conversionRate(BigDecimal.valueOf(5.3))
-                                .build(),
-                        DashboardResponse.SourceAnalytics.builder()
-                                .source("REFERRAL")
-                                .sourceLabel("員工推薦")
-                                .count(21)
-                                .percentage(BigDecimal.valueOf(24.7))
-                                .hiredCount(2)
-                                .conversionRate(BigDecimal.valueOf(9.5))
-                                .build(),
-                        DashboardResponse.SourceAnalytics.builder()
-                                .source("WEBSITE")
-                                .sourceLabel("公司官網")
-                                .count(17)
-                                .percentage(BigDecimal.valueOf(20.0))
-                                .hiredCount(1)
-                                .conversionRate(BigDecimal.valueOf(5.9))
-                                .build(),
-                        DashboardResponse.SourceAnalytics.builder()
-                                .source("LINKEDIN")
-                                .sourceLabel("LinkedIn")
-                                .count(9)
-                                .percentage(BigDecimal.valueOf(10.6))
-                                .hiredCount(0)
-                                .conversionRate(BigDecimal.ZERO)
-                                .build()))
-                .conversionFunnel(DashboardResponse.ConversionFunnel.builder()
-                        .applied(85)
-                        .screened(45)
-                        .interviewed(23)
-                        .offered(8)
-                        .hired(5)
-                        .rates(DashboardResponse.ConversionRates.builder()
-                                .screeningRate(BigDecimal.valueOf(52.9))
-                                .interviewRate(BigDecimal.valueOf(51.1))
-                                .offerRate(BigDecimal.valueOf(34.8))
-                                .acceptRate(BigDecimal.valueOf(62.5))
-                                .build())
-                        .build())
-                .openingsByDepartment(List.of(
-                        DashboardResponse.DepartmentStats.builder()
-                                .departmentId("dept-001")
-                                .departmentName("研發部")
-                                .openJobs(5)
-                                .candidates(35)
-                                .hired(2)
-                                .build(),
-                        DashboardResponse.DepartmentStats.builder()
-                                .departmentId("dept-002")
-                                .departmentName("業務部")
-                                .openJobs(3)
-                                .candidates(25)
-                                .hired(1)
-                                .build()))
-                .monthlyTrend(List.of(
-                        DashboardResponse.MonthlyTrend.builder()
-                                .month("2025-10")
-                                .applications(65)
-                                .hired(3)
-                                .build(),
-                        DashboardResponse.MonthlyTrend.builder()
-                                .month("2025-11")
-                                .applications(72)
-                                .hired(4)
-                                .build(),
-                        DashboardResponse.MonthlyTrend.builder()
-                                .month("2025-12")
-                                .applications(85)
-                                .hired(5)
-                                .build()))
-                .build();
-    }
+        private final com.company.hrms.recruitment.domain.repository.IJobOpeningRepository jobOpeningRepository;
+        private final com.company.hrms.recruitment.domain.repository.ICandidateRepository candidateRepository;
 }

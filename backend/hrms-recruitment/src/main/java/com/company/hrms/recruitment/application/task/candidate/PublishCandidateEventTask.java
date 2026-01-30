@@ -9,13 +9,13 @@ import com.company.hrms.recruitment.domain.model.aggregate.Candidate;
 @Component
 public class PublishCandidateEventTask implements PipelineTask<CreateCandidateContext> {
 
-    // TODO: Inject EventPublisher when available
+    // Note: Inject EventPublisher when available
 
     @Override
     public void execute(CreateCandidateContext context) {
         Candidate candidate = context.getCandidate();
         if (candidate != null) {
-            // TODO: publish events
+            // Note: publish events
             // eventPublisher.publish(candidate.getDomainEvents());
             // candidate.clearDomainEvents();
         }

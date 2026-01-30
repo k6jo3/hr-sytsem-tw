@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.notification.api.request.notification.SendNotificationRequest;
 import com.company.hrms.notification.application.service.send.SendNotificationServiceImpl;
+import com.company.hrms.notification.infrastructure.client.timesheet.TimesheetServiceClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TimesheetReminderJob {
 
     private final SendNotificationServiceImpl sendNotificationService;
-    // TODO: 未來應透過 Feign Client 呼叫 Timesheet Service 取得未填報工時的員工列表
+    private final TimesheetServiceClient timesheetServiceClient;
 
     /**
      * 每日 18:00 執行
@@ -47,12 +48,7 @@ public class TimesheetReminderJob {
                 return;
             }
 
-            // TODO: 查詢今日尚未填寫工時的員工
-            // List<Employee> employeesWithoutTimesheet =
-            // timesheetRepository.findEmployeesWithoutTimesheetForDate(today);
-
-            // 暫時實作：空列表
-            List<String> employeeIds = List.of();
+            List<String> employeeIds = timesheetServiceClient.getEmployeesWithoutTimesheet(today.toString());
 
             int successCount = 0;
             int failCount = 0;

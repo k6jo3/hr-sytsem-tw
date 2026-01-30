@@ -1,13 +1,16 @@
 package com.company.hrms.notification.infrastructure.channel;
 
-import com.company.hrms.notification.domain.model.aggregate.Notification;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
+import com.company.hrms.notification.domain.model.aggregate.Notification;
+import com.company.hrms.notification.infrastructure.client.organization.OrganizationServiceClient;
+import com.company.hrms.notification.infrastructure.client.organization.dto.EmployeeDto;
+
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Email 通知發送器
@@ -24,6 +27,7 @@ import jakarta.mail.internet.MimeMessage;
 public class EmailChannelSender implements ChannelSender {
 
     private final JavaMailSender mailSender;
+    private final OrganizationServiceClient organizationServiceClient;
 
     @Override
     public void send(Notification notification, String recipientId) throws Exception {
@@ -34,8 +38,12 @@ public class EmailChannelSender implements ChannelSender {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            // TODO: 從員工服務查詢收件人的 Email
+            // 從員工服務查詢收件人的 Email
             String recipientEmail = getRecipientEmail(recipientId);
+
+            if (recipientEmail == null || recipientEmail.trim().isEmpty()) {
+                throw new IllegalArgumentException("收件人 Email 為空，無法發送: " + recipientId);
+            }
 
             helper.setTo(recipientEmail);
             helper.setSubject(notification.getTitle());
@@ -60,14 +68,23 @@ public class EmailChannelSender implements ChannelSender {
     }
 
     /**
-     * 取得收件人 Email（暫時實作）
-     * TODO: 整合員工服務 API
+     * 取得收件人 Email
+     * <p>
+     * 呼叫員工服務 API 取得員工詳細資訊
+     * </p>
      *
-     * @param recipientId 收件人 ID
+     * @param recipientId 收件人 ID (Employee ID)
      * @return Email 地址
      */
     private String getRecipientEmail(String recipientId) {
-        // 暫時實作：使用收件人 ID + @company.com
-        return recipientId + "@company.com";
+        try {
+            EmployeeDto employee = organizationServiceClient.getEmployeeDetail(recipientId);
+            if (employee != null) {
+                return employee.getEmail();
+            }
+        } catch (Exception e) {
+            log.error("查詢員工資料失敗: recipientId={}, error={}", recipientId, e.getMessage());
+        }
+        return null;
     }
 }

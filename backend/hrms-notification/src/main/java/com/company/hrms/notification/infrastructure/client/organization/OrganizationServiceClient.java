@@ -20,4 +20,13 @@ public interface OrganizationServiceClient {
 
     @GetMapping("/api/v1/employees/{id}")
     EmployeeDto getEmployeeDetail(@PathVariable("id") String id);
+
+    @GetMapping("/api/v1/employees/birthday")
+    java.util.List<EmployeeDto> getEmployeesByBirthday(
+            @RequestParam("month") int month,
+            @RequestParam("day") int day);
+
+    @GetMapping("/api/v1/employees/contracts/expiring")
+    java.util.List<com.company.hrms.notification.infrastructure.client.organization.dto.ContractDto> getExpiringContracts(
+            @RequestParam("expiryDate") String expiryDate);
 }

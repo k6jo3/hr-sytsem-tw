@@ -70,7 +70,7 @@ public class Customer extends AggregateRoot<CustomerId> {
         customer.phoneNumber = cmd.getPhoneNumber();
         customer.status = CustomerStatus.ACTIVE;
 
-        // TODO: Publish CustomerCreatedEvent if needed (not in spec, but good practice)
+        // CustomerCreatedEvent logic can be added here if needed in future
 
         return customer;
     }

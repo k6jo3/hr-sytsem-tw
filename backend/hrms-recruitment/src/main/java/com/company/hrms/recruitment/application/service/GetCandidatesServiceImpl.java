@@ -23,7 +23,7 @@ public class GetCandidatesServiceImpl implements QueryApiService<CandidateSearch
     @Override
     public Object getResponse(CandidateSearchDto searchDto, JWTModel currentUser, String... args) throws Exception {
         QueryGroup query = QueryBuilder.fromCondition(searchDto);
-        Pageable pageable = Pageable.unpaged(); // TODO: Add pageable support from args or DTO
+        Pageable pageable = searchDto.toPageable();
 
         Page<Candidate> page = candidateRepository.findAll(query, pageable);
 

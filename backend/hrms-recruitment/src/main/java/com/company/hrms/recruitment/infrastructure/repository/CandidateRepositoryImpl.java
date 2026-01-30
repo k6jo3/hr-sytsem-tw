@@ -147,4 +147,9 @@ public class CandidateRepositoryImpl
                 .build();
         return super.count(query) > 0;
     }
+
+    @Override
+    public long count(QueryGroup query) {
+        return super.count(query);
+    }
 }

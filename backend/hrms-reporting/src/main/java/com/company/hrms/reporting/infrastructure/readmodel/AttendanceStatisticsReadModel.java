@@ -71,13 +71,13 @@ public class AttendanceStatisticsReadModel {
     @Column(name = "absent_count")
     private Integer absentCount;
 
-    @Column(name = "leave_days", precision = 10, scale = 2)
+    @Column(name = "leave_days")
     private Double leaveDays;
 
-    @Column(name = "overtime_hours", precision = 10, scale = 2)
+    @Column(name = "overtime_hours")
     private Double overtimeHours;
 
-    @Column(name = "attendance_rate", precision = 5, scale = 2)
+    @Column(name = "attendance_rate")
     private Double attendanceRate;
 
     @Column(name = "updated_at")
