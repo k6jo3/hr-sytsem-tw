@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.project.api.request.GetProjectListRequest;
@@ -32,24 +33,17 @@ public class GetProjectListServiceImpl implements QueryApiService<GetProjectList
         @Override
         public GetProjectListResponse getResponse(GetProjectListRequest req, JWTModel currentUser, String... args)
                         throws Exception {
-                // TODO: 未符合Fluent-Query-Engine的設計
-                // Build QueryGroup
-                QueryGroup query = QueryGroup.and();
-
-                if (req.getStatus() != null && !req.getStatus().isEmpty()) {
-                        query.eq("status", req.getStatus());
-                }
-
-                // if (req.getOwnerId() != null && !req.getOwnerId().isEmpty()) {
-                // query.eq("ownerId", req.getOwnerId());
-                // }
+                // 使用 Fluent-Query-Engine API
+                var builder = QueryBuilder.where().fromDto(req);
 
                 if (req.getKeyword() != null && !req.getKeyword().isEmpty()) {
-                        query.addSubGroup(
-                                        QueryGroup.or()
-                                                        .like("projectName", "%" + req.getKeyword() + "%")
-                                                        .like("projectCode", "%" + req.getKeyword() + "%"));
+                        String k = req.getKeyword();
+                        builder.orGroup(or -> or
+                                        .like("projectName", k)
+                                        .like("projectCode", k));
                 }
+
+                QueryGroup query = builder.build();
 
                 // Build Pageable
                 Sort.Direction direction = "ASC".equalsIgnoreCase(req.getSortDirection()) ? Sort.Direction.ASC

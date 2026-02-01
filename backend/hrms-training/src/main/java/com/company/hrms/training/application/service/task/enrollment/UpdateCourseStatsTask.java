@@ -1,4 +1,4 @@
-package com.company.hrms.training.application.task.enrollment;
+package com.company.hrms.training.application.service.task.enrollment;
 
 import org.springframework.stereotype.Component;
 

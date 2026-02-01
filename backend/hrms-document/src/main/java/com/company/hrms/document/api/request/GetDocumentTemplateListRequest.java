@@ -13,8 +13,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetDocumentTemplateListRequest {
+    @com.company.hrms.common.query.QueryCondition.EQ("status")
     private String status;
+
+    @com.company.hrms.common.query.QueryCondition.EQ("category")
     private String category;
+
+    @com.company.hrms.common.query.QueryCondition.LIKE("name")
     private String name;
+
+    @com.company.hrms.common.query.QueryCondition.EQ("department_id")
     private String deptId;
 }

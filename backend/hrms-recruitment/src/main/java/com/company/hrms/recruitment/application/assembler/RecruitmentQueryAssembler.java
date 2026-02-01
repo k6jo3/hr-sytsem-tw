@@ -1,16 +1,29 @@
 package com.company.hrms.recruitment.application.assembler;
 
-import com.company.hrms.common.query.QueryBuilder;
-import com.company.hrms.common.query.QueryGroup;
-import com.company.hrms.recruitment.domain.model.valueobject.CandidateStatus;
-import com.company.hrms.recruitment.domain.model.valueobject.InterviewStatus;
-import com.company.hrms.recruitment.domain.model.valueobject.JobStatus;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * 招聘查詢組裝器
  * 
  * 將 Request DTO 轉換為 QueryGroup，供 Repository 使用。
  */
+import org.springframework.stereotype.Component;
+
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryCondition;
+import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.recruitment.domain.model.valueobject.CandidateStatus;
+import com.company.hrms.recruitment.domain.model.valueobject.InterviewStatus;
+import com.company.hrms.recruitment.domain.model.valueobject.JobStatus;
+import com.company.hrms.recruitment.domain.model.valueobject.OfferStatus;
+
+/**
+ * 招聘查詢組裝器
+ * 
+ * 將 Request DTO 轉換為 QueryGroup，供 Repository 使用。
+ */
+@Component
 public class RecruitmentQueryAssembler {
 
     /**
@@ -20,27 +33,44 @@ public class RecruitmentQueryAssembler {
             JobStatus status,
             String departmentId,
             String keyword) {
-        // TODO: 未符合Fluent-Query-Engine設計
-        QueryBuilder builder = QueryBuilder.where();
 
-        if (status != null) {
-            builder.eq("status", status);
-        }
+        JobOpeningCondition condition = new JobOpeningCondition();
+        condition.setStatus(status);
+        condition.setDepartmentId(departmentId);
+        condition.setIsDeleted(0);
 
-        if (departmentId != null && !departmentId.isBlank()) {
-            builder.eq("department_id", java.util.UUID.fromString(departmentId));
-        }
+        var builder = QueryBuilder.where().fromDto(condition);
 
         if (keyword != null && !keyword.isBlank()) {
-            builder.orGroup(group -> group
-                    .like("title", keyword)
-                    .like("requirements", "%" + keyword + "%"));
+            JobOpeningKeywordCondition keywordCondition = new JobOpeningKeywordCondition();
+            keywordCondition.setTitle(keyword);
+            keywordCondition.setRequirements(keyword);
+
+            builder.orGroup(group -> group.fromDto(keywordCondition));
         }
 
-        // 軟刪除過濾
-        builder.eq("is_deleted", 0);
-
         return builder.build();
+    }
+
+    @lombok.Data
+    public static class JobOpeningCondition {
+        @QueryCondition.EQ
+        private JobStatus status;
+
+        @QueryCondition.EQ("department_id")
+        private String departmentId;
+
+        @QueryCondition.EQ("is_deleted")
+        private Integer isDeleted;
+    }
+
+    @lombok.Data
+    public static class JobOpeningKeywordCondition {
+        @QueryCondition.LIKE("title")
+        private String title;
+
+        @QueryCondition.LIKE("requirements")
+        private String requirements;
     }
 
     /**
@@ -51,23 +81,41 @@ public class RecruitmentQueryAssembler {
             CandidateStatus status,
             String keyword) {
 
-        QueryBuilder builder = QueryBuilder.where();
-
+        CandidateCondition condition = new CandidateCondition();
         if (openingId != null && !openingId.isBlank()) {
-            builder.eq("openingId", java.util.UUID.fromString(openingId));
+            condition.setOpeningId(UUID.fromString(openingId));
         }
+        condition.setStatus(status);
 
-        if (status != null) {
-            builder.eq("status", status);
-        }
+        var builder = QueryBuilder.where().fromDto(condition);
 
         if (keyword != null && !keyword.isBlank()) {
-            builder.orGroup(group -> group
-                    .like("fullName", "%" + keyword + "%")
-                    .like("email", "%" + keyword + "%"));
+            CandidateKeywordCondition keywordCondition = new CandidateKeywordCondition();
+            keywordCondition.setFullName(keyword);
+            keywordCondition.setEmail(keyword);
+
+            builder.orGroup(group -> group.fromDto(keywordCondition));
         }
 
         return builder.build();
+    }
+
+    @lombok.Data
+    public static class CandidateCondition {
+        @QueryCondition.EQ("openingId")
+        private UUID openingId;
+
+        @QueryCondition.EQ
+        private CandidateStatus status;
+    }
+
+    @lombok.Data
+    public static class CandidateKeywordCondition {
+        @QueryCondition.LIKE("fullName")
+        private String fullName;
+
+        @QueryCondition.LIKE("email")
+        private String email;
     }
 
     /**
@@ -76,29 +124,35 @@ public class RecruitmentQueryAssembler {
     public QueryGroup toInterviewQuery(
             String candidateId,
             String interviewStatus,
-            java.time.LocalDateTime startDate,
-            java.time.LocalDateTime endDate) {
+            LocalDateTime startDate,
+            LocalDateTime endDate) {
 
-        QueryBuilder builder = QueryBuilder.where();
-
+        InterviewCondition condition = new InterviewCondition();
         if (candidateId != null && !candidateId.isBlank()) {
-            builder.eq("candidateId", java.util.UUID.fromString(candidateId));
+            condition.setCandidateId(UUID.fromString(candidateId));
         }
-
         if (interviewStatus != null && !interviewStatus.isBlank()) {
-            builder.eq("status",
-                    InterviewStatus.valueOf(interviewStatus));
+            condition.setStatus(InterviewStatus.valueOf(interviewStatus));
         }
+        condition.setStartDate(startDate);
+        condition.setEndDate(endDate);
 
-        if (startDate != null) {
-            builder.gte("interviewDate", startDate);
-        }
+        return QueryBuilder.where().fromDto(condition).build();
+    }
 
-        if (endDate != null) {
-            builder.lte("interviewDate", endDate);
-        }
+    @lombok.Data
+    public static class InterviewCondition {
+        @QueryCondition.EQ("candidateId")
+        private UUID candidateId;
 
-        return builder.build();
+        @QueryCondition.EQ("status")
+        private InterviewStatus status;
+
+        @QueryCondition.GTE("interviewDate")
+        private LocalDateTime startDate;
+
+        @QueryCondition.LTE("interviewDate")
+        private LocalDateTime endDate;
     }
 
     /**
@@ -108,17 +162,23 @@ public class RecruitmentQueryAssembler {
             String candidateId,
             String offerStatus) {
 
-        QueryBuilder builder = QueryBuilder.where();
-
+        OfferCondition condition = new OfferCondition();
         if (candidateId != null && !candidateId.isBlank()) {
-            builder.eq("candidateId", java.util.UUID.fromString(candidateId));
+            condition.setCandidateId(UUID.fromString(candidateId));
         }
-
         if (offerStatus != null && !offerStatus.isBlank()) {
-            builder.eq("status",
-                    com.company.hrms.recruitment.domain.model.valueobject.OfferStatus.valueOf(offerStatus));
+            condition.setStatus(OfferStatus.valueOf(offerStatus));
         }
 
-        return builder.build();
+        return QueryBuilder.where().fromDto(condition).build();
+    }
+
+    @lombok.Data
+    public static class OfferCondition {
+        @QueryCondition.EQ("candidateId")
+        private UUID candidateId;
+
+        @QueryCondition.EQ("status")
+        private OfferStatus status;
     }
 }

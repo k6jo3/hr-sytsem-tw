@@ -2,7 +2,6 @@ package com.company.hrms.document.application.assembler;
 
 import org.springframework.stereotype.Component;
 
-import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.document.api.request.GetDocumentAccessLogListRequest;
@@ -14,29 +13,7 @@ import com.company.hrms.document.api.request.GetDocumentAccessLogListRequest;
 public class DocumentAccessLogListQueryAssembler {
 
     public QueryGroup toQueryGroup(GetDocumentAccessLogListRequest request) {
-        // TODO: 未符合Fluent-Query-Engine的設計
-        var query = QueryBuilder.where();
-
-        // 1. Document ID Filter
-        if (request.getDocumentId() != null) {
-            query.and("document_id", Operator.EQ, request.getDocumentId());
-        }
-
-        // 2. User ID Filter
-        if (request.getUserId() != null) {
-            query.and("user_id", Operator.EQ, request.getUserId());
-        }
-
-        // 3. Action Filter
-        if (request.getAction() != null) {
-            query.and("action", Operator.EQ, request.getAction());
-        }
-
-        // 4. Date Range Filter
-        if (request.getStartDate() != null) {
-            query.and("access_time", Operator.GTE, request.getStartDate().toString());
-        }
-
-        return query.build();
+        // 使用 Fluent-Query-Engine 的設計
+        return QueryBuilder.fromCondition(request);
     }
 }

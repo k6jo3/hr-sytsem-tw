@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.project.api.request.GetCustomerListRequest;
@@ -31,17 +32,18 @@ public class GetCustomerListServiceImpl implements QueryApiService<GetCustomerLi
         @Override
         public GetCustomerListResponse getResponse(GetCustomerListRequest req, JWTModel currentUser, String... args)
                         throws Exception {
-                // TODO: 未符合Fluent-Query-Engine
-                // Build QueryGroup
-                QueryGroup query = QueryGroup.and();
+                // 使用 Fluent-Query-Engine API
+                var builder = QueryBuilder.where();
 
                 if (req.getKeyword() != null && !req.getKeyword().isEmpty()) {
-                        query.addSubGroup(
-                                        QueryGroup.or()
-                                                        .like("customerName", "%" + req.getKeyword() + "%")
-                                                        .like("customerCode", "%" + req.getKeyword() + "%")
-                                                        .like("taxId", "%" + req.getKeyword() + "%"));
+                        String k = req.getKeyword();
+                        builder.orGroup(or -> or
+                                        .like("customerName", k)
+                                        .like("customerCode", k)
+                                        .like("taxId", k));
                 }
+
+                QueryGroup query = builder.build();
 
                 // Build Pageable (Default sort by CustomerCode ASC)
                 Pageable pageable = PageRequest.of(req.getPage(), req.getSize(),

@@ -1,4 +1,4 @@
-package com.company.hrms.training.application.task.statistics;
+package com.company.hrms.training.application.service.task.statistics;
 
 import java.time.LocalDate;
 

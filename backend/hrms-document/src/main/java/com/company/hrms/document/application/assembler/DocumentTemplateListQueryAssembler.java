@@ -14,32 +14,12 @@ import com.company.hrms.document.api.request.GetDocumentTemplateListRequest;
 public class DocumentTemplateListQueryAssembler {
 
     public QueryGroup toQueryGroup(GetDocumentTemplateListRequest request) {
-        // TODO: 未符合Fluent-Query-Engine的設計
-        var query = QueryBuilder.where();
+        // 使用 Fluent-Query-Engine 自動解析條件
+        var builder = QueryBuilder.where().fromDto(request);
 
         // 1. Soft Delete (Always required)
-        query.and("is_deleted", Operator.EQ, 0);
+        builder.and("is_deleted", Operator.EQ, 0);
 
-        // 2. Status Filter (ACTIVE by default for most queries)
-        if (request.getStatus() != null) {
-            query.and("status", Operator.EQ, request.getStatus());
-        }
-
-        // 3. Category Filter
-        if (request.getCategory() != null) {
-            query.and("category", Operator.EQ, request.getCategory());
-        }
-
-        // 4. Name Filter (Fuzzy)
-        if (request.getName() != null) {
-            query.and("name", Operator.LIKE, request.getName());
-        }
-
-        // 5. Department Filter
-        if (request.getDeptId() != null) {
-            query.and("department_id", Operator.EQ, request.getDeptId());
-        }
-
-        return query.build();
+        return builder.build();
     }
 }

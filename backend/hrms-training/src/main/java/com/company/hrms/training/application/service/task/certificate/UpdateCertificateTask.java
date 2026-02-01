@@ -1,4 +1,4 @@
-package com.company.hrms.training.application.task.certificate;
+package com.company.hrms.training.application.service.task.certificate;
 
 import org.springframework.stereotype.Component;
 

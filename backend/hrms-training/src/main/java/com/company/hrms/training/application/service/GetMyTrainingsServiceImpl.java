@@ -21,7 +21,7 @@ import com.company.hrms.training.infrastructure.repository.TrainingEnrollmentQue
 import lombok.RequiredArgsConstructor;
 
 /**
- * 查詢我的訓練紀錄服務
+ * ?�詢?��?訓練紀?��???
  */
 @Service("getMyTrainingsServiceImpl")
 @Transactional(readOnly = true)
@@ -34,19 +34,19 @@ public class GetMyTrainingsServiceImpl
     @Override
     public Page<TrainingEnrollmentResponse> getResponse(GetMyTrainingsRequest request, JWTModel currentUser,
             String... args) {
-        // 使用 QueryBuilder 從 Request DTO 自動建構查詢條件 (宣告式查詢)
+        // 使用 QueryBuilder �?Request DTO ?��?建�??�詢條件 (�??式查�?
         QueryGroup query = QueryBuilder.where()
                 .fromDto(request)
-                .eq("employee_id", currentUser.getUserId()) // 強制加入員工ID過濾
+                .eq("employee_id", currentUser.getUserId()) // 強制?�入?�工ID?�濾
                 .build();
 
-        // 取得分頁資訊 (從 BaseRequest 轉換)
+        // ?��??��?資�? (�?BaseRequest 轉�?)
         Pageable pageable = request.toPageable();
 
-        // 執行查詢
+        // ?��??�詢
         Page<TrainingEnrollmentEntity> page = enrollmentRepository.findPage(query, pageable);
 
-        // 轉換為 DTO
+        // 轉�???DTO
         List<TrainingEnrollmentResponse> responseList = new ArrayList<>();
         for (TrainingEnrollmentEntity enrollment : page.getContent()) {
             responseList.add(toResponse(enrollment));
@@ -55,10 +55,10 @@ public class GetMyTrainingsServiceImpl
         return new PageImpl<>(responseList, pageable, page.getTotalElements());
     }
 
-    // 移除不必要的 overload 方法，因為 Pageable 已包含在 request 中
+    // 移除不�?要�? overload ?��?，�???Pageable 已�??�在 request �?
 
     private TrainingEnrollmentResponse toResponse(TrainingEnrollmentEntity enrollment) {
-        // TODO: 程式太長，建議用objectMapper或structMapper
+        // TODO: 程�?太長，建議用objectMapper?�structMapper
         TrainingEnrollmentResponse res = new TrainingEnrollmentResponse();
         res.setEnrollmentId(enrollment.getEnrollmentId());
         res.setCourseId(enrollment.getCourse_id());

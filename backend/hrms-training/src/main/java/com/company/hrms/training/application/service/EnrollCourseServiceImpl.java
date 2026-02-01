@@ -1,54 +1,63 @@
 package com.company.hrms.training.application.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.company.hrms.common.application.pipeline.BusinessPipeline;
-import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
+import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.training.api.request.EnrollCourseRequest;
 import com.company.hrms.training.api.response.TrainingEnrollmentResponse;
 import com.company.hrms.training.application.service.context.EnrollCourseContext;
-import com.company.hrms.training.application.task.enrollment.CheckDuplicateEnrollmentTask;
-import com.company.hrms.training.application.task.enrollment.CreateEnrollmentTask;
-import com.company.hrms.training.application.task.enrollment.FetchEmployeeInfoTask;
-import com.company.hrms.training.application.task.enrollment.LoadCourseTask;
-import com.company.hrms.training.application.task.enrollment.SaveEnrollmentTask;
-import com.company.hrms.training.application.task.enrollment.UpdateCourseStatsTask;
+import com.company.hrms.training.application.service.task.enrollment.CheckDuplicateEnrollmentTask;
+import com.company.hrms.training.application.service.task.enrollment.CreateEnrollmentTask;
+import com.company.hrms.training.application.service.task.enrollment.LoadCourseTask;
+import com.company.hrms.training.application.service.task.enrollment.SaveEnrollmentTask;
+import com.company.hrms.training.application.service.task.enrollment.UpdateCourseStatsTask;
 import com.company.hrms.training.domain.model.aggregate.TrainingEnrollment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 
-/**
- * 報名課程服務
- * 使用獨立的 Task Bean 進行 Pipeline 編排
- */
 @Service("enrollCourseServiceImpl")
 @Transactional
-@RequiredArgsConstructor
 public class EnrollCourseServiceImpl implements CommandApiService<EnrollCourseRequest, TrainingEnrollmentResponse> {
 
-    private final LoadCourseTask loadCourseTask;
-    private final CheckDuplicateEnrollmentTask checkDuplicateTask;
-    private final FetchEmployeeInfoTask fetchEmployeeInfoTask;
-    private final CreateEnrollmentTask createEnrollmentTask;
-    private final SaveEnrollmentTask saveEnrollmentTask;
-    private final UpdateCourseStatsTask updateCourseStatsTask;
+    @Autowired
+    private LoadCourseTask loadCourseTask;
+
+    @Autowired
+    private CheckDuplicateEnrollmentTask checkDuplicateEnrollmentTask;
+
+    @Autowired
+    private CreateEnrollmentTask createEnrollmentTask;
+
+    @Autowired
+    private SaveEnrollmentTask saveEnrollmentTask;
+
+    @Autowired
+    private UpdateCourseStatsTask updateCourseStatsTask;
 
     @Override
-    public TrainingEnrollmentResponse execCommand(EnrollCourseRequest req, JWTModel currentUser, String... args)
-            throws Exception {
-        // 決定目標員工：若請求有 employeeId 則使用 (管理員代為報名)，否則使用當前用戶
-        String targetEmployeeId = (req.getEmployeeId() != null && !req.getEmployeeId().isEmpty())
-                ? req.getEmployeeId()
-                : currentUser.getUserId();
+    public TrainingEnrollmentResponse execCommand(EnrollCourseRequest request, JWTModel currentUser, String... args) throws Exception {
+        // Determine target employee ID. 
+        // Using employeeNumber from JWT as default if request doesn't specify.
+        String targetEmployeeId = Optional.ofNullable(request.getEmployeeId())
+                .filter(s -> !s.trim().isEmpty())
+                .orElse(currentUser.getEmployeeNumber());
 
-        EnrollCourseContext ctx = new EnrollCourseContext(req, targetEmployeeId, currentUser.getUserId());
+        // Constructor expects: (EnrollCourseRequest request, String employeeId, String requestedBy)
+        EnrollCourseContext ctx = new EnrollCourseContext(
+            request, 
+            targetEmployeeId, 
+            currentUser.getUserId()
+        );
+        
+        // Set the full user model for tasks to use
+        ctx.setCurrentUser(currentUser); 
 
         BusinessPipeline.start(ctx)
                 .next(loadCourseTask)
-                .next(checkDuplicateTask)
-                .next(fetchEmployeeInfoTask)
+                .next(checkDuplicateEnrollmentTask)
                 .next(createEnrollmentTask)
                 .next(saveEnrollmentTask)
                 .next(updateCourseStatsTask)
@@ -58,30 +67,33 @@ public class EnrollCourseServiceImpl implements CommandApiService<EnrollCourseRe
     }
 
     private TrainingEnrollmentResponse toResponse(TrainingEnrollment enrollment) {
+        if (enrollment == null) {
+            return new TrainingEnrollmentResponse();
+        }
         TrainingEnrollmentResponse res = new TrainingEnrollmentResponse();
-        res.setEnrollmentId(enrollment.getId().toString());
+        
+        // Map ID. EnrollmentId is a ValueObject, usually has toString that returns the UUID value.
+        if (enrollment.getId() != null) {
+            res.setEnrollmentId(enrollment.getId().toString());
+        }
+        
         res.setCourseId(enrollment.getCourseId());
         res.setEmployeeId(enrollment.getEmployeeId());
-        res.setStatus(enrollment.getStatus());
-        res.setReason(enrollment.getReason());
-        res.setRemarks(enrollment.getRemarks());
-        res.setApprovedBy(enrollment.getApprovedBy());
-        res.setApprovedAt(enrollment.getApprovedAt());
-        res.setRejectedBy(enrollment.getRejectedBy());
-        res.setRejectedAt(enrollment.getRejectedAt());
-        res.setRejectReason(enrollment.getRejectReason());
-        res.setCancelledBy(enrollment.getCancelledBy());
-        res.setCancelledAt(enrollment.getCancelledAt());
-        res.setCancelReason(enrollment.getCancelReason());
-        res.setAttendance(enrollment.isAttendance());
-        res.setAttendedHours(enrollment.getAttendedHours());
-        res.setCompletedHours(enrollment.getCompletedHours());
-        res.setScore(enrollment.getScore());
-        res.setPassed(enrollment.getPassed());
-        res.setFeedback(enrollment.getFeedback());
-        res.setCompletedAt(enrollment.getCompletedAt());
+        
+        // Map common audit fields
         res.setCreatedAt(enrollment.getCreatedAt());
         res.setUpdatedAt(enrollment.getUpdatedAt());
+
+        // Map Status (Enum to Enum)
+        res.setStatus(enrollment.getStatus());
+        
+        // Map other details provided in TrainingEnrollmentResponse
+        res.setReason(enrollment.getReason());
+        res.setRemarks(enrollment.getRemarks());
+        res.setPassed(enrollment.getPassed());
+        res.setScore(enrollment.getScore());
+        res.setCompletedAt(enrollment.getCompletedAt());
+        
         return res;
     }
 }

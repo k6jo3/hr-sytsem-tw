@@ -162,6 +162,7 @@ class AttendanceRecordTest {
     private Shift createRegularShift() {
         Shift shift = new Shift(
                 new ShiftId("shift-001"),
+                "ORG-001",
                 "常規班",
                 ShiftType.REGULAR,
                 LocalTime.of(9, 0),

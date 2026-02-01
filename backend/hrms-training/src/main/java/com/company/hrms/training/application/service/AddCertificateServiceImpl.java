@@ -9,8 +9,8 @@ import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.training.api.request.AddCertificateRequest;
 import com.company.hrms.training.api.response.CertificateResponse;
 import com.company.hrms.training.application.service.context.AddCertificateContext;
-import com.company.hrms.training.application.task.certificate.CreateCertificateTask;
-import com.company.hrms.training.application.task.certificate.SaveCertificateActionTask;
+import com.company.hrms.training.application.service.task.certificate.CreateCertificateTask;
+import com.company.hrms.training.application.service.task.certificate.SaveCertificateActionTask;
 import com.company.hrms.training.domain.model.aggregate.Certificate;
 
 import lombok.RequiredArgsConstructor;

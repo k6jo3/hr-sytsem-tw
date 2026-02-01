@@ -15,8 +15,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetDocumentAccessLogListRequest {
+    @com.company.hrms.common.query.QueryCondition.EQ("document_id")
     private String documentId;
+
+    @com.company.hrms.common.query.QueryCondition.EQ("user_id")
     private String userId;
+
+    @com.company.hrms.common.query.QueryCondition.EQ("action")
     private String action;
+
+    @com.company.hrms.common.query.QueryCondition.GTE("access_time")
     private LocalDate startDate;
 }

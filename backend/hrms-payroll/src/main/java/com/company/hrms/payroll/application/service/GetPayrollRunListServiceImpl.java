@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.company.hrms.common.api.response.PageResponse;
 import com.company.hrms.common.application.service.AbstractQueryService;
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.payroll.application.dto.request.GetPayrollRunListRequest;
@@ -64,24 +63,8 @@ public class GetPayrollRunListServiceImpl
 
     @Override
     protected QueryGroup buildQuery(GetPayrollRunListRequest request, JWTModel currentUser) {
-        // TODO: 未符合Fluent-Query-Engine
-        QueryBuilder builder = QueryBuilder.where();
-
-        if (request.getOrganizationId() != null) {
-            builder.and("organizationId", Operator.EQ, request.getOrganizationId());
-        }
-
-        if (request.getStartDate() != null) {
-            builder.and("periodStartDate", Operator.GTE, request.getStartDate());
-        }
-        if (request.getEndDate() != null) {
-            builder.and("periodEndDate", Operator.LTE, request.getEndDate());
-        }
-        if (request.getStatus() != null) {
-            builder.and("status", Operator.EQ, request.getStatus());
-        }
-
-        return builder.build();
+        // 使用 Fluent-Query-Engine 自動解析條件
+        return QueryBuilder.where().fromDto(request).build();
     }
 
     @Override

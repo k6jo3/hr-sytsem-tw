@@ -2,6 +2,8 @@ package com.company.hrms.insurance.application.service.query.assembler;
 
 import org.springframework.stereotype.Component;
 
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.insurance.api.request.GetEnrollmentListRequest;
 
@@ -19,53 +21,22 @@ public class EnrollmentQueryAssembler {
      * @return QueryGroup 查詢條件
      */
     public QueryGroup toQueryGroup(GetEnrollmentListRequest request) {
-        QueryGroup query = QueryGroup.and();
-        // TODO: 未符合Fluent-Query-Engine的設計
+        // 使用 Fluent-Query-Engine 自動解析條件
+        var builder = QueryBuilder.where().fromDto(request);
 
         // 1. 基礎過濾: 未刪除
-        query.eq("is_deleted", 0);
+        builder.and("is_deleted", Operator.EQ, 0);
 
-        // 2. 員工編號過濾
-        if (request.getEmployeeId() != null && !request.getEmployeeId().isBlank()) {
-            query.eq("employee_id", request.getEmployeeId());
-        }
-
-        // 3. 當前使用者過濾 (個人查詢)
+        // 2. 當前使用者過濾 (個人查詢)
+        // 手動處理，因為 employeeId 已經有標註，如果 currentUserId 也有值，
+        // 則再加一個 employee_id 條件可能導致衝突或重複，
+        // 但若是為了權限控管，通常是強制覆蓋或增加 AND 條件。
+        // 原邏輯是: eq("employee_id", request.getCurrentUserId())
         if (request.getCurrentUserId() != null && !request.getCurrentUserId().isBlank()) {
-            query.eq("employee_id", request.getCurrentUserId());
+            builder.and("employee_id", Operator.EQ, request.getCurrentUserId());
         }
 
-        // 4. 保險類型過濾
-        if (request.getInsuranceType() != null && !request.getInsuranceType().isBlank()) {
-            query.eq("insurance_type", request.getInsuranceType());
-        }
-
-        // 5. 狀態過濾
-        if (request.getStatus() != null && !request.getStatus().isBlank()) {
-            query.eq("status", request.getStatus());
-        }
-
-        // 6. 加保日期過濾
-        if (request.getEnrollDate() != null && !request.getEnrollDate().isBlank()) {
-            query.eq("enroll_date", request.getEnrollDate());
-        }
-
-        // 7. 投保級距過濾
-        if (request.getSalaryGrade() != null && !request.getSalaryGrade().isBlank()) {
-            query.eq("salary_grade", Integer.parseInt(request.getSalaryGrade()));
-        }
-
-        // 8. 投保單位過濾
-        if (request.getInsuranceUnit() != null && !request.getInsuranceUnit().isBlank()) {
-            query.eq("insurance_unit", request.getInsuranceUnit());
-        }
-
-        // 9. 眷屬過濾
-        if (request.getHasDependents() != null && request.getHasDependents()) {
-            query.eq("has_dependents", 1);
-        }
-
-        return query;
+        return builder.build();
     }
 
     /**
@@ -73,7 +44,7 @@ public class EnrollmentQueryAssembler {
      */
     public QueryGroup toLaborInsuranceQuery(GetEnrollmentListRequest request) {
         QueryGroup query = toQueryGroup(request);
-        query.eq("insurance_type", "LABOR");
+        query.add(new com.company.hrms.common.query.FilterUnit("insurance_type", Operator.EQ, "LABOR"));
         return query;
     }
 
@@ -82,7 +53,7 @@ public class EnrollmentQueryAssembler {
      */
     public QueryGroup toHealthInsuranceQuery(GetEnrollmentListRequest request) {
         QueryGroup query = toQueryGroup(request);
-        query.eq("insurance_type", "HEALTH");
+        query.add(new com.company.hrms.common.query.FilterUnit("insurance_type", Operator.EQ, "HEALTH"));
         return query;
     }
 
@@ -91,7 +62,7 @@ public class EnrollmentQueryAssembler {
      */
     public QueryGroup toPensionQuery(GetEnrollmentListRequest request) {
         QueryGroup query = toQueryGroup(request);
-        query.eq("insurance_type", "PENSION");
+        query.add(new com.company.hrms.common.query.FilterUnit("insurance_type", Operator.EQ, "PENSION"));
         return query;
     }
 }
