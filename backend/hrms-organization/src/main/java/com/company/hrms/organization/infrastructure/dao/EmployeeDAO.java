@@ -113,4 +113,11 @@ public class EmployeeDAO {
     public List<EmployeePO> findAll() {
         return employeeMapper.selectAll();
     }
+
+    public List<EmployeePO> findByIds(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        return employeeMapper.selectByIds(ids);
+    }
 }

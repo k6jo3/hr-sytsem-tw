@@ -3,8 +3,11 @@ package com.company.hrms.organization.application.service.employee;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
+import com.company.hrms.organization.application.service.employee.context.EmployeeImportContext;
+import com.company.hrms.organization.application.service.employee.task.ProcessEmployeeImportTask;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 批次匯入員工服務實作
  * <p>
- * 目前僅保留介面，待確認 Excel 格式後實作解析邏輯
+ * 採用 Business Pipeline 模式建構架構
  * </p>
  */
 @Service("importEmployeesServiceImpl")
@@ -21,16 +24,24 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class ImportEmployeesServiceImpl
         implements CommandApiService<Void, Void> {
-    // TODO: 尚未實作邏輯
+
+    private final ProcessEmployeeImportTask processEmployeeImportTask;
+
     @Override
     public Void execCommand(Void request,
             JWTModel currentUser,
             String... args) throws Exception {
-        log.info("Importing employees request received.");
+        log.info("Batch importing employees process started by {}",
+                currentUser != null ? currentUser.getUserId() : "unknown");
 
-        // Note: Excel 解析與匯入邏輯待實作
-        // 目前先模擬成功以支援 API 測試
-        log.warn("Excel 匯入功能僅為 Stub，尚未實作實際邏輯");
+        EmployeeImportContext context = new EmployeeImportContext();
+
+        BusinessPipeline.start(context)
+                .next(processEmployeeImportTask)
+                .execute();
+
+        log.info("Batch importing employees process completed. Success: {}, Failure: {}",
+                context.getSuccessCount(), context.getFailureCount());
 
         return null;
     }

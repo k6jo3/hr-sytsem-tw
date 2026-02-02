@@ -92,10 +92,7 @@ public class Timesheet extends AggregateRoot<TimesheetId> {
             throw new DomainException("不可回報未來日期的工時");
         }
 
-        // Check daily limit (24 hours) - exclude the entry being updated if it exists
-        // (for update scenario)
-        // But since we use remove-then-add for update, simple check is fine.
-
+        // Check daily limit (24 hours)
         BigDecimal dailyTotal = this.entries.stream()
                 .filter(e -> e.getWorkDate().equals(entry.getWorkDate()))
                 .map(TimesheetEntry::getHours)
@@ -106,6 +103,36 @@ public class Timesheet extends AggregateRoot<TimesheetId> {
         }
 
         this.entries.add(entry);
+        recalculateTotal();
+    }
+
+    public void updateEntry(UUID entryId, TimesheetEntry updatedEntry) {
+        if (this.isLocked) {
+            throw new DomainException("工時表已鎖定，無法修改");
+        }
+
+        TimesheetEntry existing = this.entries.stream()
+                .filter(e -> e.getId().equals(entryId))
+                .findFirst()
+                .orElseThrow(() -> new DomainException("找不到此工時明細"));
+
+        // Check daily limit
+        BigDecimal dailyTotalWithoutCurrent = this.entries.stream()
+                .filter(e -> e.getWorkDate().equals(updatedEntry.getWorkDate()) && !e.getId().equals(entryId))
+                .map(TimesheetEntry::getHours)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (dailyTotalWithoutCurrent.add(updatedEntry.getHours()).compareTo(new BigDecimal("24")) > 0) {
+            throw new DomainException("單日工時不可超過24小時");
+        }
+
+        // Update fields (Keep ID)
+        existing.setProjectId(updatedEntry.getProjectId());
+        existing.setTaskId(updatedEntry.getTaskId());
+        existing.setWorkDate(updatedEntry.getWorkDate());
+        existing.setHours(updatedEntry.getHours());
+        existing.setDescription(updatedEntry.getDescription());
+
         recalculateTotal();
     }
 

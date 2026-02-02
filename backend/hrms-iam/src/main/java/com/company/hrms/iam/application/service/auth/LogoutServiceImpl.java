@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
+import com.company.hrms.iam.api.request.auth.LogoutRequest;
 import com.company.hrms.iam.domain.event.UserLoggedOutEvent;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.repository.IUserRepository;
+import com.company.hrms.iam.domain.service.JwtBlacklistDomainService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class LogoutServiceImpl implements CommandApiService<Void, Void> {
+public class LogoutServiceImpl implements CommandApiService<LogoutRequest, Void> {
 
     private final IUserRepository userRepository;
     private final EventPublisher eventPublisher;
+    private final JwtBlacklistDomainService jwtBlacklistService;
 
     @Override
-    public Void execCommand(Void request, JWTModel currentUser, String... args)
+    public Void execCommand(LogoutRequest request, JWTModel currentUser, String... args)
             throws Exception {
 
         if (currentUser == null || currentUser.getUserId() == null) {
@@ -46,18 +49,20 @@ public class LogoutServiceImpl implements CommandApiService<Void, Void> {
 
         log.info("使用者登出: userId={}, username={}", userId, username);
 
-        // 1. 記錄登出時間 (選用實體化記錄)
+        // 1. 記錄登出時間
         userRepository.findById(new UserId(userId)).ifPresent(user -> {
             user.recordLogout();
             userRepository.update(user);
         });
 
-        // 2. 發布登出領域事件 (可供其他微服務或審計日誌使用)
-        eventPublisher.publish(new UserLoggedOutEvent(userId, username));
+        // 2. 將 Token 加入黑名單 (Redis)
+        if (request != null && request.getToken() != null && currentUser.getExpiresAt() != null) {
+            jwtBlacklistService.blacklistToken(request.getToken(), currentUser.getExpiresAt());
+            log.debug("Token 已加入黑名單，過期時間: {}", currentUser.getExpiresAt());
+        }
 
-        // TODO: 後端沒有token的驗證機制判斷失效的token或使token失效?
-        // 註：對於無狀態 Token (JWT)，伺服器端不需要（也無法單方面）使 Token 失效。
-        // 前端應負責清除存儲的 Token。
+        // 3. 發布登出領域事件 (可供其他微服務或審計日誌使用)
+        eventPublisher.publish(new UserLoggedOutEvent(userId, username));
 
         return null;
     }

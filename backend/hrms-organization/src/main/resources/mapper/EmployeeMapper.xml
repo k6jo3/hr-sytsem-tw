@@ -255,4 +255,13 @@
         WHERE d.organization_id = #{organizationId}
     </select>
 
+    <select id="selectByIds" resultMap="EmployeeResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM employees
+        WHERE id IN
+        <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
 </mapper>

@@ -1,15 +1,16 @@
 package com.company.hrms.organization.domain.model.entity;
 
-import com.company.hrms.common.exception.DomainException;
-import com.company.hrms.organization.domain.model.valueobject.EmployeeHistoryEventType;
-import com.company.hrms.organization.domain.model.valueobject.HistoryId;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
+
+import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.organization.domain.model.valueobject.EmployeeHistoryEventType;
+import com.company.hrms.organization.domain.model.valueobject.HistoryId;
+
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * 員工人事歷程實體
@@ -70,7 +71,7 @@ public class EmployeeHistory {
      * 記錄到職
      */
     public static EmployeeHistory recordOnboarding(UUID employeeId, LocalDate hireDate,
-                                                    Map<String, Object> employeeData) {
+            Map<String, Object> employeeData) {
         return create(employeeId, EmployeeHistoryEventType.ONBOARDING, hireDate,
                 null, employeeData, "新進員工到職", null);
     }
@@ -79,7 +80,7 @@ public class EmployeeHistory {
      * 記錄試用期轉正
      */
     public static EmployeeHistory recordProbationPassed(UUID employeeId, LocalDate effectiveDate,
-                                                         UUID approvedBy) {
+            UUID approvedBy) {
         return create(employeeId, EmployeeHistoryEventType.PROBATION_PASSED, effectiveDate,
                 Map.of("status", "PROBATION"),
                 Map.of("status", "ACTIVE"),
@@ -90,8 +91,8 @@ public class EmployeeHistory {
      * 記錄部門調動
      */
     public static EmployeeHistory recordDepartmentTransfer(UUID employeeId, LocalDate effectiveDate,
-                                                            UUID oldDepartmentId, UUID newDepartmentId,
-                                                            String reason, UUID approvedBy) {
+            UUID oldDepartmentId, UUID newDepartmentId,
+            String reason, UUID approvedBy) {
         return create(employeeId, EmployeeHistoryEventType.DEPARTMENT_TRANSFER, effectiveDate,
                 Map.of("departmentId", oldDepartmentId.toString()),
                 Map.of("departmentId", newDepartmentId.toString()),
@@ -102,8 +103,8 @@ public class EmployeeHistory {
      * 記錄職務異動
      */
     public static EmployeeHistory recordJobChange(UUID employeeId, LocalDate effectiveDate,
-                                                   String oldJobTitle, String newJobTitle,
-                                                   String reason, UUID approvedBy) {
+            String oldJobTitle, String newJobTitle,
+            String reason, UUID approvedBy) {
         return create(employeeId, EmployeeHistoryEventType.JOB_CHANGE, effectiveDate,
                 Map.of("jobTitle", oldJobTitle),
                 Map.of("jobTitle", newJobTitle),
@@ -114,9 +115,9 @@ public class EmployeeHistory {
      * 記錄升遷
      */
     public static EmployeeHistory recordPromotion(UUID employeeId, LocalDate effectiveDate,
-                                                   String oldJobTitle, String oldJobLevel,
-                                                   String newJobTitle, String newJobLevel,
-                                                   String reason, UUID approvedBy) {
+            String oldJobTitle, String oldJobLevel,
+            String newJobTitle, String newJobLevel,
+            String reason, UUID approvedBy) {
         return create(employeeId, EmployeeHistoryEventType.PROMOTION, effectiveDate,
                 Map.of("jobTitle", oldJobTitle, "jobLevel", oldJobLevel),
                 Map.of("jobTitle", newJobTitle, "jobLevel", newJobLevel),
@@ -127,7 +128,7 @@ public class EmployeeHistory {
      * 記錄調薪
      */
     public static EmployeeHistory recordSalaryAdjustment(UUID employeeId, LocalDate effectiveDate,
-                                                          String reason, UUID approvedBy) {
+            String reason, UUID approvedBy) {
         return create(employeeId, EmployeeHistoryEventType.SALARY_ADJUSTMENT, effectiveDate,
                 null, null, reason, approvedBy);
     }
@@ -136,7 +137,7 @@ public class EmployeeHistory {
      * 記錄離職
      */
     public static EmployeeHistory recordTermination(UUID employeeId, LocalDate terminationDate,
-                                                     String reason, UUID approvedBy) {
+            String reason, UUID approvedBy) {
         return create(employeeId, EmployeeHistoryEventType.TERMINATION, terminationDate,
                 Map.of("status", "ACTIVE"),
                 Map.of("status", "TERMINATED"),
@@ -147,7 +148,7 @@ public class EmployeeHistory {
      * 記錄復職
      */
     public static EmployeeHistory recordRehire(UUID employeeId, LocalDate effectiveDate,
-                                                String reason, UUID approvedBy) {
+            String reason, UUID approvedBy) {
         return create(employeeId, EmployeeHistoryEventType.REHIRE, effectiveDate,
                 Map.of("status", "TERMINATED"),
                 Map.of("status", "ACTIVE"),
@@ -155,11 +156,37 @@ public class EmployeeHistory {
     }
 
     /**
+     * 從持久層還原
+     */
+    public static EmployeeHistory reconstitute(
+            HistoryId id,
+            UUID employeeId,
+            EmployeeHistoryEventType eventType,
+            LocalDate effectiveDate,
+            Map<String, Object> oldValue,
+            Map<String, Object> newValue,
+            String reason,
+            UUID approvedBy,
+            LocalDateTime createdAt) {
+        return EmployeeHistory.builder()
+                .id(id)
+                .employeeId(employeeId)
+                .eventType(eventType)
+                .effectiveDate(effectiveDate)
+                .oldValue(oldValue)
+                .newValue(newValue)
+                .reason(reason)
+                .approvedBy(approvedBy)
+                .createdAt(createdAt)
+                .build();
+    }
+
+    /**
      * 通用建立方法
      */
     private static EmployeeHistory create(UUID employeeId, EmployeeHistoryEventType eventType,
-                                           LocalDate effectiveDate, Map<String, Object> oldValue,
-                                           Map<String, Object> newValue, String reason, UUID approvedBy) {
+            LocalDate effectiveDate, Map<String, Object> oldValue,
+            Map<String, Object> newValue, String reason, UUID approvedBy) {
         if (employeeId == null) {
             throw new DomainException("EMPLOYEE_ID_REQUIRED", "員工 ID 不可為空");
         }
@@ -187,6 +214,7 @@ public class EmployeeHistory {
 
     /**
      * 取得事件類型顯示名稱
+     * 
      * @return 顯示名稱
      */
     public String getEventTypeDisplayName() {

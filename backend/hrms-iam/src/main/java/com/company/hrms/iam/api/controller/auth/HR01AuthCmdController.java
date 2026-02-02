@@ -5,6 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,9 +13,12 @@ import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.controller.CommandBaseController;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.iam.api.request.auth.AdminResetPasswordRequest;
+import com.company.hrms.iam.api.request.auth.ForgotPasswordRequest;
 import com.company.hrms.iam.api.request.auth.LoginRequest;
+import com.company.hrms.iam.api.request.auth.LogoutRequest;
 import com.company.hrms.iam.api.request.auth.RefreshTokenRequest;
 import com.company.hrms.iam.api.request.auth.ResetPasswordRequest;
+import com.company.hrms.iam.api.response.auth.ForgotPasswordResponse;
 import com.company.hrms.iam.api.response.auth.LoginResponse;
 import com.company.hrms.iam.api.response.auth.RefreshTokenResponse;
 import com.company.hrms.iam.api.response.auth.ResetPasswordResponse;
@@ -25,8 +29,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import com.company.hrms.iam.api.request.auth.ForgotPasswordRequest;
-import com.company.hrms.iam.api.response.auth.ForgotPasswordResponse;
 
 /**
  * IAM - 認證管理 Command Controller
@@ -85,8 +87,14 @@ public class HR01AuthCmdController extends CommandBaseController {
         })
         @PostMapping("/logout")
         public ResponseEntity<Void> logout(
+                        @RequestHeader(value = "Authorization", required = false) String token,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-                execCommand(null, currentUser);
+                String jwt = null;
+                if (token != null && token.startsWith("Bearer ")) {
+                        jwt = token.substring(7);
+                }
+                LogoutRequest request = new LogoutRequest(jwt);
+                execCommand(request, currentUser);
                 return ResponseEntity.noContent().build();
         }
 

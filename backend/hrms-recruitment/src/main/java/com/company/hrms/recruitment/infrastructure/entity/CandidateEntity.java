@@ -29,6 +29,10 @@ public class CandidateEntity {
     @Column(name = "opening_id", nullable = false)
     private UUID openingId;
 
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "opening_id", insertable = false, updatable = false)
+    private JobOpeningEntity opening;
+
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
@@ -89,6 +93,14 @@ public class CandidateEntity {
 
     public void setOpeningId(UUID openingId) {
         this.openingId = openingId;
+    }
+
+    public JobOpeningEntity getOpening() {
+        return opening;
+    }
+
+    public void setOpening(JobOpeningEntity opening) {
+        this.opening = opening;
     }
 
     public String getFullName() {

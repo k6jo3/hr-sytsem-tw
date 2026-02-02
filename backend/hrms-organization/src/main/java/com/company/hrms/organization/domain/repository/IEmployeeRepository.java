@@ -27,6 +27,14 @@ public interface IEmployeeRepository {
     Optional<Employee> findById(EmployeeId id);
 
     /**
+     * 批量查詢 (依 ID 集合)
+     * 
+     * @param ids 員工 ID 集合
+     * @return 員工列表
+     */
+    List<Employee> findByIdIn(java.util.Set<EmployeeId> ids);
+
+    /**
      * 依員工編號查詢
      * 
      * @param employeeNumber 員工編號

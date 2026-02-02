@@ -48,6 +48,23 @@ public class CustomerRepositoryImpl extends CommandBatchBaseRepository<CustomerE
         return super.findPage(query, pageable).map(this::toDomain);
     }
 
+    @Override
+    public boolean existsByCustomerCode(String customerCode) {
+        return super.exists(com.company.hrms.common.query.QueryBuilder.where()
+                .eq("customerCode", customerCode)
+                .build());
+    }
+
+    @Override
+    public boolean existsByTaxId(String taxId) {
+        if (taxId == null || taxId.isBlank()) {
+            return false;
+        }
+        return super.exists(com.company.hrms.common.query.QueryBuilder.where()
+                .eq("taxId", taxId)
+                .build());
+    }
+
     // ================= Mapper =================
 
     private CustomerEntity toEntity(Customer domain) {
