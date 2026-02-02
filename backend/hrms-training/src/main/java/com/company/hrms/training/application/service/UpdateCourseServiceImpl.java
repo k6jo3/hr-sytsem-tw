@@ -8,6 +8,7 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.training.api.request.UpdateCourseRequest;
 import com.company.hrms.training.api.response.TrainingCourseResponse;
+import com.company.hrms.training.application.assembler.TrainingCourseAssembler;
 import com.company.hrms.training.application.service.context.UpdateCourseContext;
 import com.company.hrms.training.application.service.task.course.LoadCourseForUpdateTask;
 import com.company.hrms.training.application.service.task.course.SaveUpdatedCourseTask;
@@ -45,7 +46,6 @@ public class UpdateCourseServiceImpl implements CommandApiService<UpdateCourseRe
     }
 
     private TrainingCourseResponse toResponse(TrainingCourse course) {
-        return com.company.hrms.training.application.assembler.TrainingCourseAssembler.toResponse(course);
+        return TrainingCourseAssembler.toResponse(course);
     }
 }
-

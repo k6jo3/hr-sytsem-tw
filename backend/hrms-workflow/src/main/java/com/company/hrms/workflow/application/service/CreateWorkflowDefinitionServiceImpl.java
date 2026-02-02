@@ -1,44 +1,45 @@
 package com.company.hrms.workflow.application.service;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.workflow.api.request.CreateWorkflowDefinitionRequest;
 import com.company.hrms.workflow.api.response.CreateWorkflowDefinitionResponse;
-import com.company.hrms.workflow.infrastructure.entity.WorkflowDefinitionEntity;
-import com.company.hrms.workflow.infrastructure.repository.IWorkflowDefinitionJpaRepository;
+import com.company.hrms.workflow.application.service.context.CreateWorkflowDefinitionContext;
+import com.company.hrms.workflow.application.service.task.definition.ConstructCreateDefinitionResponseTask;
+import com.company.hrms.workflow.application.service.task.definition.InitWorkflowDefinitionTask;
+import com.company.hrms.workflow.application.service.task.definition.SaveNewWorkflowDefinitionTask;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 建立流程定義服務
+ */
 @Service("createWorkflowDefinitionServiceImpl")
 @Transactional
 @RequiredArgsConstructor
 public class CreateWorkflowDefinitionServiceImpl
         implements CommandApiService<CreateWorkflowDefinitionRequest, CreateWorkflowDefinitionResponse> {
 
-    private final IWorkflowDefinitionJpaRepository formRepository;
+    private final InitWorkflowDefinitionTask initTask;
+    private final SaveNewWorkflowDefinitionTask saveTask;
+    private final ConstructCreateDefinitionResponseTask responseTask;
 
     @Override
     public CreateWorkflowDefinitionResponse execCommand(CreateWorkflowDefinitionRequest req, JWTModel currentUser,
             String... args) throws Exception {
 
-        WorkflowDefinitionEntity entity = new WorkflowDefinitionEntity();
-        entity.setDefinitionId(UUID.randomUUID().toString());
-        entity.setFlowName(req.getFlowName());
-        entity.setFlowType(req.getFlowType());
-        entity.setNodesJson(req.getNodes());
-        entity.setEdgesJson(req.getEdges());
-        entity.setActive(false); // Default inactive until published
-        entity.setVersion(1);
-        entity.setCreatedAt(LocalDateTime.now());
+        CreateWorkflowDefinitionContext context = new CreateWorkflowDefinitionContext(req, currentUser);
 
-        formRepository.save(entity);
+        BusinessPipeline.start(context)
+                .next(initTask)
+                .next(saveTask)
+                .next(responseTask)
+                .execute();
 
-        return new CreateWorkflowDefinitionResponse(entity.getDefinitionId());
+        return context.getResponse();
     }
 }
