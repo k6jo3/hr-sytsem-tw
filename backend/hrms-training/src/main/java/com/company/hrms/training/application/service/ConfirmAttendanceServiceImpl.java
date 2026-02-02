@@ -8,9 +8,9 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.training.api.request.ConfirmAttendanceRequest;
 import com.company.hrms.training.application.service.context.ConfirmAttendanceContext;
-import com.company.hrms.training.application.task.enrollment.ConfirmAttendanceTask;
-import com.company.hrms.training.application.task.enrollment.LoadEnrollmentActionTask;
-import com.company.hrms.training.application.task.enrollment.SaveEnrollmentActionTask;
+import com.company.hrms.training.application.service.task.enrollment.ConfirmAttendanceTask;
+import com.company.hrms.training.application.service.task.enrollment.LoadEnrollmentActionTask;
+import com.company.hrms.training.application.service.task.enrollment.SaveEnrollmentActionTask;
 
 import lombok.RequiredArgsConstructor;
 

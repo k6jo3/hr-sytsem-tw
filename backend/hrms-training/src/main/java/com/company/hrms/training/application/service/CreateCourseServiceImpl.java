@@ -9,15 +9,15 @@ import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.training.api.request.CreateCourseRequest;
 import com.company.hrms.training.api.response.TrainingCourseResponse;
 import com.company.hrms.training.application.service.context.CreateCourseContext;
-import com.company.hrms.training.application.task.course.CreateCourseTask;
-import com.company.hrms.training.application.task.course.SaveCourseTask;
+import com.company.hrms.training.application.service.task.course.CreateCourseTask;
+import com.company.hrms.training.application.service.task.course.SaveCourseTask;
 import com.company.hrms.training.domain.model.aggregate.TrainingCourse;
 
 import lombok.RequiredArgsConstructor;
 
 /**
- * 建立課程服務
- * 使用獨立的 Task Bean 進行 Pipeline 編排
+ * 建�?課�??��?
+ * 使用?��???Task Bean ?��? Pipeline 編�?
  */
 @Service("createCourseServiceImpl")
 @Transactional

@@ -25,8 +25,10 @@ public class GetProjectListRequest {
     private String keyword;
 
     @Schema(description = "專案狀態")
+    @com.company.hrms.common.query.QueryCondition.EQ("status")
     private String status;
 
     @Schema(description = "負責人ID")
+    @com.company.hrms.common.query.QueryCondition.EQ("ownerId")
     private String ownerId;
 }

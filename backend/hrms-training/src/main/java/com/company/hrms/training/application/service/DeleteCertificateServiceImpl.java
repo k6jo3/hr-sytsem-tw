@@ -7,8 +7,8 @@ import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.training.application.service.context.DeleteCertificateContext;
-import com.company.hrms.training.application.task.certificate.DeleteCertificateActionTask;
-import com.company.hrms.training.application.task.certificate.LoadCertificateActionTask;
+import com.company.hrms.training.application.service.task.certificate.DeleteCertificateActionTask;
+import com.company.hrms.training.application.service.task.certificate.LoadCertificateActionTask;
 
 import lombok.RequiredArgsConstructor;
 

@@ -9,9 +9,9 @@ import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.training.api.request.UpdateCertificateRequest;
 import com.company.hrms.training.api.response.CertificateResponse;
 import com.company.hrms.training.application.service.context.UpdateCertificateContext;
-import com.company.hrms.training.application.task.certificate.LoadCertificateActionTask;
-import com.company.hrms.training.application.task.certificate.SaveCertificateActionTask;
-import com.company.hrms.training.application.task.certificate.UpdateCertificateTask;
+import com.company.hrms.training.application.service.task.certificate.LoadCertificateActionTask;
+import com.company.hrms.training.application.service.task.certificate.SaveCertificateActionTask;
+import com.company.hrms.training.application.service.task.certificate.UpdateCertificateTask;
 import com.company.hrms.training.domain.model.aggregate.Certificate;
 
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class UpdateCertificateServiceImpl implements CommandApiService<UpdateCer
     }
 
     private CertificateResponse toResponse(Certificate cert) {
-        // TODO: 程式太長，建議用objectMapper或structMapper
+        // TODO: 程�?太長，建議用objectMapper?�structMapper
         CertificateResponse res = new CertificateResponse();
         res.setCertificateId(cert.getId().toString());
         res.setEmployeeId(cert.getEmployeeId());

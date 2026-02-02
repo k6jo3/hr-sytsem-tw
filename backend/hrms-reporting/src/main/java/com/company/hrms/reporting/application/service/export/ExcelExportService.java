@@ -1,32 +1,35 @@
 package com.company.hrms.reporting.application.service.export;
 
-import java.io.ByteArrayOutputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
+import com.company.hrms.reporting.application.service.export.context.ExcelExportContext;
+import com.company.hrms.reporting.application.service.export.task.FinalizeExcelTask;
+import com.company.hrms.reporting.application.service.export.task.PrepareWorkbookTask;
+import com.company.hrms.reporting.application.service.export.task.WriteExcelContentTask;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * Excel 匯出服務
  * 
  * <p>
- * 使用 Apache POI 產生 Excel 檔案
+ * 使用 Business Pipeline 編排 Excel 產生流程
  * 
  * @author SA Team
  * @since 2026-01-29
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ExcelExportService {
+
+    private final PrepareWorkbookTask prepareWorkbookTask;
+    private final WriteExcelContentTask writeExcelContentTask;
+    private final FinalizeExcelTask finalizeExcelTask;
 
     /**
      * 匯出資料到 Excel
@@ -40,118 +43,18 @@ public class ExcelExportService {
             List<String> headers,
             List<List<Object>> data,
             String sheetName) throws Exception {
-        // TODO: 不符合business pipeline設計以及clean code
+
         log.info("開始匯出 Excel，工作表: {}, 資料筆數: {}", sheetName, data.size());
 
-        try (Workbook workbook = new XSSFWorkbook();
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        ExcelExportContext ctx = new ExcelExportContext(headers, data, sheetName);
 
-            // 建立工作表
-            Sheet sheet = workbook.createSheet(sheetName);
+        BusinessPipeline.start(ctx)
+                .next(prepareWorkbookTask)
+                .next(writeExcelContentTask)
+                .next(finalizeExcelTask)
+                .execute();
 
-            // 建立樣式
-            CellStyle headerStyle = createHeaderStyle(workbook);
-            CellStyle dataStyle = createDataStyle(workbook);
-
-            // 建立表頭
-            Row headerRow = sheet.createRow(0);
-            for (int i = 0; i < headers.size(); i++) {
-                org.apache.poi.ss.usermodel.Cell cell = headerRow.createCell(i);
-                cell.setCellValue(headers.get(i));
-                cell.setCellStyle(headerStyle);
-            }
-
-            // 填入資料
-            for (int i = 0; i < data.size(); i++) {
-                Row row = sheet.createRow(i + 1);
-                List<Object> rowData = data.get(i);
-
-                for (int j = 0; j < rowData.size(); j++) {
-                    org.apache.poi.ss.usermodel.Cell cell = row.createCell(j);
-                    Object value = rowData.get(j);
-
-                    if (value != null) {
-                        if (value instanceof Number) {
-                            cell.setCellValue(((Number) value).doubleValue());
-                        } else if (value instanceof LocalDateTime) {
-                            cell.setCellValue(((LocalDateTime) value)
-                                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                        } else {
-                            cell.setCellValue(value.toString());
-                        }
-                    }
-                    cell.setCellStyle(dataStyle);
-                }
-            }
-
-            // 自動調整欄寬
-            for (int i = 0; i < headers.size(); i++) {
-                sheet.autoSizeColumn(i);
-                // 設定最小寬度
-                int currentWidth = sheet.getColumnWidth(i);
-                if (currentWidth < 3000) {
-                    sheet.setColumnWidth(i, 3000);
-                }
-            }
-
-            // 寫入輸出流
-            workbook.write(outputStream);
-
-            log.info("Excel 匯出完成，檔案大小: {} bytes", outputStream.size());
-
-            return outputStream.toByteArray();
-
-        } catch (Exception e) {
-            log.error("Excel 匯出失敗", e);
-            throw new RuntimeException("Excel 匯出失敗: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * 建立表頭樣式
-     */
-    private CellStyle createHeaderStyle(Workbook workbook) {
-        CellStyle style = workbook.createCellStyle();
-
-        // 設定字體
-        Font font = workbook.createFont();
-        font.setBold(true);
-        font.setFontHeightInPoints((short) 12);
-        style.setFont(font);
-
-        // 設定對齊
-        style.setAlignment(org.apache.poi.ss.usermodel.HorizontalAlignment.CENTER);
-        style.setVerticalAlignment(org.apache.poi.ss.usermodel.VerticalAlignment.CENTER);
-
-        // 設定邊框
-        style.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
-        style.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
-        style.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
-        style.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
-
-        // 設定背景色
-        style.setFillForegroundColor(org.apache.poi.ss.usermodel.IndexedColors.GREY_25_PERCENT.getIndex());
-        style.setFillPattern(org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND);
-
-        return style;
-    }
-
-    /**
-     * 建立資料樣式
-     */
-    private CellStyle createDataStyle(Workbook workbook) {
-        CellStyle style = workbook.createCellStyle();
-
-        // 設定邊框
-        style.setBorderTop(org.apache.poi.ss.usermodel.BorderStyle.THIN);
-        style.setBorderBottom(org.apache.poi.ss.usermodel.BorderStyle.THIN);
-        style.setBorderLeft(org.apache.poi.ss.usermodel.BorderStyle.THIN);
-        style.setBorderRight(org.apache.poi.ss.usermodel.BorderStyle.THIN);
-
-        // 設定對齊
-        style.setVerticalAlignment(org.apache.poi.ss.usermodel.VerticalAlignment.CENTER);
-
-        return style;
+        return ctx.getResult();
     }
 
     /**

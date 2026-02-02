@@ -3,15 +3,15 @@ package com.company.hrms.project.application.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.company.hrms.common.domain.event.EventPublisher;
-import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.project.api.request.AddProjectMemberRequest;
 import com.company.hrms.project.api.response.AddProjectMemberResponse;
-import com.company.hrms.project.domain.model.aggregate.Project;
-import com.company.hrms.project.domain.model.valueobject.ProjectId;
-import com.company.hrms.project.domain.repository.IProjectRepository;
+import com.company.hrms.project.application.service.context.AddProjectMemberContext;
+import com.company.hrms.project.application.service.task.AddMemberToProjectTask;
+import com.company.hrms.project.application.service.task.LoadProjectTask;
+import com.company.hrms.project.application.service.task.SaveProjectTask;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,26 +21,21 @@ import lombok.RequiredArgsConstructor;
 public class AddProjectMemberServiceImpl
         implements CommandApiService<AddProjectMemberRequest, AddProjectMemberResponse> {
 
-    private final IProjectRepository projectRepository;
-    private final EventPublisher eventPublisher;
+    private final LoadProjectTask loadProjectTask;
+    private final AddMemberToProjectTask addMemberToProjectTask;
+    private final SaveProjectTask saveProjectTask;
 
     @Override
     public AddProjectMemberResponse execCommand(AddProjectMemberRequest req, JWTModel currentUser, String... args)
             throws Exception {
-        // TODO: 未符合business pipeline的設計
-        if (req.getProjectId() == null) {
-            throw new IllegalArgumentException("Project ID is required");
-        }
 
-        Project project = projectRepository.findById(new ProjectId(req.getProjectId()))
-                .orElseThrow(() -> new DomainException("Project not found: " + req.getProjectId()));
+        AddProjectMemberContext context = new AddProjectMemberContext(req);
 
-        project.addMember(req.getEmployeeId(), req.getRole(), req.getAllocatedHours());
-
-        projectRepository.save(project);
-
-        eventPublisher.publishAll(project.getDomainEvents());
-        project.clearDomainEvents();
+        BusinessPipeline.start(context)
+                .next(loadProjectTask)
+                .next(addMemberToProjectTask)
+                .next(saveProjectTask)
+                .execute();
 
         return new AddProjectMemberResponse(true);
     }

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -112,13 +113,15 @@ class ValidateCheckOutTaskTest {
             record.checkIn(LocalDateTime.now().minusHours(9),
                     new Shift(
                             new ShiftId("S1"),
+                            "org-001",
                             "Regular",
                             ShiftType.REGULAR,
-                            java.time.LocalTime.of(9, 0), java.time.LocalTime.of(18, 0)));
+                            LocalTime.of(9, 0), LocalTime.of(18, 0)));
 
             record.checkOut(LocalDateTime.now(),
                     new Shift(
                             new ShiftId("S1"),
+                            "org-001",
                             "Regular",
                             ShiftType.REGULAR,
                             java.time.LocalTime.of(9, 0), java.time.LocalTime.of(18, 0)));

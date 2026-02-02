@@ -1,18 +1,16 @@
 package com.company.hrms.organization.application.service.department;
 
-import java.util.List;
-
-import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
-import com.company.hrms.organization.domain.model.aggregate.Employee;
-import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
-import com.company.hrms.organization.domain.repository.IDepartmentRepository;
-import com.company.hrms.organization.domain.repository.IEmployeeRepository;
+import com.company.hrms.organization.application.service.department.context.DepartmentContext;
+import com.company.hrms.organization.application.service.department.task.CheckChildDepartmentsTask;
+import com.company.hrms.organization.application.service.department.task.CheckDepartmentEmployeesTask;
+import com.company.hrms.organization.application.service.department.task.DeleteDepartmentTask;
+import com.company.hrms.organization.application.service.department.task.LoadDeptTask;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,39 +38,25 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional
 public class DeleteDepartmentServiceImpl implements CommandApiService<Object, Void> {
 
-    private final IDepartmentRepository departmentRepository;
-    private final IEmployeeRepository employeeRepository;
+    private final LoadDeptTask loadDeptTask;
+    private final CheckDepartmentEmployeesTask checkDepartmentEmployeesTask;
+    private final CheckChildDepartmentsTask checkChildDepartmentsTask;
+    private final DeleteDepartmentTask deleteDepartmentTask;
 
     @Override
     public Void execCommand(Object request, JWTModel currentUser, String... args)
             throws Exception {
-        // TODO: 不符合business pipeline的設計，應該要拆成多個task
         String departmentId = args[0];
         log.info("刪除部門: departmentId={}", departmentId);
 
-        // 查詢部門
-        DepartmentId deptId = new DepartmentId(departmentId);
-        departmentRepository.findById(deptId)
-                .orElseThrow(() -> new ResourceNotFoundException("DEPT_NOT_FOUND", "部門不存在: " + departmentId));
+        DepartmentContext context = new DepartmentContext(departmentId);
 
-        // 檢查是否有員工
-        List<Employee> employees = employeeRepository.findByDepartmentId(deptId);
-        if (!employees.isEmpty()) {
-            throw new DomainException("CANNOT_DELETE_DEPT",
-                    "無法刪除部門，尚有 " + employees.size() + " 位員工");
-        }
-
-        // 檢查是否有子部門
-        int childCount = departmentRepository.countByParentId(deptId);
-        if (childCount > 0) {
-            throw new DomainException("CANNOT_DELETE_DEPT",
-                    "無法刪除部門，尚有 " + childCount + " 個子部門");
-        }
-
-        // 刪除部門（軟刪除）
-        departmentRepository.delete(deptId);
-
-        log.info("部門刪除成功: departmentId={}", departmentId);
+        BusinessPipeline.start(context)
+                .next(loadDeptTask)
+                .next(checkDepartmentEmployeesTask)
+                .next(checkChildDepartmentsTask)
+                .next(deleteDepartmentTask)
+                .execute();
 
         return null;
     }

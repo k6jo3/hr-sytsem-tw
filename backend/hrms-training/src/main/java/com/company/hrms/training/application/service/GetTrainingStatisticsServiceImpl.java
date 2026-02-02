@@ -30,7 +30,7 @@ public class GetTrainingStatisticsServiceImpl
         public TrainingStatisticsResponse getResponse(TrainingStatisticsQuery query, JWTModel currentUser,
                         String... args) {
                 // Assume query contains date range or use defaults
-                // TODO: 不符合business pipeline設計
+                // TODO: 不符?�business pipeline設�?
                 LocalDate startDate = query != null && query.getStartDate() != null ? query.getStartDate()
                                 : LocalDate.of(LocalDate.now().getYear(), 1, 1);
                 LocalDate endDate = query != null && query.getEndDate() != null ? query.getEndDate() : LocalDate.now();

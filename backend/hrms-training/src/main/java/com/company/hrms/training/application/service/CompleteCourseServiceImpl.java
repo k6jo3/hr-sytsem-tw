@@ -8,9 +8,9 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.training.api.request.CourseActionRequest;
 import com.company.hrms.training.application.service.context.CourseActionContext;
-import com.company.hrms.training.application.task.course.CompleteCourseTask;
-import com.company.hrms.training.application.task.course.LoadCourseActionTask;
-import com.company.hrms.training.application.task.course.SaveCourseActionTask;
+import com.company.hrms.training.application.service.task.course.CompleteCourseTask;
+import com.company.hrms.training.application.service.task.course.LoadCourseActionTask;
+import com.company.hrms.training.application.service.task.course.SaveCourseActionTask;
 
 import lombok.RequiredArgsConstructor;
 

@@ -40,7 +40,7 @@ public class GetExpiringCertificatesServiceImpl implements QueryApiService<Query
     }
 
     private CertificateResponse toResponse(Certificate cert) {
-        // TODO: 程式太長，建議用objectMapper或structMapper
+        // TODO: 程�?太長，建議用objectMapper?�structMapper
         CertificateResponse res = new CertificateResponse();
         res.setCertificateId(cert.getId().toString());
         res.setEmployeeId(cert.getEmployeeId());

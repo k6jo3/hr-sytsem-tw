@@ -1,6 +1,7 @@
 package com.company.hrms.training.application.service.context;
 
 import com.company.hrms.common.application.pipeline.PipelineContext;
+import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.training.api.request.EnrollCourseRequest;
 import com.company.hrms.training.domain.model.aggregate.TrainingCourse;
 import com.company.hrms.training.domain.model.aggregate.TrainingEnrollment;
@@ -14,6 +15,7 @@ public class EnrollCourseContext extends PipelineContext {
     private final EnrollCourseRequest request;
     private final String employeeId; // The employee being enrolled
     private final String requestedBy; // Operator/Manager ID
+    private JWTModel currentUser;
 
     // Loaded Data
     private TrainingCourse course;

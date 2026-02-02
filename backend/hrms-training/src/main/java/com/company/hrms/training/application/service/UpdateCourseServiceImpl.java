@@ -9,9 +9,9 @@ import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.training.api.request.UpdateCourseRequest;
 import com.company.hrms.training.api.response.TrainingCourseResponse;
 import com.company.hrms.training.application.service.context.UpdateCourseContext;
-import com.company.hrms.training.application.task.course.LoadCourseForUpdateTask;
-import com.company.hrms.training.application.task.course.SaveUpdatedCourseTask;
-import com.company.hrms.training.application.task.course.UpdateCourseTask;
+import com.company.hrms.training.application.service.task.course.LoadCourseForUpdateTask;
+import com.company.hrms.training.application.service.task.course.SaveUpdatedCourseTask;
+import com.company.hrms.training.application.service.task.course.UpdateCourseTask;
 import com.company.hrms.training.domain.model.aggregate.TrainingCourse;
 
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class UpdateCourseServiceImpl implements CommandApiService<UpdateCourseRe
     }
 
     private TrainingCourseResponse toResponse(TrainingCourse course) {
-        // TODO: 程式太長，建議用objectMapper或structMapper
+        // TODO: 程�?太長，建議用objectMapper?�structMapper
         TrainingCourseResponse res = new TrainingCourseResponse();
         res.setCourseId(course.getId().toString());
         res.setCourseCode(course.getCourseCode());
