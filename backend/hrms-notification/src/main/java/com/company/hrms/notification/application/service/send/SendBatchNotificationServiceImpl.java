@@ -1,10 +1,9 @@
 package com.company.hrms.notification.application.service.send;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.notification.api.request.notification.SendBatchNotificationRequest;
@@ -12,6 +11,7 @@ import com.company.hrms.notification.api.response.notification.SendBatchNotifica
 import com.company.hrms.notification.application.service.send.context.SendBatchNotificationContext;
 import com.company.hrms.notification.application.service.send.task.ExecuteBatchSendTask;
 import com.company.hrms.notification.application.service.send.task.GetBatchRecipientIdsTask;
+import com.company.hrms.notification.application.service.send.task.ValidateBatchRecipientTask;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 public class SendBatchNotificationServiceImpl
         implements CommandApiService<SendBatchNotificationRequest, SendBatchNotificationResponse> {
 
-    private static final int MAX_RECIPIENTS = 500;
-
     private final GetBatchRecipientIdsTask getBatchRecipientIdsTask;
+    private final ValidateBatchRecipientTask validateBatchRecipientTask;
     private final ExecuteBatchSendTask executeBatchSendTask;
 
     @Override
@@ -57,20 +56,9 @@ public class SendBatchNotificationServiceImpl
         context.setAttribute("currentUser", currentUser);
 
         // 2. 執行 Pipeline
-        com.company.hrms.common.application.pipeline.BusinessPipeline.start(context)
+        BusinessPipeline.start(context)
                 .next(getBatchRecipientIdsTask)
-                .next(ctx -> {
-                    // 驗證收件人數量
-                    List<String> ids = ctx.getRecipientIds();
-                    if (ids.isEmpty()) {
-                        throw new IllegalArgumentException("收件人列表不可為空");
-                    }
-                    if (ids.size() > MAX_RECIPIENTS) {
-                        throw new IllegalArgumentException(
-                                String.format("收件人數量超過上限（最多 %d 人，實際 %d 人）",
-                                        MAX_RECIPIENTS, ids.size()));
-                    }
-                })
+                .next(validateBatchRecipientTask)
                 .next(executeBatchSendTask)
                 .execute();
 

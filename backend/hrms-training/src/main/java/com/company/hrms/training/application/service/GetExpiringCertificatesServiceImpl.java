@@ -11,6 +11,7 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.training.api.response.CertificateResponse;
+import com.company.hrms.training.application.assembler.CertificateAssembler;
 import com.company.hrms.training.domain.model.aggregate.Certificate;
 import com.company.hrms.training.domain.repository.ICertificateRepository;
 
@@ -33,32 +34,10 @@ public class GetExpiringCertificatesServiceImpl implements QueryApiService<Query
 
         List<CertificateResponse> responseList = new ArrayList<>();
         for (Certificate cert : certs) {
-            responseList.add(toResponse(cert));
+            responseList.add(CertificateAssembler.toResponse(cert));
         }
 
         return responseList;
     }
 
-    private CertificateResponse toResponse(Certificate cert) {
-        // TODO: 程�?太長，建議用objectMapper?�structMapper
-        CertificateResponse res = new CertificateResponse();
-        res.setCertificateId(cert.getId().toString());
-        res.setEmployeeId(cert.getEmployeeId());
-        res.setCertificateName(cert.getCertificateName());
-        res.setIssuingOrganization(cert.getIssuingOrganization());
-        res.setCertificateNumber(cert.getCertificateNumber());
-        res.setIssueDate(cert.getIssueDate());
-        res.setExpiryDate(cert.getExpiryDate());
-        res.setCategory(cert.getCategory());
-        res.setIsRequired(cert.getIsRequired());
-        res.setAttachmentUrl(cert.getAttachmentUrl());
-        res.setRemarks(cert.getRemarks());
-        res.setIsVerified(cert.getIsVerified());
-        res.setVerifiedBy(cert.getVerifiedBy());
-        res.setVerifiedAt(cert.getVerifiedAt());
-        res.setStatus(cert.getStatus());
-        res.setCreatedAt(cert.getCreatedAt());
-        res.setUpdatedAt(cert.getUpdatedAt());
-        return res;
-    }
 }

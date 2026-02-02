@@ -21,8 +21,8 @@ import com.company.hrms.training.infrastructure.repository.CertificateQueryRepos
 import lombok.RequiredArgsConstructor;
 
 /**
- * ?�詢證照?�表?��?
- * 使用 QueryBuilder.fromDto() ?��?�??式查�?
+ * ?亥岷霅?”??
+ * 雿輻 QueryBuilder.fromDto() ?脰?摰??撘閰?
  */
 @Service("getCertificatesServiceImpl")
 @Transactional(readOnly = true)
@@ -33,18 +33,18 @@ public class GetCertificatesServiceImpl implements QueryApiService<GetCertificat
 
     @Override
     public Page<CertificateResponse> getResponse(GetCertificatesRequest request, JWTModel currentUser, String... args) {
-        // 使用 QueryBuilder �?Request DTO ?��?建�??�詢條件 (�??式查�?
+        // 雿輻 QueryBuilder 敺?Request DTO ?芸?撱箸??亥岷璇辣 (摰??撘閰?
         QueryGroup query = QueryBuilder.where()
                 .fromDto(request)
                 .build();
 
-        // ?��??��?資�? (�?PageRequest 轉�?)
+        // ????鞈? (敺?PageRequest 頧?)
         Pageable pageable = request.toPageable();
 
-        // ?��??�詢
+        // ?瑁??亥岷
         Page<CertificateEntity> page = certificateRepository.findPage(query, pageable);
 
-        // 轉�???DTO
+        // 頧???DTO
         List<CertificateResponse> responseList = new ArrayList<>();
         for (CertificateEntity cert : page.getContent()) {
             responseList.add(toResponse(cert));

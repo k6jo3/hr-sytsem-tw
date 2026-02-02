@@ -52,7 +52,11 @@ class SendBatchNotificationServiceTest {
 
         @org.springframework.context.annotation.Bean
         public org.springframework.mail.javamail.JavaMailSender javaMailSender() {
-            return org.mockito.Mockito.mock(org.springframework.mail.javamail.JavaMailSender.class);
+            org.springframework.mail.javamail.JavaMailSender sender = org.mockito.Mockito
+                    .mock(org.springframework.mail.javamail.JavaMailSender.class);
+            org.mockito.Mockito.when(sender.createMimeMessage())
+                    .thenReturn(org.mockito.Mockito.mock(jakarta.mail.internet.MimeMessage.class));
+            return sender;
         }
 
         @org.springframework.context.annotation.Bean

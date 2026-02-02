@@ -45,25 +45,7 @@ public class UpdateCertificateServiceImpl implements CommandApiService<UpdateCer
     }
 
     private CertificateResponse toResponse(Certificate cert) {
-        // TODO: 程�?太長，建議用objectMapper?�structMapper
-        CertificateResponse res = new CertificateResponse();
-        res.setCertificateId(cert.getId().toString());
-        res.setEmployeeId(cert.getEmployeeId());
-        res.setCertificateName(cert.getCertificateName());
-        res.setIssuingOrganization(cert.getIssuingOrganization());
-        res.setCertificateNumber(cert.getCertificateNumber());
-        res.setIssueDate(cert.getIssueDate());
-        res.setExpiryDate(cert.getExpiryDate());
-        res.setCategory(cert.getCategory());
-        res.setIsRequired(cert.getIsRequired());
-        res.setAttachmentUrl(cert.getAttachmentUrl());
-        res.setRemarks(cert.getRemarks());
-        res.setIsVerified(cert.getIsVerified());
-        res.setVerifiedBy(cert.getVerifiedBy());
-        res.setVerifiedAt(cert.getVerifiedAt());
-        res.setStatus(cert.getStatus());
-        res.setCreatedAt(cert.getCreatedAt());
-        res.setUpdatedAt(cert.getUpdatedAt());
-        return res;
+        return com.company.hrms.training.application.assembler.CertificateAssembler.toResponse(cert);
     }
 }
+

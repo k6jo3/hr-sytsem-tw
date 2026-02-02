@@ -45,33 +45,7 @@ public class UpdateCourseServiceImpl implements CommandApiService<UpdateCourseRe
     }
 
     private TrainingCourseResponse toResponse(TrainingCourse course) {
-        // TODO: 程�?太長，建議用objectMapper?�structMapper
-        TrainingCourseResponse res = new TrainingCourseResponse();
-        res.setCourseId(course.getId().toString());
-        res.setCourseCode(course.getCourseCode());
-        res.setCourseName(course.getCourseName());
-        res.setCourseType(course.getCourseType());
-        res.setDeliveryMode(course.getDeliveryMode());
-        res.setCategory(course.getCategory());
-        res.setDescription(course.getDescription());
-        res.setInstructor(course.getInstructor());
-        res.setInstructorInfo(course.getInstructorInfo());
-        res.setDurationHours(course.getDurationHours());
-        res.setMaxParticipants(course.getMaxParticipants());
-        res.setMinParticipants(course.getMinParticipants());
-        res.setCurrentEnrollments(course.getCurrentEnrollments());
-        res.setStartDate(course.getStartDate());
-        res.setEndDate(course.getEndDate());
-        res.setStartTime(course.getStartTime());
-        res.setEndTime(course.getEndTime());
-        res.setLocation(course.getLocation());
-        res.setCost(course.getCost());
-        res.setIsMandatory(course.getIsMandatory());
-        res.setTargetAudience(course.getTargetAudience());
-        res.setPrerequisites(course.getPrerequisites());
-        res.setEnrollmentDeadline(course.getEnrollmentDeadline());
-        res.setStatus(course.getStatus());
-        res.setCreatedBy(course.getCreatedBy());
-        return res;
+        return com.company.hrms.training.application.assembler.TrainingCourseAssembler.toResponse(course);
     }
 }
+

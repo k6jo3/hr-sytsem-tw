@@ -16,8 +16,8 @@ import com.company.hrms.training.domain.model.aggregate.TrainingCourse;
 import lombok.RequiredArgsConstructor;
 
 /**
- * å»ºç?èª²ç??å?
- * ä½¿ç”¨?¨ç???Task Bean ?²è? Pipeline ç·¨æ?
+ * æ’±ç®‡?éš¤è„©??ïš—?
+ * é›¿è¼»îœ…?å‡½???Task Bean ?è„°? Pipeline èºå†½?
  */
 @Service("createCourseServiceImpl")
 @Transactional
