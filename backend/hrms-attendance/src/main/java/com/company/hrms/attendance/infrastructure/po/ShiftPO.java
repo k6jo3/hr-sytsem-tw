@@ -30,6 +30,9 @@ public class ShiftPO {
     @Column(name = "organization_id", length = 50)
     private String organizationId;
 
+    @Column(name = "code", length = 50, nullable = false)
+    private String code;
+
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 

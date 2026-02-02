@@ -1,7 +1,7 @@
 package com.company.hrms.document.application.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,13 +30,15 @@ public class GetMyDocumentsServiceImpl implements QueryApiService<GetDocumentLis
 
     @Override
     public Page<DocumentResponse> getResponse(GetDocumentListRequest req, JWTModel currentUser, String... args) {
-        QueryGroup query = queryAssembler.toQueryGroup(req);
+        // 建立查詢條件
+        QueryGroup query = queryAssembler.toQueryGroup(req, currentUser);
 
-        // 強制篩選為本人文件
-        query.eq("ownerId", currentUser.getUserId());
+        // 強制篩選為本人文件 (覆蓋可能傳入的 ownerId)
+        // 注意: QueryBuilder 若已有 owner_id 條件，此處調用 eq 會新增一個 AND 條件
+        query.eq("owner_id", currentUser.getUserId());
 
-        // 預設分頁
-        var pageable = PageRequest.of(0, 20);
+        // 使用 Request 中的分頁資訊
+        Pageable pageable = req.toPageable();
 
         return repository.findDocuments(query, pageable)
                 .map(responseAssembler::toResponse);

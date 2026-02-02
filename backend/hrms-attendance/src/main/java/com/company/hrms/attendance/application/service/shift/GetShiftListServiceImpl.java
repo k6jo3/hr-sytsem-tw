@@ -51,7 +51,7 @@ public class GetShiftListServiceImpl extends AbstractQueryService<GetShiftListRe
     private ShiftListResponse toResponse(Shift shift) {
         return ShiftListResponse.builder()
                 .shiftId(shift.getId().getValue())
-                .shiftCode(null) // TODO: 如果 Shift 聚合根有增加 code 欄位可補上
+                .shiftCode(shift.getCode())
                 .shiftName(shift.getName())
                 .shiftType(shift.getType().name())
                 .workStartTime(shift.getWorkStartTime())

@@ -12,32 +12,45 @@ import com.company.hrms.attendance.domain.model.valueobject.ApplicationStatus;
 import com.company.hrms.attendance.domain.model.valueobject.OvertimeId;
 import com.company.hrms.attendance.domain.model.valueobject.OvertimeType;
 import com.company.hrms.attendance.domain.repository.IOvertimeApplicationRepository;
-import com.company.hrms.attendance.infrastructure.dao.OvertimeApplicationDAO;
 import com.company.hrms.attendance.infrastructure.po.OvertimeApplicationPO;
-
-import lombok.RequiredArgsConstructor;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
-@RequiredArgsConstructor
-public class OvertimeApplicationRepositoryImpl implements IOvertimeApplicationRepository {
+public class OvertimeApplicationRepositoryImpl extends BaseRepository<OvertimeApplicationPO, String>
+        implements IOvertimeApplicationRepository {
 
-    private final OvertimeApplicationDAO overtimeApplicationDAO;
+    public OvertimeApplicationRepositoryImpl(JPAQueryFactory factory) {
+        super(factory, OvertimeApplicationPO.class);
+    }
 
     @Override
     public Optional<OvertimeApplication> findById(OvertimeId id) {
-        return overtimeApplicationDAO.findById(id.getValue()).map(this::toDomain);
+        return super.findById(id.getValue()).map(this::toDomain);
     }
 
     @Override
     public List<OvertimeApplication> findByEmployeeId(String employeeId) {
-        return overtimeApplicationDAO.findByEmployeeId(employeeId).stream()
+        QueryGroup query = QueryBuilder.where()
+                .and("employeeId", Operator.EQ, employeeId)
+                .build();
+        return findByQuery(query);
+    }
+
+    @Override
+    public List<OvertimeApplication> findByEmployeeIdAndMonth(String employeeId, int year, int month) {
+        return super.findAll(QueryBuilder.where().and("employeeId", Operator.EQ, employeeId).build()).stream()
+                .filter(po -> po.getDate().getYear() == year && po.getDate().getMonthValue() == month)
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<OvertimeApplication> findByEmployeeIdAndMonth(String employeeId, int year, int month) {
-        return overtimeApplicationDAO.findByEmployeeIdAndMonth(employeeId, year, month).stream()
+    public List<OvertimeApplication> findByQuery(QueryGroup query) {
+        return super.findAll(query).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -45,19 +58,19 @@ public class OvertimeApplicationRepositoryImpl implements IOvertimeApplicationRe
     @Override
     public void save(OvertimeApplication application) {
         OvertimeApplicationPO po = toPO(application);
-        if (overtimeApplicationDAO.findById(po.getId()).isPresent()) {
+        if (super.findById(po.getId()).isPresent()) {
             po.setUpdatedAt(LocalDateTime.now());
-            overtimeApplicationDAO.update(po);
+            super.update(po);
         } else {
             po.setCreatedAt(LocalDateTime.now());
             po.setUpdatedAt(LocalDateTime.now());
-            overtimeApplicationDAO.insert(po);
+            super.save(po);
         }
     }
 
     @Override
     public void delete(OvertimeId id) {
-        overtimeApplicationDAO.deleteById(id.getValue());
+        super.deleteById(id.getValue());
     }
 
     private OvertimeApplication toDomain(OvertimeApplicationPO po) {
@@ -73,15 +86,15 @@ public class OvertimeApplicationRepositoryImpl implements IOvertimeApplicationRe
     }
 
     private OvertimeApplicationPO toPO(OvertimeApplication application) {
-        OvertimeApplicationPO po = new OvertimeApplicationPO();
-        po.setId(application.getId().getValue());
-        po.setEmployeeId(application.getEmployeeId());
-        po.setDate(application.getDate());
-        po.setHours(application.getHours());
-        po.setStatus(application.getStatus().name());
-        po.setReason(application.getReason());
-        po.setOvertimeType(application.getOvertimeType().name());
-        po.setRejectionReason(application.getRejectionReason());
-        return po;
+        return OvertimeApplicationPO.builder()
+                .id(application.getId().getValue())
+                .employeeId(application.getEmployeeId())
+                .date(application.getDate())
+                .hours(application.getHours())
+                .status(application.getStatus().name())
+                .reason(application.getReason())
+                .overtimeType(application.getOvertimeType().name())
+                .rejectionReason(application.getRejectionReason())
+                .build();
     }
 }

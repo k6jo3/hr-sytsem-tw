@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.company.hrms.attendance.domain.model.aggregate.OvertimeApplication;
 import com.company.hrms.attendance.domain.model.valueobject.OvertimeId;
+import com.company.hrms.common.query.QueryGroup;
 
 public interface IOvertimeApplicationRepository {
     void save(OvertimeApplication application);
@@ -14,6 +15,8 @@ public interface IOvertimeApplicationRepository {
     List<OvertimeApplication> findByEmployeeId(String employeeId);
 
     List<OvertimeApplication> findByEmployeeIdAndMonth(String employeeId, int year, int month);
+
+    List<OvertimeApplication> findByQuery(QueryGroup query);
 
     void delete(OvertimeId id);
 }

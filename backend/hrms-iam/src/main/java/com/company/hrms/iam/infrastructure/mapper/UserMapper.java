@@ -22,7 +22,8 @@ public interface UserMapper {
          * 根據 ID 查詢使用者
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, password_changed_at, " +
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, password_changed_at, "
+                        +
                         "must_change_password, created_at, updated_at " +
                         "FROM users WHERE user_id = #{userId}")
         UserPO selectById(@Param("userId") String userId);
@@ -31,7 +32,8 @@ public interface UserMapper {
          * 根據使用者名稱查詢
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, password_changed_at, " +
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, password_changed_at, "
+                        +
                         "must_change_password, created_at, updated_at " +
                         "FROM users WHERE username = #{username}")
         UserPO selectByUsername(@Param("username") String username);
@@ -40,7 +42,8 @@ public interface UserMapper {
          * 根據 Email 查詢
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, password_changed_at, " +
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, password_changed_at, "
+                        +
                         "must_change_password, created_at, updated_at " +
                         "FROM users WHERE email = #{email}")
         UserPO selectByEmail(@Param("email") String email);
@@ -49,7 +52,8 @@ public interface UserMapper {
          * 根據狀態查詢
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, password_changed_at, " +
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, password_changed_at, "
+                        +
                         "must_change_password, created_at, updated_at " +
                         "FROM users WHERE status = #{status}")
         List<UserPO> selectByStatus(@Param("status") String status);
@@ -58,7 +62,8 @@ public interface UserMapper {
          * 查詢所有使用者
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, password_changed_at, " +
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, password_changed_at, "
+                        +
                         "must_change_password, created_at, updated_at " +
                         "FROM users ORDER BY created_at DESC")
         List<UserPO> selectAll();
@@ -67,11 +72,13 @@ public interface UserMapper {
          * 新增使用者
          */
         @Insert("INSERT INTO users (user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, password_changed_at, " +
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, password_changed_at, "
+                        +
                         "must_change_password, created_at, updated_at) " +
                         "VALUES (#{userId}, #{username}, #{email}, #{passwordHash}, #{displayName}, #{employeeId}, #{tenantId}, "
                         +
-                        "#{status}, #{failedLoginAttempts}, #{lockedUntil}, #{lastLoginAt}, #{passwordChangedAt}, " +
+                        "#{status}, #{failedLoginAttempts}, #{lockedUntil}, #{lastLoginAt}, #{lastLogoutAt}, #{passwordChangedAt}, "
+                        +
                         "#{mustChangePassword}, #{createdAt}, #{updatedAt})")
         void insert(UserPO userPO);
 
@@ -83,8 +90,9 @@ public interface UserMapper {
                         +
                         "tenant_id = #{tenantId}, status = #{status}, failed_login_attempts = #{failedLoginAttempts}, "
                         +
-                        "locked_until = #{lockedUntil}, last_login_at = #{lastLoginAt}, password_changed_at = #{passwordChangedAt}, "
+                        "locked_until = #{lockedUntil}, last_login_at = #{lastLoginAt}, last_logout_at = #{lastLogoutAt}, "
                         +
+                        "password_changed_at = #{passwordChangedAt}, " +
                         "must_change_password = #{mustChangePassword}, updated_at = #{updatedAt} " +
                         "WHERE user_id = #{userId}")
         void update(UserPO userPO);

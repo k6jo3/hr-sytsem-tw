@@ -114,6 +114,7 @@ class ValidateCheckOutTaskTest {
                     new Shift(
                             new ShiftId("S1"),
                             "org-001",
+                            "S1",
                             "Regular",
                             ShiftType.REGULAR,
                             LocalTime.of(9, 0), LocalTime.of(18, 0)));
@@ -122,6 +123,7 @@ class ValidateCheckOutTaskTest {
                     new Shift(
                             new ShiftId("S1"),
                             "org-001",
+                            "S1",
                             "Regular",
                             ShiftType.REGULAR,
                             java.time.LocalTime.of(9, 0), java.time.LocalTime.of(18, 0)));

@@ -20,6 +20,9 @@ public interface LeaveApplicationMapper {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
+    List<LeaveApplicationPO> selectByDateRange(@Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
     int insert(LeaveApplicationPO application);
 
     int update(LeaveApplicationPO application);

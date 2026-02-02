@@ -50,7 +50,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             System.out.println("DEBUG QUERY DOC_D001: " + query);
@@ -70,7 +70,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_D002");
@@ -89,7 +89,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_D003");
@@ -108,7 +108,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_D004");
@@ -131,7 +131,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_D008");
@@ -149,7 +149,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_D005");
@@ -167,7 +167,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_D006");
@@ -186,7 +186,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_D007");
@@ -203,7 +203,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_D009");
@@ -221,7 +221,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_D010");
@@ -247,7 +247,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_F001");
@@ -265,7 +265,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_F002");
@@ -284,7 +284,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_F003");
@@ -303,7 +303,7 @@ public class DocumentApiContractTest extends BaseContractTest {
                     .build();
 
             // When
-            var query = assembler.toQueryGroup(request);
+            var query = assembler.toQueryGroup(request, null);
 
             // Then
             assertContract(query, contractSpec, "DOC_F004");

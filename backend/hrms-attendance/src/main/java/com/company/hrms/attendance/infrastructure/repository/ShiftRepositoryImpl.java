@@ -79,6 +79,7 @@ public class ShiftRepositoryImpl extends BaseRepository<ShiftPO, String> impleme
         return Shift.reconstitute(
                 new ShiftId(po.getId()),
                 po.getOrganizationId(),
+                po.getCode(),
                 po.getName(),
                 ShiftType.valueOf(po.getType()),
                 LocalTime.parse(po.getStartTime()),
@@ -95,6 +96,7 @@ public class ShiftRepositoryImpl extends BaseRepository<ShiftPO, String> impleme
         return ShiftPO.builder()
                 .id(shift.getId().getValue())
                 .organizationId(shift.getOrganizationId())
+                .code(shift.getCode())
                 .name(shift.getName())
                 .type(shift.getType().name())
                 .startTime(shift.getWorkStartTime().toString())

@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS users (
     failed_login_attempts INTEGER DEFAULT 0,
     locked_until TIMESTAMP,
     last_login_at TIMESTAMP,
+    last_logout_at TIMESTAMP,
     password_changed_at TIMESTAMP,                     -- 密碼變更時間
     must_change_password BOOLEAN DEFAULT FALSE,        -- 首次登入強制改密
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
