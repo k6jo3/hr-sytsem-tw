@@ -12,7 +12,9 @@ import lombok.Setter;
 @Setter
 public class EmployeeImportContext extends PipelineContext {
     private String fileName;
+    private byte[] fileData;
     private int totalCount;
     private int successCount;
     private int failureCount;
+    private java.util.List<String> errors = new java.util.ArrayList<>();
 }

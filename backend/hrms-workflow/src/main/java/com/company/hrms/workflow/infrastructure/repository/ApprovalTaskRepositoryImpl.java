@@ -30,6 +30,42 @@ public class ApprovalTaskRepositoryImpl extends QueryBaseRepository<ApprovalTask
     }
 
     @Override
+    public java.util.Optional<com.company.hrms.workflow.domain.model.entity.ApprovalTask> findById(String taskId) {
+        ApprovalTaskEntity entity = super.factory
+                .selectFrom(com.company.hrms.workflow.infrastructure.entity.QApprovalTaskEntity.approvalTaskEntity)
+                .where(com.company.hrms.workflow.infrastructure.entity.QApprovalTaskEntity.approvalTaskEntity.taskId
+                        .eq(taskId))
+                .fetchOne();
+        return java.util.Optional
+                .ofNullable(com.company.hrms.workflow.application.assembler.ApprovalTaskAssembler.toDomain(entity));
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void save(com.company.hrms.workflow.domain.model.entity.ApprovalTask task) {
+        ApprovalTaskEntity entity = super.factory
+                .selectFrom(com.company.hrms.workflow.infrastructure.entity.QApprovalTaskEntity.approvalTaskEntity)
+                .where(com.company.hrms.workflow.infrastructure.entity.QApprovalTaskEntity.approvalTaskEntity.taskId
+                        .eq(task.getTaskId()))
+                .fetchOne();
+
+        if (entity == null) {
+            entity = com.company.hrms.workflow.application.assembler.ApprovalTaskAssembler.toEntity(task, null);
+            if (entity != null) {
+                // If new, may need to handle WorkflowInstance link
+                if (task.getInstanceId() != null) {
+                    WorkflowInstanceEntity inst = em.getReference(WorkflowInstanceEntity.class, task.getInstanceId());
+                    entity.setWorkflowInstance(inst);
+                }
+                em.persist(entity);
+            }
+        } else {
+            com.company.hrms.workflow.application.assembler.ApprovalTaskAssembler.toEntity(task, entity);
+            em.merge(entity);
+        }
+    }
+
+    @Override
     public Page<PendingTaskResponse> searchPendingTasks(QueryGroup queryGroup, Pageable pageable) {
         // 1. 初始化 Engine
         UltimateQueryEngine<ApprovalTaskEntity> engine = new UltimateQueryEngine<>(factory, clazz);

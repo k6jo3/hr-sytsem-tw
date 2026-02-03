@@ -15,6 +15,10 @@ public class CourseActionContext extends PipelineContext {
     // For close action
     private String reason;
 
+    // For complete action statistics
+    private Integer completedCount;
+    private Integer noShowCount;
+
     public CourseActionContext(String courseId, String operatorId) {
         this.courseId = courseId;
         this.operatorId = operatorId;

@@ -13,6 +13,8 @@ public class CompleteCourseTask implements PipelineTask<CourseActionContext> {
 
     @Override
     public void execute(CourseActionContext context) {
-        context.getCourse().complete();
+        context.getCourse().complete(
+                context.getCompletedCount(),
+                context.getNoShowCount());
     }
 }

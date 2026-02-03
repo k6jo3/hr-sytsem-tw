@@ -6,7 +6,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import com.company.hrms.common.domain.model.AggregateRoot;
+import com.company.hrms.training.domain.event.CourseClosedEvent;
+import com.company.hrms.training.domain.event.CourseCompletedEvent;
 import com.company.hrms.training.domain.event.CourseCreatedEvent;
+import com.company.hrms.training.domain.event.CoursePublishedEvent;
 import com.company.hrms.training.domain.model.valueobject.CourseCategory;
 import com.company.hrms.training.domain.model.valueobject.CourseId;
 import com.company.hrms.training.domain.model.valueobject.CourseStatus;
@@ -193,7 +196,14 @@ public class TrainingCourse extends AggregateRoot<CourseId> {
 
         this.status = CourseStatus.OPEN;
         this.touch();
-        // TODO: publish CoursePublishedEvent
+
+        this.registerEvent(CoursePublishedEvent.create(
+                this.getId().toString(),
+                this.courseName,
+                this.isMandatory != null ? this.isMandatory : false,
+                this.targetAudience,
+                this.startDate,
+                this.enrollmentDeadline));
     }
 
     public void close(String reason) {
@@ -203,27 +213,57 @@ public class TrainingCourse extends AggregateRoot<CourseId> {
 
         this.status = CourseStatus.CLOSED;
         this.touch();
-        // TODO: publish CourseClosedEvent
+
+        this.registerEvent(CourseClosedEvent.create(
+                this.getId().toString(),
+                this.courseName,
+                reason));
     }
 
-    public void complete() {
+    public void complete(Integer completedCount, Integer noShowCount) {
         if (this.status != CourseStatus.CLOSED) {
             throw new IllegalStateException("只有已截止報名的課程可以完成");
         }
 
-        if (this.endDate.isAfter(LocalDate.now())) {
+        if (this.endDate != null && this.endDate.isAfter(LocalDate.now())) {
             throw new IllegalStateException("課程尚未結束");
         }
 
         this.status = CourseStatus.COMPLETED;
         this.touch();
-        // TODO: publish CourseCompletedEvent
+
+        this.registerEvent(CourseCompletedEvent.create(
+                this.getId().toString(),
+                this.courseName,
+                completedCount != null ? completedCount : 0,
+                noShowCount != null ? noShowCount : 0));
     }
 
     public boolean canEnroll() {
         return this.status == CourseStatus.OPEN &&
                 (this.enrollmentDeadline == null || !LocalDate.now().isAfter(this.enrollmentDeadline)) &&
                 (this.maxParticipants == null || this.currentEnrollments < this.maxParticipants);
+    }
+
+    /**
+     * 增加報名人數
+     */
+    public void incrementEnrollmentCount() {
+        if (!canEnroll()) {
+            throw new IllegalStateException("目前無法報名此課程");
+        }
+        this.currentEnrollments++;
+        this.touch();
+    }
+
+    /**
+     * 減少報名人數（用於退選或審核不通過）
+     */
+    public void decrementEnrollmentCount() {
+        if (this.currentEnrollments > 0) {
+            this.currentEnrollments--;
+            this.touch();
+        }
     }
 
     // === Domain Logic Validations ===

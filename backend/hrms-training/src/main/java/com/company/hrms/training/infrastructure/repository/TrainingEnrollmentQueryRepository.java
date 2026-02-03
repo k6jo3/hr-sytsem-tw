@@ -27,6 +27,7 @@ public class TrainingEnrollmentQueryRepository extends QueryBaseRepository<Train
     public List<TrainingEnrollmentEntity> findCompletedInPeriod(LocalDate startDate, LocalDate endDate) {
         QTrainingEnrollmentEntity qe = QTrainingEnrollmentEntity.trainingEnrollmentEntity;
         return queryFactory.selectFrom(qe)
+                .leftJoin(qe.course).fetchJoin()
                 .where(qe.status.eq(EnrollmentStatus.COMPLETED)
                         .and(qe.completedAt.between(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay())))
                 .fetch();
