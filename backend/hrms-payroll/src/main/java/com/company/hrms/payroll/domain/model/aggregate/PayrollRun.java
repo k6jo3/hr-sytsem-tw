@@ -175,6 +175,10 @@ public class PayrollRun {
     public void startExecution(String executorId, int totalEmployees) {
         status.validateTransition(PayrollRunStatus.CALCULATING);
 
+        if (totalEmployees < 0) {
+            throw new DomainException("PAY_RUN_INVALID_EMPLOYEE_COUNT", "員工總數不可為負數");
+        }
+
         this.status = PayrollRunStatus.CALCULATING;
         this.executedBy = executorId;
         this.executedAt = LocalDateTime.now();
