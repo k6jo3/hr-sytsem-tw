@@ -62,7 +62,7 @@ public class EmployeeHistoryRepositoryImpl implements IEmployeeHistoryRepository
     @Override
     public List<EmployeeHistory> findByEmployeeIdAndDateRange(UUID employeeId, LocalDate startDate, LocalDate endDate) {
         return historyDAO.findByDateRange(startDate, endDate).stream()
-                .filter(po -> po.getEmployeeId().equals(employeeId))
+                .filter(po -> po.getEmployeeId().equals(employeeId.toString()))
                 .map(this::toAggregate)
                 .collect(Collectors.toList());
     }
@@ -70,7 +70,7 @@ public class EmployeeHistoryRepositoryImpl implements IEmployeeHistoryRepository
     @Override
     public void save(EmployeeHistory history) {
         EmployeeHistoryPO po = toPO(history);
-        if (historyDAO.findById(po.getHistoryId().toString()).isPresent()) {
+        if (historyDAO.existsById(po.getId())) {
             historyDAO.update(po);
         } else {
             historyDAO.insert(po);
@@ -96,25 +96,25 @@ public class EmployeeHistoryRepositoryImpl implements IEmployeeHistoryRepository
         }
 
         return EmployeeHistory.reconstitute(
-                new HistoryId(po.getHistoryId()),
-                po.getEmployeeId(),
+                new HistoryId(UUID.fromString(po.getId())),
+                UUID.fromString(po.getEmployeeId()),
                 EmployeeHistoryEventType.valueOf(po.getEventType()),
-                po.getEffectiveDate(),
+                po.getEventDate(),
                 oldValue,
                 newValue,
-                po.getReason(),
-                po.getApprovedBy(),
+                po.getDescription(),
+                null, // approvedBy is not in the mapper, setting null for now
                 po.getCreatedAt());
     }
 
     private EmployeeHistoryPO toPO(EmployeeHistory history) {
         EmployeeHistoryPO po = new EmployeeHistoryPO();
-        po.setHistoryId(history.getId().getValue());
-        po.setEmployeeId(history.getEmployeeId());
+        po.setId(history.getId().getValue().toString());
+        po.setEmployeeId(history.getEmployeeId().toString());
         po.setEventType(history.getEventType().name());
-        po.setEffectiveDate(history.getEffectiveDate());
-        po.setReason(history.getReason());
-        po.setApprovedBy(history.getApprovedBy());
+        po.setEventDate(history.getEffectiveDate());
+        po.setDescription(history.getReason());
+        // po.setApprovedBy(history.getApprovedBy()); // Not in the PO/Mapper
         po.setCreatedAt(history.getCreatedAt());
 
         try {

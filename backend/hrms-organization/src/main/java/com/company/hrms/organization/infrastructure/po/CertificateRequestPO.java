@@ -1,24 +1,34 @@
 package com.company.hrms.organization.infrastructure.po;
 
-import lombok.Data;
-
 import java.time.LocalDateTime;
-import java.util.UUID;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  * 證明文件申請持久化對象
  */
 @Data
+@Entity
+@Table(name = "certificate_requests")
 public class CertificateRequestPO {
 
-    private UUID requestId;
-    private UUID employeeId;
+    @Id
+    private String id;
+    private String employeeId;
     private String certificateType;
+    private Integer copies;
     private String purpose;
-    private Integer quantity;
-    private LocalDateTime requestDate;
     private String status;
-    private UUID processedBy;
-    private LocalDateTime processedAt;
-    private String documentUrl;
+    private LocalDateTime requestDate;
+    private LocalDateTime completedDate;
+    private String remarks;
+
+    // 審計欄位
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private String createdBy;
+    private String updatedBy;
 }

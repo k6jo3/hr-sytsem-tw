@@ -17,13 +17,14 @@
         <result column="description" property="description"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
         <result column="created_by" property="createdBy"/>
         <result column="updated_by" property="updatedBy"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id, code, name, name_en, organization_id, parent_id, level, path, manager_id,
-        status, sort_order, description, created_at, updated_at, created_by, updated_by
+        status, sort_order, description, created_at, updated_at, is_deleted, created_by, updated_by
     </sql>
 
     <select id="selectById" resultMap="DepartmentResultMap">
@@ -76,11 +77,11 @@
     <insert id="insert">
         INSERT INTO departments (
             id, code, name, name_en, organization_id, parent_id, level, path, manager_id,
-            status, sort_order, description, created_at, updated_at, created_by, updated_by
+            status, sort_order, description, created_at, updated_at, is_deleted, created_by, updated_by
         ) VALUES (
             #{id}, #{code}, #{name}, #{nameEn}, #{organizationId}, #{parentId}, #{level},
             #{path}, #{managerId}, #{status}, #{sortOrder}, #{description},
-            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+            #{createdAt}, #{updatedAt}, #{isDeleted}, #{createdBy}, #{updatedBy}
         )
     </insert>
 
@@ -97,6 +98,7 @@
             status = #{status},
             sort_order = #{sortOrder},
             description = #{description},
+            is_deleted = #{isDeleted},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}

@@ -19,13 +19,14 @@
         <result column="description" property="description"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
         <result column="created_by" property="createdBy"/>
         <result column="updated_by" property="updatedBy"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id, code, name, name_en, type, status, parent_id, tax_id, phone, fax, email,
-        address, established_date, description, created_at, updated_at, created_by, updated_by
+        address, established_date, description, created_at, updated_at, is_deleted, created_by, updated_by
     </sql>
 
     <select id="selectById" resultMap="OrganizationResultMap">
@@ -63,11 +64,11 @@
     <insert id="insert">
         INSERT INTO organizations (
             id, code, name, name_en, type, status, parent_id, tax_id, phone, fax, email,
-            address, established_date, description, created_at, updated_at, created_by, updated_by
+            address, established_date, description, created_at, updated_at, is_deleted, created_by, updated_by
         ) VALUES (
             #{id}, #{code}, #{name}, #{nameEn}, #{type}, #{status}, #{parentId}, #{taxId},
             #{phone}, #{fax}, #{email}, #{address}, #{establishedDate}, #{description},
-            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+            #{createdAt}, #{updatedAt}, #{isDeleted}, #{createdBy}, #{updatedBy}
         )
     </insert>
 
@@ -86,6 +87,7 @@
             address = #{address},
             established_date = #{establishedDate},
             description = #{description},
+            is_deleted = #{isDeleted},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}

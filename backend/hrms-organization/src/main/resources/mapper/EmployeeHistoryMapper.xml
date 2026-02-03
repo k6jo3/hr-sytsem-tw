@@ -77,4 +77,8 @@
         DELETE FROM employee_history WHERE employee_id = #{employeeId}
     </delete>
 
+    <select id="existsById" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM employee_history WHERE id = #{id})
+    </select>
+
 </mapper>

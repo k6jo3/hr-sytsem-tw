@@ -1,18 +1,20 @@
 package com.company.hrms.organization.infrastructure.po;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "work_experience")
+@Table(name = "work_experiences")
 public class WorkExperiencePO {
     @Id
     private String id;
@@ -22,4 +24,6 @@ public class WorkExperiencePO {
     private LocalDate startDate;
     private LocalDate endDate;
     private String description;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

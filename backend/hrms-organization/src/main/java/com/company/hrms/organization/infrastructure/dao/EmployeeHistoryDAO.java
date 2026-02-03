@@ -1,13 +1,15 @@
 package com.company.hrms.organization.infrastructure.dao;
 
-import com.company.hrms.organization.infrastructure.mapper.EmployeeHistoryMapper;
-import com.company.hrms.organization.infrastructure.po.EmployeeHistoryPO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+import com.company.hrms.organization.infrastructure.mapper.EmployeeHistoryMapper;
+import com.company.hrms.organization.infrastructure.po.EmployeeHistoryPO;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 員工人事歷程 DAO
@@ -48,5 +50,9 @@ public class EmployeeHistoryDAO {
 
     public void deleteByEmployeeId(String employeeId) {
         historyMapper.deleteByEmployeeId(employeeId);
+    }
+
+    public boolean existsById(String id) {
+        return historyMapper.existsById(id);
     }
 }

@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.controller.QueryBaseController;
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.model.PageResponse;
 import com.company.hrms.organization.api.request.employee.GetEmployeeListRequest;
 import com.company.hrms.organization.api.response.employee.CheckUniqueResponse;
 import com.company.hrms.organization.api.response.employee.EmployeeDetailResponse;
-import com.company.hrms.organization.api.response.employee.EmployeeListResponse;
+import com.company.hrms.organization.api.response.employee.EmployeeListItemResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,7 +47,7 @@ public class HR02EmployeeQryController extends QueryBaseController {
                         @ApiResponse(responseCode = "401", description = "未授權")
         })
         @GetMapping
-        public ResponseEntity<EmployeeListResponse> getEmployeeList(
+        public ResponseEntity<PageResponse<EmployeeListItemResponse>> getEmployeeList(
                         @RequestParam(required = false) String search,
                         @RequestParam(required = false) String status,
                         @RequestParam(required = false) String departmentId,
@@ -56,7 +57,8 @@ public class HR02EmployeeQryController extends QueryBaseController {
                         @RequestParam(defaultValue = "20") Integer size,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
 
-                GetEmployeeListRequest request = GetEmployeeListRequest.builder()
+                GetEmployeeListRequest request = GetEmployeeListRequest
+                                .builder()
                                 .keyword(search)
                                 .statuses(status != null ? java.util.List.of(status) : null)
                                 .departmentIds(departmentId != null ? java.util.List.of(departmentId) : null)

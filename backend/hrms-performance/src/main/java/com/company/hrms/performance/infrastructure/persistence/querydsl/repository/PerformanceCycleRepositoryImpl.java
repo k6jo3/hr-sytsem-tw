@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+// 外面還有一個repository的資料次，到底是要用那個路徑?
 /**
  * 考核週期 Repository 實作
  * 使用 Fluent-Query-Engine (Querydsl)

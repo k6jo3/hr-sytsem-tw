@@ -1,22 +1,32 @@
 package com.company.hrms.organization.infrastructure.po;
 
-import lombok.Data;
-
 import java.time.LocalDate;
-import java.util.UUID;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  * 學歷持久化對象
  */
 @Data
+@Entity
+@Table(name = "educations")
 public class EducationPO {
 
-    private UUID educationId;
-    private UUID employeeId;
+    @Id
+    private String id;
+    private String employeeId;
+    private String schoolName;
     private String degree;
-    private String school;
     private String major;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Boolean isHighestDegree;
+    private Boolean isGraduated;
+
+    // 審計欄位
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
