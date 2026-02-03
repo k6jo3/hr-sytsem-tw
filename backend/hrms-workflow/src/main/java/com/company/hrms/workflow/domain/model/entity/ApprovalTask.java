@@ -38,15 +38,39 @@ public class ApprovalTask {
     private boolean isOverdue;
 
     public void approve(String approverId, String comments) {
+        if (this.status != TaskStatus.PENDING) {
+            throw new IllegalStateException("只能核准處理中的任務");
+        }
         this.status = TaskStatus.APPROVED;
+        this.approverId = approverId;
         this.approvedAt = LocalDateTime.now();
         this.comment = comments;
-        // logic to check if approver matches assignee or delegate
     }
 
     public void reject(String approverId, String comments) {
+        if (this.status != TaskStatus.PENDING) {
+            throw new IllegalStateException("只能駁回處理中的任務");
+        }
         this.status = TaskStatus.REJECTED;
-        this.approvedAt = LocalDateTime.now(); // or rejectedAt
+        this.approverId = approverId;
+        this.approvedAt = LocalDateTime.now();
         this.comment = comments;
+    }
+
+    public void delegate(String delegateToId, String delegateToName, String operatorId) {
+        if (this.status != TaskStatus.PENDING) {
+            throw new IllegalStateException("只能轉交處理中的任務");
+        }
+        if (!this.assigneeId.equals(operatorId)) {
+            // 如果當前有代理人，則代理人也可以轉交？
+            // 按需求「只有任務負責人可以轉交」
+            throw new SecurityException("只有任務負責人可以轉交任務");
+        }
+
+        this.status = TaskStatus.DELEGATED;
+        this.delegatedToId = delegateToId;
+        this.delegatedToName = delegateToName;
+        // 在實際轉交邏輯中，可能需要建立一個新的 Task 給被轉交人
+        // 這裡僅更新當前 Task 狀態為已轉交
     }
 }

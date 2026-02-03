@@ -52,7 +52,7 @@ public class GenerateTrainingStatisticsExcelTask implements PipelineTask<ExportT
                 Row row = sheet.createRow(rowNum++);
                 row.createCell(0).setCellValue(e.getEmployee_id() != null ? e.getEmployee_id() : "");
                 row.createCell(1).setCellValue(e.getCourse_id() != null ? e.getCourse_id() : "");
-                row.createCell(2).setCellValue(""); // TODO: 需關聯課程取得名稱
+                row.createCell(2).setCellValue(e.getCourse() != null ? e.getCourse().getName() : "");
                 row.createCell(3).setCellValue(e.getStatus() != null ? e.getStatus().name() : "");
                 row.createCell(4).setCellValue(e.getAttendedHours() != null ? e.getAttendedHours().doubleValue() : 0);
                 row.createCell(5).setCellValue(e.getCompletedHours() != null ? e.getCompletedHours().doubleValue() : 0);

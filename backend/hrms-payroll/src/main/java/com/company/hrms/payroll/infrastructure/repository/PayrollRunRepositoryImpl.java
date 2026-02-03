@@ -31,7 +31,11 @@ public class PayrollRunRepositoryImpl extends CommandBatchBaseRepository<Payroll
     @Override
     public PayrollRun save(PayrollRun run) {
         PayrollRunPO po = toPO(run);
-        super.save(po);
+        if (existsById(po.getRunId())) {
+            po = super.update(po);
+        } else {
+            super.save(po);
+        }
         return toDomain(po);
     }
 

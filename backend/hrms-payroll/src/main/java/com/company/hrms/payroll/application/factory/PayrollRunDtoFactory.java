@@ -12,6 +12,7 @@ public class PayrollRunDtoFactory {
 
         return PayrollRunResponse.builder()
                 .runId(domain.getId().getValue())
+                .organizationId(domain.getOrganizationId())
                 .name(domain.getName())
                 .status(domain.getStatus().name())
                 .payrollSystem(domain.getPayrollSystem().name())

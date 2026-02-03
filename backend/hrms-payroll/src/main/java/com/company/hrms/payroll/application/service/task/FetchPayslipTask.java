@@ -3,7 +3,7 @@ package com.company.hrms.payroll.application.service.task;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
-import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.payroll.application.service.context.PayslipActionContext;
 import com.company.hrms.payroll.domain.model.aggregate.Payslip;
 import com.company.hrms.payroll.domain.model.valueobject.PayslipId;
@@ -27,8 +27,7 @@ public class FetchPayslipTask implements PipelineTask<PayslipActionContext> {
         }
 
         Payslip payslip = repository.findById(new PayslipId(context.getPayslipId()))
-                .orElseThrow(() -> new DomainException("PAYSLIP_NOT_FOUND",
-                        "找不到薪資單: " + context.getPayslipId()));
+                .orElseThrow(() -> new EntityNotFoundException("找不到薪資單: " + context.getPayslipId()));
 
         context.setPayslip(payslip);
     }

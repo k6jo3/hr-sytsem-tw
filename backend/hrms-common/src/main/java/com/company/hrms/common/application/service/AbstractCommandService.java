@@ -58,7 +58,7 @@ public abstract class AbstractCommandService<T, R> implements CommandApiService<
     protected EventPublisher eventPublisher;
 
     /** 收集的領域事件 */
-    private final List<DomainEvent> collectedEvents = new ArrayList<>();
+    private List<DomainEvent> collectedEvents;
 
     /** 是否自動發布事件 */
     private boolean autoPublish = true;
@@ -66,8 +66,21 @@ public abstract class AbstractCommandService<T, R> implements CommandApiService<
     /** 是否啟用事件攔截（供測試使用） */
     private boolean captureEnabled = true;
 
+    /**
+     * 初始化 collectedEvents
+     * 在構造後立即執行，確保字段被正確初始化
+     */
+    public AbstractCommandService() {
+        this.collectedEvents = new ArrayList<>();
+    }
+
     @Override
     public final R execCommand(T request, JWTModel currentUser, String... args) throws Exception {
+        // 確保 collectedEvents 被初始化（延遲初始化）
+        if (collectedEvents == null) {
+            collectedEvents = new ArrayList<>();
+        }
+
         // 清空先前收集的事件
         collectedEvents.clear();
 

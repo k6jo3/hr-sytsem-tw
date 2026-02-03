@@ -4,9 +4,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.application.pipeline.BusinessPipeline;
-import com.company.hrms.common.application.service.AbstractCommandService;
+import com.company.hrms.common.application.service.AbstractQueryService;
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.payroll.application.dto.request.PayrollRunActionRequest;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.payroll.application.dto.response.PayslipResponse;
 import com.company.hrms.payroll.application.factory.PayslipDtoFactory;
 import com.company.hrms.payroll.application.service.context.PayslipActionContext;
@@ -19,29 +20,33 @@ import lombok.RequiredArgsConstructor;
  * 產生薪資單 PDF 服務
  * 使用 Pipeline 模式編排 PDF 產生流程
  * 
- * 外部服務整合說明：
- * - 實際 PDF 產生邏輯在 GeneratePdfTask 中
- * - 需在 hrms-document 模組完成後注入 DocumentServiceClient
+ * 注意：雖然這是一個 GET 請求，但因為涉及 PDF 產生與 state 更新 (pdfUrl)，
+ * 在此架構下由 Query Controller 呼叫。
  */
 @Service("generatePayslipPdfServiceImpl")
 @Transactional
 @RequiredArgsConstructor
-public class GeneratePayslipPdfServiceImpl extends AbstractCommandService<PayrollRunActionRequest, PayslipResponse> {
+public class GeneratePayslipPdfServiceImpl extends AbstractQueryService<String, PayslipResponse> {
 
     private final FetchPayslipTask fetchPayslipTask;
     private final GeneratePdfTask generatePdfTask;
 
     @Override
-    protected PayslipResponse doExecute(PayrollRunActionRequest request, JWTModel currentUser, String... args)
-            throws Exception {
+    protected QueryGroup buildQuery(String request, JWTModel currentUser) {
+        return QueryBuilder.where().build();
+    }
 
-        if (args == null || args.length == 0) {
+    @Override
+    protected PayslipResponse executeQuery(QueryGroup query, String id, JWTModel currentUser, String... args)
+            throws Exception {
+        String targetId = (args != null && args.length > 0) ? args[0] : id;
+
+        if (targetId == null) {
             throw new IllegalArgumentException("薪資單 ID 為必填");
         }
-        String payslipId = args[0];
 
         // 1. 建立 Context
-        PayslipActionContext context = new PayslipActionContext(payslipId, currentUser, "GENERATE_PDF");
+        PayslipActionContext context = new PayslipActionContext(targetId, currentUser, "GENERATE_PDF");
 
         // 2. 執行 Pipeline
         BusinessPipeline.start(context)

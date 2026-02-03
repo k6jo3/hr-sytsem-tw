@@ -26,8 +26,7 @@ public class InitPayrollRunTask implements PipelineTask<StartPayrollRunContext> 
         PayPeriod period = new PayPeriod(context.getRequest().getStartDate(), context.getRequest().getEndDate());
 
         String userId = context.getCurrentUser() != null ? context.getCurrentUser().getUserId() : "SYSTEM";
-        String orgId = context.getRequest().getOrganizationId() != null ? context.getRequest().getOrganizationId()
-                : "ORG-001";
+        String orgId = context.getRequest().getOrganizationId();
 
         PayrollRun run = PayrollRun.create(
                 new RunId(UUID.randomUUID().toString()),
@@ -35,7 +34,7 @@ public class InitPayrollRunTask implements PipelineTask<StartPayrollRunContext> 
                 orgId,
                 period,
                 system,
-                context.getRequest().getEndDate(),
+                context.getRequest().getPayDate(),
                 userId);
 
         context.setPayrollRun(run);
