@@ -192,7 +192,7 @@ class PayslipTest {
 			// Then
 			assertThat(payslip.getTotalEarnings())
 					.as("收入項目應包含在總額中")
-					.isEqualTo(new BigDecimal("5000"));
+					.isEqualByComparingTo("5000");
 		}
 
 		@Test
@@ -208,7 +208,7 @@ class PayslipTest {
 			// Then
 			assertThat(payslip.getTotalDeductions())
 					.as("扣除項目應包含在總額中")
-					.isEqualTo(new BigDecimal("1000"));
+					.isEqualByComparingTo("1000");
 		}
 
 		@Test
@@ -225,7 +225,7 @@ class PayslipTest {
 					() -> payslip
 							.addEarningItem(PayslipItem.createEarning("BONUS", "獎金", new BigDecimal("5000"), "Manual")))
 					.isInstanceOf(DomainException.class)
-					.hasMessageContaining("非草稿狀態");
+					.hasMessageContaining("已定案的薪資單不可修改");
 		}
 
 		@Test
@@ -346,7 +346,7 @@ class PayslipTest {
 					.isEqualTo(PayslipStatus.SENT);
 			assertThat(payslip.getGrossWage())
 					.as("應發薪資應正確計算")
-					.isEqualTo(new BigDecimal("35000"));
+					.isEqualByComparingTo("35000");
 			assertThat(payslip.getPdfUrl())
 					.as("PDF URL 應已設定")
 					.isNotNull();

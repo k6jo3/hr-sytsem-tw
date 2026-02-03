@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PayrollRunResponse {
     private String runId;
+    private String organizationId;
     private String name;
     private String status;
     private String payrollSystem;

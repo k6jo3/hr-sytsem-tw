@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.application.service.AbstractQueryService;
-import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
@@ -64,7 +64,7 @@ public class GetPayslipByIdServiceImpl extends AbstractQueryService<String, Pays
         }
 
         Payslip payslip = repository.findById(new PayslipId(targetId))
-                .orElseThrow(() -> new DomainException("PAYSLIP_NOT_FOUND", "找不到薪資單: " + targetId));
+                .orElseThrow(() -> new EntityNotFoundException("找不到薪資單: " + targetId));
 
         return PayslipDtoFactory.toResponse(payslip);
     }

@@ -28,7 +28,6 @@ import com.company.hrms.payroll.application.dto.request.PayrollRunActionRequest;
 import com.company.hrms.payroll.application.dto.request.StartPayrollRunRequest;
 import com.company.hrms.payroll.application.dto.response.PayrollRunResponse;
 import com.company.hrms.payroll.domain.model.valueobject.PayrollRunStatus;
-import com.company.hrms.payroll.domain.repository.IPayrollRunRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -45,28 +44,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <li>異常情況處理</li>
  * </ul>
  *
- * <p>
- * TODO: 待實現項目
- * </p>
- * <ul>
- * <li>建立測試資料 SQL 檔案：
- * <ul>
- * <li>src/test/resources/test-data/payroll_run_test_data.sql (20 筆測試批次)</li>
- * <li>src/test/resources/test-data/cleanup.sql (清理腳本)</li>
- * </ul>
- * </li>
- * <li>實現 PayrollRun API 端點：
- * <ul>
- * <li>POST /api/v1/payroll-runs (建立薪資批次)</li>
- * <li>POST /api/v1/payroll-runs/{id}/execute (執行薪資計算)</li>
- * <li>PUT /api/v1/payroll-runs/{id}/submit (送審)</li>
- * <li>PUT /api/v1/payroll-runs/{id}/approve (核准)</li>
- * <li>PUT /api/v1/payroll-runs/{id}/reject (退回)</li>
- * <li>PUT /api/v1/payroll-runs/{id}/mark-paid (標記已發薪)</li>
- * </ul>
- * </li>
- * <li>實現對應的 Service 和 Domain Logic</li>
- * </ul>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc(addFilters = false)
@@ -76,9 +53,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("薪資批次 API 整合測試")
 class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
-
-	@Autowired
-	private IPayrollRunRepository payrollRunRepository;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -101,17 +75,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
-	/**
-	 * PAY_API_001: 建立薪資批次
-	 *
-	 * TODO: 修復 Response DTO 缺少 organizationId 字段
-	 * - 當前錯誤: No value at JSON path "$.organizationId"
-	 * - 原因: PayrollRunResponse 未包含 organizationId 欄位
-	 * - 需要修改 PayrollRunDtoFactory.toResponse() 或 PayrollRunResponse DTO
-	 * - 參考: 確認 Domain 層的 PayrollRun.organizationId 是否能正確轉換到 Response
-	 */
 	@Test
-	@org.junit.jupiter.api.Disabled("DTO 字段缺少，待修復")
 	@DisplayName("PAY_API_001: 建立薪資批次 - 應回傳 runId 和 DRAFT 狀態")
 	void PAY_API_001_createPayrollRun_ShouldReturnRunIdAndDraftStatus() throws Exception {
 		// Given
@@ -120,6 +84,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 		request.setPayrollSystem("MONTHLY");
 		request.setStartDate(LocalDate.of(2025, 12, 1));
 		request.setEndDate(LocalDate.of(2025, 12, 31));
+		request.setPayDate(LocalDate.of(2026, 1, 5));
 		request.setName("2025年12月薪資核准");
 
 		// When & Then
@@ -145,18 +110,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 	@DisplayName("薪資計算 API")
 	class PayrollCalculationApiTests {
 
-		/**
-		 * TODO: 修復 Hibernate SessionFactory 對象管理問題
-		 * - 當前錯誤: A different object with the same identifier value was already associated with the session
-		 * - 原因: 同一事務中創建的 PayrollRun 對象與重新查詢的對象衝突
-		 * - 可能解決方案:
-		 *   1. 在 Repository 中使用 merge() 而非 save()
-		 *   2. 清理 Hibernate Session（evict）後重新查詢
-		 *   3. 使用 detach() 分離舊對象
-		 * - 參考: FetchPayrollRunTask.execute() 中的 Repository 查詢邏輯
-		 */
 		@Test
-		@org.junit.jupiter.api.Disabled("Hibernate SessionFactory 衝突，待修復")
 		@DisplayName("PAY_API_002: 執行薪資計算 - 應從 DRAFT 轉為 CALCULATING 再到 COMPLETED")
 		void PAY_API_002_executePayrollCalculation_ShouldTransitionToCalculating() throws Exception {
 			// Given: 建立一個薪資批次
@@ -165,6 +119,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 			createReq.setPayrollSystem("MONTHLY");
 			createReq.setStartDate(LocalDate.of(2025, 12, 1));
 			createReq.setEndDate(LocalDate.of(2025, 12, 31));
+			createReq.setPayDate(LocalDate.of(2026, 1, 5));
 			createReq.setName("2025年12月薪資計算");
 
 			var createResponse = performPost("/api/v1/payroll-runs", createReq)
@@ -211,17 +166,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 	@DisplayName("薪資批次送審 API")
 	class PayrollSubmissionApiTests {
 
-		/**
-		 * TODO: 修復 Repository 查詢或 Pipeline 執行問題
-		 * - 當前錯誤: HTTP 500（具體錯誤待檢查）
-		 * - 需要檢查:
-		 *   1. ExecutePayrollRunActionTask 的業務邏輯
-		 *   2. 狀態轉換邏輯是否正確（COMPLETED → SUBMITTED）
-		 *   3. Repository 是否能正確查詢 RUN-004
-		 * - 參考文件: 查看 payroll_run_test_data.sql 確認測試資料存在
-		 */
 		@Test
-		@org.junit.jupiter.api.Disabled("業務邏輯執行失敗，待診斷")
 		@DisplayName("PAY_API_003: 送審薪資批次 - 應從 COMPLETED 轉為 SUBMITTED")
 		void PAY_API_003_submitPayrollRun_ShouldTransitionToSubmitted() throws Exception {
 			// Given: 使用已計算完成的批次 RUN-004 (CALCULATING → COMPLETED 狀態)
@@ -256,17 +201,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 	@DisplayName("薪資批次核准 API")
 	class PayrollApprovalApiTests {
 
-		/**
-		 * TODO: 修復 Pipeline 執行或狀態轉換邏輯
-		 * - 當前錯誤: HTTP 500（ExecutePayrollRunActionTask 執行失敗）
-		 * - 依賴前置條件: 需要 PAY_API_003 先通過以獲得 SUBMITTED 狀態的批次
-		 * - 檢查項目:
-		 *   1. RUN-007 在測試資料中是否存在且狀態為 SUBMITTED
-		 *   2. ApprovePayrollRunServiceImpl 或相關 Task 的業務邏輯
-		 *   3. 狀態轉換驗證邏輯（SUBMITTED → APPROVED）
-		 */
 		@Test
-		@org.junit.jupiter.api.Disabled("依賴前置測試，Pipeline 執行失敗")
 		@DisplayName("PAY_API_004: 核准薪資批次 - 應從 SUBMITTED 轉為 APPROVED")
 		void PAY_API_004_approvePayrollRun_ShouldTransitionToApproved() throws Exception {
 			// Given: 使用已送審的批次 RUN-007 (SUBMITTED 狀態)
@@ -305,18 +240,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 	@DisplayName("薪資批次退回 API")
 	class PayrollRejectionApiTests {
 
-		/**
-		 * TODO: 修復 Pipeline 執行或退回業務邏輯
-		 * - 當前錯誤: HTTP 500（RejectPayrollRunServiceImpl 執行失敗）
-		 * - 依賴前置條件: 需要 SUBMITTED 狀態的批次（RUN-008）
-		 * - 檢查項目:
-		 *   1. RejectPayrollRunServiceImpl 中的狀態轉換邏輯
-		 *   2. ExecutePayrollRunActionTask 如何處理 REJECT 操作
-		 *   3. RUN-008 是否在測試資料中存在
-		 *   4. 退回原因的保存邏輯是否實現
-		 */
 		@Test
-		@org.junit.jupiter.api.Disabled("Pipeline 執行失敗，待修復")
 		@DisplayName("PAY_API_005: 退回薪資批次 - 應從 SUBMITTED 轉回 COMPLETED")
 		void PAY_API_005_rejectPayrollRun_ShouldTransitionToCompleted() throws Exception {
 			// Given: 使用已送審的批次 RUN-008 (SUBMITTED 狀態)
@@ -354,19 +278,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 	@DisplayName("薪資發放 API")
 	class PayrollPaymentApiTests {
 
-		/**
-		 * TODO: 修復 Pipeline 執行或發薪邏輯
-		 * - 當前錯誤: HTTP 500（MarkPayrollRunPaidServiceImpl 執行失敗）
-		 * - 依賴前置條件: 需要 APPROVED 狀態的批次（RUN-009）
-		 * - 檢查項目:
-		 *   1. MarkPayrollRunPaidServiceImpl 中的業務邏輯
-		 *   2. GenerateBankTransferFileTask 或相關 Task 的實現
-		 *   3. 銀行轉帳文件 URL 的保存邏輯
-		 *   4. RUN-009 是否在測試資料中存在且狀態為 APPROVED
-		 *   5. paidAt 時間戳記的記錄邏輯
-		 */
 		@Test
-		@org.junit.jupiter.api.Disabled("Pipeline 執行失敗，待修復")
 		@DisplayName("PAY_API_006: 標記已發薪 - 應從 APPROVED 轉為 PAID")
 		void PAY_API_006_markPayrollRunPaid_ShouldTransitionToPaid() throws Exception {
 			// Given: 使用已核准的批次 RUN-009 (APPROVED 狀態)
@@ -400,17 +312,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 		}
 	}
 
-	/**
-	 * PAY_API_010: 完整生命週期測試
-	 * 測試完整流程：DRAFT → CALCULATING → COMPLETED → SUBMITTED → APPROVED → PAID
-	 *
-	 * TODO: 完整生命週期測試依賴所有前置測試通過
-	 * - 依賴: PAY_API_001, PAY_API_002, PAY_API_003, PAY_API_004, PAY_API_006
-	 * - 應在所有前置測試通過後再啟用此測試
-	 * - 此測試驗證完整業務流程的狀態轉換和資料一致性
-	 */
 	@Test
-	@org.junit.jupiter.api.Disabled("依賴前置測試，一齊啟用")
 	@DisplayName("PAY_API_010: 完整薪資批次生命週期 - DRAFT → PAID")
 	void PAY_API_010_completePayrollRunLifecycle_ShouldSucceed() throws Exception {
 		// Step 1: 建立薪資批次 (DRAFT)
@@ -419,6 +321,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 		createReq.setPayrollSystem("MONTHLY");
 		createReq.setStartDate(LocalDate.of(2025, 1, 1));
 		createReq.setEndDate(LocalDate.of(2025, 1, 31));
+		createReq.setPayDate(LocalDate.of(2025, 2, 5));
 		createReq.setName("完整生命週期測試批次");
 
 		var createResponse = performPost("/api/v1/payroll-runs", createReq)
@@ -523,17 +426,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 	@DisplayName("異常情況處理")
 	class ExceptionHandlingTests {
 
-		/**
-		 * TODO: 實現組織 ID 驗證
-		 * - 當前錯誤: 預期 HTTP 400，但返回 200 OK
-		 * - 原因: StartPayrollRunServiceImpl 未驗證 organizationId 不為空
-		 * - 需要檢查:
-		 *   1. Request DTO (@Valid @NotNull 註解)
-		 *   2. Service 層或 Controller 層的業務驗證
-		 *   3. 拋出 ValidationException 或類似異常
-		 */
 		@Test
-		@org.junit.jupiter.api.Disabled("驗證邏輯未實現")
 		@DisplayName("應拒絕無效的組織 ID")
 		void shouldRejectInvalidOrganizationId() throws Exception {
 			// Given
@@ -542,6 +435,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setPayrollSystem("MONTHLY");
 			request.setStartDate(LocalDate.of(2025, 12, 1));
 			request.setEndDate(LocalDate.of(2025, 12, 31));
+			request.setPayDate(LocalDate.of(2026, 1, 5));
 			request.setName("Test Payroll");
 
 			// When & Then
@@ -549,17 +443,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 					.andExpect(status().isBadRequest());
 		}
 
-		/**
-		 * TODO: 實現薪資日期驗證
-		 * - 當前錯誤: 預期 HTTP 400，但返回 200 OK
-		 * - 原因: StartPayrollRunServiceImpl 未驗證薪資日期邏輯
-		 * - 需要檢查:
-		 *   1. API 規格是否要求驗證 payDate？
-		 *   2. 如果需要，應在 Request DTO 或 Service 中添加自定義驗證器
-		 *   3. 拋出相應的驗證異常
-		 */
 		@Test
-		@org.junit.jupiter.api.Disabled("日期驗證邏輯需確認")
 		@DisplayName("應拒絕發薪日早於計薪期間結束日期的請求")
 		void shouldRejectPayDateBeforePeriodEnd() throws Exception {
 			// Given
@@ -568,7 +452,7 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setPayrollSystem("MONTHLY");
 			request.setStartDate(LocalDate.of(2025, 12, 1));
 			request.setEndDate(LocalDate.of(2025, 12, 31));
-			// TODO: 確認 API 是否應驗證 payDate 不得早於期間結束日期
+			request.setPayDate(LocalDate.of(2025, 12, 10)); // 早於 12/31
 			request.setName("Test Payroll");
 
 			// When & Then

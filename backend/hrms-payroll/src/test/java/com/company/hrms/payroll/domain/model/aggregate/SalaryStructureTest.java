@@ -97,7 +97,8 @@ class SalaryStructureTest {
 					new BigDecimal("-1000"),
 					PayrollCycle.MONTHLY,
 					LocalDate.now()))
-					.isInstanceOf(IllegalArgumentException.class);
+					.isInstanceOf(DomainException.class)
+					.hasMessageContaining("月薪必須大於 0");
 		}
 	}
 
