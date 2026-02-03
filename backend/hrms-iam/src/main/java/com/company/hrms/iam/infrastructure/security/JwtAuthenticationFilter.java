@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.company.hrms.iam.domain.service.JwtBlacklistDomainService;
 import com.company.hrms.iam.domain.service.JwtTokenDomainService;
 
 import jakarta.servlet.FilterChain;
@@ -30,9 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtTokenDomainService jwtTokenService;
+    private final JwtBlacklistDomainService jwtBlacklistService;
 
-    public JwtAuthenticationFilter(JwtTokenDomainService jwtTokenService) {
+    public JwtAuthenticationFilter(JwtTokenDomainService jwtTokenService,
+            JwtBlacklistDomainService jwtBlacklistService) {
         this.jwtTokenService = jwtTokenService;
+        this.jwtBlacklistService = jwtBlacklistService;
     }
 
     @Override
@@ -47,27 +51,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 2. 驗證 Token
             if (StringUtils.hasText(token) && jwtTokenService.validateToken(token)) {
-                // 3. 提取用戶信息
-                String userId = jwtTokenService.extractUserId(token);
-                String username = jwtTokenService.extractUsername(token);
-                List<String> roles = jwtTokenService.extractRoles(token);
+                // 檢查是否在黑名單中
+                if (jwtBlacklistService.isTokenBlacklisted(token)) {
+                    logger.debug("Token is blacklisted: " + token);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    return; // 這裡直接返回，不進入後續過濾鏈，或者讓 filterChain 繼續但不設置 Authentication (後者較好，讓 Security 處理
+                            // 401)
+                    // 上述 return 會導致請求中斷，前端可能收到空響應。比較好的做法是不設置 Authentication，讓 Spring Security 攔截。
+                } else {
+                    // 3. 提取用戶信息
+                    String userId = jwtTokenService.extractUserId(token);
+                    String username = jwtTokenService.extractUsername(token);
+                    List<String> roles = jwtTokenService.extractRoles(token);
 
-                // 4. 構建權限列表
-                List<SimpleGrantedAuthority> authorities = roles.stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                        .collect(Collectors.toList());
+                    // 4. 構建權限列表
+                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                            .collect(Collectors.toList());
 
-                // 5. 創建認證對象
-                JwtAuthenticationToken authentication = new JwtAuthenticationToken(
-                        userId,
-                        username,
-                        roles,
-                        authorities);
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
+                    // 5. 創建認證對象
+                    JwtAuthenticationToken authentication = new JwtAuthenticationToken(
+                            userId,
+                            username,
+                            roles,
+                            authorities);
+                    authentication.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // 6. 設置到 SecurityContext
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    // 6. 設置到 SecurityContext
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         } catch (Exception e) {
             logger.error("Cannot set user authentication: " + e.getMessage());

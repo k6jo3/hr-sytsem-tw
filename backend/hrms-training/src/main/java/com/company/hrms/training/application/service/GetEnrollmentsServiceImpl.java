@@ -15,14 +15,15 @@ import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.training.api.request.GetEnrollmentsRequest;
 import com.company.hrms.training.api.response.TrainingEnrollmentResponse;
+import com.company.hrms.training.application.assembler.TrainingEnrollmentAssembler;
 import com.company.hrms.training.infrastructure.entity.TrainingEnrollmentEntity;
 import com.company.hrms.training.infrastructure.repository.TrainingEnrollmentQueryRepository;
 
 import lombok.RequiredArgsConstructor;
 
 /**
- * ?¥è©¢?±å??—è¡¨?å?
- * ä½¿ç”¨ QueryBuilder.fromDto() ?²è?å®??å¼æŸ¥è©?
+ * ?ï¿½è©¢?ï¿½ï¿½??ï¿½è¡¨?ï¿½ï¿½?
+ * ä½¿ç”¨ QueryBuilder.fromDto() ?ï¿½ï¿½?ï¿½??å¼æŸ¥ï¿½?
  */
 @Service("getEnrollmentsServiceImpl")
 @Transactional(readOnly = true)
@@ -31,56 +32,29 @@ public class GetEnrollmentsServiceImpl
         implements QueryApiService<GetEnrollmentsRequest, Page<TrainingEnrollmentResponse>> {
 
     private final TrainingEnrollmentQueryRepository enrollmentRepository;
+    private final TrainingEnrollmentAssembler trainingEnrollmentAssembler;
 
     @Override
     public Page<TrainingEnrollmentResponse> getResponse(GetEnrollmentsRequest request, JWTModel currentUser,
             String... args) {
-        // ä½¿ç”¨ QueryBuilder å¾?Request DTO ?ªå?å»ºæ??¥è©¢æ¢ä»¶ (å®??å¼æŸ¥è©?
+        // ä½¿ç”¨ QueryBuilder ï¿½?Request DTO ?ï¿½ï¿½?å»ºï¿½??ï¿½è©¢æ¢ä»¶ (ï¿½??å¼æŸ¥ï¿½?
         QueryGroup query = QueryBuilder.where()
                 .fromDto(request)
                 .build();
 
-        // ?–å??†é?è³‡è? (å¾?PageRequest è½‰æ?)
+        // ?ï¿½ï¿½??ï¿½ï¿½?è³‡ï¿½? (ï¿½?PageRequest è½‰ï¿½?)
         Pageable pageable = request.toPageable();
 
-        // ?·è??¥è©¢
+        // ?ï¿½ï¿½??ï¿½è©¢
         Page<TrainingEnrollmentEntity> page = enrollmentRepository.findPage(query, pageable);
 
-        // è½‰æ???DTO
+        // è½‰ï¿½???DTO
         List<TrainingEnrollmentResponse> responseList = new ArrayList<>();
         for (TrainingEnrollmentEntity enrollment : page.getContent()) {
-            responseList.add(toResponse(enrollment));
+            responseList.add(trainingEnrollmentAssembler.toResponse(enrollment));
         }
 
         return new PageImpl<>(responseList, pageable, page.getTotalElements());
     }
 
-    private TrainingEnrollmentResponse toResponse(TrainingEnrollmentEntity enrollment) {
-        // TODO: ç¨‹å?å¤ªé•·ï¼Œå»ºè­°ç”¨objectMapper?–structMapper
-        TrainingEnrollmentResponse res = new TrainingEnrollmentResponse();
-        res.setEnrollmentId(enrollment.getEnrollmentId());
-        res.setCourseId(enrollment.getCourse_id());
-        res.setEmployeeId(enrollment.getEmployee_id());
-        res.setStatus(enrollment.getStatus());
-        res.setReason(enrollment.getReason());
-        res.setRemarks(enrollment.getRemarks());
-        res.setApprovedBy(enrollment.getApprovedBy());
-        res.setApprovedAt(enrollment.getApprovedAt());
-        res.setRejectedBy(enrollment.getRejectedBy());
-        res.setRejectedAt(enrollment.getRejectedAt());
-        res.setRejectReason(enrollment.getRejectReason());
-        res.setCancelledBy(enrollment.getCancelledBy());
-        res.setCancelledAt(enrollment.getCancelledAt());
-        res.setCancelReason(enrollment.getCancelReason());
-        res.setAttendance(enrollment.isAttendance());
-        res.setAttendedHours(enrollment.getAttendedHours());
-        res.setCompletedHours(enrollment.getCompletedHours());
-        res.setScore(enrollment.getScore());
-        res.setPassed(enrollment.getPassed());
-        res.setFeedback(enrollment.getFeedback());
-        res.setCompletedAt(enrollment.getCompletedAt());
-        res.setCreatedAt(enrollment.getCreatedAt());
-        res.setUpdatedAt(enrollment.getUpdatedAt());
-        return res;
-    }
 }

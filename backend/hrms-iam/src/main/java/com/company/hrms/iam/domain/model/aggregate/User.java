@@ -76,6 +76,11 @@ public class User {
     private LocalDateTime lastLoginAt;
 
     /**
+     * 最後登出時間
+     */
+    private LocalDateTime lastLogoutAt;
+
+    /**
      * 密碼變更時間
      */
     private LocalDateTime passwordChangedAt;
@@ -225,6 +230,14 @@ public class User {
     public void recordLogin() {
         this.failedLoginAttempts = 0;
         this.lastLoginAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 記錄登出成功
+     */
+    public void recordLogout() {
+        this.lastLogoutAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 

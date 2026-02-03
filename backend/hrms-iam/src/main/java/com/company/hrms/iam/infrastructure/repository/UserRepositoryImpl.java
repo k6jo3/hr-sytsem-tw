@@ -160,6 +160,7 @@ public class UserRepositoryImpl implements IUserRepository {
                         : 0)
                 .lockedUntil(toLocalDateTime(po.getLockedUntil()))
                 .lastLoginAt(toLocalDateTime(po.getLastLoginAt()))
+                .lastLogoutAt(toLocalDateTime(po.getLastLogoutAt()))
                 .passwordChangedAt(toLocalDateTime(po.getPasswordChangedAt()))
                 .mustChangePassword(po.getMustChangePassword() != null
                         ? po.getMustChangePassword()
@@ -186,6 +187,7 @@ public class UserRepositoryImpl implements IUserRepository {
                 .failedLoginAttempts(user.getFailedLoginAttempts())
                 .lockedUntil(toTimestamp(user.getLockedUntil()))
                 .lastLoginAt(toTimestamp(user.getLastLoginAt()))
+                .lastLogoutAt(toTimestamp(user.getLastLogoutAt()))
                 .passwordChangedAt(toTimestamp(user.getPasswordChangedAt()))
                 .mustChangePassword(user.isMustChangePassword())
                 .createdAt(toTimestamp(user.getCreatedAt()))

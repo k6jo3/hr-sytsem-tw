@@ -25,6 +25,14 @@ public class StartCycleContext extends PipelineContext {
      */
     private PerformanceCycle cycle;
 
+    // === 更新資料 (可選) ===
+    private String cycleName;
+    private com.company.hrms.performance.domain.model.valueobject.CycleType cycleType;
+    private java.time.LocalDate startDate;
+    private java.time.LocalDate endDate;
+    private java.time.LocalDate selfEvalDeadline;
+    private java.time.LocalDate managerEvalDeadline;
+
     /**
      * 建構子
      */

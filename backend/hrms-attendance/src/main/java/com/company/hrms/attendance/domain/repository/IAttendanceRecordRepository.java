@@ -4,11 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.company.hrms.attendance.domain.model.aggregate.AttendanceRecord;
 import com.company.hrms.attendance.domain.model.valueobject.RecordId;
-import com.company.hrms.common.infrastructure.persistence.querydsl.repository.IQueryRepository;
+import com.company.hrms.common.query.QueryGroup;
 
-public interface IAttendanceRecordRepository extends IQueryRepository<AttendanceRecord, RecordId> {
+public interface IAttendanceRecordRepository {
     void save(AttendanceRecord record);
 
     Optional<AttendanceRecord> findById(RecordId id);
@@ -16,6 +19,10 @@ public interface IAttendanceRecordRepository extends IQueryRepository<Attendance
     List<AttendanceRecord> findByEmployeeIdAndDate(String employeeId, LocalDate date);
 
     List<AttendanceRecord> findByEmployeeIdAndDateRange(String employeeId, LocalDate startDate, LocalDate endDate);
+
+    List<AttendanceRecord> findByQuery(QueryGroup query);
+
+    Page<AttendanceRecord> findPageByQuery(QueryGroup query, Pageable pageable);
 
     void delete(RecordId id);
 }

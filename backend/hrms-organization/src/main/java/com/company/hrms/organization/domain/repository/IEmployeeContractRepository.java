@@ -1,14 +1,14 @@
 package com.company.hrms.organization.domain.repository;
 
-import com.company.hrms.organization.domain.model.aggregate.EmployeeContract;
-import com.company.hrms.organization.domain.model.valueobject.ContractId;
-import com.company.hrms.organization.domain.model.valueobject.ContractStatus;
-import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.company.hrms.organization.domain.model.aggregate.EmployeeContract;
+import com.company.hrms.organization.domain.model.valueobject.ContractId;
+import com.company.hrms.organization.domain.model.valueobject.ContractStatus;
+import com.company.hrms.organization.domain.model.valueobject.EmployeeId;
 
 /**
  * 員工合約 Repository 介面
@@ -69,6 +69,11 @@ public interface IEmployeeContractRepository {
      * 查詢所有即將到期的合約 (30天內)
      */
     List<EmployeeContract> findContractsExpiringSoon();
+
+    /**
+     * 依狀態查詢合約
+     */
+    List<EmployeeContract> findByStatus(ContractStatus status);
 
     /**
      * 儲存合約

@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetDocumentListRequest {
+@lombok.EqualsAndHashCode(callSuper = true)
+public class GetDocumentListRequest extends com.company.hrms.common.api.request.PageRequest {
     @com.company.hrms.common.query.QueryCondition.EQ("folder_id")
     private String folderId;
 

@@ -1,15 +1,19 @@
 package com.company.hrms.recruitment.application.service.task;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
 import com.company.hrms.common.query.QueryBuilder;
-import com.company.hrms.common.query.QueryCondition;
+import com.company.hrms.common.query.QueryCondition.BETWEEN;
+import com.company.hrms.common.query.QueryCondition.EQ;
 import com.company.hrms.recruitment.application.service.context.DashboardContext;
 import com.company.hrms.recruitment.domain.repository.ICandidateRepository;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -42,28 +46,14 @@ public class CountCandidateStatsTask implements PipelineTask<DashboardContext> {
     }
 
     private long countByStatus(String status, LocalDate from, LocalDate to, String deptId) {
-        CandidateStatCondition cond = new CandidateStatCondition();
-        cond.setStatus(status); // if null, @EQ skips or we handle explicitly? Fluent engine skips nulls by
-                                // default for @EQ usually.
-        // Actually for Date Range we need specific handling if not purely @BETWEEN on
-        // single field DTO
-        // Let's use clean separate logic or a reusable method
+        // 使用宣告式設計建構查詢條件
+        CandidateStatCondition cond = CandidateStatCondition.builder()
+                .status(status)
+                .dateRange(Arrays.asList(from, to))
+                .departmentId(deptId != null && !deptId.isBlank() ? UUID.fromString(deptId) : null)
+                .build();
 
-        var builder = QueryBuilder.where();
-        if (status != null) {
-            builder.eq("status", status);
-        }
-        // Date range
-        builder.between("applicationDate", from, to);
-
-        // TODO: Handle department join if needed. Assuming simple case for now or
-        // departmentId is on Candidate (unlikely, usually on JobOpening).
-        // Since original code didn't handle department filter on candidates, I will
-        // skip it too to match original logic,
-        // OR better, verify domain model. But for now I match original logic which
-        // relied on date mainly.
-
-        return candidateRepository.count(builder.build());
+        return candidateRepository.count(QueryBuilder.fromCondition(cond));
     }
 
     @Override
@@ -72,11 +62,15 @@ public class CountCandidateStatsTask implements PipelineTask<DashboardContext> {
     }
 
     @Data
+    @Builder
     public static class CandidateStatCondition {
-        @QueryCondition.EQ
+        @EQ
         private String status;
 
-        // Complex date logic usually handled by builder API if simple DTO annotation
-        // doesn't suffice (e.g. dynamic range)
+        @BETWEEN("applicationDate")
+        private java.util.List<LocalDate> dateRange;
+
+        @EQ("opening.departmentId")
+        private java.util.UUID departmentId;
     }
 }

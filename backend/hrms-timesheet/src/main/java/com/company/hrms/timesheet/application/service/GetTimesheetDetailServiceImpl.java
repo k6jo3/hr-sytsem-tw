@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
@@ -32,23 +33,31 @@ public class GetTimesheetDetailServiceImpl
                         String... args)
                         throws Exception {
 
-                // TODO: 邏輯未實作，確認此功能到底要幹嘛
                 Timesheet t = timesheetRepository.findById(new TimesheetId(UUID.fromString(request.getTimesheetId())))
                                 .orElseThrow(() -> new EntityNotFoundException("Timesheet", request.getTimesheetId()));
 
-                // 基本權限檢查 (可選：移至 Policy)
-                // 僅擁有者或審核者 (若已分配) 可查看詳情
-                // UUID userId = UUID.fromString(currentUser.getUserId());
-                // boolean isOwner = t.getEmployeeId().equals(userId);
-                // boolean isApprover = t.getApprovedBy() != null &&
-                // t.getApprovedBy().equals(userId);
-                // if (!isOwner && !isApprover) {
-                // 目前假設若持有 ID 即可查看 (或依賴 Gateway/Role)
-                // 或在此實作嚴格檢查
-                // throw new DomainException("無權限查看此工時表");
-                // }
+                // 權限檢查
+                validatePermission(t, currentUser);
 
                 return toResponse(t);
+        }
+
+        /**
+         * 驗證存取權限
+         * 1. 只有本人可以查看自己的工時表
+         * 2. 具有管理權限 (timesheet:approve 或 timesheet:read:all) 的使用者可以查看
+         * 3. 管理員 (ADMIN) 可以查看
+         */
+        private void validatePermission(Timesheet t, JWTModel currentUser) {
+                UUID currentUserId = UUID.fromString(currentUser.getUserId());
+                boolean isOwner = t.getEmployeeId().equals(currentUserId);
+                boolean isAdmin = currentUser.hasRole("ADMIN");
+                boolean hasReadPermission = currentUser.hasPermission("timesheet:approve") ||
+                                currentUser.hasPermission("timesheet:read:all");
+
+                if (!isOwner && !isAdmin && !hasReadPermission) {
+                        throw new DomainException("您無權限查看此工時表詳情");
+                }
         }
 
         private GetTimesheetDetailResponse toResponse(Timesheet t) {

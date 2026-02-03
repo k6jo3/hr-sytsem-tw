@@ -28,21 +28,10 @@ public class GetTimesheetSummaryServiceImpl
         public GetTimesheetSummaryResponse getResponse(GetTimesheetSummaryRequest request, JWTModel currentUser,
                         String... args)
                         throws Exception {
-                // TODO: 不符合Fluent-Query-Engine設計
                 // 建構查詢條件
-                QueryBuilder builder = QueryBuilder.where();
-
-                if (request.getStartDate() != null) {
-                        builder.gte("periodStartDate", request.getStartDate());
-                }
-                if (request.getEndDate() != null) {
-                        builder.lte("periodEndDate", request.getEndDate());
-                }
-                if (request.getEmployeeId() != null) {
-                        builder.eq("employeeId", request.getEmployeeId());
-                }
-
-                QueryGroup query = builder.build();
+                QueryGroup query = QueryBuilder.where()
+                                .fromDto(request)
+                                .build();
 
                 // 查詢所有符合條件的工時表（不分頁）
                 var timesheets = timesheetRepository.findAll(query, org.springframework.data.domain.Pageable.unpaged())

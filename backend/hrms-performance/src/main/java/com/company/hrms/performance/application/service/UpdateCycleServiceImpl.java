@@ -12,6 +12,7 @@ import com.company.hrms.performance.application.service.context.StartCycleContex
 import com.company.hrms.performance.application.service.task.LoadCycleTask;
 import com.company.hrms.performance.application.service.task.PublishCycleEventsTask;
 import com.company.hrms.performance.application.service.task.SaveCycleTask;
+import com.company.hrms.performance.application.service.task.UpdateCycleTask;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class UpdateCycleServiceImpl implements CommandApiService<UpdateCycleRequest, SuccessResponse> {
 
     private final LoadCycleTask loadCycleTask;
+    private final UpdateCycleTask updateCycleTask;
     private final SaveCycleTask saveCycleTask;
     private final PublishCycleEventsTask publishEventsTask;
 
@@ -32,19 +34,16 @@ public class UpdateCycleServiceImpl implements CommandApiService<UpdateCycleRequ
             throws Exception {
 
         StartCycleContext ctx = new StartCycleContext(req.getCycleId());
+        ctx.setCycleName(req.getCycleName());
+        ctx.setCycleType(req.getCycleType());
+        ctx.setStartDate(req.getStartDate());
+        ctx.setEndDate(req.getEndDate());
+        ctx.setSelfEvalDeadline(req.getSelfEvalDeadline());
+        ctx.setManagerEvalDeadline(req.getManagerEvalDeadline());
 
         BusinessPipeline.start(ctx)
                 .next(loadCycleTask)
-                .next(context -> {
-                    // 更新週期名稱 (使用 Domain 方法)
-                    if (req.getCycleName() != null) {
-                        context.getCycle().updateCycleName(req.getCycleName());
-                    }
-                    // 更新考核期間 (使用 Domain 方法)
-                    if (req.getStartDate() != null && req.getEndDate() != null) {
-                        context.getCycle().updatePeriod(req.getStartDate(), req.getEndDate());
-                    }
-                })
+                .next(updateCycleTask)
                 .next(saveCycleTask)
                 .next(publishEventsTask)
                 .execute();

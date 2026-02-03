@@ -31,15 +31,6 @@ public class UpdateTimesheetEntryServiceImpl
             throws Exception {
         UpdateTimesheetEntryContext context = new UpdateTimesheetEntryContext(request);
         context.setUserId(UUID.fromString(currentUser.getUserId()));
-        // TODO: 邏輯未實作，請確認此功能是幹嘛的，如不需要，請移除此api
-        // Note: We skip ValidateEntryTask (Project Service check) for now to save
-        // time/complexity,
-        // assuming Project/Task ID validity is checked or less critical for update if
-        // unchanged.
-        // Ideally we SHOULD re-validate project/task.
-        // I will skipping it for this step since I need to adapt ValidateEntryTask to
-        // accept UpdateContext which is different type.
-
         BusinessPipeline.start(context)
                 .next(loadTimesheetByIdTask)
                 .next(updateEntryTask)

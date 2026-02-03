@@ -1,11 +1,11 @@
 package com.company.hrms.iam.infrastructure.po;
 
+import java.sql.Timestamp;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Timestamp;
 
 /**
  * User Persistent Object
@@ -71,6 +71,11 @@ public class UserPO {
      * 最後登入時間
      */
     private Timestamp lastLoginAt;
+
+    /**
+     * 最後登出時間
+     */
+    private Timestamp lastLogoutAt;
 
     /**
      * 密碼變更時間

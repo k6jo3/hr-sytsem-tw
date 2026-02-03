@@ -26,17 +26,17 @@ public class LockTimesheetServiceImpl implements CommandApiService<LockTimesheet
         @Override
         public LockTimesheetResponse execCommand(LockTimesheetRequest request, JWTModel currentUser, String... args)
                         throws Exception {
-                // TODO: 參數命名不符合clean code
-                Timesheet t = timesheetRepository.findById(new TimesheetId(UUID.fromString(request.getTimesheetId())))
+                Timesheet timesheet = timesheetRepository
+                                .findById(new TimesheetId(UUID.fromString(request.getTimesheetId())))
                                 .orElseThrow(() -> new EntityNotFoundException("Timesheet", request.getTimesheetId()));
 
-                t.lock();
+                timesheet.lock();
 
-                timesheetRepository.save(t);
+                timesheetRepository.save(timesheet);
 
                 return LockTimesheetResponse.builder()
-                                .timesheetId(t.getId().getValue().toString())
-                                .locked(t.isLocked())
+                                .timesheetId(timesheet.getId().getValue().toString())
+                                .locked(timesheet.isLocked())
                                 .build();
         }
 }

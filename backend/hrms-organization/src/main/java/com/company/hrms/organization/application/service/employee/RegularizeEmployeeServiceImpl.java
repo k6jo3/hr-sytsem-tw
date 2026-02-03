@@ -29,11 +29,11 @@ import lombok.extern.slf4j.Slf4j;
  * <li>PublishProbationPassedEventTask - 發布轉正事件</li>
  * </ol>
  */
-@Service("completeProbationServiceImpl")
+@Service("regularizeEmployeeServiceImpl")
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class CompleteProbationServiceImpl
+public class RegularizeEmployeeServiceImpl
         implements CommandApiService<Object, Void> {
 
     // === Pipeline Tasks ===

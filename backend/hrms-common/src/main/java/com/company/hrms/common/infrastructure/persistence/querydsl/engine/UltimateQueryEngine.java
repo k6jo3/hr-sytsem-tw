@@ -3,6 +3,7 @@ package com.company.hrms.common.infrastructure.persistence.querydsl.engine;
 import java.beans.Introspector;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.company.hrms.common.query.FilterUnit;
@@ -135,53 +136,86 @@ public class UltimateQueryEngine<T> {
     /**
      * 根據運算子類型建立對應的 Querydsl 謂詞
      */
-    @SuppressWarnings({ "rawtypes" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private BooleanExpression createPredicate(PathBuilder<?> path, String fieldName, Operator op, Object value) {
+        // 取得欄位類型以進行必要的轉換
+        Class<?> fieldType = path.get(fieldName).getType();
+        Object finalValue = value;
+
+        // 自動處理 Enum 轉換 (如果值是 String)
+        if (fieldType != null && fieldType.isEnum() && value != null) {
+            if (value instanceof String) {
+                finalValue = Enum.valueOf((Class<Enum>) fieldType, (String) value);
+            } else if (value instanceof Collection) {
+                finalValue = ((Collection<?>) value).stream()
+                        .map(v -> v instanceof String ? Enum.valueOf((Class<Enum>) fieldType, (String) v) : v)
+                        .toList();
+            } else if (value.getClass().isArray()) {
+                Object[] arr = (Object[]) value;
+                finalValue = java.util.Arrays.stream(arr)
+                        .map(v -> v instanceof String ? Enum.valueOf((Class<Enum>) fieldType, (String) v) : v)
+                        .toArray();
+            }
+        }
+
         switch (op) {
             case EQ:
-                return path.get(fieldName).eq(value);
+                return path.get(fieldName).eq(finalValue);
 
             case NE:
-                return path.get(fieldName).ne(value);
+                return path.get(fieldName).ne(finalValue);
 
             case GT:
-                return path.getComparable(fieldName, Comparable.class).gt((Comparable) value);
+                return path.getComparable(fieldName, Comparable.class).gt((Comparable) finalValue);
 
             case LT:
-                return path.getComparable(fieldName, Comparable.class).lt((Comparable) value);
+                return path.getComparable(fieldName, Comparable.class).lt((Comparable) finalValue);
 
             case GTE:
-                return path.getComparable(fieldName, Comparable.class).goe((Comparable) value);
+                return path.getComparable(fieldName, Comparable.class).goe((Comparable) finalValue);
 
             case LTE:
-                return path.getComparable(fieldName, Comparable.class).loe((Comparable) value);
+                return path.getComparable(fieldName, Comparable.class).loe((Comparable) finalValue);
 
             case LIKE:
-                return path.getString(fieldName).containsIgnoreCase((String) value);
+                String likeValue = String.valueOf(finalValue);
+                // 如果值已經包含通配符，使用 like；否則使用 contains (自動包裝通配符)
+                if (likeValue.contains("%") || likeValue.contains("_")) {
+                    return path.getString(fieldName).likeIgnoreCase(likeValue);
+                }
+                return path.getString(fieldName).containsIgnoreCase(likeValue);
 
             case IN:
-                if (value instanceof Collection) {
-                    return path.get(fieldName).in((Collection<?>) value);
-                } else if (value instanceof Object[]) {
-                    return path.get(fieldName).in((Object[]) value);
+                if (finalValue instanceof Collection) {
+                    return path.get(fieldName).in((Collection<?>) finalValue);
+                } else if (finalValue instanceof Object[]) {
+                    return path.get(fieldName).in((Object[]) finalValue);
                 }
                 throw new IllegalArgumentException("IN 運算子需要 Collection 或 Array 類型的值");
 
             case NOT_IN:
-                if (value instanceof Collection) {
-                    return path.get(fieldName).notIn((Collection<?>) value);
-                } else if (value instanceof Object[]) {
-                    return path.get(fieldName).notIn((Object[]) value);
+                if (finalValue instanceof Collection) {
+                    return path.get(fieldName).notIn((Collection<?>) finalValue);
+                } else if (finalValue instanceof Object[]) {
+                    return path.get(fieldName).notIn((Object[]) finalValue);
                 }
                 throw new IllegalArgumentException("NOT_IN 運算子需要 Collection 或 Array 類型的值");
 
             case BETWEEN:
-                if (value instanceof Object[] && ((Object[]) value).length == 2) {
-                    Object[] range = (Object[]) value;
-                    return path.getComparable(fieldName, Comparable.class)
-                        .between((Comparable) range[0], (Comparable) range[1]);
+                Object[] range;
+                if (finalValue instanceof List) {
+                    range = ((List<?>) finalValue).toArray();
+                } else if (finalValue instanceof Object[]) {
+                    range = (Object[]) finalValue;
+                } else {
+                    throw new IllegalArgumentException("BETWEEN 運算子需要包含兩個元素的 List 或 Array");
                 }
-                throw new IllegalArgumentException("BETWEEN 運算子需要包含兩個元素的陣列");
+
+                if (range.length == 2) {
+                    return path.getComparable(fieldName, Comparable.class)
+                            .between((Comparable) range[0], (Comparable) range[1]);
+                }
+                throw new IllegalArgumentException("BETWEEN 運算子需要正好兩個元素");
 
             case IS_NULL:
                 return path.get(fieldName).isNull();

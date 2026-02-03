@@ -204,6 +204,33 @@ public class PerformanceCycle extends AggregateRoot<CycleId> {
     }
 
     /**
+     * 更新截止日
+     */
+    public void updateDeadlines(LocalDate selfDeadline, LocalDate managerDeadline) {
+        if (status != CycleStatus.DRAFT) {
+            throw new IllegalStateException("只有草稿狀態的週期可以修改");
+        }
+        validateDeadlines(this.endDate, selfDeadline, managerDeadline);
+
+        this.selfEvalDeadline = selfDeadline;
+        this.managerEvalDeadline = managerDeadline;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 更新考核類型
+     */
+    public void updateCycleType(CycleType newType) {
+        if (status != CycleStatus.DRAFT) {
+            throw new IllegalStateException("只有草稿狀態的週期可以修改");
+        }
+        validateCycleType(newType);
+
+        this.cycleType = newType;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
      * 儲存考核表單範本
      */
     public void saveTemplate(EvaluationTemplate template) {

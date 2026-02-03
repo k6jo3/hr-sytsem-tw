@@ -7,12 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.workflow.api.request.GetWorkflowInstanceDetailRequest;
 import com.company.hrms.workflow.api.response.TaskHistoryResponse;
 import com.company.hrms.workflow.api.response.WorkflowInstanceDetailResponse;
 import com.company.hrms.workflow.infrastructure.entity.WorkflowInstanceEntity;
-import com.company.hrms.workflow.infrastructure.repository.IWorkflowInstanceJpaRepository;
+import com.company.hrms.workflow.infrastructure.repository.WorkflowInstanceQueryRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class GetWorkflowInstanceDetailServiceImpl
                 implements QueryApiService<GetWorkflowInstanceDetailRequest, WorkflowInstanceDetailResponse> {
 
-        private final IWorkflowInstanceJpaRepository repository;
+        private final WorkflowInstanceQueryRepository repository;
 
         @Override
         public WorkflowInstanceDetailResponse getResponse(GetWorkflowInstanceDetailRequest req, JWTModel currentUser,
@@ -30,7 +31,8 @@ public class GetWorkflowInstanceDetailServiceImpl
 
                 String instanceId = (args.length > 0) ? args[0] : req.getInstanceId();
 
-                WorkflowInstanceEntity entity = repository.findById(instanceId)
+                WorkflowInstanceEntity entity = repository
+                                .findOne(QueryBuilder.where().eq("instanceId", instanceId).build())
                                 .orElseThrow(() -> new NoSuchElementException("Instance not found: " + instanceId));
 
                 return WorkflowInstanceDetailResponse.builder()

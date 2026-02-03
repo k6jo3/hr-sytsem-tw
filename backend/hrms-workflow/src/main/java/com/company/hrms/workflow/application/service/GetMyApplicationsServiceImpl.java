@@ -1,21 +1,20 @@
 package com.company.hrms.workflow.application.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.company.hrms.common.infrastructure.persistence.querydsl.engine.UltimateQueryEngine;
+import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.workflow.api.request.GetMyApplicationsRequest;
 import com.company.hrms.workflow.api.response.MyApplicationsResponse;
-import com.company.hrms.workflow.infrastructure.entity.WorkflowInstanceEntity;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.company.hrms.workflow.application.service.context.MyApplicationsContext;
+import com.company.hrms.workflow.application.service.task.instance.FetchMyApplicationsTask;
+import com.company.hrms.workflow.application.service.task.instance.TransformMyApplicationsResponseTask;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,51 +24,31 @@ import lombok.RequiredArgsConstructor;
 public class GetMyApplicationsServiceImpl
                 implements QueryApiService<GetMyApplicationsRequest, Page<MyApplicationsResponse>> {
 
-        private final JPAQueryFactory factory;
+        private final FetchMyApplicationsTask fetchTask;
+        private final TransformMyApplicationsResponseTask transformTask;
 
         @Override
         public Page<MyApplicationsResponse> getResponse(GetMyApplicationsRequest req, JWTModel currentUser,
                         String... args)
                         throws Exception {
-                // TODO: 不符合business pipeline以及Fluent-Query-Engine設計
-                UltimateQueryEngine<WorkflowInstanceEntity> engine = new UltimateQueryEngine<>(factory,
-                                WorkflowInstanceEntity.class);
 
-                // Security: Force filter by applicantId = current user
-                req.eq("applicantId", currentUser.getUserId());
-
-                BooleanExpression predicate = engine.parse(req);
-
-                JPAQuery<WorkflowInstanceEntity> query = engine.getQuery();
-                if (predicate != null) {
-                        query.where(predicate);
+                // 1. Prepare Pagination (Default sort by startedAt desc)
+                Pageable pageable = PageRequest.of(0, 10, Sort.by("startedAt").descending());
+                if (args != null && args.length >= 2) {
+                        int page = Integer.parseInt(args[0]);
+                        int size = Integer.parseInt(args[1]);
+                        pageable = PageRequest.of(page, size, Sort.by("startedAt").descending());
                 }
 
-                // Count Query
-                UltimateQueryEngine<WorkflowInstanceEntity> countEngine = new UltimateQueryEngine<>(factory,
-                                WorkflowInstanceEntity.class);
-                BooleanExpression countPred = countEngine.parse(req);
-                long finalTotal = countEngine.getQuery().where(countPred).select(countEngine.getEntityPath().count())
-                                .fetchOne();
+                // 2. Setup Context
+                MyApplicationsContext context = new MyApplicationsContext(req, currentUser, pageable);
 
-                List<WorkflowInstanceEntity> entities = query
-                                .offset(req.getPageable().getOffset())
-                                .limit(req.getPageable().getPageSize())
-                                .orderBy(engine.getEntityPath().getString("startedAt").desc())
-                                .fetch();
+                // 3. Execute Pipeline
+                BusinessPipeline.start(context)
+                                .next(fetchTask)
+                                .next(transformTask)
+                                .execute();
 
-                List<MyApplicationsResponse> content = entities.stream().map(e -> MyApplicationsResponse.builder()
-                                .instanceId(e.getInstanceId())
-                                .businessType(e.getBusinessType())
-                                .businessId(e.getBusinessId())
-                                .businessUrl(e.getBusinessUrl())
-                                .currentNodeName(e.getCurrentNodeName())
-                                .status(e.getStatus().name())
-                                .startedAt(e.getStartedAt())
-                                .completedAt(e.getCompletedAt())
-                                .summary(e.getSummary())
-                                .build()).collect(Collectors.toList());
-
-                return new org.springframework.data.domain.PageImpl<>(content, req.getPageable(), finalTotal);
+                return context.getResponse();
         }
 }

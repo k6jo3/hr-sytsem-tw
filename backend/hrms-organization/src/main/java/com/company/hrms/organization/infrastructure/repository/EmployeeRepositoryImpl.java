@@ -45,6 +45,20 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     }
 
     @Override
+    public List<Employee> findByIdIn(java.util.Set<EmployeeId> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        List<String> idStrings = ids.stream()
+                .map(id -> id.getValue().toString())
+                .collect(Collectors.toList());
+
+        return employeeDAO.findByIds(idStrings).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Employee> findAll() {
         return employeeDAO.findAll().stream()
                 .map(this::toDomain)

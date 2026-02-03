@@ -14,40 +14,65 @@ import com.company.hrms.attendance.domain.model.valueobject.ApplicationStatus;
 import com.company.hrms.attendance.domain.model.valueobject.LeavePeriodType;
 import com.company.hrms.attendance.domain.model.valueobject.LeaveTypeId;
 import com.company.hrms.attendance.domain.repository.ILeaveApplicationRepository;
-import com.company.hrms.attendance.infrastructure.dao.LeaveApplicationDAO;
 import com.company.hrms.attendance.infrastructure.po.LeaveApplicationPO;
-
-import lombok.RequiredArgsConstructor;
+import com.company.hrms.common.infrastructure.persistence.querydsl.repository.BaseRepository;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
-@RequiredArgsConstructor
-public class LeaveApplicationRepositoryImpl implements ILeaveApplicationRepository {
+public class LeaveApplicationRepositoryImpl extends BaseRepository<LeaveApplicationPO, String>
+        implements ILeaveApplicationRepository {
 
-    private final LeaveApplicationDAO leaveApplicationDAO;
+    public LeaveApplicationRepositoryImpl(JPAQueryFactory factory) {
+        super(factory, LeaveApplicationPO.class);
+    }
 
     @Override
     public Optional<LeaveApplication> findById(ApplicationId id) {
-        return leaveApplicationDAO.findById(id.getValue()).map(this::toDomain);
+        return super.findById(id.getValue()).map(this::toDomain);
     }
 
     @Override
     public List<LeaveApplication> findByEmployeeId(String employeeId) {
-        return leaveApplicationDAO.findByEmployeeId(employeeId).stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        QueryGroup query = QueryBuilder.where()
+                .and("employeeId", Operator.EQ, employeeId)
+                .build();
+        return findByQuery(query);
     }
 
     @Override
     public List<LeaveApplication> findByStatus(ApplicationStatus status) {
-        return leaveApplicationDAO.findByStatus(status.name()).stream()
-                .map(this::toDomain)
-                .collect(Collectors.toList());
+        QueryGroup query = QueryBuilder.where()
+                .and("status", Operator.EQ, status.name())
+                .build();
+        return findByQuery(query);
     }
 
     @Override
     public List<LeaveApplication> findByEmployeeIdAndDateRange(String employeeId, LocalDate startDate,
             LocalDate endDate) {
-        return leaveApplicationDAO.findByEmployeeIdAndDateRange(employeeId, startDate, endDate).stream()
+        QueryGroup query = QueryBuilder.where()
+                .and("employeeId", Operator.EQ, employeeId)
+                .and("startDate", Operator.LTE, endDate)
+                .and("endDate", Operator.GTE, startDate)
+                .build();
+        return findByQuery(query);
+    }
+
+    @Override
+    public List<LeaveApplication> findByDateRange(LocalDate startDate, LocalDate endDate) {
+        QueryGroup query = QueryBuilder.where()
+                .and("startDate", Operator.LTE, endDate)
+                .and("endDate", Operator.GTE, startDate)
+                .build();
+        return findByQuery(query);
+    }
+
+    @Override
+    public List<LeaveApplication> findByQuery(QueryGroup query) {
+        return super.findAll(query).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -55,19 +80,19 @@ public class LeaveApplicationRepositoryImpl implements ILeaveApplicationReposito
     @Override
     public void save(LeaveApplication application) {
         LeaveApplicationPO po = toPO(application);
-        if (leaveApplicationDAO.findById(po.getId()).isPresent()) {
+        if (super.findById(po.getId()).isPresent()) {
             po.setUpdatedAt(LocalDateTime.now());
-            leaveApplicationDAO.update(po);
+            super.update(po);
         } else {
             po.setCreatedAt(LocalDateTime.now());
             po.setUpdatedAt(LocalDateTime.now());
-            leaveApplicationDAO.insert(po);
+            super.save(po);
         }
     }
 
     @Override
     public void delete(ApplicationId id) {
-        leaveApplicationDAO.deleteById(id.getValue());
+        super.deleteById(id.getValue());
     }
 
     private LeaveApplication toDomain(LeaveApplicationPO po) {
@@ -86,18 +111,18 @@ public class LeaveApplicationRepositoryImpl implements ILeaveApplicationReposito
     }
 
     private LeaveApplicationPO toPO(LeaveApplication application) {
-        LeaveApplicationPO po = new LeaveApplicationPO();
-        po.setId(application.getId().getValue());
-        po.setEmployeeId(application.getEmployeeId());
-        po.setLeaveTypeId(application.getLeaveTypeId().getValue());
-        po.setStartDate(application.getStartDate());
-        po.setEndDate(application.getEndDate());
-        po.setStatus(application.getStatus().name());
-        po.setReason(application.getReason());
-        po.setStartPeriod(application.getStartPeriod() != null ? application.getStartPeriod().name() : null);
-        po.setEndPeriod(application.getEndPeriod() != null ? application.getEndPeriod().name() : null);
-        po.setProofAttachmentUrl(application.getProofAttachmentUrl());
-        po.setRejectionReason(application.getRejectionReason());
-        return po;
+        return LeaveApplicationPO.builder()
+                .id(application.getId().getValue())
+                .employeeId(application.getEmployeeId())
+                .leaveTypeId(application.getLeaveTypeId().getValue())
+                .startDate(application.getStartDate())
+                .endDate(application.getEndDate())
+                .startPeriod(application.getStartPeriod() != null ? application.getStartPeriod().name() : null)
+                .endPeriod(application.getEndPeriod() != null ? application.getEndPeriod().name() : null)
+                .status(application.getStatus().name())
+                .reason(application.getReason())
+                .proofAttachmentUrl(application.getProofAttachmentUrl())
+                .rejectionReason(application.getRejectionReason())
+                .build();
     }
 }

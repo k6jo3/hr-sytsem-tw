@@ -1,7 +1,7 @@
 package com.company.hrms.document.application.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,16 +27,11 @@ public class GetDocumentListServiceImpl implements QueryApiService<GetDocumentLi
     @Override
     public Page<DocumentResponse> getResponse(GetDocumentListRequest req, JWTModel currentUser, String... args) {
 
-        // Populate implicit filters from currentUser if needed
-        if (currentUser != null) {
-            // TODO: 未實作邏輯
-            // Logic handled in Assembler or here
-        }
+        // 建立查詢條件，並傳入 currentUser 以進行權限過濾 (如：非管理員僅能查看公開或個人的文件)
+        var query = queryAssembler.toQueryGroup(req, currentUser);
 
-        var query = queryAssembler.toQueryGroup(req);
-
-        // Default paging
-        var pageable = PageRequest.of(0, 20);
+        // 使用 Request 中帶的分頁資訊
+        Pageable pageable = req.toPageable();
 
         return repository.findDocuments(query, pageable)
                 .map(responseAssembler::toResponse);

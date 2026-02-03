@@ -34,6 +34,10 @@ public class LeaveApplicationDAO {
         return leaveApplicationMapper.selectByEmployeeIdAndDateRange(employeeId, startDate, endDate);
     }
 
+    public List<LeaveApplicationPO> findByDateRange(LocalDate startDate, LocalDate endDate) {
+        return leaveApplicationMapper.selectByDateRange(startDate, endDate);
+    }
+
     public void insert(LeaveApplicationPO application) {
         leaveApplicationMapper.insert(application);
     }

@@ -32,6 +32,7 @@ class ShiftTest {
 
             // Then
             assertNotNull(shift.getId());
+            assertEquals("S001", shift.getCode());
             assertEquals("常規班", shift.getName());
             assertEquals(ShiftType.REGULAR, shift.getType());
             assertEquals(LocalTime.of(9, 0), shift.getWorkStartTime());
@@ -43,7 +44,16 @@ class ShiftTest {
         void shouldThrowExceptionWhenNameIsBlank() {
             // When & Then
             assertThrows(IllegalArgumentException.class,
-                    () -> new Shift(new ShiftId("shift-001"), "ORG001", "", ShiftType.REGULAR,
+                    () -> new Shift(new ShiftId("shift-001"), "ORG001", "S001", "", ShiftType.REGULAR,
+                            LocalTime.of(9, 0), LocalTime.of(18, 0)));
+        }
+
+        @Test
+        @DisplayName("編碼為空時應拋出例外")
+        void shouldThrowExceptionWhenCodeIsBlank() {
+            // When & Then
+            assertThrows(IllegalArgumentException.class,
+                    () -> new Shift(new ShiftId("shift-001"), "ORG001", "", "常規班", ShiftType.REGULAR,
                             LocalTime.of(9, 0), LocalTime.of(18, 0)));
         }
     }
@@ -119,6 +129,7 @@ class ShiftTest {
         return new Shift(
                 new ShiftId("shift-001"),
                 "ORG001",
+                "S001",
                 "常規班",
                 ShiftType.REGULAR,
                 LocalTime.of(9, 0),

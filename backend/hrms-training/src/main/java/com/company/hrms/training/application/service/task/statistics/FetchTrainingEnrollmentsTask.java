@@ -18,7 +18,7 @@ public class FetchTrainingEnrollmentsTask implements PipelineTask<ExportTraining
     private final TrainingEnrollmentQueryRepository enrollmentRepository;
 
     @Override
-    public void execute(ExportTrainingStatisticsContext context) {
+    public void execute(ExportTrainingStatisticsContext context) throws Exception {
         List<TrainingEnrollmentEntity> enrollments = enrollmentRepository.findCompletedInPeriod(context.getStartDate(),
                 context.getEndDate());
         context.setEnrollments(enrollments);

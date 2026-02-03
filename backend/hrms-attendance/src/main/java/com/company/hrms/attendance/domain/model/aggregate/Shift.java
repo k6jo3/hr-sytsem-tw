@@ -15,6 +15,7 @@ import lombok.Getter;
 public class Shift extends AggregateRoot<ShiftId> {
 
     private String organizationId;
+    private String code; // 新增班別編碼
     private String name;
     private ShiftType type;
     private LocalTime workStartTime;
@@ -26,10 +27,11 @@ public class Shift extends AggregateRoot<ShiftId> {
     private boolean isActive;
     private boolean isDeleted;
 
-    public Shift(ShiftId id, String organizationId, String name, ShiftType type,
+    public Shift(ShiftId id, String organizationId, String code, String name, ShiftType type,
             LocalTime workStartTime, LocalTime workEndTime) {
         super(id);
         this.organizationId = organizationId;
+        this.code = code;
         this.name = name;
         this.type = type;
         this.workStartTime = workStartTime;
@@ -73,6 +75,9 @@ public class Shift extends AggregateRoot<ShiftId> {
         if (organizationId == null || organizationId.isBlank()) {
             throw new IllegalArgumentException("Organization ID cannot be empty");
         }
+        if (code == null || code.isBlank()) {
+            throw new IllegalArgumentException("Shift code cannot be empty");
+        }
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Shift name cannot be empty");
         }
@@ -84,13 +89,14 @@ public class Shift extends AggregateRoot<ShiftId> {
         }
     }
 
-    private Shift(ShiftId id, String organizationId, String name, ShiftType type,
+    private Shift(ShiftId id, String organizationId, String code, String name, ShiftType type,
             LocalTime workStartTime, LocalTime workEndTime,
             LocalTime breakStartTime, LocalTime breakEndTime,
             int lateToleranceMinutes, int earlyLeaveToleranceMinutes,
             boolean isActive, boolean isDeleted) {
         super(id);
         this.organizationId = organizationId;
+        this.code = code;
         this.name = name;
         this.type = type;
         this.workStartTime = workStartTime;
@@ -103,12 +109,12 @@ public class Shift extends AggregateRoot<ShiftId> {
         this.isDeleted = isDeleted;
     }
 
-    public static Shift reconstitute(ShiftId id, String organizationId, String name, ShiftType type,
+    public static Shift reconstitute(ShiftId id, String organizationId, String code, String name, ShiftType type,
             LocalTime workStartTime, LocalTime workEndTime,
             LocalTime breakStartTime, LocalTime breakEndTime,
             int lateToleranceMinutes, int earlyLeaveToleranceMinutes,
             boolean isActive, boolean isDeleted) {
-        return new Shift(id, organizationId, name, type, workStartTime, workEndTime,
+        return new Shift(id, organizationId, code, name, type, workStartTime, workEndTime,
                 breakStartTime, breakEndTime, lateToleranceMinutes, earlyLeaveToleranceMinutes,
                 isActive, isDeleted);
     }

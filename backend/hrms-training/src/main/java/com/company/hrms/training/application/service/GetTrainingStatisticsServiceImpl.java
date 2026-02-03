@@ -1,20 +1,22 @@
 package com.company.hrms.training.application.service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.query.QueryBuilder;
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.training.api.request.TrainingStatisticsQuery;
 import com.company.hrms.training.api.response.TrainingStatisticsResponse;
-import com.company.hrms.training.domain.model.aggregate.TrainingEnrollment;
 import com.company.hrms.training.domain.model.valueobject.EnrollmentStatus;
-import com.company.hrms.training.domain.repository.ITrainingEnrollmentRepository;
+import com.company.hrms.training.infrastructure.entity.TrainingEnrollmentEntity;
+import com.company.hrms.training.infrastructure.repository.TrainingEnrollmentQueryRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,18 +26,20 @@ import lombok.RequiredArgsConstructor;
 public class GetTrainingStatisticsServiceImpl
                 implements QueryApiService<TrainingStatisticsQuery, TrainingStatisticsResponse> {
 
-        private final ITrainingEnrollmentRepository enrollmentRepository;
+        private final TrainingEnrollmentQueryRepository enrollmentRepository;
 
         @Override
         public TrainingStatisticsResponse getResponse(TrainingStatisticsQuery query, JWTModel currentUser,
                         String... args) {
-                // Assume query contains date range or use defaults
-                // TODO: ‰∏çÁ¨¶?àbusiness pipelineË®≠Ë?
-                LocalDate startDate = query != null && query.getStartDate() != null ? query.getStartDate()
-                                : LocalDate.of(LocalDate.now().getYear(), 1, 1);
-                LocalDate endDate = query != null && query.getEndDate() != null ? query.getEndDate() : LocalDate.now();
+                // Use QueryBuilder to build query from request DTO
+                QueryGroup queryGroup = QueryBuilder.where()
+                                .fromDto(query)
+                                .build();
 
-                List<TrainingEnrollment> enrollments = enrollmentRepository.findByDateRange(startDate, endDate);
+                // Fetch all matching enrollments (unpaged)
+                List<TrainingEnrollmentEntity> enrollments = enrollmentRepository
+                                .findPage(queryGroup, Pageable.unpaged())
+                                .getContent();
 
                 int totalEnrollments = enrollments.size();
                 long completedCount = enrollments.stream().filter(e -> e.getStatus() == EnrollmentStatus.COMPLETED)
@@ -45,7 +49,7 @@ public class GetTrainingStatisticsServiceImpl
                 BigDecimal totalHours = enrollments.stream()
                                 .filter(e -> e.getStatus() == EnrollmentStatus.COMPLETED
                                                 && e.getCompletedHours() != null)
-                                .map(TrainingEnrollment::getCompletedHours)
+                                .map(TrainingEnrollmentEntity::getCompletedHours)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
                 // Map<String, Integer> coursesByCategory = ... requires join with Course, skip

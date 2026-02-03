@@ -128,4 +128,9 @@ public interface EmployeeMapper {
         int countByOrganizationId(@Param("organizationId") String organizationId);
 
         List<EmployeePO> selectAll();
+
+        /**
+         * 批量查詢員工
+         */
+        List<EmployeePO> selectByIds(@Param("ids") List<String> ids);
 }

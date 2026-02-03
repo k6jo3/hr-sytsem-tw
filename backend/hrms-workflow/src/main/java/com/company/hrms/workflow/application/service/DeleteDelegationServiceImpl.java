@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
+import com.company.hrms.workflow.api.request.DeleteDelegationRequest;
 // Assuming Delegation Repository exists or generic
 // I'll assume we can use generic JPA repo or existing Delegation one.
 // Actually CreateDelegationServiceImpl likely uses one. 
@@ -25,10 +26,12 @@ public class DeleteDelegationServiceImpl implements CommandApiService<DeleteDele
     @Override
     public Void execCommand(DeleteDelegationRequest req, JWTModel currentUser, String... args) throws Exception {
         String id = (args.length > 0) ? args[0] : req.getDelegationId();
-        // TODO: id如果是null呢?
-        if (id != null) {
-            repository.deleteById(id);
+
+        if (id == null || id.trim().isEmpty()) {
+            throw new IllegalArgumentException("Delegation ID is required");
         }
+
+        repository.deleteById(id);
 
         return null;
     }

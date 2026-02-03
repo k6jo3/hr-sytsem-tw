@@ -1,6 +1,7 @@
 package com.company.hrms.project.domain.model.aggregate;
 
 import com.company.hrms.common.domain.model.AggregateRoot;
+import com.company.hrms.project.domain.event.CustomerCreatedEvent;
 import com.company.hrms.project.domain.model.command.CreateCustomerCommand;
 import com.company.hrms.project.domain.model.command.UpdateCustomerCommand;
 import com.company.hrms.project.domain.model.valueobject.CustomerId;
@@ -11,7 +12,6 @@ import lombok.Getter;
 @Getter
 public class Customer extends AggregateRoot<CustomerId> {
 
-    private CustomerId id;
     private String customerCode;
     private String customerName;
     private String taxId;
@@ -23,8 +23,9 @@ public class Customer extends AggregateRoot<CustomerId> {
 
     // Domain Constructor
     private Customer(CustomerId id) {
-        super(id);
-        this.id = id;
+        super(id)
+
+        ;
     }
 
     public long getVersion() {
@@ -70,7 +71,11 @@ public class Customer extends AggregateRoot<CustomerId> {
         customer.phoneNumber = cmd.getPhoneNumber();
         customer.status = CustomerStatus.ACTIVE;
 
-        // CustomerCreatedEvent logic can be added here if needed in future
+        // 註冊領域事件
+        customer.registerEvent(new CustomerCreatedEvent(
+                customer.getId().getValue(),
+                customer.customerCode,
+                customer.customerName));
 
         return customer;
     }
