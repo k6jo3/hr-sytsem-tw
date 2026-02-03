@@ -73,31 +73,25 @@ public class CertificateRequestRepositoryImpl implements ICertificateRequestRepo
 
     private CertificateRequest toDomain(CertificateRequestPO po) {
         return CertificateRequest.builder()
-                .id(po.getRequestId())
-                .employeeId(po.getEmployeeId())
+                .id(UUID.fromString(po.getId()))
+                .employeeId(UUID.fromString(po.getEmployeeId()))
                 .certificateType(CertificateType.valueOf(po.getCertificateType()))
                 .purpose(po.getPurpose())
-                .quantity(po.getQuantity())
+                .quantity(po.getCopies())
                 .requestDate(po.getRequestDate())
                 .status(CertificateRequestStatus.valueOf(po.getStatus()))
-                .processedBy(po.getProcessedBy())
-                .processedAt(po.getProcessedAt())
-                .documentUrl(po.getDocumentUrl())
                 .build();
     }
 
     private CertificateRequestPO toPO(CertificateRequest request) {
         CertificateRequestPO po = new CertificateRequestPO();
-        po.setRequestId(request.getId());
-        po.setEmployeeId(request.getEmployeeId());
+        po.setId(request.getId().toString());
+        po.setEmployeeId(request.getEmployeeId().toString());
         po.setCertificateType(request.getCertificateType().name());
         po.setPurpose(request.getPurpose());
-        po.setQuantity(request.getQuantity());
+        po.setCopies(request.getQuantity());
         po.setRequestDate(request.getRequestDate());
         po.setStatus(request.getStatus().name());
-        po.setProcessedBy(request.getProcessedBy());
-        po.setProcessedAt(request.getProcessedAt());
-        po.setDocumentUrl(request.getDocumentUrl());
         return po;
     }
 }

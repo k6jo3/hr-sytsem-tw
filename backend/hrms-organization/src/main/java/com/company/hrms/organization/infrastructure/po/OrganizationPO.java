@@ -1,16 +1,22 @@
 package com.company.hrms.organization.infrastructure.po;
 
-import lombok.Data;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  * 組織持久化對象
  */
 @Data
+@Entity
+@Table(name = "organizations")
 public class OrganizationPO {
 
+    @Id
     private String id;
     private String code;
     private String name;
@@ -27,4 +33,7 @@ public class OrganizationPO {
     private String description;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean isDeleted = false;
+    private String createdBy;
+    private String updatedBy;
 }

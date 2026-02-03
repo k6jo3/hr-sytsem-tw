@@ -1,11 +1,12 @@
 package com.company.hrms.organization.infrastructure.mapper;
 
-import com.company.hrms.organization.infrastructure.po.EmployeeHistoryPO;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.company.hrms.organization.infrastructure.po.EmployeeHistoryPO;
 
 /**
  * 員工人事歷程 MyBatis Mapper
@@ -33,8 +34,7 @@ public interface EmployeeHistoryMapper {
      */
     List<EmployeeHistoryPO> selectByDateRange(
             @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
-    );
+            @Param("endDate") LocalDate endDate);
 
     /**
      * 新增歷程
@@ -55,4 +55,9 @@ public interface EmployeeHistoryMapper {
      * 根據員工 ID 刪除所有歷程
      */
     int deleteByEmployeeId(@Param("employeeId") String employeeId);
+
+    /**
+     * 檢查歷程是否存在
+     */
+    boolean existsById(@Param("id") String id);
 }

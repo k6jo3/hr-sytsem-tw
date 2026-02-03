@@ -70,27 +70,27 @@ public class EducationRepositoryImpl implements IEducationRepository {
 
     private Education toDomain(EducationPO po) {
         return Education.builder()
-                .id(new EducationId(po.getEducationId()))
-                .employeeId(po.getEmployeeId())
+                .id(new EducationId(UUID.fromString(po.getId())))
+                .employeeId(UUID.fromString(po.getEmployeeId()))
                 .degree(Degree.valueOf(po.getDegree()))
-                .school(po.getSchool())
+                .school(po.getSchoolName())
                 .major(po.getMajor())
                 .startDate(po.getStartDate())
                 .endDate(po.getEndDate())
-                .isHighestDegree(po.getIsHighestDegree() != null && po.getIsHighestDegree())
+                .isHighestDegree(po.getIsGraduated() != null && po.getIsGraduated())
                 .build();
     }
 
     private EducationPO toPO(Education entity) {
         EducationPO po = new EducationPO();
-        po.setEducationId(entity.getId().getValue());
-        po.setEmployeeId(entity.getEmployeeId());
+        po.setId(entity.getId().getValue().toString());
+        po.setEmployeeId(entity.getEmployeeId().toString());
         po.setDegree(entity.getDegree().name());
-        po.setSchool(entity.getSchool());
+        po.setSchoolName(entity.getSchool());
         po.setMajor(entity.getMajor());
         po.setStartDate(entity.getStartDate());
         po.setEndDate(entity.getEndDate());
-        po.setIsHighestDegree(entity.isHighestDegree());
+        po.setIsGraduated(entity.isHighestDegree());
         return po;
     }
 }

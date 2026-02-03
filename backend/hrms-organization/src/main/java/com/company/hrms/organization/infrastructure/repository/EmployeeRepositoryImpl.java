@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
+import com.company.hrms.common.infrastructure.persistence.querydsl.engine.UltimateQueryEngine;
+import com.company.hrms.common.query.FilterUnit;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
 import com.company.hrms.organization.domain.model.valueobject.Address;
@@ -24,6 +26,7 @@ import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
 import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 import com.company.hrms.organization.infrastructure.dao.EmployeeDAO;
 import com.company.hrms.organization.infrastructure.po.EmployeePO;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EmployeeRepositoryImpl implements IEmployeeRepository {
 
     private final EmployeeDAO employeeDAO;
+    private final JPAQueryFactory jpaQueryFactory;
 
     @Override
     public Optional<Employee> findById(EmployeeId id) {
@@ -172,16 +176,71 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     @Override
     public List<Employee> findByQuery(QueryGroup query,
             org.springframework.data.domain.Pageable pageable) {
-        // 目前尚未完整實作 QueryGroup 到 Criteria 的轉換
-        // 暫時僅支援空的查詢或回傳空列表
-        log.warn("Dynamic query (QueryGroup) is not fully supported yet. Returning empty list.");
-        return java.util.Collections.emptyList();
+        UltimateQueryEngine<EmployeePO> engine = new UltimateQueryEngine<>(jpaQueryFactory, EmployeePO.class);
+        QueryGroup mappedQuery = mapQueryFields(query);
+        com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(mappedQuery);
+
+        return engine.getQuery()
+                .where(predicate)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch()
+                .stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override
     public long countByQuery(QueryGroup query) {
-        log.warn("Dynamic count (QueryGroup) is not fully supported yet. Returning 0.");
-        return 0;
+        UltimateQueryEngine<EmployeePO> engine = new UltimateQueryEngine<>(jpaQueryFactory, EmployeePO.class);
+        QueryGroup mappedQuery = mapQueryFields(query);
+        com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(mappedQuery);
+
+        Long total = jpaQueryFactory.select(engine.getEntityPath().count())
+                .from(engine.getEntityPath())
+                .where(predicate)
+                .fetchOne();
+        return total != null ? total : 0L;
+    }
+
+    /**
+     * 將 QueryGroup 中的欄位名稱轉換為 PO 的屬性名稱 (snake_case -> camelCase)
+     */
+    private QueryGroup mapQueryFields(QueryGroup original) {
+        if (original == null) {
+            return null;
+        }
+        QueryGroup mapped = new QueryGroup(original.getJunction());
+        for (FilterUnit unit : original.getConditions()) {
+            mapped.add(new FilterUnit(translateFieldName(unit.getField()), unit.getOp(), unit.getValue()));
+        }
+        for (QueryGroup sub : original.getSubGroups()) {
+            mapped.addSubGroup(mapQueryFields(sub));
+        }
+        return mapped;
+    }
+
+    private String translateFieldName(String field) {
+        switch (field) {
+            case "employment_status":
+                return "employmentStatus";
+            case "is_deleted":
+                return "isDeleted";
+            case "department_id":
+                return "departmentId";
+            case "full_name":
+                return "fullName";
+            case "employee_number":
+                return "employeeNumber";
+            case "employment_type":
+                return "employmentType";
+            case "hire_date":
+                return "hireDate";
+            case "supervisor_id":
+                return "supervisorId";
+            default:
+                return field;
+        }
     }
 
     private Employee toDomain(EmployeePO po) {
@@ -279,6 +338,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
         po.setJobLevel(employee.getJobLevel());
         po.setEmploymentType(employee.getEmploymentType() != null ? employee.getEmploymentType().name() : null);
         po.setEmploymentStatus(employee.getEmploymentStatus() != null ? employee.getEmploymentStatus().name() : null);
+        po.setFullName(employee.getFullName());
         po.setHireDate(employee.getHireDate());
         po.setProbationEndDate(employee.getProbationEndDate());
         po.setTerminationDate(employee.getTerminationDate());

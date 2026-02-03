@@ -1,31 +1,38 @@
 package com.company.hrms.organization.infrastructure.po;
 
-import lombok.Data;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  * 員工持久化對象
  */
 @Data
+@Entity
+@Table(name = "employees")
 public class EmployeePO {
 
+    @Id
     private String id;
     private String employeeNumber;
 
     // 基本資料
     private String firstName;
     private String lastName;
+    private String fullName; // 用於模糊查詢
     private String englishName;
-    private String nationalId;  // 加密儲存
+    private String nationalId; // 加密儲存
     private LocalDate birthDate;
     private String gender;
     private String maritalStatus;
 
     // 聯絡方式
-    private String email;  // 公司 Email
-    private String phone;  // 手機
+    private String email; // 公司 Email
+    private String phone; // 手機
 
     // 地址
     private String addressPostalCode;
@@ -63,6 +70,7 @@ public class EmployeePO {
     // 審計
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean isDeleted = false;
     private String createdBy;
     private String updatedBy;
 }

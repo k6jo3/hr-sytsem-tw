@@ -16,8 +16,8 @@ import com.company.hrms.training.domain.model.aggregate.TrainingCourse;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 撱箇?隤脩???
- * 雿輻?函???Task Bean ?脰? Pipeline 蝺冽?
+ * 建立課程服務
+ * 使用獨立的 Task Bean 進行 Pipeline 編排
  */
 @Service("createCourseServiceImpl")
 @Transactional

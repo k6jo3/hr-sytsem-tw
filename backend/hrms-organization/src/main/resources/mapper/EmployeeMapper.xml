@@ -37,6 +37,7 @@
         <result column="supervisor_id" property="supervisorId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="is_deleted" property="isDeleted"/>
         <result column="created_by" property="createdBy"/>
         <result column="updated_by" property="updatedBy"/>
     </resultMap>
@@ -49,7 +50,7 @@
         bank_code, bank_branch_code, bank_account_number, bank_account_holder_name,
         department_id, job_title, job_level, employment_type, employment_status,
         hire_date, probation_end_date, termination_date, termination_reason, supervisor_id,
-        created_at, updated_at, created_by, updated_by
+        created_at, updated_at, is_deleted, created_by, updated_by
     </sql>
 
     <select id="selectById" resultMap="EmployeeResultMap">
@@ -166,7 +167,7 @@
             bank_code, bank_branch_code, bank_account_number, bank_account_holder_name,
             department_id, job_title, job_level, employment_type, employment_status,
             hire_date, probation_end_date, termination_date, termination_reason, supervisor_id,
-            created_at, updated_at, created_by, updated_by
+            created_at, updated_at, is_deleted, created_by, updated_by
         ) VALUES (
             #{id}, #{employeeNumber}, #{firstName}, #{lastName}, #{englishName}, #{gender}, #{birthDate},
             #{nationalId}, #{email}, #{phone}, #{maritalStatus},
@@ -175,7 +176,7 @@
             #{bankCode}, #{bankBranchCode}, #{bankAccountNumber}, #{bankAccountHolderName},
             #{departmentId}, #{jobTitle}, #{jobLevel}, #{employmentType}, #{employmentStatus},
             #{hireDate}, #{probationEndDate}, #{terminationDate}, #{terminationReason}, #{supervisorId},
-            #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
+            #{createdAt}, #{updatedAt}, #{isDeleted}, #{createdBy}, #{updatedBy}
         )
     </insert>
 
@@ -212,6 +213,7 @@
             termination_date = #{terminationDate},
             termination_reason = #{terminationReason},
             supervisor_id = #{supervisorId},
+            is_deleted = #{isDeleted},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}

@@ -87,17 +87,10 @@ class PayrollCalculationPipelineTest {
 			// Given
 			PayrollRun run = createPayrollRun();
 
-			// When & Then: 負數員工數應合理處理
-			// 根據實現，可能拋出異常或使用 0
-			try {
-				run.startExecution("USER-001", -10);
-				// 如果不拋異常，驗證統計已初始化
-				// TODO: PayrollRun.startExecution() 應驗證 totalEmployees >= 0，目前接受負數
-			assertThat(run.getStatistics().getTotalEmployees()).isEqualTo(-10);
-			} catch (IllegalArgumentException | DomainException e) {
-				// 預期的異常行為
-				assertThat(e.getMessage()).isNotNull();
-			}
+			// When & Then: 負數員工數應拋出異常
+			assertThatThrownBy(() -> run.startExecution("USER-001", -10))
+					.isInstanceOf(DomainException.class)
+					.hasMessageContaining("不可為負數");
 		}
 	}
 
