@@ -1,4 +1,4 @@
-package com.company.hrms.document.api;
+package com.company.hrms.document.api.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

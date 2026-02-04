@@ -15,7 +15,7 @@
 
 | 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
 | :--- | :--- | :--- | :--- | :--- |
-| DOC_D001 | 查詢資料夾內文件 | EMPLOYEE | `{"folderId":"F001"}` | `is_deleted = 0`, `folder_id = F001`, `visibility IN [PUBLIC, SHARED, DEPARTMENT]` |
+| DOC_D001 | 查詢資料夾內文件 | EMPLOYEE | `{"folderId":"F001"}` | `is_deleted = 0`, `folder_id = 'F001'`, `visibility IN [PUBLIC, SHARED, DEPARTMENT]` |
 | DOC_D002 | 依名稱模糊查詢 | EMPLOYEE | `{"name":"報告"}` | `is_deleted = 0`, `name LIKE '報告'`, `visibility IN [PUBLIC, SHARED, DEPARTMENT]` |
 | DOC_D003 | 依類型查詢 | EMPLOYEE | `{"type":"PDF"}` | `is_deleted = 0`, `type = 'PDF'`, `visibility IN [PUBLIC, SHARED, DEPARTMENT]` |
 | DOC_D004 | 查詢個人文件 | EMPLOYEE | `{}` | `is_deleted = 0`, `owner_id = 'currentUserId'` |

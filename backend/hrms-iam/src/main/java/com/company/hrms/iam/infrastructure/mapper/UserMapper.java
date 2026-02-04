@@ -125,8 +125,9 @@ public interface UserMapper {
          * 新增使用者角色關聯
          */
         @Insert("INSERT INTO user_roles (user_role_id, user_id, role_id, assigned_at) " +
-                        "VALUES (gen_random_uuid(), #{userId}, #{roleId}, CURRENT_TIMESTAMP)")
-        void insertUserRole(@Param("userId") String userId, @Param("roleId") String roleId);
+                        "VALUES (#{userRoleId}, #{userId}, #{roleId}, CURRENT_TIMESTAMP)")
+        void insertUserRole(@Param("userRoleId") String userRoleId, @Param("userId") String userId,
+                        @Param("roleId") String roleId);
 
         /**
          * 查詢使用者的角色 ID 列表

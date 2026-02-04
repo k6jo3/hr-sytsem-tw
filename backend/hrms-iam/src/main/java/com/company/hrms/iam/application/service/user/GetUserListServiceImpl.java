@@ -32,60 +32,60 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional(readOnly = true)
 public class GetUserListServiceImpl
-        extends AbstractQueryService<GetUserListRequest, PageResponse<UserListResponse>> {
+                extends AbstractQueryService<GetUserListRequest, PageResponse<UserListResponse>> {
 
-    private final IUserRepository userRepository;
+        private final IUserRepository userRepository;
 
-    @Override
-    protected QueryGroup buildQuery(GetUserListRequest request, JWTModel currentUser) {
-        log.info("Building query for user list: {}", request);
-        return QueryBuilder.where()
-                .fromDto(request)
-                .eq("is_deleted", 0)
-                // 這裡可以加入其他隱含過濾條件，例如 .eq("tenantId", currentUser.getTenantId())
-                .build();
-    }
+        @Override
+        protected QueryGroup buildQuery(GetUserListRequest request, JWTModel currentUser) {
+                log.info("Building query for user list: {}", request);
+                return QueryBuilder.where()
+                                .fromDto(request)
+                                .ne("status", "DELETED")
+                                // 這裡可以加入其他隱含過濾條件，例如 .eq("tenantId", currentUser.getTenantId())
+                                .build();
+        }
 
-    @Override
-    protected PageResponse<UserListResponse> executeQuery(
-            QueryGroup query,
-            GetUserListRequest request,
-            JWTModel currentUser,
-            String... args) throws Exception {
+        @Override
+        protected PageResponse<UserListResponse> executeQuery(
+                        QueryGroup query,
+                        GetUserListRequest request,
+                        JWTModel currentUser,
+                        String... args) throws Exception {
 
-        // 處理分頁
-        int page = request.getPage() > 0 ? request.getPage() - 1 : 0;
-        int size = request.getSize() > 0 ? request.getSize() : 20;
+                // 處理分頁
+                int page = request.getPage() > 0 ? request.getPage() - 1 : 0;
+                int size = request.getSize() > 0 ? request.getSize() : 20;
 
-        // 簡單處理排序
-        Sort sort = Sort.by(Sort.Direction.DESC, "create_time");
+                // 簡單處理排序
+                Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
 
-        Pageable pageable = PageRequest.of(page, size, sort);
+                Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<User> userPage = userRepository.findPage(query, pageable);
-        List<User> users = userPage.getContent();
-        long total = userPage.getTotalElements();
+                Page<User> userPage = userRepository.findPage(query, pageable);
+                List<User> users = userPage.getContent();
+                long total = userPage.getTotalElements();
 
-        List<UserListResponse> items = users.stream()
-                .map(this::toListResponse)
-                .collect(Collectors.toList());
+                List<UserListResponse> items = users.stream()
+                                .map(this::toListResponse)
+                                .collect(Collectors.toList());
 
-        return PageResponse.<UserListResponse>builder()
-                .items(items)
-                .total(total)
-                .page(request.getPage())
-                .size(request.getSize())
-                .totalPages(userPage.getTotalPages())
-                .build();
-    }
+                return PageResponse.<UserListResponse>builder()
+                                .items(items)
+                                .total(total)
+                                .page(request.getPage())
+                                .size(request.getSize())
+                                .totalPages(userPage.getTotalPages())
+                                .build();
+        }
 
-    private UserListResponse toListResponse(User user) {
-        return UserListResponse.builder()
-                .userId(user.getId().getValue())
-                .username(user.getUsername())
-                .email(user.getEmail().getValue())
-                .displayName(user.getDisplayName())
-                .status(user.getStatus().name())
-                .build();
-    }
+        private UserListResponse toListResponse(User user) {
+                return UserListResponse.builder()
+                                .userId(user.getId().getValue())
+                                .username(user.getUsername())
+                                .email(user.getEmail().getValue())
+                                .displayName(user.getDisplayName())
+                                .status(user.getStatus().name())
+                                .build();
+        }
 }

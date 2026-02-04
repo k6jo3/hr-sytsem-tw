@@ -34,8 +34,9 @@ public class GetMyDocumentsServiceImpl implements QueryApiService<GetDocumentLis
         QueryGroup query = queryAssembler.toQueryGroup(req, currentUser);
 
         // 強制篩選為本人文件 (覆蓋可能傳入的 ownerId)
-        // 注意: QueryBuilder 若已有 owner_id 條件，此處調用 eq 會新增一個 AND 條件
-        query.eq("owner_id", currentUser.getUserId());
+        if (currentUser != null && currentUser.getUserId() != null) {
+            query.eq("ownerId", currentUser.getUserId());
+        }
 
         // 使用 Request 中的分頁資訊
         Pageable pageable = req.toPageable();

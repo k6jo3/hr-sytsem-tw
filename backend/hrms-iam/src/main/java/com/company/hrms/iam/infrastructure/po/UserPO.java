@@ -2,6 +2,9 @@ package com.company.hrms.iam.infrastructure.po;
 
 import java.sql.Timestamp;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,11 +18,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "users")
 public class UserPO {
 
     /**
      * 使用者 ID (主鍵)
      */
+    @Id
     private String userId;
 
     /**

@@ -126,12 +126,12 @@ public abstract class BaseQueryEngineContractTest<T> extends BaseTest {
             case "IN":
                 @SuppressWarnings("unchecked")
                 List<Object> inValues = (List<Object>) value;
-                builder.in(field, inValues);
+                builder.in(field, inValues.toArray());
                 break;
             case "NOT_IN":
                 @SuppressWarnings("unchecked")
                 List<Object> notInValues = (List<Object>) value;
-                builder.notIn(field, notInValues);
+                builder.notIn(field, notInValues.toArray());
                 break;
             case "GT":
                 builder.gt(field, (Comparable<?>) value);

@@ -138,23 +138,81 @@ public class UltimateQueryEngine<T> {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private BooleanExpression createPredicate(PathBuilder<?> path, String fieldName, Operator op, Object value) {
-        // 取得欄位類型以進行必要的轉換
-        Class<?> fieldType = path.get(fieldName).getType();
+        // 取得基本欄位路徑
+        PathBuilder<?> fieldPath = path.get(fieldName);
+        Class<?> fieldType = fieldPath.getType();
+
+        // 如果 Querydsl 無法偵測類型 (返回 Object.class)，嘗試使用反射取得
+        if (fieldType == Object.class && path.getType() != null) {
+            try {
+                java.lang.reflect.Field field = path.getType().getDeclaredField(fieldName);
+                fieldType = field.getType();
+            } catch (Exception e) {
+                // 忽略，維持 Object.class
+            }
+        }
+
         Object finalValue = value;
+        final Class<?> targetFieldType = fieldType;
+
+        // 1. 扁平化處理: 解決可能出現的嵌套 Collection (例如 Object[] { List })
+        // 這通常發生在 Varargs 傳遞時誤傳入了一個集合
+        if (finalValue instanceof Object[] && ((Object[]) finalValue).length == 1) {
+            Object first = ((Object[]) finalValue)[0];
+            if (first instanceof Collection || (first != null && first.getClass().isArray())) {
+                finalValue = first;
+            }
+        }
 
         // 自動處理 Enum 轉換 (如果值是 String)
-        if (fieldType != null && fieldType.isEnum() && value != null) {
-            if (value instanceof String) {
-                finalValue = Enum.valueOf((Class<Enum>) fieldType, (String) value);
-            } else if (value instanceof Collection) {
-                finalValue = ((Collection<?>) value).stream()
-                        .map(v -> v instanceof String ? Enum.valueOf((Class<Enum>) fieldType, (String) v) : v)
+        if (targetFieldType != null && targetFieldType.isEnum() && finalValue != null) {
+            if (finalValue instanceof String) {
+                finalValue = Enum.valueOf((Class<Enum>) targetFieldType, (String) finalValue);
+            } else if (finalValue instanceof Collection) {
+                finalValue = ((Collection<?>) finalValue).stream()
+                        .map(v -> v instanceof String ? Enum.valueOf((Class<Enum>) targetFieldType, (String) v) : v)
                         .toList();
-            } else if (value.getClass().isArray()) {
-                Object[] arr = (Object[]) value;
+            } else if (finalValue.getClass().isArray()) {
+                Object[] arr = (Object[]) finalValue;
                 finalValue = java.util.Arrays.stream(arr)
-                        .map(v -> v instanceof String ? Enum.valueOf((Class<Enum>) fieldType, (String) v) : v)
+                        .map(v -> v instanceof String ? Enum.valueOf((Class<Enum>) targetFieldType, (String) v) : v)
                         .toArray();
+            }
+        }
+
+        // 自動處理日期類型轉換
+        boolean isDateType = targetFieldType != null
+                && (java.time.temporal.Temporal.class.isAssignableFrom(targetFieldType)
+                        || targetFieldType.getName().startsWith("java.time.")
+                        || targetFieldType.getName().contains("Date"));
+
+        if (isDateType && finalValue != null) {
+            if (finalValue instanceof String) {
+                String strValue = (String) finalValue;
+                if (targetFieldType == java.time.LocalDateTime.class) {
+                    if (strValue.length() == 10) {
+                        finalValue = java.time.LocalDate.parse(strValue).atStartOfDay();
+                    } else {
+                        finalValue = java.time.LocalDateTime.parse(strValue.replace(" ", "T"));
+                    }
+                } else if (targetFieldType == java.time.LocalDate.class) {
+                    finalValue = java.time.LocalDate.parse(strValue);
+                }
+            } else if (finalValue instanceof Collection) {
+                finalValue = ((Collection<?>) finalValue).stream()
+                        .map(v -> {
+                            if (v instanceof String) {
+                                String strV = (String) v;
+                                if (targetFieldType == java.time.LocalDateTime.class) {
+                                    return strV.length() == 10 ? java.time.LocalDate.parse(strV).atStartOfDay()
+                                            : java.time.LocalDateTime.parse(strV.replace(" ", "T"));
+                                } else if (targetFieldType == java.time.LocalDate.class) {
+                                    return java.time.LocalDate.parse(strV);
+                                }
+                            }
+                            return v;
+                        })
+                        .toList();
             }
         }
 
@@ -166,16 +224,16 @@ public class UltimateQueryEngine<T> {
                 return path.get(fieldName).ne(finalValue);
 
             case GT:
-                return path.getComparable(fieldName, Comparable.class).gt((Comparable) finalValue);
+                return path.getComparable(fieldName, (Class) targetFieldType).gt((Comparable) finalValue);
 
             case LT:
-                return path.getComparable(fieldName, Comparable.class).lt((Comparable) finalValue);
+                return path.getComparable(fieldName, (Class) targetFieldType).lt((Comparable) finalValue);
 
             case GTE:
-                return path.getComparable(fieldName, Comparable.class).goe((Comparable) finalValue);
+                return path.getComparable(fieldName, (Class) targetFieldType).goe((Comparable) finalValue);
 
             case LTE:
-                return path.getComparable(fieldName, Comparable.class).loe((Comparable) finalValue);
+                return path.getComparable(fieldName, (Class) targetFieldType).loe((Comparable) finalValue);
 
             case LIKE:
                 String likeValue = String.valueOf(finalValue);
@@ -187,19 +245,19 @@ public class UltimateQueryEngine<T> {
 
             case IN:
                 if (finalValue instanceof Collection) {
-                    return path.get(fieldName).in((Collection<?>) finalValue);
+                    return ((PathBuilder) fieldPath).in((Collection) finalValue);
                 } else if (finalValue instanceof Object[]) {
-                    return path.get(fieldName).in((Object[]) finalValue);
+                    return ((PathBuilder) fieldPath).in((Object[]) finalValue);
                 }
-                throw new IllegalArgumentException("IN 運算子需要 Collection 或 Array 類型的值");
+                return ((PathBuilder) fieldPath).eq(finalValue); // 回退到 eq
 
             case NOT_IN:
                 if (finalValue instanceof Collection) {
-                    return path.get(fieldName).notIn((Collection<?>) finalValue);
+                    return ((PathBuilder) fieldPath).notIn((Collection) finalValue);
                 } else if (finalValue instanceof Object[]) {
-                    return path.get(fieldName).notIn((Object[]) finalValue);
+                    return ((PathBuilder) fieldPath).notIn((Object[]) finalValue);
                 }
-                throw new IllegalArgumentException("NOT_IN 運算子需要 Collection 或 Array 類型的值");
+                return ((PathBuilder) fieldPath).ne(finalValue); // 回退到 ne
 
             case BETWEEN:
                 Object[] range;

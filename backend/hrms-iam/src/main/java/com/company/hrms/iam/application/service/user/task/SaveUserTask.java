@@ -17,6 +17,10 @@ public class SaveUserTask implements PipelineTask<UserPipelineContext> {
 
     @Override
     public void execute(UserPipelineContext context) throws Exception {
-        userRepository.save(context.getUser());
+        if (context.getCreateRequest() != null) {
+            userRepository.save(context.getUser());
+        } else {
+            userRepository.update(context.getUser());
+        }
     }
 }

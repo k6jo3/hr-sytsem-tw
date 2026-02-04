@@ -69,7 +69,7 @@ public class UserRepositoryImpl implements IUserRepository {
 
     @Override
     public Page<User> findPage(QueryGroup query, Pageable pageable) {
-        UltimateQueryEngine<User> engine = new UltimateQueryEngine<>(queryFactory, User.class);
+        UltimateQueryEngine<UserPO> engine = new UltimateQueryEngine<>(queryFactory, UserPO.class);
         com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(query);
 
         long total = count(query);
@@ -77,25 +77,32 @@ public class UserRepositoryImpl implements IUserRepository {
             return new PageImpl<>(new java.util.ArrayList<>(), pageable, 0);
         }
 
-        List<User> users = engine.getQuery()
+        List<UserPO> poList = engine.getQuery()
                 .where(predicate)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
+
+        List<User> users = poList.stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
 
         return new PageImpl<>(users, pageable, total);
     }
 
     @Override
     public List<User> findAll(QueryGroup query) {
-        UltimateQueryEngine<User> engine = new UltimateQueryEngine<>(queryFactory, User.class);
+        UltimateQueryEngine<UserPO> engine = new UltimateQueryEngine<>(queryFactory, UserPO.class);
         com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(query);
-        return engine.getQuery().where(predicate).fetch();
+        List<UserPO> poList = engine.getQuery().where(predicate).fetch();
+        return poList.stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override
     public long count(QueryGroup query) {
-        UltimateQueryEngine<User> engine = new UltimateQueryEngine<>(queryFactory, User.class);
+        UltimateQueryEngine<UserPO> engine = new UltimateQueryEngine<>(queryFactory, UserPO.class);
         com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(query);
 
         Long total = queryFactory.select(engine.getEntityPath().count())

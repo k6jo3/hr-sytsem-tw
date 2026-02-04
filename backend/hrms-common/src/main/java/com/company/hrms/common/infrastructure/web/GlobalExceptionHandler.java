@@ -63,6 +63,18 @@ public class GlobalExceptionHandler {
         }
 
         /**
+         * 處理 Kafka ResourceNotFoundException
+         */
+        @ExceptionHandler(org.apache.kafka.common.errors.ResourceNotFoundException.class)
+        public ResponseEntity<ApiResponse<Void>> handleResourceNotFoundException(
+                        org.apache.kafka.common.errors.ResourceNotFoundException ex) {
+                log.warn("Resource not found: {}", ex.getMessage());
+                return ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(ApiResponse.notFound(ex.getMessage()));
+        }
+
+        /**
          * 處理驗證異常
          */
         @ExceptionHandler(ValidationException.class)
@@ -78,7 +90,7 @@ public class GlobalExceptionHandler {
          */
         @ExceptionHandler(DomainException.class)
         public ResponseEntity<ApiResponse<Void>> handleDomainException(DomainException ex) {
-                log.warn("Domain exception: {}", ex.getMessage());
+                log.warn("Domain exception: code={}, message={}", ex.getErrorCode(), ex.getMessage());
                 return ResponseEntity
                                 .status(HttpStatus.BAD_REQUEST)
                                 .body(ApiResponse.error(ex.getErrorCode(), ex.getMessage()));
@@ -91,6 +103,21 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ApiResponse<Void>> handlePipelineExecutionException(PipelineExecutionException ex) {
                 Throwable cause = ex.getCause();
                 if (cause instanceof DomainException domainEx) {
+                        // Handle specific domain error codes
+                        if ("USER_NOT_FOUND".equals(domainEx.getErrorCode())) {
+                                log.warn("User not found: {}", domainEx.getMessage());
+                                return ResponseEntity
+                                                .status(HttpStatus.NOT_FOUND)
+                                                .body(ApiResponse.notFound(domainEx.getMessage()));
+                        }
+                        if ("USERNAME_EXISTS".equals(domainEx.getErrorCode())) {
+                                log.warn("Username exists: {}", domainEx.getMessage());
+                                return ResponseEntity
+                                                .status(HttpStatus.CONFLICT)
+                                                .body(ApiResponse.error(domainEx.getErrorCode(),
+                                                                domainEx.getMessage()));
+                        }
+
                         log.warn("Pipeline task [{}] failed due to domain rule: {}", ex.getTaskName(),
                                         domainEx.getMessage());
                         return ResponseEntity
