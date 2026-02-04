@@ -64,12 +64,13 @@ public class FilterUnit implements Serializable {
 
     /**
      * 建立 BETWEEN 條件
+     * 
      * @param field 欄位名稱
      * @param start 起始值 (包含)
-     * @param end 結束值 (包含)
+     * @param end   結束值 (包含)
      */
     public static FilterUnit between(String field, Object start, Object end) {
-        return new FilterUnit(field, Operator.BETWEEN, new Object[]{start, end});
+        return new FilterUnit(field, Operator.BETWEEN, new Object[] { start, end });
     }
 
     /**
@@ -142,12 +143,14 @@ public class FilterUnit implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         FilterUnit that = (FilterUnit) o;
         return Objects.equals(field, that.field) &&
-               op == that.op &&
-               Objects.equals(value, that.value);
+                op == that.op &&
+                Objects.equals(value, that.value);
     }
 
     @Override
@@ -160,6 +163,21 @@ public class FilterUnit implements Serializable {
         if (op == Operator.IS_NULL || op == Operator.IS_NOT_NULL) {
             return String.format("%s %s", field, op.getSymbol());
         }
+
+        // 針對 IN 和 NOT_IN 操作符，格式化數組值為 [val1, val2, val3]
+        if ((op == Operator.IN || op == Operator.NOT_IN) && value != null && value.getClass().isArray()) {
+            Object[] array = (Object[]) value;
+            StringBuilder sb = new StringBuilder();
+            sb.append(field).append(" ").append(op.getSymbol()).append(" [");
+            for (int i = 0; i < array.length; i++) {
+                if (i > 0)
+                    sb.append(", ");
+                sb.append(array[i]);
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+
         return String.format("%s %s '%s'", field, op.getSymbol(), value);
     }
 }

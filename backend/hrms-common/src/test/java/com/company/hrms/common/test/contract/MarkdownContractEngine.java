@@ -1,7 +1,10 @@
 package com.company.hrms.common.test.contract;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -27,10 +30,14 @@ public class MarkdownContractEngine {
 
     /**
      * 條件解析正規表達式
-     * 支援格式: field = 'value', field LIKE '%value%', field > 100
+     * 支援多種格式:
+     * - field = 'value'
+     * - field LIKE '%value%'
+     * - field > 100
+     * - field IN [val1, val2, val3]
      */
     private static final Pattern CRITERIA_PATTERN = Pattern.compile(
-            "([\\w.]+)\\s*([=!<>]+|LIKE|IN|IS\\s+NULL|IS\\s+NOT\\s+NULL)\\s*'?([^']*)'?");
+            "([\\w.]+)\\s*([=!<>]+|LIKE|IN|NOT\\s+IN|IS\\s+NULL|IS\\s+NOT\\s+NULL)(?:\\s*(?:\\[([^\\]]+)\\]|'([^']*)'|([^,]+)))?");
 
     /**
      * 數值模式
@@ -96,27 +103,63 @@ public class MarkdownContractEngine {
     protected boolean verifyFilterMatch(FilterUnit filter, String criteria) {
         Matcher m = CRITERIA_PATTERN.matcher(criteria.trim());
         if (!m.find()) {
+            System.err.println("DEBUG REGEX: No match for criteria: " + criteria);
             return false;
         }
 
         String expectedField = m.group(1).trim();
         String expectedOp = m.group(2).trim().toUpperCase();
-        String expectedValue = m.group(3).trim();
+        // group(3) = IN 條件的列表值 [val1, val2]
+        // group(4) = 單引號值 'value'
+        // group(5) = 無引號值
+        String expectedValue = null;
+        if (m.group(3) != null) {
+            // IN 條件，列表值
+            expectedValue = m.group(3).trim();
+        } else if (m.group(4) != null) {
+            expectedValue = m.group(4).trim();
+        } else if (m.group(5) != null) {
+            expectedValue = m.group(5).trim();
+        }
+
+        // 調試輸出
+        System.err.println("DEBUG VERIFY: criteria='" + criteria + "'");
+        System.err.println("  -> expectedField=" + expectedField + ", expectedOp=" + expectedOp + ", expectedValue="
+                + expectedValue);
+        System.err.println("  -> actualField=" + filter.getField() + ", actualOp=" + filter.getOp() + ", actualValue="
+                + filter.getValue());
 
         // 比對欄位名稱 (忽略大小寫)
         if (!filter.getField().equalsIgnoreCase(expectedField)) {
+            System.err.println("  -> FIELD MISMATCH");
             return false;
         }
 
         // 比對運算子
         Operator parsedOp = Operator.fromSymbol(expectedOp);
         if (filter.getOp() != parsedOp) {
+            System.err.println("  -> OP MISMATCH: expected=" + parsedOp + ", actual=" + filter.getOp());
             return false;
         }
 
         // IS NULL / IS NOT NULL 不需要比對值
         if (parsedOp == Operator.IS_NULL || parsedOp == Operator.IS_NOT_NULL) {
+            System.err.println("  -> NULL CHECK PASS");
             return true;
+        }
+
+        // IN / NOT_IN 需要特殊處理
+        if (parsedOp == Operator.IN || parsedOp == Operator.NOT_IN) {
+            boolean result = compareArrayValues(filter.getValue(), expectedValue);
+            System.err.println("  -> IN COMPARE: " + (result ? "PASS" : "FAIL"));
+            return result;
+        }
+
+        // LIKE 需要特殊處理（忽略 % 前後綴）
+        if (parsedOp == Operator.LIKE) {
+            boolean result = compareLikeValues(filter.getValue(), expectedValue);
+            System.err.println("  -> LIKE COMPARE: " + (result ? "PASS" : "FAIL"));
+            return result;
         }
 
         // 比對值
@@ -124,11 +167,92 @@ public class MarkdownContractEngine {
     }
 
     /**
+     * 比較 LIKE 條件值
+     * 寬容比對：移除 %、'、空格，並忽略大小寫
+     */
+    protected boolean compareLikeValues(Object actualValue, String expectedValue) {
+        if (actualValue == null || expectedValue == null) {
+            return false;
+        }
+
+        String actualStr = String.valueOf(actualValue);
+        String expectedStr = expectedValue;
+
+        // 清理字串函式
+        java.util.function.Function<String, String> cleaner = s -> s
+                .replace("%", "")
+                .replace("'", "")
+                .trim()
+                .toLowerCase();
+
+        return cleaner.apply(actualStr).equals(cleaner.apply(expectedStr));
+    }
+
+    /**
+     * 比較數組值 (用於 IN 和 NOT_IN)
+     * 寬容比對：將兩邊都解析為列表，忽略括號、引號、空格，並比較集合內容
+     */
+    protected boolean compareArrayValues(Object actualValue, String expectedValue) {
+        if (actualValue == null || expectedValue == null) {
+            return false;
+        }
+
+        // 1. 解析實際值為 Set<String>
+        Set<String> actualSet = new HashSet<>();
+        if (actualValue.getClass().isArray()) {
+            Object[] array = (Object[]) actualValue;
+            for (Object obj : array) {
+                actualSet.add(cleanString(String.valueOf(obj)));
+            }
+        } else if (actualValue instanceof Collection) {
+            for (Object obj : (Collection<?>) actualValue) {
+                actualSet.add(cleanString(String.valueOf(obj)));
+            }
+        } else {
+            // 單一值也當作集合
+            actualSet.add(cleanString(String.valueOf(actualValue)));
+        }
+
+        // 2. 解析預期值為 Set<String>
+        Set<String> expectedSet = new HashSet<>();
+        // 移除外層括號 []
+        String cleanExpected = expectedValue.trim();
+        if (cleanExpected.startsWith("[") && cleanExpected.endsWith("]")) {
+            cleanExpected = cleanExpected.substring(1, cleanExpected.length() - 1);
+        }
+
+        // 分割並清理
+        for (String part : cleanExpected.split(",")) {
+            String val = cleanString(part);
+            if (!val.isEmpty()) {
+                expectedSet.add(val);
+            }
+        }
+
+        // 3. 比較集合內容是否相同
+        return actualSet.equals(expectedSet);
+    }
+
+    /**
+     * 清理字串：移除引號、空格，轉小寫
+     */
+    private String cleanString(String input) {
+        if (input == null)
+            return "";
+        return input.replace("'", "")
+                .replace("\"", "")
+                .replace("[", "") // 防禦性移除殘留括號
+                .replace("]", "")
+                .trim()
+                .toLowerCase();
+    }
+
+    /**
      * 比較值 (處理類型轉換)
      */
     protected boolean compareValues(Object actualValue, String expectedValue) {
         if (actualValue == null) {
-            return expectedValue.isEmpty() || "null".equalsIgnoreCase(expectedValue);
+            return expectedValue == null || expectedValue.isEmpty() || "null".equalsIgnoreCase(expectedValue);
         }
 
         String actualStr = String.valueOf(actualValue);

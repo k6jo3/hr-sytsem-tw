@@ -14,16 +14,17 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetDocumentAccessLogListRequest {
-    @com.company.hrms.common.query.QueryCondition.EQ("document_id")
+@lombok.EqualsAndHashCode(callSuper = true)
+public class GetDocumentAccessLogListRequest extends com.company.hrms.common.api.request.PageRequest {
+    @com.company.hrms.common.query.QueryCondition.EQ("documentId")
     private String documentId;
 
-    @com.company.hrms.common.query.QueryCondition.EQ("user_id")
+    @com.company.hrms.common.query.QueryCondition.EQ("userId")
     private String userId;
 
     @com.company.hrms.common.query.QueryCondition.EQ("action")
     private String action;
 
-    @com.company.hrms.common.query.QueryCondition.GTE("access_time")
+    @com.company.hrms.common.query.QueryCondition.GTE("accessedAt")
     private LocalDate startDate;
 }

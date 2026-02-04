@@ -1,7 +1,6 @@
 package com.company.hrms.document.application.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,15 +19,17 @@ import lombok.RequiredArgsConstructor;
 @Service("getDocumentAccessLogListServiceImpl")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class GetDocumentAccessLogListServiceImpl implements QueryApiService<Void, Page<Object>> {
+public class GetDocumentAccessLogListServiceImpl implements
+        QueryApiService<com.company.hrms.document.api.request.GetDocumentAccessLogListRequest, Page<Object>> {
 
     private final IDocumentAccessLogRepository repository;
     private final DocumentAccessLogListQueryAssembler queryAssembler;
 
     @Override
-    public Page<Object> getResponse(Void req, JWTModel currentUser, String... args) {
-        QueryGroup query = queryAssembler.toQueryGroup(null);
-        Pageable pageable = PageRequest.of(0, 10);
+    public Page<Object> getResponse(com.company.hrms.document.api.request.GetDocumentAccessLogListRequest req,
+            JWTModel currentUser, String... args) {
+        QueryGroup query = queryAssembler.toQueryGroup(req);
+        Pageable pageable = req.toPageable();
         return repository.findLogs(query, pageable).map(log -> (Object) log);
     }
 }

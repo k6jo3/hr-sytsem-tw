@@ -15,6 +15,12 @@ spring:
       ddl-auto: create-drop
     show-sql: true
 
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+
+  kafka:
+    enabled: false
+
 # JWT Configuration for Testing
 jwt:
   secret: test-secret-key-for-jwt-token-generation-must-be-long-enough-256-bits

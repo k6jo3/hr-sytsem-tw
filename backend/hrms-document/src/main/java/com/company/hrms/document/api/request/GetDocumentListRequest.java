@@ -14,19 +14,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @lombok.EqualsAndHashCode(callSuper = true)
 public class GetDocumentListRequest extends com.company.hrms.common.api.request.PageRequest {
-    @com.company.hrms.common.query.QueryCondition.EQ("folder_id")
+    @com.company.hrms.common.query.QueryCondition.EQ("folderId")
     private String folderId;
 
     // Manual handling for complex logic (NULL_MARKER)
     private String parentId;
 
-    @com.company.hrms.common.query.QueryCondition.LIKE("name")
+    @com.company.hrms.common.query.QueryCondition.LIKE("fileName")
     private String name;
 
-    @com.company.hrms.common.query.QueryCondition.EQ("type")
+    @com.company.hrms.common.query.QueryCondition.EQ("documentType")
     private String documentType;
 
-    @com.company.hrms.common.query.QueryCondition.EQ("owner_id")
+    @com.company.hrms.common.query.QueryCondition.EQ("ownerId")
     private String ownerId;
 
     @com.company.hrms.common.query.QueryCondition.EQ("visibility")
@@ -40,7 +40,7 @@ public class GetDocumentListRequest extends com.company.hrms.common.api.request.
 
     @com.company.hrms.common.query.QueryCondition.IN("visibility")
     private List<String> accessibleVisibilities;
-    @com.company.hrms.common.query.QueryCondition.GTE("updated_at")
+    @com.company.hrms.common.query.QueryCondition.GTE("updatedAt")
     private LocalDate startDate;
     private LocalDate endDate;
 }

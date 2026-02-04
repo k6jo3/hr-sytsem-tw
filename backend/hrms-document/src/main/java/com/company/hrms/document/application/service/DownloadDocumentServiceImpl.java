@@ -3,6 +3,7 @@ package com.company.hrms.document.application.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.document.api.response.FileDownloadResponse;
@@ -26,10 +27,10 @@ public class DownloadDocumentServiceImpl implements QueryApiService<String, File
     @Override
     public FileDownloadResponse getResponse(String documentId, JWTModel currentUser, String... args) {
         var doc = repository.findById(new DocumentId(documentId))
-                .orElseThrow(() -> new IllegalArgumentException("Document not found: " + documentId));
+                .orElseThrow(() -> new EntityNotFoundException("Document not found: " + documentId));
 
         if (doc.isDeleted()) {
-            throw new IllegalStateException("Document has been deleted.");
+            throw new EntityNotFoundException("Document has been deleted: " + documentId);
         }
 
         // 紀錄存取日誌

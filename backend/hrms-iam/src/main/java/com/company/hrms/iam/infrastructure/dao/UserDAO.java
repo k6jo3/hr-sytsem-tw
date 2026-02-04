@@ -1,6 +1,7 @@
 package com.company.hrms.iam.infrastructure.dao;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
@@ -101,7 +102,7 @@ public class UserDAO {
      * 新增使用者角色關聯
      */
     public void insertUserRole(String userId, String roleId) {
-        userMapper.insertUserRole(userId, roleId);
+        userMapper.insertUserRole(UUID.randomUUID().toString(), userId, roleId);
     }
 
     /**

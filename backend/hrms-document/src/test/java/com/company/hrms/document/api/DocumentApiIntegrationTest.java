@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -27,23 +26,15 @@ import com.company.hrms.common.test.base.BaseApiIntegrationTest;
  * Document API 整合測試
  * 驗證文件管理完整 API 流程 (Controller → Service → Repository → H2 DB)
  *
- * <p>測試範圍：
+ * <p>
+ * 測試範圍：
  * <ul>
- *   <li>文件查詢 API (列表、詳情、我的文件)</li>
- *   <li>文件下載/版本查詢</li>
- *   <li>異常情況處理</li>
+ * <li>文件查詢 API (列表、詳情、我的文件)</li>
+ * <li>文件下載/版本查詢</li>
+ * <li>異常情況處理</li>
  * </ul>
  *
- * <p><b>TODO:</b> 此測試暫時禁用，待以下問題修正後啟用：
- * <ul>
- *   <li>GetDocumentListServiceImpl 尚未實作完成，需實作 QueryApiService 介面</li>
- *   <li>GetDocumentDetailServiceImpl 需要正確處理 document ID 查詢</li>
- *   <li>GetMyDocumentsServiceImpl 需要根據 currentUser 過濾文件</li>
- *   <li>DownloadDocumentServiceImpl 需要實作檔案下載邏輯</li>
- *   <li>GetDocumentVersionsServiceImpl 需要查詢版本歷史</li>
- *   <li>GetDocumentAccessLogListServiceImpl 需要查詢存取紀錄</li>
- *   <li>異常處理需要返回正確的 HTTP 404 狀態碼</li>
- * </ul>
+ * <p>
  *
  * @author SA Team
  * @since 2026-02-03
@@ -52,10 +43,9 @@ import com.company.hrms.common.test.base.BaseApiIntegrationTest;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @Transactional
-@Sql(scripts = "classpath:test-data/document_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(scripts = "file:src/test/resources/test-data/document_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "file:src/test/resources/test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("HR13 文件管理 API 整合測試")
-@Disabled("TODO: Document Service 後端實作尚未完成，需修正 Service 層邏輯後啟用測試")
 class DocumentApiIntegrationTest extends BaseApiIntegrationTest {
 
     @BeforeEach

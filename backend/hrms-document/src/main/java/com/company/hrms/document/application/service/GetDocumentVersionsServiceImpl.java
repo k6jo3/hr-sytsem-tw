@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.document.api.response.DocumentVersionResponse;
@@ -28,7 +29,8 @@ public class GetDocumentVersionsServiceImpl implements QueryApiService<String, D
         @Override
         public DocumentVersionResponse getResponse(String documentId, JWTModel currentUser, String... args) {
                 var doc = repository.findById(new DocumentId(documentId))
-                                .orElseThrow(() -> new IllegalArgumentException("Document not found: " + documentId));
+                                .filter(d -> !d.isDeleted())
+                                .orElseThrow(() -> new EntityNotFoundException("Document not found: " + documentId));
 
                 var versions = versionRepository.findByDocumentId(documentId).stream()
                                 .map(v -> DocumentVersionResponse.VersionInfo.builder()

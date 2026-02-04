@@ -209,6 +209,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.2</version>
                 <configuration>
+                    <argLine>-XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
                     <systemPropertyVariables>
                         <org.mockito.mock-maker>mock</org.mockito.mock-maker>
                     </systemPropertyVariables>

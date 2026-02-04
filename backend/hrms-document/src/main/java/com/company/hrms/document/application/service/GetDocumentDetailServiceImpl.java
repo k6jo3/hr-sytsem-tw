@@ -3,6 +3,7 @@ package com.company.hrms.document.application.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.document.api.response.DocumentResponse;
@@ -26,7 +27,8 @@ public class GetDocumentDetailServiceImpl implements QueryApiService<String, Doc
     @Override
     public DocumentResponse getResponse(String documentId, JWTModel currentUser, String... args) {
         return repository.findById(new DocumentId(documentId))
+                .filter(doc -> !doc.isDeleted()) // 增加軟刪除過濾
                 .map(responseAssembler::toResponse)
-                .orElseThrow(() -> new IllegalArgumentException("Document not found: " + documentId));
+                .orElseThrow(() -> new EntityNotFoundException("Document not found: " + documentId));
     }
 }

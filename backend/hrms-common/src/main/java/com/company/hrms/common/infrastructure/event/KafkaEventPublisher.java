@@ -1,27 +1,31 @@
 package com.company.hrms.common.infrastructure.event;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
+
 import com.company.hrms.common.domain.event.DomainEvent;
 import com.company.hrms.common.domain.event.EventPublisher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
 
 /**
  * Kafka 事件發布器實作
  * 將領域事件發布到 Kafka Topic
  *
- * <p>Topic 命名規則：{aggregate-type}.{event-type}
+ * <p>
+ * Topic 命名規則：{aggregate-type}.{event-type}
  * <ul>
- *   <li>user.created - 使用者創建事件</li>
- *   <li>employee.terminated - 員工離職事件</li>
+ * <li>user.created - 使用者創建事件</li>
+ * <li>employee.terminated - 員工離職事件</li>
  * </ul>
  */
 @Component
+@ConditionalOnProperty(name = "spring.kafka.enabled", havingValue = "true", matchIfMissing = true)
 public class KafkaEventPublisher implements EventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaEventPublisher.class);

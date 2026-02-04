@@ -14,7 +14,6 @@ import org.springframework.test.context.jdbc.Sql;
 
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
-import com.company.hrms.common.test.base.BaseRepositoryTest;
 import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 
@@ -34,175 +33,173 @@ import com.company.hrms.iam.domain.repository.IUserRepository;
  * @author SA Team
  * @since 2026-01-29
  */
-@Sql(scripts = "classpath:test-data/user_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = { "classpath:test-data/iam_base_data.sql",
+                "classpath:test-data/user_test_data.sql" }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("User Repository 整合測試")
-class UserRepositoryIntegrationTest extends BaseRepositoryTest {
+class UserRepositoryIntegrationTest extends com.company.hrms.common.test.base.BaseIntegrationTest {
 
-    @Autowired
-    private IUserRepository userRepository;
+        @Autowired
+        private IUserRepository userRepository;
 
-    @Nested
-    @DisplayName("基本查詢測試")
-    class BasicQueryTests {
+        @Nested
+        @DisplayName("基本查詢測試")
+        class BasicQueryTests {
 
-        @Test
-        @DisplayName("EQ 操作符 - 依狀態查詢")
-        void findByStatus_EQ_ShouldReturnMatchingUsers() {
-            // Given
-            QueryGroup query = QueryBuilder.where()
-                    .eq("status", "ACTIVE")
-                    .eq("is_deleted", 0)
-                    .build();
+                @Test
+                @DisplayName("EQ 操作符 - 依狀態查詢")
+                void findByStatus_EQ_ShouldReturnMatchingUsers() {
+                        // Given
+                        QueryGroup query = QueryBuilder.where()
+                                        .eq("status", "ACTIVE")
+                                        .build();
 
-            // When
-            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
+                        // When
+                        Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
 
-            // Then
-            assertThat(result.getContent())
-                    .isNotEmpty()
-                    .allMatch(user -> "ACTIVE".equals(user.getStatus().name()));
+                        // Then
+                        assertThat(result.getContent())
+                                        .isNotEmpty()
+                                        .allMatch(user -> "ACTIVE".equals(user.getStatus().name()));
+                }
+
+                @Test
+                @DisplayName("LIKE 操作符 - 依使用者名稱模糊查詢")
+                void findByUsername_LIKE_ShouldReturnMatchingUsers() {
+                        // Given
+                        QueryGroup query = QueryBuilder.where()
+                                        .like("username", "%admin%")
+                                        .ne("status", "DELETED")
+                                        .build();
+
+                        // When
+                        Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
+
+                        // Then
+                        assertThat(result.getContent())
+                                        .isNotEmpty()
+                                        .allMatch(user -> user.getUsername().contains("admin"));
+                }
+
+                @Test
+                @DisplayName("IN 操作符 - 依多個狀態查詢")
+                void findByStatuses_IN_ShouldReturnMatchingUsers() {
+                        // Given
+                        QueryGroup query = QueryBuilder.where()
+                                        .in("status", List.of("ACTIVE", "LOCKED"))
+                                        .build();
+
+                        // When
+                        Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
+
+                        // Then
+                        assertThat(result.getContent())
+                                        .isNotEmpty()
+                                        .allMatch(user -> "ACTIVE".equals(user.getStatus().name()) ||
+                                                        "LOCKED".equals(user.getStatus().name()));
+                }
         }
 
-        @Test
-        @DisplayName("LIKE 操作符 - 依使用者名稱模糊查詢")
-        void findByUsername_LIKE_ShouldReturnMatchingUsers() {
-            // Given
-            QueryGroup query = QueryBuilder.where()
-                    .like("username", "%admin%")
-                    .eq("is_deleted", 0)
-                    .build();
+        @Nested
+        @DisplayName("分頁測試")
+        class PaginationTests {
 
-            // When
-            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
+                @Test
+                @DisplayName("分頁查詢 - 第一頁")
+                void findAll_Page0_ShouldReturnFirstPage() {
+                        // Given
+                        QueryGroup query = QueryBuilder.where()
+                                        .ne("status", "DELETED")
+                                        .build();
 
-            // Then
-            assertThat(result.getContent())
-                    .isNotEmpty()
-                    .allMatch(user -> user.getUsername().contains("admin"));
+                        // When
+                        Page<User> result = userRepository.findPage(query, PageRequest.of(0, 5));
+
+                        // Then
+                        assertThat(result.getNumber()).isEqualTo(0);
+                        assertThat(result.getSize()).isEqualTo(5);
+                        assertThat(result.getContent()).hasSizeLessThanOrEqualTo(5);
+                }
+
+                @Test
+                @DisplayName("分頁查詢 - 第二頁")
+                void findAll_Page1_ShouldReturnSecondPage() {
+                        // Given
+                        QueryGroup query = QueryBuilder.where()
+                                        .ne("status", "DELETED")
+                                        .build();
+
+                        // When
+                        Page<User> page0 = userRepository.findPage(query, PageRequest.of(0, 5));
+                        Page<User> page1 = userRepository.findPage(query, PageRequest.of(1, 5));
+
+                        // Then
+                        assertThat(page1.getNumber()).isEqualTo(1);
+                        if (page0.getTotalElements() > 5) {
+                                assertThat(page1.getContent()).isNotEmpty();
+                        }
+                }
         }
 
-        @Test
-        @DisplayName("IN 操作符 - 依多個狀態查詢")
-        void findByStatuses_IN_ShouldReturnMatchingUsers() {
-            // Given
-            QueryGroup query = QueryBuilder.where()
-                    .in("status", List.of("ACTIVE", "LOCKED"))
-                    .eq("is_deleted", 0)
-                    .build();
+        @Nested
+        @DisplayName("軟刪除過濾測試")
+        class SoftDeleteTests {
 
-            // When
-            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
+                @Test
+                @DisplayName("軟刪除過濾 - 不應返回已刪除資料")
+                void findAll_WithSoftDeleteFilter_ShouldExcludeDeleted() {
+                        // Given
+                        QueryGroup query = QueryBuilder.where()
+                                        .ne("status", "DELETED")
+                                        .build();
 
-            // Then
-            assertThat(result.getContent())
-                    .isNotEmpty()
-                    .allMatch(user -> "ACTIVE".equals(user.getStatus().name()) ||
-                            "LOCKED".equals(user.getStatus().name()));
-        }
-    }
+                        // When
+                        Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
 
-    @Nested
-    @DisplayName("分頁測試")
-    class PaginationTests {
+                        // Then
+                        // 驗證沒有已刪除的資料 (假設測試資料中有軟刪除資料)
+                        assertThat(result.getContent())
+                                        .allMatch(user -> !user.isDeleted());
+                }
 
-        @Test
-        @DisplayName("分頁查詢 - 第一頁")
-        void findAll_Page0_ShouldReturnFirstPage() {
-            // Given
-            QueryGroup query = QueryBuilder.where()
-                    .eq("is_deleted", 0)
-                    .build();
+                @Test
+                @DisplayName("不含軟刪除過濾 - 應返回所有資料")
+                void findAll_WithoutSoftDeleteFilter_ShouldIncludeAll() {
+                        // Given - 不加 is_deleted 條件
+                        QueryGroup query = QueryBuilder.where().build();
 
-            // When
-            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 5));
+                        // When
+                        Page<User> withFilter = userRepository.findPage(
+                                        QueryBuilder.where().ne("status", "DELETED").build(),
+                                        PageRequest.of(0, 100));
+                        Page<User> withoutFilter = userRepository.findPage(query, PageRequest.of(0, 100));
 
-            // Then
-            assertThat(result.getNumber()).isEqualTo(0);
-            assertThat(result.getSize()).isEqualTo(5);
-            assertThat(result.getContent()).hasSizeLessThanOrEqualTo(5);
-        }
-
-        @Test
-        @DisplayName("分頁查詢 - 第二頁")
-        void findAll_Page1_ShouldReturnSecondPage() {
-            // Given
-            QueryGroup query = QueryBuilder.where()
-                    .eq("is_deleted", 0)
-                    .build();
-
-            // When
-            Page<User> page0 = userRepository.findPage(query, PageRequest.of(0, 5));
-            Page<User> page1 = userRepository.findPage(query, PageRequest.of(1, 5));
-
-            // Then
-            assertThat(page1.getNumber()).isEqualTo(1);
-            if (page0.getTotalElements() > 5) {
-                assertThat(page1.getContent()).isNotEmpty();
-            }
-        }
-    }
-
-    @Nested
-    @DisplayName("軟刪除過濾測試")
-    class SoftDeleteTests {
-
-        @Test
-        @DisplayName("軟刪除過濾 - 不應返回已刪除資料")
-        void findAll_WithSoftDeleteFilter_ShouldExcludeDeleted() {
-            // Given
-            QueryGroup query = QueryBuilder.where()
-                    .eq("is_deleted", 0)
-                    .build();
-
-            // When
-            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
-
-            // Then
-            // 驗證沒有已刪除的資料 (假設測試資料中有軟刪除資料)
-            assertThat(result.getContent())
-                    .allMatch(user -> !user.isDeleted());
+                        // Then
+                        // 不含過濾的結果應 >= 含過濾的結果
+                        assertThat(withoutFilter.getTotalElements())
+                                        .isGreaterThanOrEqualTo(withFilter.getTotalElements());
+                }
         }
 
-        @Test
-        @DisplayName("不含軟刪除過濾 - 應返回所有資料")
-        void findAll_WithoutSoftDeleteFilter_ShouldIncludeAll() {
-            // Given - 不加 is_deleted 條件
-            QueryGroup query = QueryBuilder.where().build();
+        @Nested
+        @DisplayName("複合條件測試")
+        class CompoundConditionTests {
 
-            // When
-            Page<User> withFilter = userRepository.findPage(
-                    QueryBuilder.where().eq("is_deleted", 0).build(),
-                    PageRequest.of(0, 100));
-            Page<User> withoutFilter = userRepository.findPage(query, PageRequest.of(0, 100));
+                @Test
+                @DisplayName("AND 條件 - 狀態 + 角色")
+                void findByStatusAndRole_ShouldReturnMatchingUsers() {
+                        // Given
+                        QueryGroup query = QueryBuilder.where()
+                                        .eq("status", "ACTIVE")
+                                        // 假設有關聯查詢
+                                        .build();
 
-            // Then
-            // 不含過濾的結果應 >= 含過濾的結果
-            assertThat(withoutFilter.getTotalElements())
-                    .isGreaterThanOrEqualTo(withFilter.getTotalElements());
+                        // When
+                        Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
+
+                        // Then
+                        assertThat(result.getContent())
+                                        .allMatch(user -> "ACTIVE".equals(user.getStatus().name()));
+                }
         }
-    }
-
-    @Nested
-    @DisplayName("複合條件測試")
-    class CompoundConditionTests {
-
-        @Test
-        @DisplayName("AND 條件 - 狀態 + 角色")
-        void findByStatusAndRole_ShouldReturnMatchingUsers() {
-            // Given
-            QueryGroup query = QueryBuilder.where()
-                    .eq("status", "ACTIVE")
-                    .eq("is_deleted", 0)
-                    // 假設有關聯查詢
-                    .build();
-
-            // When
-            Page<User> result = userRepository.findPage(query, PageRequest.of(0, 100));
-
-            // Then
-            assertThat(result.getContent())
-                    .allMatch(user -> "ACTIVE".equals(user.getStatus().name()));
-        }
-    }
 }

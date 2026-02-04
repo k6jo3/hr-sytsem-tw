@@ -1,4 +1,4 @@
-package com.company.hrms.document.api;
+package com.company.hrms.document.api.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

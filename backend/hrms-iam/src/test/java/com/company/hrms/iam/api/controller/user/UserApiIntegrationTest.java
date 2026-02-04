@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,36 +31,19 @@ import com.company.hrms.iam.api.request.user.UpdateUserRequest;
  * User API 整合測試
  * 驗證用戶管理 API 的完整流程（Controller → Service → Repository → H2 DB）
  *
- * <p><b>TODO:</b> 測試資料腳本缺失，需建立以下檔案才能啟用測試：
+ *
+ * <p>
+ * <b>測試涵蓋範圍:</b>
  * <ul>
- *   <li><b>iam_base_data.sql:</b>
- *     <ul>
- *       <li>建立基礎資料表結構（roles, permissions, role_permissions）</li>
- *       <li>插入測試用的角色資料（ADMIN, USER, HR 等）</li>
- *       <li>插入測試用的權限資料（user:create, user:update, user:activate 等）</li>
- *     </ul>
- *   </li>
- *   <li><b>user_test_data.sql:</b>
- *     <ul>
- *       <li>插入測試用的用戶資料（USER-001, USER-002 等）</li>
- *       <li>用戶應包含不同狀態（ACTIVE, INACTIVE）</li>
- *       <li>用戶應關聯到角色</li>
- *       <li>用戶應包含完整資訊（username, email, displayName 等）</li>
- *     </ul>
- *   </li>
- * </ul>
- * <p><b>測試涵蓋範圍:</b>
- * <ul>
- *   <li>用戶 CRUD API（新增、更新、查詢列表、查詢詳情）</li>
- *   <li>用戶狀態管理 API（啟用、停用、批量停用）</li>
- *   <li>角色指派 API</li>
- *   <li>用戶搜尋與過濾 API</li>
+ * <li>用戶 CRUD API（新增、更新、查詢列表、查詢詳情）</li>
+ * <li>用戶狀態管理 API（啟用、停用、批量停用）</li>
+ * <li>角色指派 API</li>
+ * <li>用戶搜尋與過濾 API</li>
  * </ul>
  *
  * @author SA Team
  * @since 2026-02-03
  */
-@Disabled("TODO: 缺少測試資料腳本 (iam_base_data.sql, user_test_data.sql)，需建立後啟用測試")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -87,7 +69,7 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 				new SimpleGrantedAuthority("user:update"),
 				new SimpleGrantedAuthority("user:activate"),
 				new SimpleGrantedAuthority("user:deactivate"),
-				new SimpleGrantedAuthority("user:assign-roles"));
+				new SimpleGrantedAuthority("user:assign-role"));
 
 		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
 				mockUser, null, authorities);
@@ -140,7 +122,7 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("IAM_USER_API_003: 更新用戶 - 應返回更新後的用戶資訊")
 		void IAM_USER_API_003_updateUser_ShouldReturnUpdatedUser() throws Exception {
 			// Given
-			String userId = "USER-001";
+			String userId = "user-001";
 			UpdateUserRequest request = new UpdateUserRequest();
 			request.setDisplayName("Updated Display Name");
 			request.setEmail("updated@company.com");
@@ -178,14 +160,14 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 
 			String responseBody = response.getResponse().getContentAsString();
 			assertThat(responseBody).contains("items");
-			assertThat(responseBody).contains("totalCount");
+			assertThat(responseBody).contains("total");
 		}
 
 		@Test
 		@DisplayName("IAM_USER_API_006: 查詢用戶詳情 - 應返回完整用戶資訊")
 		void IAM_USER_API_006_getUserDetail_ShouldReturnUserDetail() throws Exception {
 			// Given
-			String userId = "USER-001";
+			String userId = "user-001";
 
 			// When & Then
 			var response = performGet("/api/v1/users/" + userId)
@@ -222,7 +204,7 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("IAM_USER_API_008: 啟用用戶 - 應返回 204")
 		void IAM_USER_API_008_activateUser_ShouldReturn204() throws Exception {
 			// Given
-			String userId = "USER-002"; // 假設此用戶處於停用狀態
+			String userId = "user-002"; // 假設此用戶處於停用狀態
 
 			// When & Then
 			performPut("/api/v1/users/" + userId + "/activate", null)
@@ -233,7 +215,7 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("IAM_USER_API_009: 停用用戶 - 應返回 204")
 		void IAM_USER_API_009_deactivateUser_ShouldReturn204() throws Exception {
 			// Given
-			String userId = "USER-001";
+			String userId = "user-001";
 
 			// When & Then
 			performPut("/api/v1/users/" + userId + "/deactivate", null)
@@ -245,16 +227,16 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 		void IAM_USER_API_010_batchDeactivateUsers_ShouldReturnResult() throws Exception {
 			// Given
 			BatchDeactivateUsersRequest request = new BatchDeactivateUsersRequest();
-			request.setUserIds(Arrays.asList("USER-001", "USER-002"));
+			request.setUserIds(Arrays.asList("user-001", "user-002"));
 
 			// When & Then
-			var response = performPost("/api/v1/users/batch-deactivate", request)
+			var response = performPut("/api/v1/users/batch-deactivate", request)
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
 			assertThat(responseBody).contains("successCount");
-			assertThat(responseBody).contains("failureCount");
+			assertThat(responseBody).contains("failedCount");
 		}
 	}
 
@@ -269,17 +251,18 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("IAM_USER_API_011: 指派角色給用戶 - 應返回成功訊息")
 		void IAM_USER_API_011_assignRoles_ShouldReturnSuccess() throws Exception {
 			// Given
-			String userId = "USER-001";
+			String userId = "user-001";
 			AssignUserRolesRequest request = new AssignUserRolesRequest();
 			request.setRoleIds(Arrays.asList("ROLE-001", "ROLE-002"));
 
 			// When & Then
-			var response = performPost("/api/v1/users/" + userId + "/roles", request)
+			var response = performPut("/api/v1/users/" + userId + "/roles", request)
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("success");
+			assertThat(responseBody).contains("userId");
+			assertThat(responseBody).contains("roles");
 		}
 
 		@Test
@@ -291,7 +274,7 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setRoleIds(Arrays.asList("ROLE-001"));
 
 			// When & Then
-			performPost("/api/v1/users/" + userId + "/roles", request)
+			performPut("/api/v1/users/" + userId + "/roles", request)
 					.andExpect(status().isNotFound());
 		}
 	}
@@ -337,8 +320,8 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 
 			String responseBody = response.getResponse().getContentAsString();
 			assertThat(responseBody).contains("items");
-			assertThat(responseBody).contains("totalCount");
-			assertThat(responseBody).contains("pageSize");
+			assertThat(responseBody).contains("total");
+			assertThat(responseBody).contains("size");
 		}
 	}
 
