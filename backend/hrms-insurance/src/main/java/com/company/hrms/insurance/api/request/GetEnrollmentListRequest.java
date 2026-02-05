@@ -1,5 +1,8 @@
 package com.company.hrms.insurance.api.request;
 
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryFilter;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,37 +18,54 @@ import lombok.NoArgsConstructor;
 public class GetEnrollmentListRequest {
 
     /** 員工編號 */
-    @com.company.hrms.common.query.QueryCondition.EQ("employee_id")
+    @QueryFilter(property = "employee_id", operator = Operator.EQ)
     private String employeeId;
 
     /** 保險類型 (LABOR/HEALTH/PENSION) */
-    @com.company.hrms.common.query.QueryCondition.EQ("insurance_type")
+    @QueryFilter(property = "insurance_type", operator = Operator.EQ)
     private String insuranceType;
 
     /** 狀態 (ACTIVE/TERMINATED/WITHDRAWN) */
-    @com.company.hrms.common.query.QueryCondition.EQ("status")
+    @QueryFilter(property = "status", operator = Operator.EQ)
     private String status;
 
     /** 加保日期 */
-    @com.company.hrms.common.query.QueryCondition.EQ("enroll_date")
+    @QueryFilter(property = "enroll_date", operator = Operator.EQ)
     private String enrollDate;
 
     /** 投保級距 */
-    @com.company.hrms.common.query.QueryCondition.EQ("salary_grade")
+    @QueryFilter(property = "salary_grade", operator = Operator.EQ)
     private String salaryGrade;
 
     /** 投保單位 */
-    @com.company.hrms.common.query.QueryCondition.EQ("insurance_unit")
+    @QueryFilter(property = "insurance_unit", operator = Operator.EQ)
     private String insuranceUnit;
 
     /** 是否有眷屬 */
-    @com.company.hrms.common.query.QueryCondition.EQ("has_dependents")
+    @QueryFilter(property = "has_dependents", operator = Operator.EQ)
     private Boolean hasDependents;
 
+    /** 年月 (格式: YYYY-MM) */
+    @QueryFilter(property = "year_month", operator = Operator.EQ)
+    private String yearMonth;
+
+    /** 提撥率 */
+    @QueryFilter(property = "contribution_rate", operator = Operator.EQ)
+    private String contributionRate;
+
+    /** 是否有自提 (傳入true時，查詢 voluntary_rate > 0) */
+    // 特殊處理：需在 Assembler 中手動處理
+    private Boolean hasVoluntary;
+
+    /** 眷屬關係 */
+    @QueryFilter(property = "relationship", operator = Operator.EQ)
+    private String relationship;
+
+    /** 職災發生日期 */
+    @QueryFilter(property = "incident_date", operator = Operator.EQ)
+    private String incidentDate;
+
     /** 當前使用者 ID (用於個人查詢) */
-    // Special handling in Assembler if needed, or mapped to same field?
-    // If annotated, it adds AND condition.
-    // If Controller logic ensures only one is set (or they match), it's fine.
-    // If not annotated, we can add manually in Assembler.
+    // 特殊處理：需在 Assembler 中手動處理
     private String currentUserId;
 }

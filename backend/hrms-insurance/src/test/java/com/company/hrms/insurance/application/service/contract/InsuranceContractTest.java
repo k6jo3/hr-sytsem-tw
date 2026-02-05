@@ -222,6 +222,45 @@ public class InsuranceContractTest extends BaseContractTest {
         }
 
         @Test
+        @DisplayName("INS_P002: 查詢月提撥紀錄應包含年月過濾")
+        void searchByYearMonth_ShouldIncludeYearMonthFilter() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .yearMonth("2025-01")
+                    .build();
+
+            var query = assembler.toPensionQuery(request);
+
+            assertContract(query, contract, "INS_P002");
+        }
+
+        @Test
+        @DisplayName("INS_P003: 依提撥率查詢應包含提撥率過濾")
+        void searchByContributionRate_ShouldIncludeRateFilter() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .contributionRate("6")
+                    .build();
+
+            var query = assembler.toPensionQuery(request);
+
+            assertContract(query, contract, "INS_P003");
+        }
+
+        @Test
+        @DisplayName("INS_P004: 查詢自提勞退應包含自提率過濾")
+        void searchVoluntaryPension_ShouldIncludeVoluntaryRateFilter() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .hasVoluntary(true)
+                    .build();
+
+            var query = assembler.toPensionQuery(request);
+
+            assertContract(query, contract, "INS_P004");
+        }
+
+        @Test
         @DisplayName("INS_P005: 員工查詢自己勞退應包含當前使用者過濾")
         void searchOwnEnrollments_ShouldIncludeCurrentUserFilter() throws Exception {
             // 當設定 currentUserId 時，查詢必須包含 employee_id 過濾
@@ -234,6 +273,132 @@ public class InsuranceContractTest extends BaseContractTest {
             // 驗證包含 employee_id 和 is_deleted 過濾條件
             assertHasFilterForField(query, "employee_id");
             assertHasFilterForField(query, "is_deleted");
+        }
+    }
+
+    /**
+     * 眷屬資料查詢合約測試
+     */
+    @Nested
+    @DisplayName("眷屬資料查詢合約 (Dependent Query Contract)")
+    class DependentQueryContractTests {
+
+        private final EnrollmentQueryAssembler assembler = new EnrollmentQueryAssembler();
+
+        @Test
+        @DisplayName("INS_D001: 查詢員工眷屬應包含員工ID過濾")
+        void searchByEmployeeId_ShouldIncludeCorrectFilters() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .employeeId("E001")
+                    .build();
+
+            var query = assembler.toDependentQuery(request);
+
+            assertContract(query, contract, "INS_D001");
+        }
+
+        @Test
+        @DisplayName("INS_D002: 依眷屬關係查詢應包含關係過濾")
+        void searchByRelationship_ShouldIncludeRelationshipFilter() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .relationship("SPOUSE")
+                    .build();
+
+            var query = assembler.toDependentQuery(request);
+
+            assertContract(query, contract, "INS_D002");
+        }
+
+        @Test
+        @DisplayName("INS_D003: 查詢有效眷屬應包含狀態過濾")
+        void searchActiveDependent_ShouldIncludeStatusFilter() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .status("ACTIVE")
+                    .build();
+
+            var query = assembler.toDependentQuery(request);
+
+            assertContract(query, contract, "INS_D003");
+        }
+
+        @Test
+        @DisplayName("INS_D004: 員工查詢自己眷屬應包含當前使用者過濾")
+        void searchOwnDependents_ShouldIncludeCurrentUserFilter() throws Exception {
+            // 當設定 currentUserId 時，查詢必須包含 employee_id 過濾
+            var request = GetEnrollmentListRequest.builder()
+                    .currentUserId("E001")
+                    .build();
+
+            var query = assembler.toDependentQuery(request);
+
+            // 驗證包含 employee_id 和 is_deleted 過濾條件
+            assertHasFilterForField(query, "employee_id");
+            assertHasFilterForField(query, "is_deleted");
+        }
+    }
+
+    /**
+     * 職災紀錄查詢合約測試
+     */
+    @Nested
+    @DisplayName("職災紀錄查詢合約 (Work Injury Query Contract)")
+    class WorkInjuryQueryContractTests {
+
+        private final EnrollmentQueryAssembler assembler = new EnrollmentQueryAssembler();
+
+        @Test
+        @DisplayName("INS_W001: 查詢員工職災紀錄應包含員工ID過濾")
+        void searchByEmployeeId_ShouldIncludeCorrectFilters() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .employeeId("E001")
+                    .build();
+
+            var query = assembler.toWorkInjuryQuery(request);
+
+            assertContract(query, contract, "INS_W001");
+        }
+
+        @Test
+        @DisplayName("INS_W002: 查詢處理中職災應包含狀態過濾")
+        void searchProcessingInjury_ShouldIncludeStatusFilter() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .status("PROCESSING")
+                    .build();
+
+            var query = assembler.toWorkInjuryQuery(request);
+
+            assertContract(query, contract, "INS_W002");
+        }
+
+        @Test
+        @DisplayName("INS_W003: 查詢已結案職災應包含狀態過濾")
+        void searchClosedInjury_ShouldIncludeStatusFilter() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .status("CLOSED")
+                    .build();
+
+            var query = assembler.toWorkInjuryQuery(request);
+
+            assertContract(query, contract, "INS_W003");
+        }
+
+        @Test
+        @DisplayName("INS_W004: 依發生日期查詢應包含日期過濾")
+        void searchByIncidentDate_ShouldIncludeDateFilter() throws Exception {
+            String contract = loadContractSpec("insurance");
+            var request = GetEnrollmentListRequest.builder()
+                    .incidentDate("2025-01-15")
+                    .build();
+
+            var query = assembler.toWorkInjuryQuery(request);
+
+            assertContract(query, contract, "INS_W004");
         }
     }
 
