@@ -4,14 +4,16 @@ package com.company.hrms.common.api.response;
  * 錯誤碼常數定義
  * 提供統一的錯誤碼規範
  *
- * <p>錯誤碼格式：{服務代號}{錯誤類型}{序號}
+ * <p>
+ * 錯誤碼格式：{服務代號}{錯誤類型}{序號}
  * <ul>
- *   <li>服務代號：01=IAM, 02=ORG, 03=ATT, 等</li>
- *   <li>錯誤類型：4=客戶端錯誤, 5=伺服器錯誤</li>
- *   <li>序號：001~999</li>
+ * <li>服務代號：01=IAM, 02=ORG, 03=ATT, 等</li>
+ * <li>錯誤類型：4=客戶端錯誤, 5=伺服器錯誤</li>
+ * <li>序號：001~999</li>
  * </ul>
  *
- * <p>通用錯誤碼使用 00 作為服務代號
+ * <p>
+ * 通用錯誤碼使用 00 作為服務代號
  */
 public final class ErrorCode {
 
@@ -28,6 +30,9 @@ public final class ErrorCode {
 
     /** 資源不存在 */
     public static final String RESOURCE_NOT_FOUND = "004004";
+
+    /** 資源已存在 */
+    public static final String RESOURCE_ALREADY_EXISTS = "004009";
 
     /** 請求方法不允許 */
     public static final String METHOD_NOT_ALLOWED = "004005";

@@ -31,6 +31,12 @@ public class GetAttendanceListRequest {
     @EQ
     private LocalDate date;
 
+    @Schema(description = "開始日期")
+    private LocalDate startDate;
+
+    @Schema(description = "結束日期")
+    private LocalDate endDate;
+
     @Schema(description = "月份 (YYYY-MM)")
     private String month;
 
@@ -45,4 +51,10 @@ public class GetAttendanceListRequest {
     @Schema(description = "是否早退")
     @EQ("isEarlyLeave")
     private Boolean earlyLeaveFlag;
+
+    @Schema(description = "頁碼")
+    private Integer page;
+
+    @Schema(description = "每頁筆數")
+    private Integer size;
 }

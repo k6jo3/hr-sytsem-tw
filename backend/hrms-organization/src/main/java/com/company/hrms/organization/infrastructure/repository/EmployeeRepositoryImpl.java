@@ -286,6 +286,10 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
                 address,
                 emergencyContact,
                 bankAccount,
+                po.getOrganizationId() != null
+                        ? new com.company.hrms.organization.domain.model.valueobject.OrganizationId(
+                                po.getOrganizationId())
+                        : null,
                 po.getDepartmentId() != null ? new DepartmentId(po.getDepartmentId()) : null,
                 po.getJobTitle(),
                 po.getJobLevel(),
@@ -334,6 +338,8 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
 
         po.setDepartmentId(
                 employee.getDepartmentIdVO() != null ? employee.getDepartmentIdVO().getValue().toString() : null);
+        po.setOrganizationId(
+                employee.getOrganizationId() != null ? employee.getOrganizationId().toString() : null);
         po.setJobTitle(employee.getJobTitle());
         po.setJobLevel(employee.getJobLevel());
         po.setEmploymentType(employee.getEmploymentType() != null ? employee.getEmploymentType().name() : null);

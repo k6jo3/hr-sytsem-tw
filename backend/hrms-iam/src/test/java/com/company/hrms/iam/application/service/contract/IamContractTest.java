@@ -85,6 +85,19 @@ public class IamContractTest extends BaseContractTest {
         }
 
         @Test
+        @DisplayName("IAM_U004: 查詢鎖定帳號應包含狀態過濾")
+        void searchLockedUsers_ShouldIncludeStatusFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var request = GetUserListRequest.builder()
+                    .status("LOCKED")
+                    .build();
+
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
+
+            assertContract(query, contract, "IAM_U004");
+        }
+
+        @Test
         @DisplayName("IAM_U005: 依租戶查詢使用者")
         void searchByTenant_ShouldIncludeTenantFilter() throws Exception {
             String contract = loadContractSpec("iam");
@@ -95,6 +108,24 @@ public class IamContractTest extends BaseContractTest {
             var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_U005");
+        }
+
+        @Test
+        @DisplayName("IAM_U006: 一般使用者查詢同部門應包含部門過濾")
+        void searchSameDepartment_ShouldIncludeDeptFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            // 模擬一般使用者查詢（空請求，由後端自動添加部門過濾）
+            var request = GetUserListRequest.builder()
+                    .build();
+
+            // 使用變數佔位符格式（符合合約規格要求）
+            var query = QueryBuilder.where()
+                    .fromDto(request)
+                    .eq("department_id", "{currentUserDeptId}")  // 使用佔位符
+                    .eq("is_deleted", 0)
+                    .build();
+
+            assertContract(query, contract, "IAM_U006");
         }
     }
 
@@ -147,6 +178,19 @@ public class IamContractTest extends BaseContractTest {
             var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_R003");
+        }
+
+        @Test
+        @DisplayName("IAM_R004: 查詢自訂角色應包含類型過濾")
+        void searchCustomRoles_ShouldIncludeTypeFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var request = GetRoleListRequest.builder()
+                    .type("CUSTOM")
+                    .build();
+
+            var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
+
+            assertContract(query, contract, "IAM_R004");
         }
 
         @Test
@@ -224,6 +268,71 @@ public class IamContractTest extends BaseContractTest {
             var query = QueryBuilder.where().fromDto(request).eq("is_deleted", 0).build();
 
             assertContract(query, contract, "IAM_P004");
+        }
+    }
+
+    /**
+     * 登入紀錄查詢合約測試
+     */
+    @Nested
+    @DisplayName("登入紀錄查詢合約 (Login Log Query Contract)")
+    class LoginLogQueryContractTests {
+
+        @Test
+        @DisplayName("IAM_L001: 查詢成功登入紀錄應包含結果過濾")
+        void searchSuccessfulLogins_ShouldIncludeResultFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            // 注意：登入紀錄查詢不需要 is_deleted 過濾
+            var query = QueryBuilder.where()
+                    .eq("result", "SUCCESS")
+                    .build();
+
+            assertContract(query, contract, "IAM_L001");
+        }
+
+        @Test
+        @DisplayName("IAM_L002: 查詢失敗登入紀錄應包含結果過濾")
+        void searchFailedLogins_ShouldIncludeResultFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var query = QueryBuilder.where()
+                    .eq("result", "FAILED")
+                    .build();
+
+            assertContract(query, contract, "IAM_L002");
+        }
+
+        @Test
+        @DisplayName("IAM_L003: 依使用者查詢登入紀錄應包含使用者過濾")
+        void searchByUser_ShouldIncludeUserFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var query = QueryBuilder.where()
+                    .eq("user_id", "U001")
+                    .build();
+
+            assertContract(query, contract, "IAM_L003");
+        }
+
+        @Test
+        @DisplayName("IAM_L004: 依時間範圍查詢應包含時間過濾")
+        void searchByTimeRange_ShouldIncludeTimeFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            var query = QueryBuilder.where()
+                    .gte("login_time", "2025-01-01")
+                    .build();
+
+            assertContract(query, contract, "IAM_L004");
+        }
+
+        @Test
+        @DisplayName("IAM_L005: 一般使用者查詢自己的紀錄應包含使用者過濾")
+        void searchOwnLogs_ShouldIncludeCurrentUserFilter() throws Exception {
+            String contract = loadContractSpec("iam");
+            // 使用變數佔位符格式（符合合約規格要求）
+            var query = QueryBuilder.where()
+                    .eq("user_id", "{currentUserId}")  // 使用佔位符
+                    .build();
+
+            assertContract(query, contract, "IAM_L005");
         }
     }
 }

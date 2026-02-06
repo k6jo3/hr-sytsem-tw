@@ -269,6 +269,7 @@ class UserApiTest extends BaseApiContractTest {
         @DisplayName("使用者查詢 API")
         class UserQueryApiTests {
 
+                // TODO: 測試失敗
                 @Test
                 @DisplayName("IAM_USER_007: 查詢使用者列表 - 應回傳列表結果")
                 void getUserList_ShouldReturnList() throws Exception {
@@ -340,6 +341,7 @@ class UserApiTest extends BaseApiContractTest {
                                         .andExpect(jsonPath("$.roles").isArray());
                 }
 
+                // TODO: 測試失敗
                 @Test
                 @DisplayName("IAM_USER_009: 依狀態篩選使用者列表")
                 void getUserList_WithStatusFilter_ShouldFilterByStatus() throws Exception {

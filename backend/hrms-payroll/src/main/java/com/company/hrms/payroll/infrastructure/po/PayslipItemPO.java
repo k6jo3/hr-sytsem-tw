@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table(name = "pay_payslip_items")
+@Table(name = "hr04_payslip_items")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,6 +30,8 @@ public class PayslipItemPO {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payslip_id", nullable = false)
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private PayslipPO payslip;
 
     @Column(name = "item_id", length = 36, nullable = false)

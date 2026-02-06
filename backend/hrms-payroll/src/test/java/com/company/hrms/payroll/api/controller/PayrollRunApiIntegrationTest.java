@@ -166,6 +166,10 @@ class PayrollRunApiIntegrationTest extends BaseApiIntegrationTest {
 	@DisplayName("薪資批次送審 API")
 	class PayrollSubmissionApiTests {
 
+		// TODO:測試失敗 - Status expected:<200> but was:<400>
+		// 可能原因：測試資料 RUN-004 的狀態不符合送審條件，或 API 參數驗證錯誤
+		// 需檢查：1. payroll_run_test_data.sql 中 RUN-004 的狀態
+		//        2. SubmitPayrollRunServiceImpl 的業務邏輯
 		@Test
 		@DisplayName("PAY_API_003: 送審薪資批次 - 應從 COMPLETED 轉為 SUBMITTED")
 		void PAY_API_003_submitPayrollRun_ShouldTransitionToSubmitted() throws Exception {

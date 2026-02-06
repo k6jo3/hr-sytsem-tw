@@ -563,6 +563,8 @@ public class Employee {
             Address address,
             EmergencyContact emergencyContact,
             BankAccount bankAccount,
+
+            com.company.hrms.organization.domain.model.valueobject.OrganizationId organizationId,
             DepartmentId departmentId,
             String jobTitle,
             String jobLevel,
@@ -591,6 +593,7 @@ public class Employee {
                 .address(address)
                 .emergencyContact(emergencyContact)
                 .bankAccount(bankAccount)
+                .organizationId(organizationId != null ? organizationId.getValue() : null)
                 .departmentId(departmentId != null ? departmentId.getValue() : null)
                 .jobTitle(jobTitle)
                 .jobLevel(jobLevel)
@@ -604,6 +607,10 @@ public class Employee {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
+    }
+
+    public UUID getOrganizationId() {
+        return this.organizationId;
     }
 
     // ==================== Getter 方法 (for Repository) ====================

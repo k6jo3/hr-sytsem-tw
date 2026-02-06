@@ -121,7 +121,23 @@ public class UltimateQueryEngine<T> {
                 String part = parts[i];
                 pathAcc = pathAcc.isEmpty() ? part : pathAcc + "." + part;
                 if (!joinedPaths.containsKey(pathAcc)) {
-                    PathBuilder<Object> nextPath = new PathBuilder<>(Object.class, part);
+                    // 嘗試取得屬性的真實類型
+                    Class<?> nextType = Object.class;
+                    try {
+                        java.lang.reflect.Field field = currentPath.getType().getDeclaredField(part);
+                        nextType = field.getType();
+                    } catch (Exception e) {
+                        // 嘗試尋找 getter
+                        try {
+                            String getterName = "get" + part.substring(0, 1).toUpperCase() + part.substring(1);
+                            nextType = currentPath.getType().getMethod(getterName).getReturnType();
+                        } catch (Exception e2) {
+                            // 維持 Object.class
+                        }
+                    }
+
+                    @SuppressWarnings({ "unchecked", "rawtypes" })
+                    PathBuilder<Object> nextPath = new PathBuilder<>((Class) nextType, part);
                     query.leftJoin((PathBuilder<Object>) currentPath.get(part, Object.class), nextPath);
                     joinedPaths.put(pathAcc, nextPath);
                 }
@@ -133,27 +149,52 @@ public class UltimateQueryEngine<T> {
         return createPredicate(currentPath, fieldName, unit.getOp(), unit.getValue());
     }
 
-    /**
-     * 根據運算子類型建立對應的 Querydsl 謂詞
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private BooleanExpression createPredicate(PathBuilder<?> path, String fieldName, Operator op, Object value) {
+        // 1. 自動處理底線轉駝峰 (例如 total_amount -> totalAmount)
+        String actualFieldName = fieldName;
+        if (fieldName.contains("_")) {
+            StringBuilder sb = new StringBuilder();
+            boolean nextUpper = false;
+            for (char c : fieldName.toCharArray()) {
+                if (c == '_') {
+                    nextUpper = true;
+                } else if (nextUpper) {
+                    sb.append(Character.toUpperCase(c));
+                    nextUpper = false;
+                } else {
+                    sb.append(c);
+                }
+            }
+            actualFieldName = sb.toString();
+        }
+
         // 取得基本欄位路徑
-        PathBuilder<?> fieldPath = path.get(fieldName);
+        PathBuilder<?> fieldPath = path.get(actualFieldName);
         Class<?> fieldType = fieldPath.getType();
 
-        // 如果 Querydsl 無法偵測類型 (返回 Object.class)，嘗試使用反射取得
+        // 2. 遞迴尋找欄位類型 (支援繼承)
         if (fieldType == Object.class && path.getType() != null) {
-            try {
-                java.lang.reflect.Field field = path.getType().getDeclaredField(fieldName);
-                fieldType = field.getType();
-            } catch (Exception e) {
-                // 忽略，維持 Object.class
+            Class<?> currentClass = path.getType();
+            while (currentClass != null && currentClass != Object.class) {
+                try {
+                    java.lang.reflect.Field field = currentClass.getDeclaredField(actualFieldName);
+                    fieldType = field.getType();
+                    break;
+                } catch (Exception e) {
+                    currentClass = currentClass.getSuperclass();
+                }
             }
+        }
+
+        // 重新使用確定的類型取得路徑，這有助於 Querydsl 產生正確的 SQL (特別是 IN 操作符)
+        if (fieldType != Object.class) {
+            fieldPath = path.get(actualFieldName, (Class) fieldType);
         }
 
         Object finalValue = value;
         final Class<?> targetFieldType = fieldType;
+        fieldName = actualFieldName; // 更新欄位名稱供後續 switch 使用
 
         // 1. 扁平化處理: 解決可能出現的嵌套 Collection (例如 Object[] { List })
         // 這通常發生在 Varargs 傳遞時誤傳入了一個集合

@@ -38,7 +38,7 @@ public class GetEmployeeListServiceImpl
         log.info("Building query for employee list: {}", request);
         return QueryBuilder.where()
                 .fromDto(request)
-                .eq("is_deleted", 0)
+                .eq("is_deleted", false)
                 // 如有需要可在此加入隱含過濾條件，例如 .eq("tenantId", currentUser.getTenantId())
                 .build();
     }

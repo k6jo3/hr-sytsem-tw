@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
+import com.company.hrms.common.infrastructure.persistence.querydsl.engine.UltimateQueryEngine;
+import com.company.hrms.common.query.FilterUnit;
+import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.organization.domain.model.aggregate.Department;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentStatus;
@@ -14,6 +17,7 @@ import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
 import com.company.hrms.organization.domain.repository.IDepartmentRepository;
 import com.company.hrms.organization.infrastructure.dao.DepartmentDAO;
 import com.company.hrms.organization.infrastructure.po.DepartmentPO;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +26,70 @@ import lombok.RequiredArgsConstructor;
 public class DepartmentRepositoryImpl implements IDepartmentRepository {
 
     private final DepartmentDAO departmentDAO;
+    private final JPAQueryFactory jpaQueryFactory;
+
+    @Override
+    public List<Department> findByQuery(QueryGroup query, org.springframework.data.domain.Pageable pageable) {
+        UltimateQueryEngine<DepartmentPO> engine = new UltimateQueryEngine<>(jpaQueryFactory, DepartmentPO.class);
+        QueryGroup mappedQuery = mapQueryFields(query);
+        com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(mappedQuery);
+
+        return engine.getQuery()
+                .where(predicate)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch()
+                .stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public long countByQuery(QueryGroup query) {
+        UltimateQueryEngine<DepartmentPO> engine = new UltimateQueryEngine<>(jpaQueryFactory, DepartmentPO.class);
+        QueryGroup mappedQuery = mapQueryFields(query);
+        com.querydsl.core.types.dsl.BooleanExpression predicate = engine.parse(mappedQuery);
+
+        Long total = jpaQueryFactory.select(engine.getEntityPath().count())
+                .from(engine.getEntityPath())
+                .where(predicate)
+                .fetchOne();
+        return total != null ? total : 0L;
+    }
+
+    private QueryGroup mapQueryFields(QueryGroup original) {
+        if (original == null) {
+            return null;
+        }
+        QueryGroup mapped = new QueryGroup(original.getJunction());
+        for (FilterUnit unit : original.getConditions()) {
+            mapped.add(new FilterUnit(translateFieldName(unit.getField()), unit.getOp(), unit.getValue()));
+        }
+        for (QueryGroup sub : original.getSubGroups()) {
+            mapped.addSubGroup(mapQueryFields(sub));
+        }
+        return mapped;
+    }
+
+    private String translateFieldName(String field) {
+        switch (field) {
+            case "departmentCode":
+                return "code";
+            case "departmentName":
+                return "name";
+            case "organizationId":
+                return "organizationId";
+            case "parentId":
+            case "parent_department_id":
+                return "parentId";
+            case "status":
+                return "status";
+            case "is_deleted":
+                return "isDeleted";
+            default:
+                return field;
+        }
+    }
 
     @Override
     public Optional<Department> findById(DepartmentId id) {

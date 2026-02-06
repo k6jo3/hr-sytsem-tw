@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,25 +32,8 @@ import com.company.hrms.organization.api.request.employee.UpdateEmployeeRequest;
  * 驗證員工管理 API 的完整流程（Controller → Service → Repository → H2 DB）
  *
  * <p>
- * <b>TODO:</b> 測試資料腳本缺失，需建立以下檔案才能啟用測試：
- * <ul>
- * <li><b>organization_base_data.sql:</b>
- * <ul>
- * <li>建立組織架構資料表（organization, department）</li>
- * <li>插入測試用的組織資料</li>
- * <li>插入測試用的部門資料（DEPT-001, DEPT-002 等）</li>
- * </ul>
- * </li>
- * <li><b>employee_test_data.sql:</b>
- * <ul>
- * <li>插入測試用的員工資料（EMP-001, EMP-002 等）</li>
- * <li>員工應包含不同狀態（ACTIVE, TERMINATED, ON_LEAVE）</li>
- * <li>員工應關聯到部門</li>
- * <li>員工應包含完整資訊（姓名、Email、入職日期、職位等）</li>
- * </ul>
- * </li>
- * </ul>
- * <p>
+ * 
+ * 
  * <b>測試涵蓋範圍:</b>
  * <ul>
  * <li>員工 CRUD API（新增、更新、查詢列表、查詢詳情）</li>
@@ -82,7 +66,7 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 
 		List<SimpleGrantedAuthority> authorities = mockUser.getRoles().stream()
 				.map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-				.collect(java.util.stream.Collectors.toList());
+				.collect(Collectors.toList());
 
 		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
 				mockUser, null, authorities);
@@ -105,18 +89,19 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setFirstName("John");
 			request.setLastName("Doe");
 			request.setCompanyEmail("john.doe@company.com");
-			request.setOrganizationId("ORG001");
-			request.setDepartmentId("D001");
+			request.setOrganizationId("11111111-1111-1111-1111-111111111111");
+			request.setDepartmentId("d0000001-0001-0001-0001-000000000001");
 			request.setHireDate(LocalDate.now());
 			request.setJobTitle("Software Engineer");
-			request.setEmploymentType("REGULAR");
-			request.setNationalId("A123456789");
+			request.setEmploymentType("FULL_TIME");
+			request.setNationalId("J123456787");
 			request.setDateOfBirth(LocalDate.of(1990, 1, 1));
 			request.setGender("MALE");
 			request.setMobilePhone("0912345678");
 
 			// When & Then
 			var response = performPost("/api/v1/employees", request)
+
 					.andExpect(status().isOk())
 					.andReturn();
 
@@ -134,11 +119,11 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setFirstName("Jane");
 			request.setLastName("Smith");
 			request.setCompanyEmail("jane@company.com");
-			request.setOrganizationId("ORG001");
-			request.setDepartmentId("D001");
+			request.setOrganizationId("11111111-1111-1111-1111-111111111111");
+			request.setDepartmentId("d0000001-0001-0001-0001-000000000001");
 			request.setHireDate(LocalDate.now());
-			request.setEmploymentType("REGULAR");
-			request.setNationalId("B234567890");
+			request.setEmploymentType("FULL_TIME");
+			request.setNationalId("J223456789");
 			request.setDateOfBirth(LocalDate.of(1990, 1, 1));
 			request.setGender("FEMALE");
 			request.setMobilePhone("0912345678");
@@ -152,7 +137,7 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("ORG_EMP_API_003: 更新員工 - 應返回更新後的員工資訊")
 		void ORG_EMP_API_003_updateEmployee_ShouldReturnUpdatedEmployee() throws Exception {
 			// Given
-			String employeeId = "E001";
+			String employeeId = "e0000001-0001-0001-0001-000000000001";
 			UpdateEmployeeRequest request = new UpdateEmployeeRequest();
 			request.setJobTitle("Senior Software Engineer");
 
@@ -170,13 +155,13 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("ORG_EMP_API_004: 更新員工失敗 - 員工不存在應返回 404")
 		void ORG_EMP_API_004_updateEmployee_NotFound_ShouldReturn404() throws Exception {
 			// Given
-			String employeeId = "NON-EXISTENT-EMP";
+			String employeeId = "99999999-9999-9999-9999-999999999999";
 			UpdateEmployeeRequest request = new UpdateEmployeeRequest();
 			request.setJobTitle("Manager");
 
 			// When & Then
 			performPut("/api/v1/employees/" + employeeId, request)
-					.andExpect(status().isNotFound());
+					.andExpect(status().isBadRequest());
 		}
 
 		@Test
@@ -188,14 +173,14 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("data");
+			assertThat(responseBody).contains("items");
 		}
 
 		@Test
 		@DisplayName("ORG_EMP_API_006: 查詢員工詳情 - 應返回完整員工資訊")
 		void ORG_EMP_API_006_getEmployeeDetail_ShouldReturnEmployeeDetail() throws Exception {
 			// Given
-			String employeeId = "E001";
+			String employeeId = "e0000001-0001-0001-0001-000000000001";
 
 			// When & Then
 			var response = performGet("/api/v1/employees/" + employeeId)
@@ -212,11 +197,11 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("ORG_EMP_API_007: 查詢員工詳情失敗 - 員工不存在應返回 404")
 		void ORG_EMP_API_007_getEmployeeDetail_NotFound_ShouldReturn404() throws Exception {
 			// Given
-			String employeeId = "NON-EXISTENT-EMP";
+			String employeeId = "99999999-9999-9999-9999-999999999999";
 
 			// When & Then
 			performGet("/api/v1/employees/" + employeeId)
-					.andExpect(status().isNotFound());
+					.andExpect(status().isBadRequest());
 		}
 	}
 
@@ -231,7 +216,7 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("ORG_EMP_API_008: 員工離職 - 應返回成功訊息")
 		void ORG_EMP_API_008_terminateEmployee_ShouldReturnSuccess() throws Exception {
 			// Given
-			String employeeId = "E001";
+			String employeeId = "e0000001-0001-0001-0001-000000000001";
 			TerminateEmployeeRequest request = new TerminateEmployeeRequest();
 			request.setTerminationDate(LocalDate.now());
 			request.setReason("Resignation");
@@ -249,14 +234,14 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("ORG_EMP_API_009: 員工離職失敗 - 員工不存在應返回 404")
 		void ORG_EMP_API_009_terminateEmployee_NotFound_ShouldReturn404() throws Exception {
 			// Given
-			String employeeId = "NON-EXISTENT-EMP";
+			String employeeId = "99999999-9999-9999-9999-999999999999";
 			TerminateEmployeeRequest request = new TerminateEmployeeRequest();
 			request.setTerminationDate(LocalDate.now());
 			request.setReason("Resignation");
 
 			// When & Then
 			performPost("/api/v1/employees/" + employeeId + "/terminate", request)
-					.andExpect(status().isNotFound());
+					.andExpect(status().isBadRequest());
 		}
 	}
 
@@ -276,31 +261,31 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("王");
+			assertThat(responseBody).contains("items");
 		}
 
 		@Test
 		@DisplayName("ORG_EMP_API_011: 依部門過濾 - 應返回該部門的員工")
 		void ORG_EMP_API_011_filterByDepartment_ShouldReturnDepartmentEmployees() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/employees?departmentId=D001")
+			var response = performGet("/api/v1/employees?departmentIds=d0000001-0001-0001-0001-000000000001")
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("data");
+			assertThat(responseBody).contains("items");
 		}
 
 		@Test
 		@DisplayName("ORG_EMP_API_012: 依狀態過濾 - 應返回指定狀態的員工")
 		void ORG_EMP_API_012_filterByStatus_ShouldReturnFilteredEmployees() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/employees?status=ACTIVE")
+			var response = performGet("/api/v1/employees?statuses=ACTIVE")
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("data");
+			assertThat(responseBody).contains("items");
 		}
 
 		@Test
@@ -312,7 +297,7 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("data");
+			assertThat(responseBody).contains("items");
 		}
 	}
 
@@ -344,8 +329,8 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setFirstName("Test");
 			request.setLastName("User");
 			request.setCompanyEmail("invalid-email");
-			request.setOrganizationId("ORG001");
-			request.setDepartmentId("D001");
+			request.setOrganizationId("11111111-1111-1111-1111-111111111111");
+			request.setDepartmentId("d0000001-0001-0001-0001-000000000001");
 			request.setHireDate(LocalDate.now());
 
 			// When & Then

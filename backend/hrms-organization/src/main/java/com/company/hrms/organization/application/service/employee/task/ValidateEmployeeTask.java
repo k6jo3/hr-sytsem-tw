@@ -3,6 +3,7 @@ package com.company.hrms.organization.application.service.employee.task;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
+import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.organization.api.request.employee.CreateEmployeeRequest;
 import com.company.hrms.organization.application.service.employee.context.EmployeeContext;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
@@ -31,18 +32,18 @@ public class ValidateEmployeeTask implements PipelineTask<EmployeeContext> {
 
         // 驗證員工編號唯一性
         if (employeeRepository.existsByEmployeeNumber(request.getEmployeeNumber())) {
-            throw new IllegalArgumentException("員工編號已存在: " + request.getEmployeeNumber());
+            throw new DomainException("EMPLOYEE_ALREADY_EXISTS", "員工編號已存在: " + request.getEmployeeNumber());
         }
 
         // 驗證 Email 唯一性
         if (employeeRepository.existsByEmail(request.getCompanyEmail())) {
-            throw new IllegalArgumentException("Email 已存在: " + request.getCompanyEmail());
+            throw new DomainException("EMAIL_ALREADY_EXISTS", "Email 已存在: " + request.getCompanyEmail());
         }
 
         // 驗證身分證號唯一性
         if (request.getNationalId() != null &&
                 employeeRepository.existsByNationalId(request.getNationalId())) {
-            throw new IllegalArgumentException("身分證號已存在");
+            throw new DomainException("NATIONAL_ID_ALREADY_EXISTS", "身分證號已存在");
         }
 
         // 驗證部門存在

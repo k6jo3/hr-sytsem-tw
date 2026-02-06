@@ -3,16 +3,17 @@
 <mapper namespace="com.company.hrms.organization.infrastructure.mapper.EmployeeMapper">
 
     <resultMap id="EmployeeResultMap" type="com.company.hrms.organization.infrastructure.po.EmployeePO">
-        <id column="id" property="id"/>
+        <id column="employee_id" property="id"/>
         <result column="employee_number" property="employeeNumber"/>
         <result column="first_name" property="firstName"/>
         <result column="last_name" property="lastName"/>
+        <result column="full_name" property="fullName"/>
         <result column="english_name" property="englishName"/>
         <result column="gender" property="gender"/>
-        <result column="birth_date" property="birthDate"/>
+        <result column="date_of_birth" property="birthDate"/>
         <result column="national_id" property="nationalId"/>
-        <result column="email" property="email"/>
-        <result column="phone" property="phone"/>
+        <result column="company_email" property="email"/>
+        <result column="mobile_phone" property="phone"/>
         <result column="marital_status" property="maritalStatus"/>
         <result column="address_postal_code" property="addressPostalCode"/>
         <result column="address_city" property="addressCity"/>
@@ -25,6 +26,7 @@
         <result column="bank_branch_code" property="bankBranchCode"/>
         <result column="bank_account_number" property="bankAccountNumber"/>
         <result column="bank_account_holder_name" property="bankAccountHolderName"/>
+        <result column="organization_id" property="organizationId"/>
         <result column="department_id" property="departmentId"/>
         <result column="job_title" property="jobTitle"/>
         <result column="job_level" property="jobLevel"/>
@@ -34,7 +36,7 @@
         <result column="probation_end_date" property="probationEndDate"/>
         <result column="termination_date" property="terminationDate"/>
         <result column="termination_reason" property="terminationReason"/>
-        <result column="supervisor_id" property="supervisorId"/>
+        <result column="manager_id" property="supervisorId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="is_deleted" property="isDeleted"/>
@@ -43,20 +45,20 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, employee_number, first_name, last_name, english_name, gender, birth_date,
-        national_id, email, phone, marital_status,
+        employee_id, employee_number, first_name, last_name, full_name, english_name, gender, date_of_birth,
+        national_id, company_email, mobile_phone, marital_status,
         address_postal_code, address_city, address_district, address_street,
         emergency_contact_name, emergency_contact_relationship, emergency_contact_phone,
         bank_code, bank_branch_code, bank_account_number, bank_account_holder_name,
-        department_id, job_title, job_level, employment_type, employment_status,
-        hire_date, probation_end_date, termination_date, termination_reason, supervisor_id,
+        organization_id, department_id, job_title, job_level, employment_type, employment_status,
+        hire_date, probation_end_date, termination_date, termination_reason, manager_id,
         created_at, updated_at, is_deleted, created_by, updated_by
     </sql>
 
     <select id="selectById" resultMap="EmployeeResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM employees
-        WHERE id = #{id}
+        WHERE employee_id = #{id}
     </select>
 
     <select id="selectByEmployeeNumber" resultMap="EmployeeResultMap">
@@ -68,7 +70,7 @@
     <select id="selectByEmail" resultMap="EmployeeResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM employees
-        WHERE email = #{email}
+        WHERE company_email = #{email}
     </select>
 
     <select id="selectByNationalId" resultMap="EmployeeResultMap">
@@ -87,7 +89,7 @@
     <select id="selectBySupervisorId" resultMap="EmployeeResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM employees
-        WHERE supervisor_id = #{supervisorId}
+        WHERE manager_id = #{supervisorId}
         ORDER BY employee_number
     </select>
 
@@ -106,8 +108,9 @@
                 AND (employee_number LIKE CONCAT('%', #{keyword}, '%')
                     OR first_name LIKE CONCAT('%', #{keyword}, '%')
                     OR last_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR full_name LIKE CONCAT('%', #{keyword}, '%')
                     OR english_name LIKE CONCAT('%', #{keyword}, '%')
-                    OR email LIKE CONCAT('%', #{keyword}, '%'))
+                    OR company_email LIKE CONCAT('%', #{keyword}, '%'))
             </if>
             <if test="departmentId != null and departmentId != ''">
                 AND department_id = #{departmentId}
@@ -137,8 +140,9 @@
                 AND (employee_number LIKE CONCAT('%', #{keyword}, '%')
                     OR first_name LIKE CONCAT('%', #{keyword}, '%')
                     OR last_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR full_name LIKE CONCAT('%', #{keyword}, '%')
                     OR english_name LIKE CONCAT('%', #{keyword}, '%')
-                    OR email LIKE CONCAT('%', #{keyword}, '%'))
+                    OR company_email LIKE CONCAT('%', #{keyword}, '%'))
             </if>
             <if test="departmentId != null and departmentId != ''">
                 AND department_id = #{departmentId}
@@ -160,21 +164,21 @@
 
     <insert id="insert">
         INSERT INTO employees (
-            id, employee_number, first_name, last_name, english_name, gender, birth_date,
-            national_id, email, phone, marital_status,
+            employee_id, employee_number, first_name, last_name, full_name, english_name, gender, date_of_birth,
+            national_id, company_email, mobile_phone, marital_status,
             address_postal_code, address_city, address_district, address_street,
             emergency_contact_name, emergency_contact_relationship, emergency_contact_phone,
             bank_code, bank_branch_code, bank_account_number, bank_account_holder_name,
-            department_id, job_title, job_level, employment_type, employment_status,
-            hire_date, probation_end_date, termination_date, termination_reason, supervisor_id,
+            organization_id, department_id, job_title, job_level, employment_type, employment_status,
+            hire_date, probation_end_date, termination_date, termination_reason, manager_id,
             created_at, updated_at, is_deleted, created_by, updated_by
         ) VALUES (
-            #{id}, #{employeeNumber}, #{firstName}, #{lastName}, #{englishName}, #{gender}, #{birthDate},
+            #{id}, #{employeeNumber}, #{firstName}, #{lastName}, #{fullName}, #{englishName}, #{gender}, #{birthDate},
             #{nationalId}, #{email}, #{phone}, #{maritalStatus},
             #{addressPostalCode}, #{addressCity}, #{addressDistrict}, #{addressStreet},
             #{emergencyContactName}, #{emergencyContactRelationship}, #{emergencyContactPhone},
             #{bankCode}, #{bankBranchCode}, #{bankAccountNumber}, #{bankAccountHolderName},
-            #{departmentId}, #{jobTitle}, #{jobLevel}, #{employmentType}, #{employmentStatus},
+            #{organizationId}, #{departmentId}, #{jobTitle}, #{jobLevel}, #{employmentType}, #{employmentStatus},
             #{hireDate}, #{probationEndDate}, #{terminationDate}, #{terminationReason}, #{supervisorId},
             #{createdAt}, #{updatedAt}, #{isDeleted}, #{createdBy}, #{updatedBy}
         )
@@ -185,12 +189,13 @@
             employee_number = #{employeeNumber},
             first_name = #{firstName},
             last_name = #{lastName},
+            full_name = #{fullName},
             english_name = #{englishName},
             gender = #{gender},
-            birth_date = #{birthDate},
+            date_of_birth = #{birthDate},
             national_id = #{nationalId},
-            email = #{email},
-            phone = #{phone},
+            company_email = #{email},
+            mobile_phone = #{phone},
             marital_status = #{maritalStatus},
             address_postal_code = #{addressPostalCode},
             address_city = #{addressCity},
@@ -203,6 +208,7 @@
             bank_branch_code = #{bankBranchCode},
             bank_account_number = #{bankAccountNumber},
             bank_account_holder_name = #{bankAccountHolderName},
+            organization_id = #{organizationId},
             department_id = #{departmentId},
             job_title = #{jobTitle},
             job_level = #{jobLevel},
@@ -212,16 +218,16 @@
             probation_end_date = #{probationEndDate},
             termination_date = #{terminationDate},
             termination_reason = #{terminationReason},
-            supervisor_id = #{supervisorId},
+            manager_id = #{supervisorId},
             is_deleted = #{isDeleted},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
-        WHERE id = #{id}
+        WHERE employee_id = #{id}
     </update>
 
     <delete id="deleteById">
         UPDATE employees SET employment_status = 'TERMINATED', updated_at = NOW()
-        WHERE id = #{id}
+        WHERE employee_id = #{id}
     </delete>
 
     <select id="existsByEmployeeNumber" resultType="boolean">
@@ -229,7 +235,7 @@
     </select>
 
     <select id="existsByEmail" resultType="boolean">
-        SELECT EXISTS(SELECT 1 FROM employees WHERE email = #{email})
+        SELECT EXISTS(SELECT 1 FROM employees WHERE company_email = #{email})
     </select>
 
     <select id="existsByNationalId" resultType="boolean">
@@ -237,7 +243,7 @@
     </select>
 
     <select id="existsById" resultType="boolean">
-        SELECT EXISTS(SELECT 1 FROM employees WHERE id = #{id})
+        SELECT EXISTS(SELECT 1 FROM employees WHERE employee_id = #{id})
     </select>
 
     <select id="countByDepartmentId" resultType="int">
@@ -253,14 +259,14 @@
 
     <select id="countByOrganizationId" resultType="int">
         SELECT COUNT(*) FROM employees e
-        JOIN departments d ON e.department_id = d.id
+        JOIN departments d ON e.department_id = d.department_id
         WHERE d.organization_id = #{organizationId}
     </select>
 
     <select id="selectByIds" resultMap="EmployeeResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM employees
-        WHERE id IN
+        WHERE employee_id IN
         <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
             #{item}
         </foreach>
