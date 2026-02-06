@@ -5,8 +5,8 @@
     "op" : "LIKE",
     "v" : "john_doe"
   }, {
-    "f" : "is_deleted",
-    "op" : "EQ",
-    "v" : 0
+    "f" : "status",
+    "op" : "NE",
+    "v" : "DELETED"
   } ]
 }

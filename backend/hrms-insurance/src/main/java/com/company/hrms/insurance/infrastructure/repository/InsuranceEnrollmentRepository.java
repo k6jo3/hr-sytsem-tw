@@ -35,7 +35,7 @@ public class InsuranceEnrollmentRepository
         @Override
         public InsuranceEnrollment save(InsuranceEnrollment enrollment) {
                 InsuranceEnrollmentEntity entity = toEntity(enrollment);
-                super.save(entity);
+                super.update(entity);
                 return enrollment;
         }
 
@@ -104,16 +104,18 @@ public class InsuranceEnrollmentRepository
         }
 
         private InsuranceEnrollment toDomain(InsuranceEnrollmentEntity entity) {
-                // 注意：這裡需要傳入 InsuranceLevel 物件，但為了簡化，暫時使用建構子
                 return new InsuranceEnrollment(
                                 new EnrollmentId(entity.getEnrollmentId().toString()),
                                 entity.getEmployeeId(),
                                 new UnitId(entity.getInsuranceUnitId().toString()),
                                 entity.getInsuranceType(),
                                 entity.getEnrollDate(),
+                                entity.getWithdrawDate(),
                                 entity.getInsuranceLevelId() != null
                                                 ? new LevelId(entity.getInsuranceLevelId().toString())
                                                 : null,
-                                entity.getMonthlySalary());
+                                entity.getMonthlySalary(),
+                                entity.getStatus(),
+                                entity.getIsReported() != null ? entity.getIsReported() : false);
         }
 }

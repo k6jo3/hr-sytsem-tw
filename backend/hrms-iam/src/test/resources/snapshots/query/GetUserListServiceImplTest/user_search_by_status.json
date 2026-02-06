@@ -5,8 +5,8 @@
     "op" : "EQ",
     "v" : "ACTIVE"
   }, {
-    "f" : "is_deleted",
-    "op" : "EQ",
-    "v" : 0
+    "f" : "status",
+    "op" : "NE",
+    "v" : "DELETED"
   } ]
 }

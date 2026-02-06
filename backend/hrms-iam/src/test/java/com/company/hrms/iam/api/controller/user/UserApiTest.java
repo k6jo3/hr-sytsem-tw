@@ -269,7 +269,6 @@ class UserApiTest extends BaseApiContractTest {
         @DisplayName("使用者查詢 API")
         class UserQueryApiTests {
 
-                // TODO: 測試失敗
                 @Test
                 @DisplayName("IAM_USER_007: 查詢使用者列表 - 應回傳列表結果")
                 void getUserList_ShouldReturnList() throws Exception {
@@ -304,9 +303,9 @@ class UserApiTest extends BaseApiContractTest {
                         // Act & Assert
                         performGet("/api/v1/users")
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$").isArray())
-                                        .andExpect(jsonPath("$.length()").value(2))
-                                        .andExpect(jsonPath("$[0].userId").value("user-001"));
+                                        .andExpect(jsonPath("$.items").isArray())
+                                        .andExpect(jsonPath("$.items.length()").value(2))
+                                        .andExpect(jsonPath("$.items[0].userId").value("user-001"));
                 }
 
                 @Test
@@ -341,7 +340,6 @@ class UserApiTest extends BaseApiContractTest {
                                         .andExpect(jsonPath("$.roles").isArray());
                 }
 
-                // TODO: 測試失敗
                 @Test
                 @DisplayName("IAM_USER_009: 依狀態篩選使用者列表")
                 void getUserList_WithStatusFilter_ShouldFilterByStatus() throws Exception {
@@ -368,8 +366,8 @@ class UserApiTest extends BaseApiContractTest {
                         // Act & Assert
                         performGet("/api/v1/users?status=ACTIVE")
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$").isArray())
-                                        .andExpect(jsonPath("$[0].status").value("ACTIVE"));
+                                        .andExpect(jsonPath("$.items").isArray())
+                                        .andExpect(jsonPath("$.items[0].status").value("ACTIVE"));
                 }
         }
 }

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -39,10 +38,6 @@ import com.company.hrms.common.test.base.BaseApiIntegrationTest;
  * <li>請假查詢 API（列表、詳情、過濾）</li>
  * </ul>
  *
- * TODO: 需建立測試資料腳本
- * - attendance_base_data.sql (員工基礎資料)
- * - leave_test_data.sql (請假測試資料)
- * - cleanup.sql (清理腳本)
  *
  * @author SA Team
  * @since 2026-02-05
@@ -51,7 +46,9 @@ import com.company.hrms.common.test.base.BaseApiIntegrationTest;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @Transactional
-@Disabled("TODO:測試失敗 - 需建立測試資料腳本 (attendance_base_data.sql, leave_test_data.sql)")
+@Sql(scripts = "classpath:test-data/attendance_base_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:test-data/leave_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("請假管理 API 整合測試")
 class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 
@@ -92,7 +89,7 @@ class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setReason("家庭事務");
 
 			// When & Then
-			var response = performPost("/api/v1/leaves", request)
+			var response = performPost("/api/v1/leave/applications", request)
 					.andExpect(status().isOk())
 					.andReturn();
 
@@ -105,12 +102,12 @@ class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("ATT_LEAVE_API_002: 查詢請假申請列表 - 應返回列表")
 		void ATT_LEAVE_API_002_getLeaveList_ShouldReturnList() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/leaves")
+			var response = performGet("/api/v1/leave/applications")
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("items");
+			assertThat(responseBody).contains("test-leave-001");
 		}
 
 		@Test
@@ -120,7 +117,7 @@ class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 			String leaveId = "test-leave-001";
 
 			// When & Then
-			var response = performGet("/api/v1/leaves/" + leaveId)
+			var response = performGet("/api/v1/leave/applications/" + leaveId)
 					.andExpect(status().isOk())
 					.andReturn();
 
@@ -146,7 +143,7 @@ class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setApplicationId(leaveId);
 
 			// When & Then
-			var response = performPost("/api/v1/leaves/" + leaveId + "/approve", request)
+			var response = performPut("/api/v1/leave/applications/" + leaveId + "/approve", request)
 					.andExpect(status().isOk())
 					.andReturn();
 
@@ -163,7 +160,7 @@ class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setApplicationId(leaveId);
 
 			// When & Then
-			performPost("/api/v1/leaves/" + leaveId + "/approve", request)
+			performPut("/api/v1/leave/applications/" + leaveId + "/approve", request)
 					.andExpect(status().isNotFound());
 		}
 	}
@@ -179,43 +176,43 @@ class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("ATT_LEAVE_API_006: 依狀態過濾 - 應返回符合條件的請假申請")
 		void ATT_LEAVE_API_006_filterByStatus_ShouldReturnFiltered() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/leaves?status=PENDING")
+			var response = performGet("/api/v1/leave/applications?status=PENDING")
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("items");
+			assertThat(responseBody).contains("PENDING");
 		}
 
 		@Test
 		@DisplayName("ATT_LEAVE_API_007: 依日期範圍查詢 - 應返回符合期間的請假申請")
 		void ATT_LEAVE_API_007_filterByDateRange_ShouldReturnFiltered() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/leaves?startDate=2026-02-01&endDate=2026-02-28")
+			var response = performGet("/api/v1/leave/applications?startDate=2026-02-01&endDate=2026-02-28")
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("items");
+			assertThat(responseBody).contains("test-leave-001");
 		}
 
 		@Test
 		@DisplayName("ATT_LEAVE_API_008: 依請假類型過濾 - 應返回符合類型的請假申請")
 		void ATT_LEAVE_API_008_filterByLeaveType_ShouldReturnFiltered() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/leaves?leaveType=ANNUAL")
+			var response = performGet("/api/v1/leave/applications?leaveTypeId=ANNUAL")
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("items");
+			assertThat(responseBody).contains("ANNUAL");
 		}
 
 		@Test
 		@DisplayName("ATT_LEAVE_API_009: 分頁查詢 - 應返回分頁結果")
 		void ATT_LEAVE_API_009_pagination_ShouldReturnPagedResults() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/leaves?page=1&size=10")
+			var response = performGet("/api/v1/leave/applications?page=1&size=10")
 					.andExpect(status().isOk())
 					.andReturn();
 
@@ -240,7 +237,7 @@ class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 			// 缺少必填欄位
 
 			// When & Then
-			performPost("/api/v1/leaves", request)
+			performPost("/api/v1/leave/applications", request)
 					.andExpect(status().isBadRequest());
 		}
 
@@ -256,7 +253,7 @@ class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setReason("測試");
 
 			// When & Then
-			performPost("/api/v1/leaves", request)
+			performPost("/api/v1/leave/applications", request)
 					.andExpect(status().isBadRequest());
 		}
 	}

@@ -2,7 +2,7 @@ package com.company.hrms.timesheet.domain.model.valueobject;
 
 public enum TimesheetStatus {
     DRAFT,
-    SUBMITTED,
+    PENDING,
     APPROVED,
     REJECTED,
     LOCKED

@@ -114,7 +114,8 @@ public class GlobalExceptionHandler {
                         if ("USERNAME_EXISTS".equals(domainEx.getErrorCode()) ||
                                         "EMPLOYEE_ALREADY_EXISTS".equals(domainEx.getErrorCode()) ||
                                         "EMAIL_ALREADY_EXISTS".equals(domainEx.getErrorCode()) ||
-                                        "NATIONAL_ID_ALREADY_EXISTS".equals(domainEx.getErrorCode())) {
+                                        "NATIONAL_ID_ALREADY_EXISTS".equals(domainEx.getErrorCode()) ||
+                                        "054009".equals(domainEx.getErrorCode())) { // INS_ALREADY_WITHDRAWN
                                 log.warn("Duplication error: {}", domainEx.getMessage());
                                 return ResponseEntity
                                                 .status(HttpStatus.CONFLICT)

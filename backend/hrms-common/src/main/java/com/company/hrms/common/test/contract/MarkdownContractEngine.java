@@ -110,7 +110,17 @@ public class MarkdownContractEngine {
 
     protected List<String> parseFiltersFromTable(String table, String scenarioId) {
         return table.lines()
-                .filter(line -> line.contains(scenarioId))
+                .map(String::trim)
+                .filter(line -> line.startsWith("|"))
+                .filter(line -> {
+                    // Check if the first column is the scenario ID
+                    String[] parts = line.split("\\|");
+                    // Expected: ["", "ID", ...]
+                    if (parts.length < 2) {
+                        return false;
+                    }
+                    return parts[1].trim().equals(scenarioId);
+                })
                 .map(this::extractFiltersColumn)
                 .flatMap(s -> parseFilterList(s).stream())
                 .filter(s -> !s.isEmpty())
@@ -119,8 +129,12 @@ public class MarkdownContractEngine {
 
     private String extractFiltersColumn(String line) {
         String[] parts = line.split("\\|");
-        if (parts.length >= 5) {
-            return parts[parts.length - 1].trim();
+        // Find the last non-empty column
+        for (int i = parts.length - 1; i >= 0; i--) {
+            String col = parts[i].trim();
+            if (!col.isEmpty()) {
+                return col;
+            }
         }
         return "";
     }
@@ -128,6 +142,8 @@ public class MarkdownContractEngine {
     private List<String> parseFilterList(String filterColumn) {
         List<String> result = new ArrayList<>();
         String cleaned = filterColumn.replaceAll("`", "");
+        // Split by comma, but ignore commas inside brackets or quotes if possible
+        // Simple regex for comma:
         for (String part : cleaned.split(",(?![^\\[]*\\])")) {
             String trimmed = part.trim();
             if (!trimmed.isEmpty()) {

@@ -34,8 +34,11 @@ public class GetUserListRequest {
     private String status;
 
     @Schema(description = "角色 ID")
-    @QueryFilter(property = "roles.id", operator = Operator.EQ)
+    // Manually handled in Service
     private String roleId;
+
+    @Schema(description = "部門 ID")
+    private String departmentId;
 
     @Schema(description = "租戶 ID (僅 SUPER_ADMIN 可用)")
     @QueryFilter(property = "tenant_id", operator = Operator.EQ)

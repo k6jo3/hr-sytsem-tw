@@ -18,4 +18,8 @@ public interface OrganizationServiceClient {
             @RequestParam(value = "departmentId", required = false) String departmentId,
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "1000") Integer size);
+
+    @GetMapping("/api/v1/employees/{employeeId}")
+    com.company.hrms.attendance.infrastructure.client.organization.dto.EmployeeDetailDto getEmployeeDetail(
+            @org.springframework.web.bind.annotation.PathVariable("employeeId") String employeeId);
 }

@@ -1,2 +1,3 @@
--- Insurance 測試資料清理
 DELETE FROM insurance_enrollments;
+DELETE FROM insurance_levels;
+DELETE FROM insurance_units;

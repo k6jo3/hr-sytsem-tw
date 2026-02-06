@@ -13,8 +13,8 @@ import com.company.hrms.attendance.api.request.leave.ApproveLeaveRequest;
 import com.company.hrms.attendance.api.request.leave.RejectLeaveRequest;
 import com.company.hrms.attendance.api.response.leave.ApplyLeaveResponse;
 import com.company.hrms.attendance.api.response.leave.ApproveLeaveResponse;
-import com.company.hrms.attendance.api.response.leave.RejectLeaveResponse;
 import com.company.hrms.attendance.api.response.leave.CancelLeaveResponse;
+import com.company.hrms.attendance.api.response.leave.RejectLeaveResponse;
 import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.controller.CommandBaseController;
 import com.company.hrms.common.model.JWTModel;
@@ -45,7 +45,7 @@ public class HR03LeaveCmdController extends CommandBaseController {
             @ApiResponse(responseCode = "401", description = "未授權")
     })
     @PostMapping("/applications")
-    public ResponseEntity<ApplyLeaveResponse> createLeaveApplication(
+    public ResponseEntity<ApplyLeaveResponse> applyLeave(
             @RequestBody @Valid ApplyLeaveRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(execCommand(request, currentUser));

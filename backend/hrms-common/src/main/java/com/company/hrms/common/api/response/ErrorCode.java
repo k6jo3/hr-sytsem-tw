@@ -147,4 +147,14 @@ public final class ErrorCode {
 
     /** 工時超過上限 */
     public static final String TMS_HOURS_EXCEEDED = "074010";
+
+    // ========================================
+    // 保險服務錯誤碼 (05)
+    // ========================================
+
+    /** 加保記錄不存在 */
+    public static final String INS_ENROLLMENT_NOT_FOUND = "054004";
+
+    /** 已辦理退保 */
+    public static final String INS_ALREADY_WITHDRAWN = "054009";
 }

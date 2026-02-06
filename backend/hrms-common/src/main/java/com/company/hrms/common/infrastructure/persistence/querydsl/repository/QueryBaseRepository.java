@@ -80,13 +80,13 @@ public abstract class QueryBaseRepository<T, ID> implements
 
         long total;
         if (countPredicate != null) {
-            total = factory.select(countEngine.getEntityPath().count())
-                    .from(countEngine.getEntityPath())
+            total = countEngine.getQuery()
+                    .select(countEngine.getEntityPath().count())
                     .where(countPredicate)
                     .fetchOne();
         } else {
-            total = factory.select(countEngine.getEntityPath().count())
-                    .from(countEngine.getEntityPath())
+            total = countEngine.getQuery()
+                    .select(countEngine.getEntityPath().count())
                     .fetchOne();
         }
 
@@ -190,13 +190,13 @@ public abstract class QueryBaseRepository<T, ID> implements
         BooleanExpression predicate = engine.parse(group);
 
         if (predicate != null) {
-            return factory.select(engine.getEntityPath().count())
-                    .from(engine.getEntityPath())
+            return engine.getQuery()
+                    .select(engine.getEntityPath().count())
                     .where(predicate)
                     .fetchOne();
         } else {
-            return factory.select(engine.getEntityPath().count())
-                    .from(engine.getEntityPath())
+            return engine.getQuery()
+                    .select(engine.getEntityPath().count())
                     .fetchOne();
         }
     }

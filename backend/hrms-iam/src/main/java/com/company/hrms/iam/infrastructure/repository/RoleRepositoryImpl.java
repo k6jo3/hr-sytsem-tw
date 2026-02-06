@@ -153,4 +153,16 @@ public class RoleRepositoryImpl implements IRoleRepository {
     public boolean existsByRoleCodeAndTenantId(String roleCode, String tenantId) {
         return roleDAO.existsByRoleCodeAndTenantId(roleCode, tenantId);
     }
+
+    @Override
+    public org.springframework.data.domain.Page<Role> findPage(
+            com.company.hrms.common.query.QueryGroup query,
+            org.springframework.data.domain.Pageable pageable) {
+        throw new UnsupportedOperationException("RoleRepositoryImpl.findPage(QueryGroup) not implemented yet");
+    }
+
+    @Override
+    public List<Role> findAll(com.company.hrms.common.query.QueryGroup query) {
+        throw new UnsupportedOperationException("RoleRepositoryImpl.findAll(QueryGroup) not implemented yet");
+    }
 }

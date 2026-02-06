@@ -39,11 +39,6 @@ import com.company.hrms.common.test.base.BaseApiIntegrationTest;
  * <li>出勤記錄查詢 API</li>
  * </ul>
  *
- * TODO: 需建立測試資料腳本
- * - attendance_base_data.sql (員工、班次基礎資料)
- * - checkin_test_data.sql (打卡測試資料)
- * - cleanup.sql (清理腳本)
- *
  * @author SA Team
  * @since 2026-02-05
  */

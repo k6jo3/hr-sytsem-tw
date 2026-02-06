@@ -24,7 +24,6 @@ class GetUserListServiceImplTest extends BaseServiceTest<GetUserListServiceImpl>
     @InjectMocks
     private GetUserListServiceImpl service;
 
-    // TODO: 測試失敗
     @Test
     @DisplayName("依狀態查詢應產生正確的 QueryGroup")
     void searchByStatus_ShouldMatchSnapshot() throws Exception {
@@ -49,7 +48,6 @@ class GetUserListServiceImplTest extends BaseServiceTest<GetUserListServiceImpl>
         verifyCapturedQuery("user_search_by_status.json");
     }
 
-    // TODO: 測試失敗
     @Test
     @DisplayName("依使用者名稱查詢應產生正確的 QueryGroup")
     void searchByUsername_ShouldMatchSnapshot() throws Exception {

@@ -26,6 +26,7 @@ public class GetCorrectionApplicationsServiceImpl
         implements QueryApiService<GetCorrectionListRequest, PageResponse<CorrectionListResponse>> {
 
     private final ICorrectionRepository correctionRepository;
+    private final com.company.hrms.attendance.infrastructure.client.organization.OrganizationServiceClient organizationServiceClient;
 
     @Override
     public PageResponse<CorrectionListResponse> getResponse(GetCorrectionListRequest request, JWTModel currentUser,
@@ -56,13 +57,35 @@ public class GetCorrectionApplicationsServiceImpl
         int page = request.getPage() != null ? request.getPage() : 1;
         int size = request.getSize() != null ? request.getSize() : 20;
 
-        List<CorrectionListResponse> items = allApplications.stream()
+        var pagedApps = allApplications.stream()
                 .skip((long) (page - 1) * size)
                 .limit(size)
+                .collect(Collectors.toList());
+
+        java.util.Map<String, String> employeeNameMap = new java.util.HashMap<>();
+        java.util.Set<String> employeeIds = pagedApps.stream()
+                .map(app -> app.getEmployeeId())
+                .collect(Collectors.toSet());
+
+        for (String empId : employeeIds) {
+            if (empId == null)
+                continue;
+            try {
+                com.company.hrms.attendance.infrastructure.client.organization.dto.EmployeeDetailDto detail = organizationServiceClient
+                        .getEmployeeDetail(empId);
+                if (detail != null) {
+                    employeeNameMap.put(empId, detail.getFullName());
+                }
+            } catch (Exception e) {
+                // Ignore error, name will be null or default
+            }
+        }
+
+        List<CorrectionListResponse> items = pagedApps.stream()
                 .map(app -> CorrectionListResponse.builder()
                         .correctionId(app.getId().getValue())
                         .employeeId(app.getEmployeeId())
-                        .employeeName("Test Employee") // TODO: 需關聯員工姓名
+                        .employeeName(employeeNameMap.getOrDefault(app.getEmployeeId(), "Unknown"))
                         .correctionDate(app.getCorrectionDate())
                         .correctionType(app.getCorrectionType().name())
                         .status(app.getStatus().name())

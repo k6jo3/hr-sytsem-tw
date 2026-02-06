@@ -8,6 +8,7 @@ import com.company.hrms.attendance.domain.model.aggregate.LeaveApplication;
 import com.company.hrms.attendance.domain.model.valueobject.ApplicationId;
 import com.company.hrms.attendance.domain.repository.ILeaveApplicationRepository;
 import com.company.hrms.common.application.pipeline.PipelineTask;
+import com.company.hrms.common.exception.EntityNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ public class LoadLeaveApplicationTask implements PipelineTask<ApproveLeaveContex
 
         LeaveApplication application = leaveApplicationRepository
                 .findById(new ApplicationId(applicationId))
-                .orElseThrow(() -> new IllegalArgumentException("找不到請假申請: " + applicationId));
+                .orElseThrow(() -> new EntityNotFoundException("找不到請假申請: " + applicationId));
 
         context.setApplication(application);
         log.info("請假申請載入成功: applicationId={}, status={}", applicationId, application.getStatus());

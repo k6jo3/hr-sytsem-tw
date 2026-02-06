@@ -31,7 +31,7 @@ import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
  * 測試重點:
  * <ul>
  * <li>QueryGroup 各種操作符轉 SQL</li>
- * <li>狀態查詢 (DRAFT/SUBMITTED/APPROVED/REJECTED)</li>
+ * <li>狀態查詢 (DRAFT/PENDING/APPROVED/REJECTED)</li>
  * <li>員工過濾</li>
  * <li>日期範圍查詢</li>
  * <li>工時統計查詢</li>
@@ -64,12 +64,12 @@ class TimesheetRepositoryIntegrationTest extends BaseTest {
         class StatusQueryTests {
 
                 @Test
-                @DisplayName("TMS_T002: 查詢待審核工時單 (SUBMITTED)")
+                @DisplayName("TMS_T002: 查詢待審核工時單 (PENDING)")
                 void TMS_T002_QuerySubmittedTimesheets() {
                         // Given - 合約規格:
-                        // 輸入: {"status":"PENDING"} → Domain 使用 SUBMITTED
+                        // 輸入: {"status":"PENDING"} → Domain 使用 PENDING
                         QueryGroup query = QueryBuilder.where()
-                                        .eq("status", TimesheetStatus.SUBMITTED)
+                                        .eq("status", TimesheetStatus.PENDING)
                                         .build();
 
                         // When
@@ -79,7 +79,7 @@ class TimesheetRepositoryIntegrationTest extends BaseTest {
                         assertThat(result.getContent())
                                         .as("TMS_T002: 應返回所有待審核的工時單")
                                         .hasSize(3)
-                                        .allMatch(ts -> ts.getStatus() == TimesheetStatus.SUBMITTED);
+                                        .allMatch(ts -> ts.getStatus() == TimesheetStatus.PENDING);
                 }
 
                 @Test
@@ -343,7 +343,7 @@ class TimesheetRepositoryIntegrationTest extends BaseTest {
                         // Given
                         QueryGroup query = QueryBuilder.where()
                                         .gte("periodStartDate", java.time.LocalDate.parse("2025-01-06"))
-                                        .eq("status", TimesheetStatus.SUBMITTED)
+                                        .eq("status", TimesheetStatus.PENDING)
                                         .build();
 
                         // When
@@ -353,7 +353,7 @@ class TimesheetRepositoryIntegrationTest extends BaseTest {
                         assertThat(result.getContent())
                                         .as("應返回 2025-01-06 之後待審核的工時單")
                                         .isNotEmpty()
-                                        .allMatch(ts -> ts.getStatus() == TimesheetStatus.SUBMITTED);
+                                        .allMatch(ts -> ts.getStatus() == TimesheetStatus.PENDING);
                 }
         }
 
@@ -428,7 +428,7 @@ class TimesheetRepositoryIntegrationTest extends BaseTest {
                 void findByStatuses_IN_ShouldReturnMatchingRecords() {
                         // Given
                         QueryGroup query = QueryBuilder.where()
-                                        .in("status", (Object[]) new TimesheetStatus[] { TimesheetStatus.SUBMITTED,
+                                        .in("status", (Object[]) new TimesheetStatus[] { TimesheetStatus.PENDING,
                                                         TimesheetStatus.REJECTED })
                                         .build();
 
@@ -437,9 +437,9 @@ class TimesheetRepositoryIntegrationTest extends BaseTest {
 
                         // Then - 預期 3 + 2 = 5 筆
                         assertThat(result.getContent())
-                                        .as("應返回 SUBMITTED 或 REJECTED 的工時單")
+                                        .as("應返回 PENDING 或 REJECTED 的工時單")
                                         .hasSize(5)
-                                        .allMatch(ts -> ts.getStatus() == TimesheetStatus.SUBMITTED ||
+                                        .allMatch(ts -> ts.getStatus() == TimesheetStatus.PENDING ||
                                                         ts.getStatus() == TimesheetStatus.REJECTED);
                 }
 

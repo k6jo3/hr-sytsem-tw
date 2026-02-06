@@ -1,6 +1,8 @@
 package com.company.hrms.common.infrastructure.persistence.querydsl.engine;
 
 import java.beans.Introspector;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -123,22 +125,67 @@ public class UltimateQueryEngine<T> {
                 if (!joinedPaths.containsKey(pathAcc)) {
                     // 嘗試取得屬性的真實類型
                     Class<?> nextType = Object.class;
+                    Class<?> originalFieldType = Object.class;
+                    boolean isCollection = false;
                     try {
-                        java.lang.reflect.Field field = currentPath.getType().getDeclaredField(part);
-                        nextType = field.getType();
+                        java.lang.reflect.Field field = findField(currentPath.getType(), part);
+                        if (field != null) {
+                            Class<?> fieldType = field.getType();
+                            originalFieldType = fieldType;
+                            nextType = fieldType;
+
+                            if (Collection.class.isAssignableFrom(fieldType)) {
+                                isCollection = true;
+                                Type genericType = field.getGenericType();
+                                if (genericType instanceof ParameterizedType) {
+                                    nextType = (Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                                }
+                            }
+                        }
                     } catch (Exception e) {
-                        // 嘗試尋找 getter
                         try {
                             String getterName = "get" + part.substring(0, 1).toUpperCase() + part.substring(1);
-                            nextType = currentPath.getType().getMethod(getterName).getReturnType();
+                            java.lang.reflect.Method method = currentPath.getType().getMethod(getterName);
+                            Class<?> returnType = method.getReturnType();
+                            originalFieldType = returnType;
+                            nextType = returnType;
+
+                            if (Collection.class.isAssignableFrom(returnType)) {
+                                isCollection = true;
+                                Type genericType = method.getGenericReturnType();
+                                if (genericType instanceof ParameterizedType) {
+                                    nextType = (Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                                }
+                            }
                         } catch (Exception e2) {
-                            // 維持 Object.class
                         }
                     }
 
+                    String joinAlias = part + "_" + i + "_" + System.nanoTime() % 1000;
                     @SuppressWarnings({ "unchecked", "rawtypes" })
-                    PathBuilder<Object> nextPath = new PathBuilder<>((Class) nextType, part);
-                    query.leftJoin((PathBuilder<Object>) currentPath.get(part, Object.class), nextPath);
+                    PathBuilder<?> nextPath = new PathBuilder<>(nextType, joinAlias);
+
+                    try {
+                        if (isCollection) {
+                            // 使用更具體的集合路徑方法，協助 Querydsl/Hibernate 正確解析實體類型
+                            // 使用 Raw Type 轉型以避開 Querydsl/Hibernate 泛型路徑解析的限制
+                            if (java.util.List.class.isAssignableFrom(originalFieldType)) {
+                                query.leftJoin((com.querydsl.core.types.CollectionExpression) currentPath.getList(part,
+                                        nextType), nextPath);
+                            } else if (java.util.Set.class.isAssignableFrom(originalFieldType)) {
+                                query.leftJoin((com.querydsl.core.types.CollectionExpression) currentPath.getSet(part,
+                                        nextType), nextPath);
+                            } else {
+                                query.leftJoin((com.querydsl.core.types.CollectionExpression) currentPath
+                                        .getCollection(part, nextType), nextPath);
+                            }
+                        } else {
+                            query.leftJoin((com.querydsl.core.types.EntityPath) currentPath.get(part), nextPath);
+                        }
+                    } catch (Exception e) {
+                        // 發生錯誤時嘗試回退到基本 EntityPath 轉型
+                        query.leftJoin((com.querydsl.core.types.EntityPath) currentPath.get(part), nextPath);
+                    }
                     joinedPaths.put(pathAcc, nextPath);
                 }
                 currentPath = joinedPaths.get(pathAcc);
@@ -171,25 +218,22 @@ public class UltimateQueryEngine<T> {
 
         // 取得基本欄位路徑
         PathBuilder<?> fieldPath = path.get(actualFieldName);
-        Class<?> fieldType = fieldPath.getType();
+        Class<?> fieldType = Object.class;
 
         // 2. 遞迴尋找欄位類型 (支援繼承)
-        if (fieldType == Object.class && path.getType() != null) {
-            Class<?> currentClass = path.getType();
-            while (currentClass != null && currentClass != Object.class) {
+        if (path.getType() != null) {
+            java.lang.reflect.Field field = findField(path.getType(), actualFieldName);
+            if (field != null) {
+                fieldType = field.getType();
+            } else {
+                // Try getter
                 try {
-                    java.lang.reflect.Field field = currentClass.getDeclaredField(actualFieldName);
-                    fieldType = field.getType();
-                    break;
+                    String getterName = "get" + actualFieldName.substring(0, 1).toUpperCase()
+                            + actualFieldName.substring(1);
+                    fieldType = path.getType().getMethod(getterName).getReturnType();
                 } catch (Exception e) {
-                    currentClass = currentClass.getSuperclass();
                 }
             }
-        }
-
-        // 重新使用確定的類型取得路徑，這有助於 Querydsl 產生正確的 SQL (特別是 IN 操作符)
-        if (fieldType != Object.class) {
-            fieldPath = path.get(actualFieldName, (Class) fieldType);
         }
 
         Object finalValue = value;
@@ -365,5 +409,17 @@ public class UltimateQueryEngine<T> {
         this.query = null;
         this.joinedPaths.clear();
         this.joinedPaths.put("", entityPath);
+    }
+
+    private java.lang.reflect.Field findField(Class<?> clazz, String fieldName) {
+        Class<?> current = clazz;
+        while (current != null && current != Object.class) {
+            try {
+                return current.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+                current = current.getSuperclass();
+            }
+        }
+        return null;
     }
 }
