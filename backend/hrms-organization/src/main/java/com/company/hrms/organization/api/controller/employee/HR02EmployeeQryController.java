@@ -51,6 +51,8 @@ public class HR02EmployeeQryController extends QueryBaseController {
                         @RequestParam(required = false) String search,
                         @RequestParam(required = false) String status,
                         @RequestParam(required = false) String departmentId,
+                        @RequestParam(required = false) String employeeNumber,
+                        @RequestParam(required = false) String name,
                         @RequestParam(required = false) String hireDateFrom,
                         @RequestParam(required = false) String hireDateTo,
                         @RequestParam(defaultValue = "1") Integer page,
@@ -60,10 +62,12 @@ public class HR02EmployeeQryController extends QueryBaseController {
                 GetEmployeeListRequest request = GetEmployeeListRequest
                                 .builder()
                                 .keyword(search)
-                                .statuses(status != null ? java.util.List.of(status) : null)
-                                .departmentIds(departmentId != null ? java.util.List.of(departmentId) : null)
-                                .hireStartDate(hireDateFrom != null ? java.time.LocalDate.parse(hireDateFrom) : null)
-                                .hireEndDate(hireDateTo != null ? java.time.LocalDate.parse(hireDateTo) : null)
+                                .employmentStatus(status)
+                                .departmentId(departmentId)
+                                .employeeNumber(employeeNumber)
+                                .name(name != null ? "%" + name + "%" : null)
+                                .hireDateFrom(hireDateFrom != null ? java.time.LocalDate.parse(hireDateFrom) : null)
+                                .hireDateTo(hireDateTo != null ? java.time.LocalDate.parse(hireDateTo) : null)
                                 .page(page)
                                 .size(size)
                                 .build();

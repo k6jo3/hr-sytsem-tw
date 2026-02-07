@@ -23,19 +23,19 @@ public class GetDepartmentListRequest {
     private String keyword;
 
     @Schema(description = "部門代碼")
-    @QueryFilter(property = "departmentCode", operator = Operator.EQ)
+    @QueryFilter(property = "department_code", operator = Operator.EQ)
     private String code;
 
     @Schema(description = "部門名稱 (模糊查詢)")
-    @QueryFilter(property = "departmentName", operator = Operator.LIKE)
+    @QueryFilter(property = "department_name", operator = Operator.LIKE)
     private String name;
 
     @Schema(description = "組織 ID")
-    @QueryFilter(property = "organizationId", operator = Operator.EQ)
+    @QueryFilter(property = "organization_id", operator = Operator.EQ)
     private String organizationId;
 
     @Schema(description = "上層部門 ID")
-    @QueryFilter(property = "parentDepartmentId", operator = Operator.EQ)
+    @QueryFilter(property = "parent_department_id", operator = Operator.EQ)
     private String parentId;
 
     @Schema(description = "狀態 (ACTIVE/INACTIVE)")

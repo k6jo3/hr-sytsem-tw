@@ -36,10 +36,42 @@ public class GetEmployeeListServiceImpl
     @Override
     protected QueryGroup buildQuery(GetEmployeeListRequest request, JWTModel currentUser) {
         log.info("Building query for employee list: {}", request);
-        return QueryBuilder.where()
-                .fromDto(request)
-                // 如有需要可在此加入隱含過濾條件，例如 .eq("tenantId", currentUser.getTenantId())
-                .build();
+        QueryBuilder builder = QueryBuilder.where()
+                .fromDto(request);
+
+        // 如果沒有指定狀態，預設排除離職人員 (符合 HR02 v2 合約規範)
+        if (request.getEmploymentStatus() == null || request.getEmploymentStatus().isEmpty()) {
+            builder.ne("employment_status", "TERMINATED");
+        }
+
+        // 處理 keyword 模糊查詢 (工號或姓名)
+        if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
+            final String kw = "%" + request.getKeyword() + "%";
+            builder.orGroup(sub -> sub
+                    .like("employee_number", kw)
+                    .like("full_name", kw));
+        }
+
+        // 處理權限過濾 (ORG_QRY_E008, ORG_QRY_E009)
+        if (currentUser.hasRole("MANAGER")) {
+            // 主管只能看到管轄部門的員工
+            List<String> managedDeptIds = currentUser.getManagedDepartmentIds();
+            if (managedDeptIds != null && !managedDeptIds.isEmpty()) {
+                builder.in("department_id", managedDeptIds.toArray());
+                if (request.getEmploymentStatus() == null) {
+                    builder.eq("employment_status", "ACTIVE");
+                }
+            }
+        } else if (currentUser.hasRole("EMPLOYEE")) {
+            // 一般員工只能看到同部門的在職員工
+            String deptId = currentUser.getDepartmentId();
+            if (deptId != null) {
+                builder.eq("department_id", deptId);
+                builder.eq("employment_status", "ACTIVE");
+            }
+        }
+
+        return builder.build();
     }
 
     @Override
@@ -49,34 +81,39 @@ public class GetEmployeeListServiceImpl
             JWTModel currentUser,
             String... args) throws Exception {
 
-        // 處理分頁
-        int page = request.getPage() > 0 ? request.getPage() - 1 : 0;
-        int size = request.getSize() > 0 ? request.getSize() : 20;
+        try {
+            // 處理分頁
+            int page = request.getPage() > 0 ? request.getPage() - 1 : 0;
+            int size = request.getSize() > 0 ? request.getSize() : 20;
 
-        // 簡單處理排序 (預設 create_time DESC)
-        Sort sort = Sort.by(Sort.Direction.DESC, "create_time");
-        if (request.getSort() != null && !request.getSort().isEmpty()) {
-            // 實作簡單解析，或使用預設
-            // 這裡先簡化，實際專案可能需要 SortParser
+            // 簡單處理排序 (預設 create_time DESC)
+            Sort sort = Sort.by(Sort.Direction.DESC, "create_time");
+            if (request.getSort() != null && !request.getSort().isEmpty()) {
+                // 實作簡單解析，或使用預設
+                // 這裡先簡化，實際專案可能需要 SortParser
+            }
+
+            PageRequest pageable = PageRequest.of(page, size, sort);
+
+            // 執行查詢
+            List<Employee> employees = employeeRepository.findByQuery(query, pageable);
+            long total = employeeRepository.countByQuery(query);
+
+            List<EmployeeListItemResponse> items = employees.stream()
+                    .map(this::toResponse)
+                    .collect(Collectors.toList());
+
+            return PageResponse.<EmployeeListItemResponse>builder()
+                    .items(items)
+                    .total(total)
+                    .page(request.getPage())
+                    .size(request.getSize())
+                    .totalPages((int) Math.ceil((double) total / size))
+                    .build();
+        } catch (Exception e) {
+            log.error("Error in executeQuery: {}", e.getMessage(), e);
+            throw e;
         }
-
-        PageRequest pageable = PageRequest.of(page, size, sort);
-
-        // 執行查詢
-        List<Employee> employees = employeeRepository.findByQuery(query, pageable);
-        long total = employeeRepository.countByQuery(query);
-
-        List<EmployeeListItemResponse> items = employees.stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-
-        return PageResponse.<EmployeeListItemResponse>builder()
-                .items(items)
-                .total(total)
-                .page(request.getPage())
-                .size(request.getSize())
-                .totalPages((int) Math.ceil((double) total / size))
-                .build();
     }
 
     private EmployeeListItemResponse toResponse(Employee employee) {

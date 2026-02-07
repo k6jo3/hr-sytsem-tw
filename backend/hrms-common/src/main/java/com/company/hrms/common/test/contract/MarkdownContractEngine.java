@@ -17,7 +17,7 @@ import com.company.hrms.common.query.QueryGroup;
 public class MarkdownContractEngine {
 
     private static final Pattern CRITERIA_PATTERN = Pattern.compile(
-            "([\\w.]+)\\s*([=!<>]+|LIKE|IN|IS\\s+NULL|IS\\s+NOT\\s+NULL)\\s*'?([^']*)'?");
+            "([\\w.]+)\\s*([=!<>]+|LIKE|IN|IS\\s+NULL|IS\\s+NOT\\s+NULL)\\s*(.*)");
 
     private static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d+(\\.\\d+)?$");
 
@@ -71,6 +71,11 @@ public class MarkdownContractEngine {
         String expectedOp = m.group(2).trim().toUpperCase();
         String expectedValue = m.group(3).trim();
 
+        // 移除外層引號 (如果不是 (v1, v2) 這種格式)
+        if (!expectedValue.startsWith("(") && expectedValue.startsWith("'") && expectedValue.endsWith("'")) {
+            expectedValue = expectedValue.substring(1, expectedValue.length() - 1);
+        }
+
         if (!filter.getField().equalsIgnoreCase(expectedField)) {
             return false;
         }
@@ -90,6 +95,35 @@ public class MarkdownContractEngine {
     protected boolean compareValues(Object actualValue, String expectedValue) {
         if (actualValue == null) {
             return expectedValue.isEmpty() || "null".equalsIgnoreCase(expectedValue);
+        }
+
+        // 處理陣列或集合的情況 (用於 IN, NOT IN)
+        if (actualValue.getClass().isArray() || actualValue instanceof java.util.Collection) {
+            List<String> actualList = new java.util.ArrayList<>();
+            if (actualValue.getClass().isArray()) {
+                Object[] arr = (Object[]) actualValue;
+                for (Object o : arr)
+                    actualList.add(String.valueOf(o).trim());
+            } else {
+                java.util.Collection<?> col = (java.util.Collection<?>) actualValue;
+                for (Object o : col)
+                    actualList.add(String.valueOf(o).trim());
+            }
+
+            String normalizedExpected = expectedValue.trim();
+            if (normalizedExpected.startsWith("(") && normalizedExpected.endsWith(")")) {
+                normalizedExpected = normalizedExpected.substring(1, normalizedExpected.length() - 1);
+            }
+
+            List<String> expectedItems = java.util.Arrays.stream(normalizedExpected.split(","))
+                    .map(s -> s.trim().replaceAll("^'|'$", ""))
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+
+            boolean result = actualList.size() == expectedItems.size() &&
+                    actualList.stream().allMatch(a -> expectedItems.stream().anyMatch(e -> e.equalsIgnoreCase(a)));
+
+            return result;
         }
 
         String actualStr = String.valueOf(actualValue);

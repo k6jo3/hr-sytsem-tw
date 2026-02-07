@@ -67,6 +67,11 @@ public class JWTModel {
      */
     private Long expiresAt;
 
+    /**
+     * 管理的部門ID列表 (主管權限使用)
+     */
+    private List<String> managedDepartmentIds;
+
     private String tenantId;
 
     /**

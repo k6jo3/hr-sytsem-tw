@@ -66,9 +66,10 @@ public class HR02DepartmentQryController extends QueryBaseController {
         })
         public ResponseEntity<PageResponse<DepartmentListItemResponse>> getSubDepartments(
                         @PathVariable String departmentId,
+                        GetDepartmentListRequest request,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
                 log.info("Getting sub-departments for departmentId: {}", departmentId);
-                return ResponseEntity.ok(getResponse(null, currentUser, departmentId));
+                return ResponseEntity.ok(getResponse(request, currentUser, departmentId));
         }
 
         @GetMapping("/{departmentId}/managers")
