@@ -380,6 +380,64 @@ POST /api/v1/reports/{id}/export/pdf
 
 ---
 
+#### RPT_CMD_008: 政府申報格式匯出
+
+**業務場景描述：**
+HR 管理員將報表匯出為政府申報格式（如勞保局、勞動部申報表），系統依據政府規範的欄位格式產生檔案。
+
+**API 端點：**
+```
+POST /api/v1/reports/export/government
+```
+
+**前置條件：**
+- 執行者必須擁有政府申報權限 (`report:export:government`)
+- 報表類型必須支援政府申報格式
+- 組織必須完成政府申報設定（如統編、勞保證號等）
+
+**輸入 (Request)：**
+```json
+{
+  "reportType": "LABOR_INSURANCE",
+  "organizationId": "org-001",
+  "yearMonth": "2026-02",
+  "governmentFormat": "LABOR_BUREAU_ROSTER",
+  "fileName": "勞保投保名冊_20260209.txt"
+}
+```
+
+**業務規則驗證：**
+
+1. ✅ **政府申報權限檢查**
+   - 規則：用戶必須擁有 `report:export:government` 權限
+   - 預期結果：權限檢查通過
+
+2. ✅ **組織政府申報資訊檢查**
+   - 規則：組織必須已填寫統編、勞保證號等政府申報必要資訊
+   - 預期結果：組織資訊完整
+
+3. ✅ **報表類型與格式匹配檢查**
+   - 規則：reportType 必須支援指定的 governmentFormat
+   - 預期結果：格式匹配成功
+
+**預期輸出：**
+```json
+{
+  "success": true,
+  "data": {
+    "exportId": "export-gov-001",
+    "reportType": "LABOR_INSURANCE",
+    "governmentFormat": "LABOR_BUREAU_ROSTER",
+    "fileName": "勞保投保名冊_20260209.txt",
+    "recordCount": 150,
+    "downloadUrl": "https://api.hrms.com/download/export-gov-001/file.txt",
+    "expiryTime": "2026-02-16T11:00:00Z"
+  }
+}
+```
+
+---
+
 ### 1.3 儀表板管理
 
 #### RPT_CMD_005: 建立自定義儀表板
@@ -526,6 +584,68 @@ PUT /api/v1/dashboards/{id}/widgets
 
 ---
 
+#### RPT_CMD_007: 刪除儀表板
+
+**業務場景描述：**
+用戶刪除不再需要的自定義儀表板。系統將儀表板標記為停用狀態（軟刪除），保留歷史記錄用於審計。
+
+**API 端點：**
+```
+DELETE /api/v1/dashboards/{id}
+```
+
+**前置條件：**
+- 執行者必須是儀表板所有者或擁有 `dashboard:delete` 權限
+- 儀表板必須存在且未被刪除
+
+**輸入 (Request)：**
+```
+Path Parameter: dashboardId
+```
+
+**業務規則驗證：**
+
+1. ✅ **儀表板所有權檢查**
+   - 規則：僅儀表板所有者或 ADMIN 可以刪除
+   - 查詢條件：`dashboard_id = ? AND (owner_id = ? OR role = 'ADMIN')`
+   - 預期結果：所有權驗證通過
+
+2. ✅ **儀表板存在性檢查**
+   - 規則：儀表板必須存在且 `is_active = true`
+   - 預期結果：儀表板可刪除
+
+3. ✅ **系統預設儀表板保護**
+   - 規則：系統預設儀表板（`is_system_default = true`）不可刪除
+   - 預期結果：非系統預設儀表板
+
+**必須發布的領域事件：**
+```json
+{
+  "eventId": "evt-dashboard-del-001",
+  "eventType": "DashboardDeletedEvent",
+  "timestamp": "2026-02-09T14:00:00Z",
+  "aggregateId": "dashboard-001",
+  "aggregateType": "Dashboard",
+  "payload": {
+    "dashboardId": "dashboard-001",
+    "dashboardName": "我的 HR 儀表板",
+    "ownerId": "user-001",
+    "deletedAt": "2026-02-09T14:00:00Z",
+    "widgetCount": 5
+  }
+}
+```
+
+**預期輸出：**
+```json
+{
+  "success": true,
+  "message": "儀表板已刪除"
+}
+```
+
+---
+
 ## 2. Query 操作業務合約
 
 ### 2.1 HR 報表查詢
@@ -537,6 +657,7 @@ PUT /api/v1/dashboards/{id}/widgets
 | RPT_QRY_001 | 查詢員工花名冊 | HR | `GET /api/v1/reports/hr/employee-roster` | `{"organizationId":"org-001"}` | `organization_id = 'org-001'` |
 | RPT_QRY_002 | 查詢差勤統計 | HR | `GET /api/v1/reports/hr/attendance-summary` | `{"yearMonth":"2026-02"}` | `year_month = '2026-02'` |
 | RPT_QRY_003 | 查詢離職率分析 | HR | `GET /api/v1/reports/hr/turnover` | `{"organizationId":"org-001","yearMonth":"2026-02"}` | `organization_id = 'org-001'`, `year_month = '2026-02'` |
+| RPT_QRY_011 | 查詢人力盤點報表 | HR | `GET /api/v1/reports/hr/headcount` | `{"organizationId":"org-001","month":"2026-02"}` | `organization_id = 'org-001'`, `month = '2026-02'` |
 
 #### 2.1.2 業務場景說明
 
@@ -599,6 +720,7 @@ PUT /api/v1/dashboards/{id}/widgets
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | RPT_QRY_006 | 查詢人力成本分析 | FINANCE | `GET /api/v1/reports/finance/labor-cost` | `{"yearMonth":"2026-02"}` | `year_month = '2026-02'` |
 | RPT_QRY_007 | 查詢薪資總表 | FINANCE | `GET /api/v1/reports/finance/payroll-summary` | `{"yearMonth":"2026-02"}` | `year_month = '2026-02'` |
+| RPT_QRY_012 | 查詢部門人力成本分析 | FINANCE | `GET /api/v1/reports/finance/labor-cost-by-department` | `{"departmentId":"D001","yearMonth":"2026-02"}` | `department_id = 'D001'`, `year_month = '2026-02'` |
 
 ---
 
@@ -624,6 +746,37 @@ PUT /api/v1/dashboards/{id}/widgets
   WHERE owner_id = '{currentUserId}'
   ORDER BY is_default DESC, created_at DESC
   ```
+
+---
+
+### 2.5 報表匯出查詢
+
+#### 2.5.1 機器可讀合約表格
+
+| 場景 ID | 測試描述 | 模擬角色 | API 端點 | 輸入 (Request) | 必須包含的過濾條件 (Required Filters) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| RPT_QRY_013 | 下載匯出檔案 | EMPLOYEE | `GET /api/v1/reports/export/{id}/download` | `{}` | `export_id = '{id}'`, `created_by = '{currentUserId}'` |
+
+#### 2.5.2 業務場景說明
+
+**RPT_QRY_013: 下載匯出檔案**
+
+- **使用者：** 任何認證用戶
+- **業務目的：** 下載已生成的匯出檔案（Excel、PDF、政府申報格式）
+- **權限控制：** 僅能下載自己建立的匯出檔案
+- **過濾邏輯：**
+  ```sql
+  SELECT * FROM report_exports
+  WHERE export_id = '{id}'
+    AND created_by = '{currentUserId}'
+    AND expiry_time > NOW()
+  ```
+
+- **業務規則：**
+  - 匯出檔案有效期限為 7 天
+  - 過期檔案返回 410 Gone
+  - 下載次數不限制
+  - 檔案儲存在 S3/MinIO 等物件儲存服務
 
 ---
 
