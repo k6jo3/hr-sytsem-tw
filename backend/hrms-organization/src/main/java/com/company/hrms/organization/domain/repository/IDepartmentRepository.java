@@ -73,4 +73,19 @@ public interface IDepartmentRepository {
      * 計算組織下的部門數
      */
     int countByOrganizationId(OrganizationId organizationId);
+
+    /**
+     * 動態查詢 (支援 QueryGroup)
+     * 
+     * @param query    查詢條件
+     * @param pageable 分頁資訊
+     * @return 部門列表
+     */
+    List<Department> findByQuery(com.company.hrms.common.query.QueryGroup query,
+            org.springframework.data.domain.Pageable pageable);
+
+    /**
+     * 動態查詢筆數
+     */
+    long countByQuery(com.company.hrms.common.query.QueryGroup query);
 }

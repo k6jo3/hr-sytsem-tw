@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TimesheetEntry {
     private UUID id;
+    private UUID timesheetId;
     private UUID projectId;
     private UUID taskId;
     private LocalDate workDate;

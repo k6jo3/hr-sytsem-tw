@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,24 +28,6 @@ import com.company.hrms.organization.api.request.department.UpdateDepartmentRequ
  * Department API 整合測試
  * 驗證部門管理 API 的完整流程（Controller → Service → Repository → H2 DB）
  *
- * <p>
- * <b>TODO:</b> 測試資料腳本缺失，需建立以下檔案才能啟用測試：
- * <ul>
- * <li><b>organization_base_data.sql:</b>
- * <ul>
- * <li>建立組織架構資料表（organization, department）</li>
- * <li>插入測試用的組織資料（ORG-001, ORG-002 等）</li>
- * </ul>
- * </li>
- * <li><b>department_test_data.sql:</b>
- * <ul>
- * <li>插入測試用的部門資料（DEPT-001, DEPT-002 等）</li>
- * <li>部門應包含階層結構（parent_department_id）</li>
- * <li>部門應關聯到組織</li>
- * <li>部門應包含完整資訊（名稱、主管、員工數等）</li>
- * </ul>
- * </li>
- * </ul>
  * <p>
  * <b>測試涵蓋範圍:</b>
  * <ul>
@@ -160,7 +141,6 @@ class DepartmentApiIntegrationTest extends BaseApiIntegrationTest {
 		}
 
 		@Test
-		@Disabled("TODO: 缺少 GetDepartmentListService 實作")
 		@DisplayName("ORG_DEPT_API_005: 查詢部門列表 - 應返回部門清單")
 		void ORG_DEPT_API_005_getDepartmentList_ShouldReturnDepartments() throws Exception {
 			// When & Then
@@ -170,7 +150,7 @@ class DepartmentApiIntegrationTest extends BaseApiIntegrationTest {
 
 			String responseBody = response.getResponse().getContentAsString();
 			assertThat(responseBody).contains("items");
-			assertThat(responseBody).contains("totalCount");
+			assertThat(responseBody).contains("total");
 		}
 
 		@Test
@@ -204,7 +184,7 @@ class DepartmentApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("ORG_DEPT_API_008: 刪除部門 - 應返回 204")
 		void ORG_DEPT_API_008_deleteDepartment_ShouldReturn204() throws Exception {
 			// Given
-			String departmentId = "33333333-3333-3333-3333-333333330003"; // 假設此部門無員工且無子部門
+			String departmentId = "33333333-3333-3333-3333-333333330005"; // RD-BE (無員工)
 
 			// When & Then
 			performDelete("/api/v1/departments/" + departmentId)
@@ -212,7 +192,6 @@ class DepartmentApiIntegrationTest extends BaseApiIntegrationTest {
 		}
 
 		@Test
-		@Disabled("TODO: 部門下有員工的驗證需要完整的 EmployeeRepository 與 Service 實作")
 		@DisplayName("ORG_DEPT_API_009: 刪除部門失敗 - 部門下有員工應返回 400")
 		void ORG_DEPT_API_009_deleteDepartment_HasEmployees_ShouldReturn400() throws Exception {
 			// Given
@@ -232,7 +211,6 @@ class DepartmentApiIntegrationTest extends BaseApiIntegrationTest {
 	class DepartmentHierarchyApiTests {
 
 		@Test
-		@Disabled("TODO: 缺少 GetSubDepartmentsService 實作")
 		@DisplayName("ORG_DEPT_API_010: 查詢子部門 - 應返回子部門列表")
 		void ORG_DEPT_API_010_getSubDepartments_ShouldReturnSubDepartments() throws Exception {
 			// Given
@@ -282,7 +260,7 @@ class DepartmentApiIntegrationTest extends BaseApiIntegrationTest {
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("data");
+			assertThat(responseBody).contains("items");
 		}
 	}
 

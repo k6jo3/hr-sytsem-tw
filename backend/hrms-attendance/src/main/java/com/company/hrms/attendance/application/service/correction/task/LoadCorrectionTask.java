@@ -4,9 +4,10 @@ import org.springframework.stereotype.Component;
 
 import com.company.hrms.attendance.application.service.correction.context.ApproveCorrectionContext;
 import com.company.hrms.attendance.domain.model.aggregate.CorrectionApplication;
+import com.company.hrms.attendance.domain.model.valueobject.CorrectionId;
 import com.company.hrms.attendance.domain.repository.ICorrectionRepository;
-import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.common.application.pipeline.PipelineTask;
+import com.company.hrms.common.exception.EntityNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ public class LoadCorrectionTask implements PipelineTask<ApproveCorrectionContext
     public void execute(ApproveCorrectionContext context) throws Exception {
         String correctionId = context.getCorrectionId();
 
-        CorrectionApplication application = correctionRepository.findById(correctionId)
+        CorrectionApplication application = correctionRepository.findById(new CorrectionId(correctionId))
                 .orElseThrow(() -> new EntityNotFoundException("CorrectionApplication", correctionId));
 
         context.setApplication(application);

@@ -1,12 +1,12 @@
 package com.company.hrms.attendance.api.response.overtime;
 
+import java.time.LocalDateTime;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 /**
  * 駁回加班回應 DTO
@@ -32,4 +32,12 @@ public class RejectOvertimeResponse {
 
     @Schema(description = "駁回原因")
     private String rejectionReason;
+
+    public static RejectOvertimeResponse success(String overtimeId) {
+        return RejectOvertimeResponse.builder()
+                .overtimeId(overtimeId)
+                .status("REJECTED")
+                .rejectedAt(LocalDateTime.now())
+                .build();
+    }
 }

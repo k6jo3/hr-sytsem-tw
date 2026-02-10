@@ -124,17 +124,6 @@ class PayslipApiIntegrationTest extends BaseApiIntegrationTest {
 	 */
 	@Nested
 	@DisplayName("薪資單下載與導出")
-	/**
-	 * TODO: 1 個測試失敗，需修正：
-	 * - PAY_SLIP_API_006 (downloadPayslipPdf_ShouldReturnPdfFile):
-	 *   API 返回 500 Internal Server Error 而非 200 OK
-	 *   可能原因：
-	 *   1. PDF 生成服務尚未實作或拋出異常
-	 *   2. 檔案儲存路徑不存在或權限不足
-	 *   3. 薪資單資料不完整導致 PDF 生成失敗
-	 *   需檢查 GetPayslipPdfServiceImpl 的實作邏輯和錯誤處理
-	 */
-	@Disabled("TODO: PAY_SLIP_API_006 測試失敗，API 返回 500 錯誤，需修正 PDF 生成服務")
 	class PayslipDownloadAndExportTests {
 
 		@Test

@@ -92,7 +92,7 @@ class TimesheetTest {
 
         timesheet.submit();
 
-        assertEquals(TimesheetStatus.SUBMITTED, timesheet.getStatus());
+        assertEquals(TimesheetStatus.PENDING, timesheet.getStatus());
         assertNotNull(timesheet.getSubmittedAt());
     }
 

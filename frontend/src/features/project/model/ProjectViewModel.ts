@@ -3,7 +3,7 @@
  * 前端顯示用的資料模型
  */
 
-import type { ProjectType, ProjectStatus, BudgetType } from '../api/ProjectTypes';
+import type { BudgetType, ProjectStatus, ProjectType } from '../api/ProjectTypes';
 
 /**
  * 專案ViewModel - 用於列表顯示
@@ -62,4 +62,23 @@ export interface CustomerViewModel {
   contactEmail?: string;
   contactPhone?: string;
   displayName: string; // "customerCode - customerName"
+}
+
+/**
+ * 工項ViewModel (WBS)
+ */
+export interface TaskViewModel {
+  key: string; // 用於 Table rowKey (通常同 id)
+  id: string;
+  taskCode: string;
+  taskName: string;
+  level: number;
+  estimatedHours: number;
+  actualHours: number;
+  progress: number;
+  progressDisplay: string;
+  statusLabel: string;
+  statusColor: string;
+  assigneeName: string;
+  children?: TaskViewModel[];
 }

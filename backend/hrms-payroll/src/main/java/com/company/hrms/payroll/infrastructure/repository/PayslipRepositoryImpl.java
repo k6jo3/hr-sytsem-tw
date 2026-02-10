@@ -28,6 +28,7 @@ import com.company.hrms.payroll.infrastructure.po.PayslipPO;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
+@org.springframework.transaction.annotation.Transactional
 public class PayslipRepositoryImpl extends CommandBatchBaseRepository<PayslipPO, String> implements IPayslipRepository {
 
     public PayslipRepositoryImpl(JPAQueryFactory factory) {
@@ -41,7 +42,11 @@ public class PayslipRepositoryImpl extends CommandBatchBaseRepository<PayslipPO,
             po.getItems().forEach(item -> item.setPayslip(po));
         }
 
-        super.save(po);
+        if (po.getPayslipId() == null || po.getPayslipId().isBlank()) {
+            super.save(po);
+        } else {
+            em.merge(po);
+        }
         return toDomain(po);
     }
 
@@ -51,13 +56,17 @@ public class PayslipRepositoryImpl extends CommandBatchBaseRepository<PayslipPO,
                 .map(this::toPO)
                 .collect(Collectors.toList());
 
-        pos.forEach(po -> {
+        for (PayslipPO po : pos) {
             if (po.getItems() != null) {
                 po.getItems().forEach(item -> item.setPayslip(po));
             }
-        });
 
-        super.saveAll(pos);
+            if (po.getPayslipId() == null || po.getPayslipId().isBlank()) {
+                em.persist(po);
+            } else {
+                em.merge(po);
+            }
+        }
     }
 
     @Override
@@ -189,19 +198,21 @@ public class PayslipRepositoryImpl extends CommandBatchBaseRepository<PayslipPO,
 
     private Payslip toDomain(PayslipPO po) {
         OvertimePayDetail ot = OvertimePayDetail.builder()
-                .weekdayHours(po.getOtWeekdayHours())
-                .weekdayPay(po.getOtWeekdayPay())
-                .restDayHours(po.getOtRestDayHours())
-                .restDayPay(po.getOtRestDayPay())
-                .holidayHours(po.getOtHolidayHours())
-                .holidayPay(po.getOtHolidayPay())
+                .weekdayHours(po.getOtWeekdayHours() != null ? po.getOtWeekdayHours() : java.math.BigDecimal.ZERO)
+                .weekdayPay(po.getOtWeekdayPay() != null ? po.getOtWeekdayPay() : java.math.BigDecimal.ZERO)
+                .restDayHours(po.getOtRestDayHours() != null ? po.getOtRestDayHours() : java.math.BigDecimal.ZERO)
+                .restDayPay(po.getOtRestDayPay() != null ? po.getOtRestDayPay() : java.math.BigDecimal.ZERO)
+                .holidayHours(po.getOtHolidayHours() != null ? po.getOtHolidayHours() : java.math.BigDecimal.ZERO)
+                .holidayPay(po.getOtHolidayPay() != null ? po.getOtHolidayPay() : java.math.BigDecimal.ZERO)
                 .build();
 
         InsuranceDeductions ins = InsuranceDeductions.builder()
-                .laborInsurance(po.getInsLaborFee())
-                .healthInsurance(po.getInsHealthFee())
-                .pensionSelfContribution(po.getInsPensionFee())
-                .supplementaryPremium(po.getInsSupplementaryFee())
+                .laborInsurance(po.getInsLaborFee() != null ? po.getInsLaborFee() : java.math.BigDecimal.ZERO)
+                .healthInsurance(po.getInsHealthFee() != null ? po.getInsHealthFee() : java.math.BigDecimal.ZERO)
+                .pensionSelfContribution(
+                        po.getInsPensionFee() != null ? po.getInsPensionFee() : java.math.BigDecimal.ZERO)
+                .supplementaryPremium(
+                        po.getInsSupplementaryFee() != null ? po.getInsSupplementaryFee() : java.math.BigDecimal.ZERO)
                 .build();
 
         BankAccount bank = null;
@@ -234,17 +245,17 @@ public class PayslipRepositoryImpl extends CommandBatchBaseRepository<PayslipPO,
                 po.getEmployeeName(),
                 new PayPeriod(po.getPeriodStartDate(), po.getPeriodEndDate()),
                 po.getPayDate(),
-                po.getBaseSalary(),
+                po.getBaseSalary() != null ? po.getBaseSalary() : java.math.BigDecimal.ZERO,
                 earningItems,
                 deductionItems,
                 ot,
-                po.getLeaveDeduction(),
+                po.getLeaveDeduction() != null ? po.getLeaveDeduction() : java.math.BigDecimal.ZERO,
                 ins,
-                po.getIncomeTax(),
-                po.getGrossWage(),
-                po.getNetWage(),
+                po.getIncomeTax() != null ? po.getIncomeTax() : java.math.BigDecimal.ZERO,
+                po.getGrossWage() != null ? po.getGrossWage() : java.math.BigDecimal.ZERO,
+                po.getNetWage() != null ? po.getNetWage() : java.math.BigDecimal.ZERO,
                 bank,
-                PayslipStatus.valueOf(po.getStatus()),
+                po.getStatus() != null ? PayslipStatus.valueOf(po.getStatus()) : PayslipStatus.DRAFT,
                 po.getPdfUrl(),
                 po.getEmailSentAt(),
                 po.getCreatedAt());

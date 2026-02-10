@@ -14,6 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.common.test.base.BaseIntegrationTest;
 import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 
@@ -37,7 +38,7 @@ import com.company.hrms.iam.domain.repository.IUserRepository;
                 "classpath:test-data/user_test_data.sql" }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("User Repository 整合測試")
-class UserRepositoryIntegrationTest extends com.company.hrms.common.test.base.BaseIntegrationTest {
+public class UserRepositoryIntegrationTest extends BaseIntegrationTest {
 
         @Autowired
         private IUserRepository userRepository;

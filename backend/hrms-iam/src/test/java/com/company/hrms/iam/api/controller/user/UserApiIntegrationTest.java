@@ -61,6 +61,7 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 		JWTModel mockUser = new JWTModel();
 		mockUser.setUserId("test-user-001");
 		mockUser.setUsername("admin");
+		mockUser.setTenantId("T001");
 		mockUser.setRoles(Collections.singletonList("ADMIN"));
 
 		List<SimpleGrantedAuthority> authorities = Arrays.asList(
@@ -290,12 +291,12 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("IAM_USER_API_013: 依用戶名搜尋 - 應返回符合的用戶")
 		void IAM_USER_API_013_searchByUsername_ShouldReturnMatchingUsers() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/users?username=admin")
+			var response = performGet("/api/v1/users?username=test_user")
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("admin");
+			assertThat(responseBody).contains("test_user");
 		}
 
 		@Test

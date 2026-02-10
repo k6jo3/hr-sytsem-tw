@@ -1,6 +1,8 @@
 package com.company.hrms.common.infrastructure.persistence.querydsl.engine;
 
 import java.beans.Introspector;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +13,8 @@ import com.company.hrms.common.query.LogicalOp;
 import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryGroup;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.CollectionExpression;
+import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
@@ -110,6 +114,7 @@ public class UltimateQueryEngine<T> {
     /**
      * 建構單一條件的 BooleanExpression
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private BooleanExpression buildExpression(FilterUnit unit) {
         String[] parts = unit.getField().split("\\.");
         PathBuilder<?> currentPath = entityPath;
@@ -121,8 +126,68 @@ public class UltimateQueryEngine<T> {
                 String part = parts[i];
                 pathAcc = pathAcc.isEmpty() ? part : pathAcc + "." + part;
                 if (!joinedPaths.containsKey(pathAcc)) {
-                    PathBuilder<Object> nextPath = new PathBuilder<>(Object.class, part);
-                    query.leftJoin((PathBuilder<Object>) currentPath.get(part, Object.class), nextPath);
+                    // 嘗試取得屬性的真實類型
+                    Class<?> nextType = Object.class;
+                    Class<?> originalFieldType = Object.class;
+                    boolean isCollection = false;
+                    try {
+                        java.lang.reflect.Field field = findField(currentPath.getType(), part);
+                        if (field != null) {
+                            Class<?> fieldType = field.getType();
+                            originalFieldType = fieldType;
+                            nextType = fieldType;
+
+                            if (Collection.class.isAssignableFrom(fieldType)) {
+                                isCollection = true;
+                                Type genericType = field.getGenericType();
+                                if (genericType instanceof ParameterizedType) {
+                                    nextType = (Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        try {
+                            String getterName = "get" + part.substring(0, 1).toUpperCase() + part.substring(1);
+                            java.lang.reflect.Method method = currentPath.getType().getMethod(getterName);
+                            Class<?> returnType = method.getReturnType();
+                            originalFieldType = returnType;
+                            nextType = returnType;
+
+                            if (Collection.class.isAssignableFrom(returnType)) {
+                                isCollection = true;
+                                Type genericType = method.getGenericReturnType();
+                                if (genericType instanceof ParameterizedType) {
+                                    nextType = (Class<?>) ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                                }
+                            }
+                        } catch (Exception e2) {
+                        }
+                    }
+
+                    String joinAlias = part + "_" + i + "_" + System.nanoTime() % 1000;
+                    PathBuilder<?> nextPath = new PathBuilder<>(nextType, joinAlias);
+
+                    try {
+                        if (isCollection) {
+                            // 使用更具體的集合路徑方法，協助 Querydsl/Hibernate 正確解析實體類型
+                            // 使用 Raw Type 轉型以避開 Querydsl/Hibernate 泛型路徑解析的限制
+                            if (java.util.List.class.isAssignableFrom(originalFieldType)) {
+                                query.leftJoin((CollectionExpression) currentPath.getList(part,
+                                        nextType), nextPath);
+                            } else if (java.util.Set.class.isAssignableFrom(originalFieldType)) {
+                                query.leftJoin((CollectionExpression) currentPath.getSet(part,
+                                        nextType), nextPath);
+                            } else {
+                                query.leftJoin((CollectionExpression) currentPath
+                                        .getCollection(part, nextType), nextPath);
+                            }
+                        } else {
+                            query.leftJoin((EntityPath) currentPath.get(part), nextPath);
+                        }
+                    } catch (Exception e) {
+                        // 發生錯誤時嘗試回退到基本 EntityPath 轉型
+                        query.leftJoin((EntityPath) currentPath.get(part), nextPath);
+                    }
                     joinedPaths.put(pathAcc, nextPath);
                 }
                 currentPath = joinedPaths.get(pathAcc);
@@ -133,27 +198,49 @@ public class UltimateQueryEngine<T> {
         return createPredicate(currentPath, fieldName, unit.getOp(), unit.getValue());
     }
 
-    /**
-     * 根據運算子類型建立對應的 Querydsl 謂詞
-     */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private BooleanExpression createPredicate(PathBuilder<?> path, String fieldName, Operator op, Object value) {
-        // 取得基本欄位路徑
-        PathBuilder<?> fieldPath = path.get(fieldName);
-        Class<?> fieldType = fieldPath.getType();
+        // 1. 自動處理底線轉駝峰 (例如 total_amount -> totalAmount)
+        String actualFieldName = fieldName;
+        if (fieldName.contains("_")) {
+            StringBuilder sb = new StringBuilder();
+            boolean nextUpper = false;
+            for (char c : fieldName.toCharArray()) {
+                if (c == '_') {
+                    nextUpper = true;
+                } else if (nextUpper) {
+                    sb.append(Character.toUpperCase(c));
+                    nextUpper = false;
+                } else {
+                    sb.append(c);
+                }
+            }
+            actualFieldName = sb.toString();
+        }
 
-        // 如果 Querydsl 無法偵測類型 (返回 Object.class)，嘗試使用反射取得
-        if (fieldType == Object.class && path.getType() != null) {
-            try {
-                java.lang.reflect.Field field = path.getType().getDeclaredField(fieldName);
+        // 取得基本欄位路徑
+        PathBuilder<?> fieldPath = path.get(actualFieldName);
+        Class<?> fieldType = Object.class;
+
+        // 2. 遞迴尋找欄位類型 (支援繼承)
+        if (path.getType() != null) {
+            java.lang.reflect.Field field = findField(path.getType(), actualFieldName);
+            if (field != null) {
                 fieldType = field.getType();
-            } catch (Exception e) {
-                // 忽略，維持 Object.class
+            } else {
+                // Try getter
+                try {
+                    String getterName = "get" + actualFieldName.substring(0, 1).toUpperCase()
+                            + actualFieldName.substring(1);
+                    fieldType = path.getType().getMethod(getterName).getReturnType();
+                } catch (Exception e) {
+                }
             }
         }
 
         Object finalValue = value;
         final Class<?> targetFieldType = fieldType;
+        fieldName = actualFieldName; // 更新欄位名稱供後續 switch 使用
 
         // 1. 扁平化處理: 解決可能出現的嵌套 Collection (例如 Object[] { List })
         // 這通常發生在 Varargs 傳遞時誤傳入了一個集合
@@ -324,5 +411,17 @@ public class UltimateQueryEngine<T> {
         this.query = null;
         this.joinedPaths.clear();
         this.joinedPaths.put("", entityPath);
+    }
+
+    private java.lang.reflect.Field findField(Class<?> clazz, String fieldName) {
+        Class<?> current = clazz;
+        while (current != null && current != Object.class) {
+            try {
+                return current.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException e) {
+                current = current.getSuperclass();
+            }
+        }
+        return null;
     }
 }

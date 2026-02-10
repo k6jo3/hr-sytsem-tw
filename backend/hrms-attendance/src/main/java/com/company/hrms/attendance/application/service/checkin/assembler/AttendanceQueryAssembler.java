@@ -16,23 +16,47 @@ import com.company.hrms.common.query.QueryGroup;
 public class AttendanceQueryAssembler {
 
     public QueryGroup toQueryGroup(GetAttendanceListRequest request) {
-        // 1. 使用 QueryBuilder 自動解析 DTO 上的 @QueryFilter / @EQ 註解
-        QueryBuilder builder = QueryBuilder.where().fromDto(request);
+        QueryBuilder builder = QueryBuilder.where();
 
-        // 2. 月份查詢 (YYYY-MM) - 需手動處理範圍
-        if (request.getMonth() != null && !request.getMonth().isBlank()) {
-            String yearMonth = request.getMonth(); // 2025-01
-            String start = yearMonth + "-01";
-            LocalDate startDate = LocalDate.parse(start);
-            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-
-            builder.and("date", Operator.GTE, startDate);
-            builder.and("date", Operator.LTE, endDate);
+        if (request.getEmployeeId() != null && !request.getEmployeeId().isBlank()) {
+            builder.and("employee_id", Operator.EQ, request.getEmployeeId());
         }
 
-        // 3. 部門 ID - PO可能有缺失，暫保留手動加入 (假設 Entity 支援此欄位路徑或透過 Join)
+        if (request.getDate() != null) {
+            builder.and("record_date", Operator.EQ, request.getDate());
+        }
+
+        if (request.getStartDate() != null) {
+            builder.and("record_date", Operator.GTE, request.getStartDate());
+        }
+        if (request.getEndDate() != null) {
+            builder.and("record_date", Operator.LTE, request.getEndDate());
+        }
+
+        if (request.getMonth() != null && !request.getMonth().isBlank()) {
+            String yearMonth = request.getMonth();
+            LocalDate startDate = LocalDate.parse(yearMonth + "-01");
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            builder.and("record_date", Operator.GTE, startDate);
+            builder.and("record_date", Operator.LTE, endDate);
+        }
+
         if (request.getDeptId() != null && !request.getDeptId().isBlank()) {
             builder.and("department_id", Operator.EQ, request.getDeptId());
+        }
+
+        if (request.getLateFlag() != null) {
+            builder.and("is_late", Operator.EQ, request.getLateFlag());
+        }
+        if (request.getEarlyLeaveFlag() != null) {
+            builder.and("is_early_leave", Operator.EQ, request.getEarlyLeaveFlag());
+        }
+        if (request.getStatus() != null && !request.getStatus().isBlank()) {
+            if ("ABNORMAL".equals(request.getStatus())) {
+                builder.isNotNull("anomaly_type");
+            } else {
+                builder.and("status", Operator.EQ, request.getStatus());
+            }
         }
 
         return builder.build();

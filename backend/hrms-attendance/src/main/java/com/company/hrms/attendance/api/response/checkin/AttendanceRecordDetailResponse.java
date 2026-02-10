@@ -1,15 +1,15 @@
 package com.company.hrms.attendance.api.response.checkin;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 /**
  * 出勤記錄詳情 DTO
@@ -66,7 +66,7 @@ public class AttendanceRecordDetailResponse {
     @Schema(description = "下班打卡位置")
     private String checkOutLocation;
 
-    @Schema(description = "出勤狀態", allowableValues = {"NORMAL", "LATE", "EARLY_LEAVE", "ABSENT", "LEAVE", "HOLIDAY"})
+    @Schema(description = "出勤狀態", allowableValues = { "NORMAL", "LATE", "EARLY_LEAVE", "ABSENT", "LEAVE", "HOLIDAY" })
     private String status;
 
     @Schema(description = "遲到分鐘數")
@@ -80,6 +80,9 @@ public class AttendanceRecordDetailResponse {
 
     @Schema(description = "備註")
     private String remarks;
+
+    @Schema(description = "是否已補卡")
+    private Boolean isCorrected;
 
     @Schema(description = "建立時間")
     private LocalDateTime createdAt;

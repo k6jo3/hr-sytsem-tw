@@ -52,3 +52,67 @@ export interface GetEmployeeListResponse {
 export interface GetEmployeeDetailResponse {
   employee: EmployeeDto;
 }
+
+/**
+ * Organization DTO
+ */
+export interface OrganizationDto {
+  organizationId: string;
+  organizationCode: string;
+  organizationName: string;
+  organizationType: 'PARENT' | 'SUBSIDIARY';
+  taxId?: string;
+  address?: string;
+  phoneNumber?: string;
+  establishedDate?: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  parentOrganizationId?: string;
+  employeeCount?: number;
+  createdAt: string;
+}
+
+/**
+ * Department DTO
+ */
+export interface DepartmentDto {
+  departmentId: string;
+  code: string;
+  name: string;
+  level: number;
+  sortOrder: number;
+  organizationId: string;
+  parentId?: string;
+  managerId?: string;
+  managerName?: string;
+  status: 'ACTIVE' | 'INACTIVE';
+  statusDisplay?: string;
+  employeeCount: number;
+  subDepartments?: DepartmentDto[];
+}
+
+/**
+ * Create/Update Organization Request
+ */
+export interface OrganizationRequest {
+  organizationCode: string;
+  organizationName: string;
+  organizationType: 'PARENT' | 'SUBSIDIARY';
+  parentOrganizationId?: string;
+  taxId?: string;
+  address?: string;
+  phoneNumber?: string;
+  establishedDate?: string;
+}
+
+/**
+ * Create/Update Department Request
+ */
+export interface DepartmentRequest {
+  organizationId: string;
+  parentDepartmentId?: string;
+  departmentCode: string;
+  departmentName: string;
+  managerId?: string;
+  displayOrder?: number;
+}
+

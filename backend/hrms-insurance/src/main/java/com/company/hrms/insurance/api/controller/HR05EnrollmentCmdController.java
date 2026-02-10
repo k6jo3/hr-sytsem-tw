@@ -19,6 +19,7 @@ import com.company.hrms.insurance.api.response.EnrollmentDetailResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -33,7 +34,7 @@ public class HR05EnrollmentCmdController extends CommandBaseController {
         @PostMapping
         @Operation(summary = "員工加保", operationId = "enrollEmployee")
         public ResponseEntity<EnrollmentDetailResponse> enrollEmployee(
-                        @RequestBody EnrollEmployeeRequest request,
+                        @Valid @RequestBody EnrollEmployeeRequest request,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
                 return ResponseEntity.ok(execCommand(request, currentUser));
         }
@@ -42,7 +43,7 @@ public class HR05EnrollmentCmdController extends CommandBaseController {
         @Operation(summary = "退保", operationId = "withdrawEnrollment")
         public ResponseEntity<EnrollmentDetailResponse> withdrawEnrollment(
                         @PathVariable String id,
-                        @RequestBody WithdrawEnrollmentRequest request,
+                        @Valid @RequestBody WithdrawEnrollmentRequest request,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
                 return ResponseEntity.ok(execCommand(request, currentUser, id));
         }
@@ -51,7 +52,7 @@ public class HR05EnrollmentCmdController extends CommandBaseController {
         @Operation(summary = "調整投保級距", operationId = "adjustLevel")
         public ResponseEntity<EnrollmentDetailResponse> adjustLevel(
                         @PathVariable String id,
-                        @RequestBody AdjustLevelRequest request,
+                        @Valid @RequestBody AdjustLevelRequest request,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
                 return ResponseEntity.ok(execCommand(request, currentUser, id));
         }

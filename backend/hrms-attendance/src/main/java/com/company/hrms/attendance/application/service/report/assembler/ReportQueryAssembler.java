@@ -12,35 +12,47 @@ import com.company.hrms.common.query.QueryGroup;
 
 /**
  * 報表查詢組裝器
- * 符合 Fluent-Query-Engine 的設計，支援由 DTO 自動構建查詢
  */
 @Component
 public class ReportQueryAssembler {
 
-    /**
-     * 組裝月報表查詢條件
-     */
     public QueryGroup toQueryGroup(GetMonthlyReportRequest request) {
-        var builder = QueryBuilder.where().fromDto(request);
+        var builder = QueryBuilder.where();
 
-        // 處理年份與月份轉換為日期區間
+        if (request.getOrganizationId() != null) {
+            builder.and("organization_id", Operator.EQ, request.getOrganizationId());
+        }
+        if (request.getDepartmentId() != null) {
+            builder.and("employee_id", Operator.IN,
+                    "(SELECT employee_id FROM employees WHERE department_id = '" + request.getDepartmentId() + "')");
+        }
+
+        // 處理年份與月份轉換為日期區間 (合約要求 record_date)
         if (request.getYear() != null && request.getMonth() != null) {
             LocalDate start = LocalDate.of(request.getYear(), request.getMonth(), 1);
-            LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+            LocalDate endDate = start.withDayOfMonth(start.lengthOfMonth());
 
-            builder.and("date", Operator.GTE, start)
-                    .and("date", Operator.LTE, end);
+            builder.and("record_date", Operator.GTE, start)
+                    .and("record_date", Operator.LTE, endDate);
         }
 
         return builder.build();
     }
 
-    /**
-     * 組裝日報表查詢條件
-     */
     public QueryGroup toQueryGroup(GetDailyReportRequest request) {
-        return QueryBuilder.where()
-                .fromDto(request)
-                .build();
+        var builder = QueryBuilder.where();
+
+        if (request.getOrganizationId() != null) {
+            builder.and("organization_id", Operator.EQ, request.getOrganizationId());
+        }
+        if (request.getDepartmentId() != null) {
+            builder.and("employee_id", Operator.IN,
+                    "(SELECT employee_id FROM employees WHERE department_id = '" + request.getDepartmentId() + "')");
+        }
+        if (request.getDate() != null) {
+            builder.and("record_date", Operator.EQ, request.getDate());
+        }
+
+        return builder.build();
     }
 }

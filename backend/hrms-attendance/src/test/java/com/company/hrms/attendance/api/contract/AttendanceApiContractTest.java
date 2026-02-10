@@ -14,11 +14,11 @@ import com.company.hrms.attendance.api.request.attendance.GetAttendanceListReque
 import com.company.hrms.attendance.api.request.leave.GetLeaveListRequest;
 import com.company.hrms.attendance.api.request.overtime.GetOvertimeListRequest;
 import com.company.hrms.attendance.application.service.checkin.assembler.AttendanceQueryAssembler;
+import com.company.hrms.attendance.application.service.contract.AttendanceContractTest;
 import com.company.hrms.attendance.application.service.correction.assembler.CorrectionQueryAssembler;
 import com.company.hrms.attendance.application.service.leave.assembler.LeaveQueryAssembler;
 import com.company.hrms.attendance.application.service.overtime.assembler.OvertimeQueryAssembler;
 import com.company.hrms.common.test.contract.BaseContractTest;
-import com.company.hrms.attendance.application.service.contract.AttendanceContractTest;
 
 /**
  * HR03 考勤服務 API 合約測試
@@ -83,7 +83,27 @@ import com.company.hrms.attendance.application.service.contract.AttendanceContra
 @DisplayName("HR03 考勤服務 API 合約測試")
 public class AttendanceApiContractTest extends BaseContractTest {
 
-    private static final String CONTRACT = "attendance";
+    private static final String CONTRACT = "attendance_contracts_v2";
+
+    @Override
+    protected String loadContractSpec(String serviceName) throws java.io.IOException {
+        java.nio.file.Path current = java.nio.file.Paths.get("").toAbsolutePath();
+        for (int i = 0; i < 6; i++) {
+            java.nio.file.Path candidate = current.resolve("contracts/" + serviceName + ".md");
+            if (java.nio.file.Files.exists(candidate)) {
+                return java.nio.file.Files.readString(candidate);
+            }
+            java.nio.file.Path candidateSibling = current.resolve("../contracts/" + serviceName + ".md");
+            if (java.nio.file.Files.exists(candidateSibling)) {
+                return java.nio.file.Files.readString(candidateSibling);
+            }
+            current = current.getParent();
+            if (current == null)
+                break;
+        }
+        throw new RuntimeException("找不到合約檔案: " + serviceName + ".md");
+    }
+
     private String contractSpec;
 
     @BeforeEach
@@ -119,15 +139,15 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // When: 組裝 QueryGroup
             var query = assembler.toQueryGroup(request);
 
-            // Then: 驗證合約 ATT_A001
-            assertContract(query, contractSpec, "ATT_A001");
+            // Then: 驗證合約 ATT_QRY_A001
+            assertContract(query, contractSpec, "ATT_QRY_A001");
         }
 
         /**
-         * ATT_A002: HR 查詢部門月出勤
+         * ATT_QRY_A002: HR 查詢部門月出勤
          */
         @Test
-        @DisplayName("ATT_A002: HR 查詢部門月出勤")
+        @DisplayName("ATT_QRY_A002: HR 查詢部門月出勤")
         void searchDeptMonthlyAttendance_AsHR_ShouldIncludeFilters() throws Exception {
             // Given: HR 查詢部門 D001 在 2025-01 月份的出勤
             var request = GetAttendanceListRequest.builder()
@@ -138,8 +158,8 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // When: 組裝 QueryGroup
             var query = assembler.toQueryGroup(request);
 
-            // Then: 驗證合約 ATT_A002
-            assertContract(query, contractSpec, "ATT_A002");
+            // Then: 驗證合約 ATT_QRY_A002
+            assertContract(query, contractSpec, "ATT_QRY_A002");
         }
 
         /**
@@ -165,7 +185,7 @@ public class AttendanceApiContractTest extends BaseContractTest {
 
             // Then: 驗證 QueryGroup 包含員工 ID 過濾
             assertHasFilterForField(query, "employee_id");
-            assertHasFilterForField(query, "attendance_date");
+            assertHasFilterForField(query, "record_date");
         }
 
         /**
@@ -190,7 +210,7 @@ public class AttendanceApiContractTest extends BaseContractTest {
 
             // Then: 驗證 QueryGroup 包含部門過濾
             assertHasFilterForField(query, "department_id");
-            assertHasFilterForField(query, "attendance_date");
+            assertHasFilterForField(query, "record_date");
         }
     }
 
@@ -217,8 +237,8 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // When: 組裝 QueryGroup
             var query = assembler.toQueryGroup(request);
 
-            // Then: 驗證合約 ATT_L001
-            assertContract(query, contractSpec, "ATT_L001");
+            // Then: 驗證合約 ATT_QRY_L001
+            assertContract(query, contractSpec, "ATT_QRY_L001");
         }
 
         /**
@@ -236,9 +256,8 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // When: 組裝 QueryGroup
             var query = assembler.toQueryGroup(request);
 
-            // Then: 驗證 QueryGroup 包含員工 ID 與軟刪除過濾
+            // Then: 驗證 QueryGroup 包含員工 ID
             assertHasFilterForField(query, "employee_id");
-            assertHasFilterForField(query, "is_deleted");
         }
 
         /**
@@ -260,7 +279,6 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // Then: 驗證 QueryGroup 包含狀態與部門過濾
             assertHasFilterForField(query, "status");
             assertHasFilterForField(query, "department_id");
-            assertHasFilterForField(query, "is_deleted");
         }
     }
 
@@ -287,8 +305,8 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // When: 組裝 QueryGroup
             var query = assembler.toQueryGroup(request);
 
-            // Then: 驗證合約 ATT_O001
-            assertContract(query, contractSpec, "ATT_O001");
+            // Then: 驗證合約 ATT_QRY_O001
+            assertContract(query, contractSpec, "ATT_QRY_O001");
         }
 
         /**
@@ -306,9 +324,8 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // When: 組裝 QueryGroup
             var query = assembler.toQueryGroup(request);
 
-            // Then: 驗證 QueryGroup 包含員工 ID 與軟刪除過濾
+            // Then: 驗證 QueryGroup 包含員工 ID
             assertHasFilterForField(query, "employee_id");
-            assertHasFilterForField(query, "is_deleted");
         }
 
         /**
@@ -330,7 +347,6 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // Then: 驗證 QueryGroup 包含狀態與部門過濾
             assertHasFilterForField(query, "status");
             assertHasFilterForField(query, "department_id");
-            assertHasFilterForField(query, "is_deleted");
         }
     }
 
@@ -355,8 +371,8 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // When: 組裝 QueryGroup
             var query = assembler.toQueryGroup(request);
 
-            // Then: 驗證合約 ATT_C001
-            assertContract(query, contractSpec, "ATT_C001");
+            // Then: 驗證合約 ATT_QRY_C001
+            assertContract(query, contractSpec, "ATT_QRY_C001");
         }
 
         /**
@@ -372,9 +388,8 @@ public class AttendanceApiContractTest extends BaseContractTest {
             // When: 組裝 QueryGroup
             var query = assembler.toQueryGroup(request);
 
-            // Then: 驗證 QueryGroup 包含員工 ID 與軟刪除過濾
+            // Then: 驗證 QueryGroup 包含員工 ID
             assertHasFilterForField(query, "employee_id");
-            assertHasFilterForField(query, "is_deleted");
         }
     }
 

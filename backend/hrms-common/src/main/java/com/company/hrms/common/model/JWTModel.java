@@ -23,6 +23,11 @@ public class JWTModel {
     private String userId;
 
     /**
+     * 員工ID
+     */
+    private String employeeId;
+
+    /**
      * 使用者名稱
      */
     private String username;
@@ -66,6 +71,11 @@ public class JWTModel {
      * Token 過期時間 (Unix timestamp)
      */
     private Long expiresAt;
+
+    /**
+     * 管理的部門ID列表 (主管權限使用)
+     */
+    private List<String> managedDepartmentIds;
 
     private String tenantId;
 

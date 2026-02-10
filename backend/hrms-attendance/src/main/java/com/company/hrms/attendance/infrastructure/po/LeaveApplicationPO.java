@@ -53,6 +53,18 @@ public class LeaveApplicationPO {
     @Column(name = "rejection_reason", length = 255)
     private String rejectionReason;
 
+    @Column(name = "department_id", length = 50)
+    private String departmentId;
+
+    @Column(name = "hours")
+    private Double hours;
+
+    @Column(name = "approver_id", length = 50)
+    private String approverId;
+
+    @Column(name = "is_deleted")
+    private Integer isDeleted;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

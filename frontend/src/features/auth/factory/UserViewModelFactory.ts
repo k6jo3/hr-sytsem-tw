@@ -5,13 +5,14 @@
  */
 
 import dayjs from 'dayjs';
-import type { UserDto, RoleDto, PermissionDto, UserStatus } from '../api/AuthTypes';
+import type { PermissionDto, RoleDto, UserDto, UserStatus } from '../api/AuthTypes';
 import type {
+  PermissionTreeData,
+  PermissionViewModel,
+  RoleViewModel,
+  UserListViewModel,
   UserProfile,
   UserViewModel,
-  RoleViewModel,
-  PermissionViewModel,
-  PermissionTreeData,
 } from '../model/UserProfile';
 
 // ========== Status Mappings ==========
@@ -147,24 +148,7 @@ export class UserViewModelFactory {
    * Create user list item for table display
    * Used by useUsers hook
    */
-  static createUserListItem(dto: UserDto): {
-    id: string;
-    username: string;
-    email: string;
-    displayName: string;
-    fullName: string;
-    employeeId?: string;
-    status: 'ACTIVE' | 'INACTIVE' | 'LOCKED' | 'DELETED';
-    statusLabel: string;
-    statusColor: string;
-    roles: Array<{ id: string; name: string }>;
-    roleLabels: string[];
-    avatarUrl?: string;
-    lastLoginAt?: string;
-    lastLoginDisplay: string;
-    mustChangePassword: boolean;
-    createdAt: string;
-  } {
+  static createUserListItem(dto: UserDto): UserListViewModel {
     return {
       id: dto.id,
       username: dto.username,
@@ -175,10 +159,11 @@ export class UserViewModelFactory {
       status: dto.status,
       statusLabel: STATUS_LABELS[dto.status] ?? '未知',
       statusColor: STATUS_COLORS[dto.status] ?? 'default',
-      roles: dto.role_ids.map((id, index) => ({
-        id,
-        name: dto.role_list[index] || ROLE_LABELS[dto.role_list[index]] || id,
-      })),
+      roles: dto.role_ids.map((id, index) => {
+        const role = dto.role_list[index];
+        const name = role ? (ROLE_LABELS[role] ?? role) : id;
+        return { id, name };
+      }),
       roleLabels: dto.role_list.map((role) => ROLE_LABELS[role] ?? role),
       avatarUrl: dto.avatar_url,
       lastLoginAt: dto.last_login_at,
@@ -269,20 +254,6 @@ export class UserViewModelFactory {
    */
   static createPermissionListFromDTOs(dtos: PermissionDto[]): PermissionViewModel[] {
     return dtos.map((dto) => this.createPermissionViewModelFromDTO(dto));
-  }
-
-  // ========== Helper Methods ==========
-
-  private static mapStatusLabel(status: UserStatus): string {
-    return STATUS_LABELS[status] ?? '未知';
-  }
-
-  private static mapStatusColor(status: UserStatus): string {
-    return STATUS_COLORS[status] ?? 'default';
-  }
-
-  private static mapRoles(roles: string[]): string {
-    return mapRolesToDisplay(roles);
   }
 }
 

@@ -132,6 +132,8 @@ public class PayslipPO {
 
     @OneToMany(mappedBy = "payslip", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
+    @lombok.ToString.Exclude
+    @lombok.EqualsAndHashCode.Exclude
     private List<PayslipItemPO> items = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)

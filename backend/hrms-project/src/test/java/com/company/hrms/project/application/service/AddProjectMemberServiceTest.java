@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -32,7 +31,6 @@ public class AddProjectMemberServiceTest {
     @Mock
     private EventPublisher eventPublisher;
 
-    @InjectMocks
     private AddProjectMemberServiceImpl addProjectMemberService;
 
     @Mock
@@ -52,6 +50,13 @@ public class AddProjectMemberServiceTest {
         request.setEmployeeId(UUID.randomUUID());
         request.setRole("Developer");
         request.setAllocatedHours(new BigDecimal("100"));
+
+        // 手動注入實例，確保 Pipeline 中的 Task 不是 null
+        var loadTask = new com.company.hrms.project.application.service.task.LoadProjectTask(projectRepository);
+        var addTask = new com.company.hrms.project.application.service.task.AddMemberToProjectTask();
+        var saveTask = new com.company.hrms.project.application.service.task.SaveProjectTask(projectRepository,
+                eventPublisher);
+        addProjectMemberService = new AddProjectMemberServiceImpl(loadTask, addTask, saveTask);
     }
 
     @Test

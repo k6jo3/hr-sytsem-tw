@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.company.hrms.attendance.domain.model.aggregate.LeaveApplication;
@@ -75,6 +77,11 @@ public class LeaveApplicationRepositoryImpl extends BaseRepository<LeaveApplicat
         return super.findAll(query).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<LeaveApplication> searchPage(QueryGroup query, Pageable pageable) {
+        return super.findPage(query, pageable).map(this::toDomain);
     }
 
     @Override

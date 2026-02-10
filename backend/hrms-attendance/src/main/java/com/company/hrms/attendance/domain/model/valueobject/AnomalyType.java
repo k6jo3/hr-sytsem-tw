@@ -9,5 +9,7 @@ public enum AnomalyType {
     EARLY_LEAVE, // 早退
     ABSENT, // 缺勤
     MISSING_CHECK_IN, // 缺上班卡
-    MISSING_CHECK_OUT // 缺下班卡
+    MISSING_CHECK_OUT, // 缺下班卡
+    ABNORMAL, // 異常
+    ABNORMAL_LOCATION // 異常地點
 }

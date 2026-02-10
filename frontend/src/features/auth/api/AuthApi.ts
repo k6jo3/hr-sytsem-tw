@@ -23,6 +23,13 @@ export class AuthApi {
   }
 
   /**
+   * 忘記密碼
+   */
+  static async forgotPassword(email: string): Promise<void> {
+    return apiClient.post(`${this.BASE_PATH}/forgot-password`, { email });
+  }
+
+  /**
    * 刷新 Token
    */
   static async refreshToken(refreshToken: string): Promise<LoginResponse> {

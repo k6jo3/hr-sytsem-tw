@@ -50,7 +50,26 @@ import com.company.hrms.common.test.contract.BaseContractTest;
 @DisplayName("HR03 考勤服務 Assembler 單元合約測試")
 public class AttendanceContractTest extends BaseContractTest {
 
-    private static final String CONTRACT = "attendance";
+    private static final String CONTRACT = "attendance_contracts_v2";
+
+    @Override
+    protected String loadContractSpec(String serviceName) throws java.io.IOException {
+        java.nio.file.Path current = java.nio.file.Paths.get("").toAbsolutePath();
+        for (int i = 0; i < 6; i++) {
+            java.nio.file.Path candidate = current.resolve("contracts/" + serviceName + ".md");
+            if (java.nio.file.Files.exists(candidate)) {
+                return java.nio.file.Files.readString(candidate);
+            }
+            java.nio.file.Path candidateSibling = current.resolve("../contracts/" + serviceName + ".md");
+            if (java.nio.file.Files.exists(candidateSibling)) {
+                return java.nio.file.Files.readString(candidateSibling);
+            }
+            current = current.getParent();
+            if (current == null)
+                break;
+        }
+        throw new RuntimeException("找不到合約檔案: " + serviceName + ".md");
+    }
 
     // ========================================================================
     // 1. 出勤紀錄查詢合約 (Attendance Record Query Contract)
@@ -71,11 +90,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_A001");
+            assertContract(query, contract, "ATT_QRY_A001");
         }
 
         @Test
-        @DisplayName("ATT_A002: 查詢部門月出勤")
+        @DisplayName("ATT_QRY_A002: 查詢部門月出勤")
         void searchDeptMonthlyAttendance_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetAttendanceListRequest.builder()
@@ -84,11 +103,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_A002");
+            assertContract(query, contract, "ATT_QRY_A002");
         }
 
         @Test
-        @DisplayName("ATT_A003: 查詢異常出勤")
+        @DisplayName("ATT_QRY_A003: 查詢異常出勤")
         void searchAbnormalAttendance_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetAttendanceListRequest.builder()
@@ -96,11 +115,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_A003");
+            assertContract(query, contract, "ATT_QRY_A003");
         }
 
         @Test
-        @DisplayName("ATT_A004: 查詢遲到紀錄")
+        @DisplayName("ATT_QRY_A004: 查詢遲到紀錄")
         void searchLateAttendance_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetAttendanceListRequest.builder()
@@ -108,11 +127,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_A004");
+            assertContract(query, contract, "ATT_QRY_A004");
         }
 
         @Test
-        @DisplayName("ATT_A005: 查詢早退紀錄")
+        @DisplayName("ATT_QRY_A005: 查詢早退紀錄")
         void searchEarlyLeaveAttendance_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetAttendanceListRequest.builder()
@@ -120,7 +139,7 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_A005");
+            assertContract(query, contract, "ATT_QRY_A005");
         }
     }
 
@@ -142,11 +161,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_L001");
+            assertContract(query, contract, "ATT_QRY_L001");
         }
 
         @Test
-        @DisplayName("ATT_L002: 查詢已核准請假")
+        @DisplayName("ATT_QRY_L002: 查詢已核准請假")
         void searchApprovedLeave_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveListRequest.builder()
@@ -154,11 +173,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_L002");
+            assertContract(query, contract, "ATT_QRY_L002");
         }
 
         @Test
-        @DisplayName("ATT_L003: 查詢已駁回請假")
+        @DisplayName("ATT_QRY_L003: 查詢已駁回請假")
         void searchRejectedLeave_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveListRequest.builder()
@@ -166,11 +185,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_L003");
+            assertContract(query, contract, "ATT_QRY_L003");
         }
 
         @Test
-        @DisplayName("ATT_L004: 依請假類型查詢")
+        @DisplayName("ATT_QRY_L004: 依請假類型查詢")
         void searchByLeaveType_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveListRequest.builder()
@@ -178,11 +197,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_L004");
+            assertContract(query, contract, "ATT_QRY_L004");
         }
 
         @Test
-        @DisplayName("ATT_L005: 依員工查詢請假")
+        @DisplayName("ATT_QRY_L005: 依員工查詢請假")
         void searchByEmployee_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveListRequest.builder()
@@ -190,11 +209,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_L005");
+            assertContract(query, contract, "ATT_QRY_L005");
         }
 
         @Test
-        @DisplayName("ATT_L006: 依日期範圍查詢")
+        @DisplayName("ATT_QRY_L006: 依日期範圍查詢")
         void searchByDateRange_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveListRequest.builder()
@@ -203,11 +222,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_L006");
+            assertContract(query, contract, "ATT_QRY_L006");
         }
 
         @Test
-        @DisplayName("ATT_L009: 查詢病假紀錄")
+        @DisplayName("ATT_QRY_L009: 查詢病假紀錄")
         void searchSickLeave_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveListRequest.builder()
@@ -215,11 +234,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_L009");
+            assertContract(query, contract, "ATT_QRY_L009");
         }
 
         @Test
-        @DisplayName("ATT_L010: 查詢特休假紀錄")
+        @DisplayName("ATT_QRY_L010: 查詢特休假紀錄")
         void searchAnnualLeave_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveListRequest.builder()
@@ -227,7 +246,7 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_L010");
+            assertContract(query, contract, "ATT_QRY_L010");
         }
     }
 
@@ -249,11 +268,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_O001");
+            assertContract(query, contract, "ATT_QRY_O001");
         }
 
         @Test
-        @DisplayName("ATT_O002: 查詢已核准加班")
+        @DisplayName("ATT_QRY_O002: 查詢已核准加班")
         void searchApprovedOvertime_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetOvertimeListRequest.builder()
@@ -261,11 +280,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_O002");
+            assertContract(query, contract, "ATT_QRY_O002");
         }
 
         @Test
-        @DisplayName("ATT_O003: 依員工查詢加班")
+        @DisplayName("ATT_QRY_O003: 依員工查詢加班")
         void searchByEmployee_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetOvertimeListRequest.builder()
@@ -273,23 +292,23 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_O003");
+            assertContract(query, contract, "ATT_QRY_O003");
         }
 
         @Test
-        @DisplayName("ATT_O004: 依加班類型查詢")
+        @DisplayName("ATT_QRY_O004: 依加班類型查詢")
         void searchByOvertimeType_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetOvertimeListRequest.builder()
-                    .overtimeType("WORKDAY")
+                    .overtimeType("WEEKDAY")
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_O004");
+            assertContract(query, contract, "ATT_QRY_O004");
         }
 
         @Test
-        @DisplayName("ATT_O005: 查詢假日加班")
+        @DisplayName("ATT_QRY_O005: 查詢假日加班")
         void searchHolidayOvertime_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetOvertimeListRequest.builder()
@@ -297,11 +316,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_O005");
+            assertContract(query, contract, "ATT_QRY_O005");
         }
 
         @Test
-        @DisplayName("ATT_O008: 依日期範圍查詢加班")
+        @DisplayName("ATT_QRY_O008: 依日期範圍查詢加班")
         void searchByDateRange_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetOvertimeListRequest.builder()
@@ -309,7 +328,7 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_O008");
+            assertContract(query, contract, "ATT_QRY_O008");
         }
     }
 
@@ -332,11 +351,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_B001");
+            assertContract(query, contract, "ATT_QRY_B001");
         }
 
         @Test
-        @DisplayName("ATT_B002: 查詢特定假別餘額")
+        @DisplayName("ATT_QRY_B002: 查詢特定假別餘額")
         void searchByLeaveType_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveBalanceRequest.builder()
@@ -345,11 +364,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_B002");
+            assertContract(query, contract, "ATT_QRY_B002");
         }
 
         @Test
-        @DisplayName("ATT_B004: 查詢部門假別餘額")
+        @DisplayName("ATT_QRY_B004: 查詢部門假別餘額")
         void searchDeptBalance_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveBalanceRequest.builder()
@@ -358,7 +377,7 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_B004");
+            assertContract(query, contract, "ATT_QRY_B004");
         }
     }
 
@@ -380,11 +399,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_S001");
+            assertContract(query, contract, "ATT_QRY_S001");
         }
 
         @Test
-        @DisplayName("ATT_S002: 查詢停用班別")
+        @DisplayName("ATT_QRY_S002: 查詢停用班別")
         void searchInactiveShifts_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetShiftListRequest.builder()
@@ -392,11 +411,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_S002");
+            assertContract(query, contract, "ATT_QRY_S002");
         }
 
         @Test
-        @DisplayName("ATT_S003: 依組織查詢班別")
+        @DisplayName("ATT_QRY_S003: 依組織查詢班別")
         void searchByOrganization_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetShiftListRequest.builder()
@@ -404,23 +423,23 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_S003");
+            assertContract(query, contract, "ATT_QRY_S003");
         }
 
         @Test
-        @DisplayName("ATT_S004: 依班別類型查詢")
+        @DisplayName("ATT_QRY_S004: 依班別類型查詢")
         void searchByShiftType_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetShiftListRequest.builder()
-                    .shiftType("NORMAL")
+                    .shiftType("STANDARD")
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_S004");
+            assertContract(query, contract, "ATT_QRY_S004");
         }
 
         @Test
-        @DisplayName("ATT_S005: 查詢彈性班別")
+        @DisplayName("ATT_QRY_S005: 查詢彈性班別")
         void searchFlexibleShifts_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetShiftListRequest.builder()
@@ -428,7 +447,7 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_S005");
+            assertContract(query, contract, "ATT_QRY_S005");
         }
     }
 
@@ -450,11 +469,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_T001");
+            assertContract(query, contract, "ATT_QRY_T001");
         }
 
         @Test
-        @DisplayName("ATT_T002: 查詢支薪假別")
+        @DisplayName("ATT_QRY_T002: 查詢支薪假別")
         void searchPaidLeaveTypes_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveTypeListRequest.builder()
@@ -462,11 +481,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_T002");
+            assertContract(query, contract, "ATT_QRY_T002");
         }
 
         @Test
-        @DisplayName("ATT_T003: 查詢無薪假別")
+        @DisplayName("ATT_QRY_T003: 查詢無薪假別")
         void searchUnpaidLeaveTypes_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveTypeListRequest.builder()
@@ -474,11 +493,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_T003");
+            assertContract(query, contract, "ATT_QRY_T003");
         }
 
         @Test
-        @DisplayName("ATT_T004: 依組織查詢假別")
+        @DisplayName("ATT_QRY_T004: 依組織查詢假別")
         void searchByOrganization_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetLeaveTypeListRequest.builder()
@@ -486,7 +505,7 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_T004");
+            assertContract(query, contract, "ATT_QRY_T004");
         }
     }
 
@@ -506,31 +525,31 @@ public class AttendanceContractTest extends BaseContractTest {
             var request = new CorrectionQueryRequest(null, "PENDING", null, null);
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_C001");
+            assertContract(query, contract, "ATT_QRY_C001");
         }
 
         @Test
-        @DisplayName("ATT_C002: 查詢已核准補卡")
+        @DisplayName("ATT_QRY_C002: 查詢已核准補卡")
         void searchApprovedCorrections_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = new CorrectionQueryRequest(null, "APPROVED", null, null);
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_C002");
+            assertContract(query, contract, "ATT_QRY_C002");
         }
 
         @Test
-        @DisplayName("ATT_C003: 依員工查詢補卡")
+        @DisplayName("ATT_QRY_C003: 依員工查詢補卡")
         void searchByEmployee_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = new CorrectionQueryRequest("E001", null, null, null);
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_C003");
+            assertContract(query, contract, "ATT_QRY_C003");
         }
 
         @Test
-        @DisplayName("ATT_C004: 依日期範圍查詢補卡")
+        @DisplayName("ATT_QRY_C004: 依日期範圍查詢補卡")
         void searchByDateRange_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = new CorrectionQueryRequest(
@@ -539,7 +558,7 @@ public class AttendanceContractTest extends BaseContractTest {
                     LocalDate.parse("2025-01-31"));
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_C004");
+            assertContract(query, contract, "ATT_QRY_C004");
         }
     }
 
@@ -563,11 +582,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_R001");
+            assertContract(query, contract, "ATT_QRY_R001");
         }
 
         @Test
-        @DisplayName("ATT_R002: 查詢部門月報表")
+        @DisplayName("ATT_QRY_R002: 查詢部門月報表")
         void searchDeptMonthlyReport_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetMonthlyReportRequest.builder()
@@ -578,11 +597,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_R002");
+            assertContract(query, contract, "ATT_QRY_R002");
         }
 
         @Test
-        @DisplayName("ATT_R003: 查詢日報表")
+        @DisplayName("ATT_QRY_R003: 查詢日報表")
         void searchDailyReport_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetDailyReportRequest.builder()
@@ -591,11 +610,11 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_R003");
+            assertContract(query, contract, "ATT_QRY_R003");
         }
 
         @Test
-        @DisplayName("ATT_R004: 查詢部門日報表")
+        @DisplayName("ATT_QRY_R004: 查詢部門日報表")
         void searchDeptDailyReport_ShouldIncludeFilters() throws Exception {
             String contract = loadContractSpec(CONTRACT);
             var request = GetDailyReportRequest.builder()
@@ -605,7 +624,7 @@ public class AttendanceContractTest extends BaseContractTest {
                     .build();
 
             var query = assembler.toQueryGroup(request);
-            assertContract(query, contract, "ATT_R004");
+            assertContract(query, contract, "ATT_QRY_R004");
         }
     }
 }

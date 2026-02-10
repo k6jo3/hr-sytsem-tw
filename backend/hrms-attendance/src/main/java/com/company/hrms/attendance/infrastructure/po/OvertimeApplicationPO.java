@@ -2,6 +2,7 @@ package com.company.hrms.attendance.infrastructure.po;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +28,13 @@ public class OvertimeApplicationPO {
     private String employeeId;
 
     @Column(name = "overtime_date")
-    private LocalDate date;
+    private LocalDate overtimeDate;
+
+    @Column(name = "start_time")
+    private LocalTime startTime;
+
+    @Column(name = "end_time")
+    private LocalTime endTime;
 
     @Column(name = "hours")
     private Double hours;
@@ -44,6 +51,12 @@ public class OvertimeApplicationPO {
     @Column(name = "rejection_reason", length = 255)
     private String rejectionReason;
 
+    @Column(name = "department_id", length = 50)
+    private String departmentId;
+
+    @Column(name = "approver_id", length = 50)
+    private String approverId;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -55,4 +68,7 @@ public class OvertimeApplicationPO {
 
     @Column(name = "updated_by", length = 50)
     private String updatedBy;
+
+    @Column(name = "is_deleted")
+    private Integer isDeleted;
 }

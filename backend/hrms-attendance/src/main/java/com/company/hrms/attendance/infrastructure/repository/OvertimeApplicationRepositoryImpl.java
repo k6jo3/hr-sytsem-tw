@@ -43,7 +43,7 @@ public class OvertimeApplicationRepositoryImpl extends BaseRepository<OvertimeAp
     @Override
     public List<OvertimeApplication> findByEmployeeIdAndMonth(String employeeId, int year, int month) {
         return super.findAll(QueryBuilder.where().and("employeeId", Operator.EQ, employeeId).build()).stream()
-                .filter(po -> po.getDate().getYear() == year && po.getDate().getMonthValue() == month)
+                .filter(po -> po.getOvertimeDate().getYear() == year && po.getOvertimeDate().getMonthValue() == month)
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -77,7 +77,7 @@ public class OvertimeApplicationRepositoryImpl extends BaseRepository<OvertimeAp
         return OvertimeApplication.reconstitute(
                 new OvertimeId(po.getId()),
                 po.getEmployeeId(),
-                po.getDate(),
+                po.getOvertimeDate(),
                 po.getHours(),
                 OvertimeType.valueOf(po.getOvertimeType()),
                 po.getReason(),
@@ -89,7 +89,7 @@ public class OvertimeApplicationRepositoryImpl extends BaseRepository<OvertimeAp
         return OvertimeApplicationPO.builder()
                 .id(application.getId().getValue())
                 .employeeId(application.getEmployeeId())
-                .date(application.getDate())
+                .overtimeDate(application.getOvertimeDate())
                 .hours(application.getHours())
                 .status(application.getStatus().name())
                 .reason(application.getReason())

@@ -1,11 +1,14 @@
 package com.company.hrms.payroll.application.service.query.assembler;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.payroll.application.dto.request.GetPayslipListRequest;
 
 /**
  * 薪資單查詢組裝器
- * 將 GetPayslipListRequest 轉換為 QueryGroup
  */
 public class PayslipQueryAssembler {
 
@@ -16,21 +19,19 @@ public class PayslipQueryAssembler {
      * @return QueryGroup 查詢條件群組
      */
     public QueryGroup toQueryGroup(GetPayslipListRequest request) {
-        QueryGroup queryGroup = QueryGroup.and();
+        QueryBuilder builder = QueryBuilder.where().fromDto(request);
 
-        // 薪資批次過濾
-        if (request.getRunId() != null && !request.getRunId().isEmpty()) {
-            queryGroup.eq("payroll_run_id", request.getRunId());
+        // 年度月份過濾 (HR04 v2.2.1 PAY_QRY_P005)
+        if (request.getYearMonth() != null && !request.getYearMonth().isEmpty()) {
+            YearMonth ym = YearMonth.parse(request.getYearMonth());
+            LocalDate start = ym.atDay(1);
+            LocalDate end = ym.atEndOfMonth();
+            builder.gte("periodStartDate", start);
+            builder.lte("periodEndDate", end);
         }
 
-        // 員工過濾
-        if (request.getEmployeeId() != null && !request.getEmployeeId().isEmpty()) {
-            queryGroup.eq("employee_id", request.getEmployeeId());
-        }
+        // 薪資單不進行軟刪除 (HR04 v2.0)，且沒有 is_deleted 欄位
 
-        // 軟刪除過濾 (始終添加)
-        queryGroup.eq("is_deleted", 0);
-
-        return queryGroup;
+        return builder.build();
     }
 }

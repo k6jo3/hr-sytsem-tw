@@ -18,6 +18,29 @@ public class CustomerQueryAssembler {
     public QueryGroup toQueryGroup(GetCustomerListRequest request) {
         QueryGroup query = QueryGroup.and();
 
+        // Status filter
+        if (request.getStatus() != null && !request.getStatus().isEmpty()) {
+            query.eq("status", request.getStatus());
+        }
+
+        // Industry filter
+        if (request.getIndustry() != null && !request.getIndustry().isEmpty()) {
+            query.eq("industry", request.getIndustry());
+        }
+
+        // Has projects filter
+        // TODO: 需實作統計查詢 (project_count > 0)
+        // 目前 QueryGroup 不支援原始 SQL，需在 Repository 層實作
+        if (request.getHasProjects() != null && request.getHasProjects()) {
+            // 使用 gt 條件
+            query.gt("project_count", 0);
+        }
+
+        // Sales rep filter
+        if (request.getSalesRepId() != null && !request.getSalesRepId().isEmpty()) {
+            query.eq("sales_rep_id", request.getSalesRepId());
+        }
+
         // Keyword filter (name OR code OR taxId)
         if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
             query.addSubGroup(

@@ -203,18 +203,24 @@
         </pluginManagement>
 
         <plugins>
-            <!-- Maven Surefire Plugin: 實際使用 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.2</version>
-                <configuration>
-                    <argLine>-XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
-                    <systemPropertyVariables>
-                        <org.mockito.mock-maker>mock</org.mockito.mock-maker>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-        </plugins>
+        <!-- Maven Compiler Plugin: 實際使用 -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+        </plugin>
+
+        <!-- Maven Surefire Plugin: 實際使用 -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.2.2</version>
+            <configuration>
+                <argLine>-XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+                <systemPropertyVariables>
+                    <org.mockito.mock-maker>mock</org.mockito.mock-maker>
+                </systemPropertyVariables>
+            </configuration>
+        </plugin>
+    </plugins>
     </build>
 </project>

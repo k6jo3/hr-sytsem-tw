@@ -25,6 +25,7 @@ import com.company.hrms.common.api.response.ErrorCode;
 import com.company.hrms.common.application.pipeline.PipelineExecutionException;
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.common.exception.EntityNotFoundException;
+import com.company.hrms.common.exception.ResourceAlreadyExistsException;
 import com.company.hrms.common.exception.ValidationException;
 
 /**
@@ -110,8 +111,12 @@ public class GlobalExceptionHandler {
                                                 .status(HttpStatus.NOT_FOUND)
                                                 .body(ApiResponse.notFound(domainEx.getMessage()));
                         }
-                        if ("USERNAME_EXISTS".equals(domainEx.getErrorCode())) {
-                                log.warn("Username exists: {}", domainEx.getMessage());
+                        if ("USERNAME_EXISTS".equals(domainEx.getErrorCode()) ||
+                                        "EMPLOYEE_ALREADY_EXISTS".equals(domainEx.getErrorCode()) ||
+                                        "EMAIL_ALREADY_EXISTS".equals(domainEx.getErrorCode()) ||
+                                        "NATIONAL_ID_ALREADY_EXISTS".equals(domainEx.getErrorCode()) ||
+                                        "054009".equals(domainEx.getErrorCode())) { // INS_ALREADY_WITHDRAWN
+                                log.warn("Duplication error: {}", domainEx.getMessage());
                                 return ResponseEntity
                                                 .status(HttpStatus.CONFLICT)
                                                 .body(ApiResponse.error(domainEx.getErrorCode(),
@@ -144,6 +149,21 @@ public class GlobalExceptionHandler {
                         return ResponseEntity
                                         .status(HttpStatus.NOT_FOUND)
                                         .body(ApiResponse.notFound(entityNotFoundEx.getMessage()));
+                }
+                if (cause instanceof org.apache.kafka.common.errors.ResourceNotFoundException resourceNotFoundEx) {
+                        log.warn("Pipeline task [{}] failed due to resource not found: {}", ex.getTaskName(),
+                                        resourceNotFoundEx.getMessage());
+                        return ResponseEntity
+                                        .status(HttpStatus.NOT_FOUND)
+                                        .body(ApiResponse.notFound(resourceNotFoundEx.getMessage()));
+                }
+                if (cause instanceof ResourceAlreadyExistsException resourceAlreadyExistsEx) {
+                        log.warn("Pipeline task [{}] failed due to resource already exists: {}", ex.getTaskName(),
+                                        resourceAlreadyExistsEx.getMessage());
+                        return ResponseEntity
+                                        .status(HttpStatus.CONFLICT)
+                                        .body(ApiResponse.error(ErrorCode.RESOURCE_ALREADY_EXISTS,
+                                                        resourceAlreadyExistsEx.getMessage()));
                 }
 
                 log.error("Pipeline execution failed at task [{}]: {}", ex.getTaskName(), ex.getMessage(), ex);

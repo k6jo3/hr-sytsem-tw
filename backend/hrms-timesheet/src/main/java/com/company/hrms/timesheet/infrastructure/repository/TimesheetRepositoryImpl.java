@@ -60,6 +60,11 @@ public class TimesheetRepositoryImpl extends CommandBatchBaseRepository<Timeshee
     }
 
     @Override
+    public Page<Timesheet> findPageByQuery(QueryGroup query, Pageable pageable) {
+        return super.findPageDistinct(query, pageable).map(this::toDomain);
+    }
+
+    @Override
     public Optional<Timesheet> findByEmployeeAndWeek(UUID employeeId, LocalDate weekStartDate) {
         QueryGroup query = QueryBuilder.where()
                 .eq("employeeId", employeeId)
@@ -90,11 +95,11 @@ public class TimesheetRepositoryImpl extends CommandBatchBaseRepository<Timeshee
     public Page<Timesheet> findPendingApprovals(UUID approverId, Pageable pageable) {
         // 假設邏輯：尋找所有已提交的工時表
         // 實際邏輯可能需要過濾該審核者管理的專案或部門
-        // 目前僅查詢狀態為 SUBMITTED 的工時表
+        // 目前僅查詢狀態為 PENDING 的工時表
         // 特定的 PM 邏輯可能屬於 Service 層或獨立的查詢建構
 
         QueryGroup query = QueryBuilder.where()
-                .eq("status", "SUBMITTED")
+                .eq("status", "PENDING")
                 .build();
 
         return super.findPage(query, pageable).map(this::toDomain);

@@ -139,3 +139,60 @@ export interface GetCustomerListResponse {
   customers: CustomerDto[];
   total: number;
 }
+
+// ========== WBS / Task Types ==========
+
+/**
+ * 工項狀態
+ */
+export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'BLOCKED';
+
+/**
+ * 工項 DTO
+ */
+export interface TaskDto {
+  id: string;
+  project_id: string;
+  parent_task_id?: string;
+  task_code: string;
+  task_name: string;
+  level: number;
+  estimated_hours: number;
+  actual_hours: number;
+  assignee_id?: string;
+  assignee_name?: string;
+  status: TaskStatus;
+  progress: number;
+  display_order: number;
+  children?: TaskDto[];
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * 取得專案工項請求
+ */
+export interface GetProjectTasksRequest {
+  project_id: string;
+}
+
+/**
+ * 建立工項請求
+ */
+export interface CreateTaskRequest {
+  project_id: string;
+  parent_task_id?: string;
+  task_code: string;
+  task_name: string;
+  estimated_hours: number;
+  assignee_id?: string;
+  description?: string;
+}
+
+/**
+ * 更新工項進度請求
+ */
+export interface UpdateTaskProgressRequest {
+  progress: number;
+  status?: TaskStatus;
+}

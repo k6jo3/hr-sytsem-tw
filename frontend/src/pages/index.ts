@@ -1,29 +1,48 @@
 // IAM (HR01)
 export { HR01LoginPage } from './HR01LoginPage';
-export { default as HR01UserManagementPage } from './HR01UserManagementPage';
-export { default as HR01RoleManagementPage } from './HR01RoleManagementPage';
 export { default as HR01PasswordChangePage } from './HR01PasswordChangePage';
+export { default as HR01RoleManagementPage } from './HR01RoleManagementPage';
+export { default as HR01UserManagementPage } from './HR01UserManagementPage';
 
 // Organization (HR02)
+export { HR02EmployeeDetailPage } from './HR02EmployeeDetailPage';
 export { default as HR02EmployeeListPage } from './HR02EmployeeListPage';
 
 // Attendance (HR03)
-export { HR03CheckInPage } from './HR03CheckInPage';
+export { HR03ApprovalListPage } from './HR03ApprovalListPage';
+export { default as HR03CheckInPage } from './HR03AttendanceCheckInPage';
+export { default as HR03AttendanceReportPage } from './HR03AttendanceReportPage';
+export { default as HR03LeaveBalancePage } from './HR03LeaveBalancePage';
 export { HR03LeaveListPage } from './HR03LeaveListPage';
+export { default as HR03LeaveTypeManagementPage } from './HR03LeaveTypeManagementPage';
+export { default as HR03MonthClosePage } from './HR03MonthClosePage';
+export { default as HR03MyAttendanceListPage } from './HR03MyAttendanceListPage';
+export { default as HR03OvertimeListPage } from './HR03OvertimeListPage';
+export { default as HR03ShiftManagementPage } from './HR03ShiftManagementPage';
 
 // Payroll (HR04)
-export { HR04PayrollListPage } from './HR04PayrollListPage';
-export { HR04PayslipPage } from './HR04PayslipPage';
+export { default as HR04BankTransferPage } from './HR04BankTransferPage';
+export { default as HR04PayrollApprovalPage } from './HR04PayrollApprovalPage';
+export { default as HR04PayrollBatchDetailPage } from './HR04PayrollBatchDetailPage';
+export { default as HR04PayrollHistoryPage } from './HR04PayrollHistoryPage';
+export { default as HR04PayrollItemPage } from './HR04PayrollItemPage';
+export { default as HR04PayrollListPage } from './HR04PayrollListPage';
+export { default as HR04PayslipPage } from './HR04PayslipPage';
+export { default as HR04SalaryStructurePage } from './HR04SalaryStructurePage';
 
 // Insurance (HR05)
-export { HR05InsuranceListPage } from './HR05InsuranceListPage';
+export { default as HR05InsuranceCalculatorPage } from './HR05InsuranceCalculatorPage';
+export { default as HR05InsuranceEnrollmentPage } from './HR05InsuranceEnrollmentPage';
+export { default as HR05MyInsurancePage } from './HR05MyInsurancePage';
 
 // Project (HR06)
-export { HR06ProjectListPage } from './HR06ProjectListPage';
 export { HR06ProjectDetailPage } from './HR06ProjectDetailPage';
+export { HR06ProjectListPage } from './HR06ProjectListPage';
 
 // Timesheet (HR07)
+export { default as HR07TimesheetApprovalPage } from './HR07TimesheetApprovalPage';
 export { default as HR07TimesheetPage } from './HR07TimesheetPage';
+export { default as HR07TimesheetReportPage } from './HR07TimesheetReportPage';
 
 // Performance (HR08)
 export { HR08MyPerformancePage } from './HR08MyPerformancePage';

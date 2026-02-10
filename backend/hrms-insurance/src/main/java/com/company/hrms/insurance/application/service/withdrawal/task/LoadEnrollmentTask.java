@@ -3,6 +3,7 @@ package com.company.hrms.insurance.application.service.withdrawal.task;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
+import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.insurance.application.service.withdrawal.context.WithdrawalContext;
 import com.company.hrms.insurance.domain.model.aggregate.InsuranceEnrollment;
 import com.company.hrms.insurance.domain.repository.IInsuranceEnrollmentRepository;
@@ -26,7 +27,7 @@ public class LoadEnrollmentTask implements PipelineTask<WithdrawalContext> {
         log.debug("載入加保記錄: enrollmentId={}", enrollmentId.getValue());
 
         InsuranceEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new IllegalArgumentException("加保記錄不存在: " + enrollmentId.getValue()));
+                .orElseThrow(() -> new EntityNotFoundException("加保記錄不存在: " + enrollmentId.getValue()));
 
         context.setEnrollment(enrollment);
         log.info("加保記錄載入成功: type={}, employeeId={}",

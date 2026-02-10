@@ -62,10 +62,10 @@ public class SupplementaryPremiumEntity {
     @Column(name = "premium_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal premiumAmount;
 
-    @Column(name = "year", nullable = false)
+    @Column(name = "premium_year", nullable = false)
     private Integer year;
 
-    @Column(name = "month", nullable = false)
+    @Column(name = "premium_month", nullable = false)
     private Integer month;
 
     @Column(name = "created_at")

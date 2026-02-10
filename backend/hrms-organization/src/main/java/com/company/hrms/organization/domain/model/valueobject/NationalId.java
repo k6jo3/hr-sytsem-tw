@@ -1,10 +1,11 @@
 package com.company.hrms.organization.domain.model.valueobject;
 
+import java.util.regex.Pattern;
+
 import com.company.hrms.common.exception.DomainException;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-
-import java.util.regex.Pattern;
 
 /**
  * 身分證號值對象
@@ -23,14 +24,15 @@ public class NationalId {
      * 字母對應數字表 (用於驗證碼計算)
      */
     private static final int[] LETTER_MAP = {
-            10, 11, 12, 13, 14, 15, 16, 17, 34, 18, 19, 20, 21,  // A-M
-            22, 35, 23, 24, 25, 26, 27, 28, 29, 32, 30, 31, 33   // N-Z
+            10, 11, 12, 13, 14, 15, 16, 17, 34, 18, 19, 20, 21, // A-M
+            22, 35, 23, 24, 25, 26, 27, 28, 29, 32, 30, 31, 33 // N-Z
     };
 
     private final String value;
 
     /**
      * 建構身分證號值對象
+     * 
      * @param value 身分證字號
      * @throws DomainException 若格式無效或驗證碼錯誤
      */
@@ -46,7 +48,7 @@ public class NationalId {
         }
 
         if (!validateChecksum(normalized)) {
-            throw new DomainException("NATIONAL_ID_CHECKSUM_INVALID", "身分證字號驗證碼錯誤");
+            throw new DomainException("NATIONAL_ID_CHECKSUM_INVALID", "身分證字號檢核錯誤");
         }
 
         this.value = normalized;
@@ -54,6 +56,7 @@ public class NationalId {
 
     /**
      * 驗證身分證字號驗證碼
+     * 
      * @param id 身分證字號
      * @return 驗證碼是否正確
      */
@@ -66,7 +69,7 @@ public class NationalId {
         // 計算驗證碼
         int sum = n1 * 1 + n2 * 9;
 
-        int[] weights = {8, 7, 6, 5, 4, 3, 2, 1, 1};
+        int[] weights = { 8, 7, 6, 5, 4, 3, 2, 1, 1 };
         for (int i = 0; i < 9; i++) {
             sum += Character.getNumericValue(id.charAt(i + 1)) * weights[i];
         }
@@ -76,6 +79,7 @@ public class NationalId {
 
     /**
      * 取得遮罩後的身分證字號 (顯示用)
+     * 
      * @return 遮罩後的字號，如 A12***6789
      */
     public String getMaskedValue() {

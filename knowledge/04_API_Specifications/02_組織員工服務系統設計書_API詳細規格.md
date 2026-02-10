@@ -32,14 +32,16 @@
 | `/api/v1/organizations/{id}` | PUT | HR02OrganizationCmdController | 更新公司 | organization:update |
 | `/api/v1/organizations/{id}/tree` | GET | HR02OrganizationQryController | 查詢組織樹 | organization:read |
 
-### 1.2 部門管理 API (6 個端點)
+### 1.2 部門管理 API (8 個端點)
 
 | 端點 | 方法 | Controller | 說明 | 權限 |
 |:---|:---:|:---|:---|:---|
 | `/api/v1/departments` | POST | HR02DepartmentCmdController | 建立部門 | department:create |
+| `/api/v1/departments` | GET | HR02DepartmentQryController | 查詢部門列表 | department:read |
 | `/api/v1/departments/{id}` | GET | HR02DepartmentQryController | 查詢部門詳情 | department:read |
 | `/api/v1/departments/{id}` | PUT | HR02DepartmentCmdController | 更新部門 | department:update |
 | `/api/v1/departments/{id}` | DELETE | HR02DepartmentCmdController | 刪除部門 | department:delete |
+| `/api/v1/departments/{id}/sub-departments` | GET | HR02DepartmentQryController | 查詢子部門列表 | department:read |
 | `/api/v1/departments/{id}/assign-manager` | PUT | HR02DepartmentCmdController | 指派主管 | department:update |
 | `/api/v1/departments/{id}/deactivate` | PUT | HR02DepartmentCmdController | 停用部門 | department:update |
 
@@ -671,7 +673,135 @@
 
 ---
 
-### 3.2 查詢部門詳情
+### 3.2 查詢部門列表
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/departments` |
+| Controller | `HR02DepartmentQryController` |
+| Service | `GetDepartmentListServiceImpl` |
+| 權限 | `department:read` |
+| 版本 | v1 |
+
+**用途說明**
+
+查詢部門列表,支援多種過濾條件與分頁。用於部門管理頁面 (HR02-P02) 顯示部門清單。
+
+**業務邏輯**
+
+1. 根據查詢條件篩選部門
+2. 支援按部門代碼、名稱、組織、狀態篩選
+3. 返回分頁結果
+4. 注意:為性能考量,列表中的 employeeCount 固定為 0
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Query Parameters**
+
+| 參數名 | 類型 | 必填 | 預設值 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|:---|
+| code | String | ⬚ | - | 部門代碼 (精確匹配) | `"RD"` |
+| name | String | ⬚ | - | 部門名稱 (模糊查詢) | `"研發"` |
+| organizationId | UUID | ⬚ | - | 組織ID | `"550e8400-..."` |
+| parentId | UUID | ⬚ | - | 上層部門ID | `"dept-001"` |
+| status | Enum | ⬚ | - | 狀態篩選 (ACTIVE/INACTIVE) | `"ACTIVE"` |
+| page | Integer | ⬚ | 1 | 頁碼 | `1` |
+| size | Integer | ⬚ | 20 | 每頁筆數 | `20` |
+| sort | String | ⬚ | - | 排序欄位 | `"code,asc"` |
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "查詢成功",
+  "data": {
+    "items": [
+      {
+        "departmentId": "550e8400-e29b-41d4-a716-446655440100",
+        "code": "RD",
+        "name": "研發部",
+        "level": 1,
+        "sortOrder": 1,
+        "organizationId": "550e8400-e29b-41d4-a716-446655440000",
+        "parentId": null,
+        "managerId": "550e8400-e29b-41d4-a716-446655440200",
+        "managerName": "張經理",
+        "status": "ACTIVE",
+        "statusDisplay": "啟用",
+        "employeeCount": 0
+      },
+      {
+        "departmentId": "550e8400-e29b-41d4-a716-446655440101",
+        "code": "RD-FE",
+        "name": "前端組",
+        "level": 2,
+        "sortOrder": 1,
+        "organizationId": "550e8400-e29b-41d4-a716-446655440000",
+        "parentId": "550e8400-e29b-41d4-a716-446655440100",
+        "managerId": "550e8400-e29b-41d4-a716-446655440201",
+        "managerName": "李組長",
+        "status": "ACTIVE",
+        "statusDisplay": "啟用",
+        "employeeCount": 0
+      }
+    ],
+    "total": 15,
+    "page": 1,
+    "size": 20,
+    "totalPages": 1
+  }
+}
+```
+
+**Response 欄位說明**
+
+| 欄位 | 類型 | 說明 |
+|:---|:---|:---|
+| items | Array | 部門列表 |
+| items[].departmentId | UUID | 部門ID |
+| items[].code | String | 部門代碼 |
+| items[].name | String | 部門名稱 |
+| items[].level | Integer | 部門層級 (1-5) |
+| items[].sortOrder | Integer | 顯示順序 |
+| items[].organizationId | UUID | 所屬組織ID |
+| items[].parentId | UUID | 上層部門ID (null 表示頂層) |
+| items[].managerId | UUID | 部門主管ID |
+| items[].managerName | String | 部門主管姓名 |
+| items[].status | Enum | 狀態 (ACTIVE/INACTIVE) |
+| items[].statusDisplay | String | 狀態顯示名稱 |
+| items[].employeeCount | Integer | 員工人數 (列表查詢固定為 0,詳情查詢才載入) |
+| total | Long | 總筆數 |
+| page | Integer | 當前頁碼 |
+| size | Integer | 每頁筆數 |
+| totalPages | Integer | 總頁數 |
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token 無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 department:read 權限 | 聯繫管理員授權 |
+| 400 | VALIDATION_INVALID_PAGE | 頁碼無效 | 頁碼必須 >= 1 |
+| 400 | VALIDATION_INVALID_SIZE | 每頁筆數無效 | 筆數必須在 1-100 之間 |
+
+**領域事件**
+
+無
+
+---
+
+### 3.3 查詢部門詳情
 
 **基本資訊**
 
@@ -767,7 +897,113 @@
 
 ---
 
-### 3.3 更新部門
+### 3.4 查詢子部門列表
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/departments/{departmentId}/sub-departments` |
+| Controller | `HR02DepartmentQryController` |
+| Service | `GetSubDepartmentsServiceImpl` |
+| 權限 | `department:read` |
+| 版本 | v1 |
+
+**用途說明**
+
+查詢指定部門的直接子部門列表。用於組織架構圖展開部門節點時使用。
+
+**業務邏輯**
+
+1. 驗證父部門存在
+2. 查詢所有直接子部門 (parent_department_id = {departmentId})
+3. 按 displayOrder 排序
+4. 只返回 ACTIVE 狀態的子部門
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| departmentId | UUID | ✅ | 父部門ID | `550e8400-e29b-41d4-a716-446655440100` |
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "查詢成功",
+  "data": {
+    "items": [
+      {
+        "departmentId": "550e8400-e29b-41d4-a716-446655440101",
+        "code": "RD-FE",
+        "name": "前端組",
+        "level": 2,
+        "sortOrder": 1,
+        "managerId": "550e8400-e29b-41d4-a716-446655440201",
+        "managerName": "李組長",
+        "status": "ACTIVE",
+        "statusDisplay": "啟用",
+        "employeeCount": 25
+      },
+      {
+        "departmentId": "550e8400-e29b-41d4-a716-446655440102",
+        "code": "RD-BE",
+        "name": "後端組",
+        "level": 2,
+        "sortOrder": 2,
+        "managerId": "550e8400-e29b-41d4-a716-446655440202",
+        "managerName": "王組長",
+        "status": "ACTIVE",
+        "statusDisplay": "啟用",
+        "employeeCount": 30
+      }
+    ]
+  }
+}
+```
+
+**Response 欄位說明**
+
+| 欄位 | 類型 | 說明 |
+|:---|:---|:---|
+| items | Array | 子部門列表 |
+| items[].departmentId | UUID | 部門ID |
+| items[].code | String | 部門代碼 |
+| items[].name | String | 部門名稱 |
+| items[].level | Integer | 部門層級 |
+| items[].sortOrder | Integer | 顯示順序 |
+| items[].managerId | UUID | 部門主管ID |
+| items[].managerName | String | 部門主管姓名 |
+| items[].status | Enum | 狀態 (ACTIVE/INACTIVE) |
+| items[].statusDisplay | String | 狀態顯示名稱 |
+| items[].employeeCount | Integer | 員工人數 (包含子部門) |
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | RESOURCE_DEPT_NOT_FOUND | 父部門不存在 | 確認部門ID正確性 |
+| 401 | AUTH_TOKEN_INVALID | Token 無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 department:read 權限 | 聯繫管理員授權 |
+
+**領域事件**
+
+無
+
+---
+
+### 3.5 更新部門
 
 **基本資訊**
 

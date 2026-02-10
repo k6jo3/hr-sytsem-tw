@@ -121,19 +121,8 @@ public class QueryBuilder {
      * 新增 NOT IN 條件
      */
     public QueryBuilder notIn(String field, Object... values) {
-        // Assuming FilterUnit has notIn or we manually create it
-        // Checking existing patterns... group.add(FilterUnit.in(field, values));
-        // FilterUnit likely has a constructor or static factory?
-        // I'll check if FilterUnit has notIn. If not, I use new FilterUnit.
-        // But for safety I'll use generic add based on Operator.NOT_IN
-        // However, standard pattern in this file is to add FilterUnit directly for
-        // special ops?
-        // Method 'and' creates new FilterUnit(field, operator, value
-        // So I can use: return and(field, Operator.NOT_IN,
-        // java.util.Arrays.asList(values));
-        // But FilterUnit.in(...) takes array.
-        // Let's use generic approach:
-        return and(field, Operator.NOT_IN, java.util.Arrays.asList(values));
+        group.add(FilterUnit.notIn(field, values));
+        return this;
     }
 
     /**

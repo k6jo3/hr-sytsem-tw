@@ -3,36 +3,19 @@
  * Domain Code: HR01
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { UserApi } from '../api/UserApi';
-import { RoleApi } from '../api/RoleApi';
-import { UserViewModelFactory } from '../factory/UserViewModelFactory';
+import { useCallback, useEffect, useState } from 'react';
 import type {
-  GetUsersRequest,
-  UserDto,
-  RoleDto,
   CreateUserRequest,
+  GetUsersRequest,
+  RoleDto,
   UpdateUserRequest,
+  UserDto,
 } from '../api/AuthTypes';
+import { RoleApi } from '../api/RoleApi';
+import { UserApi } from '../api/UserApi';
+import { UserViewModelFactory } from '../factory/UserViewModelFactory';
+import type { UserListViewModel } from '../model/UserProfile';
 
-export interface UserViewModel {
-  id: string;
-  username: string;
-  email: string;
-  displayName: string;
-  fullName: string;
-  employeeId?: string;
-  status: 'ACTIVE' | 'INACTIVE' | 'LOCKED' | 'DELETED';
-  statusLabel: string;
-  statusColor: string;
-  roles: Array<{ id: string; name: string }>;
-  roleLabels: string[];
-  avatarUrl?: string;
-  lastLoginAt?: string;
-  lastLoginDisplay: string;
-  mustChangePassword: boolean;
-  createdAt: string;
-}
 
 export interface UseUsersParams {
   page?: number;
@@ -43,7 +26,7 @@ export interface UseUsersParams {
 }
 
 export interface UseUsersResult {
-  users: UserViewModel[];
+  users: UserListViewModel[];
   roles: RoleDto[];
   total: number;
   loading: boolean;
@@ -63,7 +46,7 @@ export interface UseUsersResult {
  * 使用者管理 Hook
  */
 export const useUsers = (params: UseUsersParams = {}): UseUsersResult => {
-  const [users, setUsers] = useState<UserViewModel[]>([]);
+  const [users, setUsers] = useState<UserListViewModel[]>([]);
   const [roles, setRoles] = useState<RoleDto[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -82,7 +65,7 @@ export const useUsers = (params: UseUsersParams = {}): UseUsersResult => {
         role_id: params.role_id,
       };
       const response = await UserApi.getUsers(request);
-      const viewModels = response.users.map((user: UserDto) =>
+      const viewModels = response.content.map((user: UserDto) =>
         UserViewModelFactory.createUserListItem(user)
       );
       setUsers(viewModels);

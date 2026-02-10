@@ -1,4 +1,4 @@
-import type { AttendanceRecordDto, CheckType, AttendanceStatus } from '../api/AttendanceTypes';
+import type { AttendanceRecordDto, AttendanceStatus, CheckType } from '../api/AttendanceTypes';
 import type { AttendanceRecordViewModel, TodayAttendanceSummary } from '../model/AttendanceRecordViewModel';
 
 /**
@@ -12,11 +12,11 @@ export class AttendanceViewModelFactory {
   static createFromDTO(dto: AttendanceRecordDto): AttendanceRecordViewModel {
     return {
       id: dto.id,
-      employeeName: dto.employee_name,
-      checkTypeLabel: this.mapCheckTypeLabel(dto.check_type),
-      checkTypeColor: this.mapCheckTypeColor(dto.check_type),
-      checkTime: dto.check_time,
-      checkTimeDisplay: this.formatTimeDisplay(dto.check_time),
+      employeeName: dto.employeeName,
+      checkTypeLabel: this.mapCheckTypeLabel(dto.checkType),
+      checkTypeColor: this.mapCheckTypeColor(dto.checkType),
+      checkTime: dto.checkTime,
+      checkTimeDisplay: this.formatTimeDisplay(dto.checkTime),
       statusLabel: this.mapStatusLabel(dto.status),
       statusColor: this.mapStatusColor(dto.status),
       address: dto.address,

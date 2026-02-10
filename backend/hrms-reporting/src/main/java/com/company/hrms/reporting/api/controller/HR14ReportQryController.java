@@ -12,13 +12,21 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.reporting.api.request.GetAttendanceStatisticsRequest;
 import com.company.hrms.reporting.api.request.GetEmployeeRosterRequest;
 import com.company.hrms.reporting.api.request.GetHeadcountReportRequest;
+import com.company.hrms.reporting.api.request.GetLaborCostAnalysisRequest;
+import com.company.hrms.reporting.api.request.GetLaborCostByDepartmentRequest;
 import com.company.hrms.reporting.api.request.GetPayrollSummaryRequest;
 import com.company.hrms.reporting.api.request.GetProjectCostAnalysisRequest;
+import com.company.hrms.reporting.api.request.GetTurnoverAnalysisRequest;
+import com.company.hrms.reporting.api.request.GetUtilizationRateRequest;
 import com.company.hrms.reporting.api.response.AttendanceStatisticsResponse;
 import com.company.hrms.reporting.api.response.EmployeeRosterResponse;
 import com.company.hrms.reporting.api.response.HeadcountReportResponse;
+import com.company.hrms.reporting.api.response.LaborCostAnalysisResponse;
+import com.company.hrms.reporting.api.response.LaborCostByDepartmentResponse;
 import com.company.hrms.reporting.api.response.PayrollSummaryResponse;
 import com.company.hrms.reporting.api.response.ProjectCostAnalysisResponse;
+import com.company.hrms.reporting.api.response.TurnoverAnalysisResponse;
+import com.company.hrms.reporting.api.response.UtilizationRateResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -93,6 +101,54 @@ public class HR14ReportQryController extends QueryBaseController {
         })
         public ResponseEntity<HeadcountReportResponse> getHeadcountReport(
                         @ModelAttribute GetHeadcountReportRequest request,
+                        @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+                return ResponseEntity.ok(getResponse(request, currentUser));
+        }
+
+        @GetMapping("/hr/turnover")
+        @Operation(summary = "查詢離職率分析", operationId = "getTurnoverAnalysis")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "查詢成功"),
+                        @ApiResponse(responseCode = "401", description = "未授權")
+        })
+        public ResponseEntity<TurnoverAnalysisResponse> getTurnoverAnalysis(
+                        @ModelAttribute GetTurnoverAnalysisRequest request,
+                        @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+                return ResponseEntity.ok(getResponse(request, currentUser));
+        }
+
+        @GetMapping("/project/utilization-rate")
+        @Operation(summary = "查詢稼動率分析", operationId = "getUtilizationRate")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "查詢成功"),
+                        @ApiResponse(responseCode = "401", description = "未授權")
+        })
+        public ResponseEntity<UtilizationRateResponse> getUtilizationRate(
+                        @ModelAttribute GetUtilizationRateRequest request,
+                        @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+                return ResponseEntity.ok(getResponse(request, currentUser));
+        }
+
+        @GetMapping("/finance/labor-cost")
+        @Operation(summary = "查詢人力成本分析", operationId = "getLaborCostAnalysis")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "查詢成功"),
+                        @ApiResponse(responseCode = "401", description = "未授權")
+        })
+        public ResponseEntity<LaborCostAnalysisResponse> getLaborCostAnalysis(
+                        @ModelAttribute GetLaborCostAnalysisRequest request,
+                        @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+                return ResponseEntity.ok(getResponse(request, currentUser));
+        }
+
+        @GetMapping("/finance/labor-cost-by-department")
+        @Operation(summary = "查詢部門人力成本分析", operationId = "getLaborCostByDepartment")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "查詢成功"),
+                        @ApiResponse(responseCode = "401", description = "未授權")
+        })
+        public ResponseEntity<LaborCostByDepartmentResponse> getLaborCostByDepartment(
+                        @ModelAttribute GetLaborCostByDepartmentRequest request,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
                 return ResponseEntity.ok(getResponse(request, currentUser));
         }

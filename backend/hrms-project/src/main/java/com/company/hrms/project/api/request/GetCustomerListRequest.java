@@ -19,4 +19,16 @@ public class GetCustomerListRequest {
 
     @Schema(description = "關鍵字 (名稱/代碼/統編)")
     private String keyword;
+
+    @Schema(description = "客戶狀態")
+    private String status;
+
+    @Schema(description = "產業類型")
+    private String industry;
+
+    @Schema(description = "是否有專案")
+    private Boolean hasProjects;
+
+    @Schema(description = "負責業務ID")
+    private String salesRepId;
 }

@@ -152,7 +152,7 @@ public class Timesheet extends AggregateRoot<TimesheetId> {
         if (this.entries.isEmpty()) {
             throw new DomainException("至少需要一筆工時記錄");
         }
-        this.status = TimesheetStatus.SUBMITTED;
+        this.status = TimesheetStatus.PENDING;
         this.submittedAt = LocalDateTime.now();
 
         registerEvent(new TimesheetSubmittedEvent(
@@ -164,7 +164,7 @@ public class Timesheet extends AggregateRoot<TimesheetId> {
     }
 
     public void approve(UUID approverId) {
-        if (this.status != TimesheetStatus.SUBMITTED) {
+        if (this.status != TimesheetStatus.PENDING) {
             throw new DomainException("只能簽核狀態為提交的工時表");
         }
         this.status = TimesheetStatus.APPROVED;
@@ -180,7 +180,7 @@ public class Timesheet extends AggregateRoot<TimesheetId> {
     }
 
     public void reject(UUID approverId, String reason) {
-        if (this.status != TimesheetStatus.SUBMITTED) {
+        if (this.status != TimesheetStatus.PENDING) {
             throw new DomainException("只能退回狀態為提交的工時表");
         }
         this.status = TimesheetStatus.REJECTED;

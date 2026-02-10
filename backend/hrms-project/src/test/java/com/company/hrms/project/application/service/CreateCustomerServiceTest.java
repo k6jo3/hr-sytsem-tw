@@ -23,6 +23,9 @@ public class CreateCustomerServiceTest {
     @Mock
     private ICustomerRepository customerRepository;
 
+    @Mock
+    private com.company.hrms.common.domain.event.EventPublisher eventPublisher;
+
     @InjectMocks
     private CreateCustomerServiceImpl createCustomerService;
 

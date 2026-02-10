@@ -1,4 +1,6 @@
 -- Department 測試資料
+SET REFERENTIAL_INTEGRITY FALSE;
+
 -- 用於 DepartmentRepositoryIntegrationTest
 
 -- 清除舊資料 (依賴順序)
@@ -9,7 +11,7 @@ DELETE FROM departments;
 -- 組織分布: 11111111-1111-1111-1111-111111111111=7, 22222222-2222-2222-2222-222222222222=3
 -- 狀態分布: ACTIVE=8, INACTIVE=2
 -- 層級分布: level 1=4, level 2=4, level 3=2
-INSERT INTO departments (id, code, name, name_en, organization_id, parent_id, level, path, manager_id, status, sort_order, description, created_at, updated_at) VALUES
+INSERT INTO departments (department_id, department_code, department_name, department_name_en, organization_id, parent_department_id, level, path, manager_id, status, display_order, description, created_at, updated_at) VALUES
 -- 11111111-1111-1111-1111-111111111111 組織的部門 (7筆)
 -- 第一層 (根部門)
 ('33333333-3333-3333-3333-333333330001', 'RD', '研發部', 'R&D', '11111111-1111-1111-1111-111111111111', NULL, 1, '/RD', '44444444-4444-4444-4444-444444440001', 'ACTIVE', 1, '研發相關工作', '2025-01-01 09:00:00', '2025-01-01 09:00:00'),
@@ -29,6 +31,12 @@ INSERT INTO departments (id, code, name, name_en, organization_id, parent_id, le
 ('33333333-3333-3333-3333-333333330102', 'ORG2-HR', '人資部', 'HR', '22222222-2222-2222-2222-222222222222', '33333333-3333-3333-3333-333333330101', 2, '/ORG2-ADMIN/ORG2-HR', NULL, 'ACTIVE', 1, '22222222-2222-2222-2222-222222222222 人資部門', '2025-01-02 09:00:00', '2025-01-02 09:00:00'),
 ('33333333-3333-3333-3333-333333330103', 'ORG2-IT', 'IT部', 'IT', '22222222-2222-2222-2222-222222222222', '33333333-3333-3333-3333-333333330101', 2, '/ORG2-ADMIN/ORG2-IT', NULL, 'INACTIVE', 2, '22222222-2222-2222-2222-222222222222 IT部門 (已停用)', '2025-01-02 09:00:00', '2025-01-20 09:00:00');
 
+-- 插入員工資料 (供部門主管與員工關聯測試)
+INSERT INTO employees (employee_id, employee_number, first_name, last_name, full_name, national_id, date_of_birth, gender, company_email, organization_id, department_id, employment_type, employment_status, hire_date, created_at, updated_at, is_deleted) VALUES
+('44444444-4444-4444-4444-444444440001', 'EMP-RD-001', '主管', '研發', '研發主管', 'A123456789', '1980-01-01', 'MALE', 'rd.mgr@company.com', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333330001', 'FULL_TIME', 'ACTIVE', '2020-01-01', '2020-01-01 00:00:00', '2020-01-01 00:00:00', FALSE),
+('44444444-4444-4444-4444-444444440003', 'EMP-SAL-001', '主管', '業務', '業務主管', 'A123456761', '1982-01-01', 'MALE', 'sales.mgr@company.com', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333330002', 'FULL_TIME', 'ACTIVE', '2020-01-01', '2020-01-01 00:00:00', '2020-01-01 00:00:00', FALSE),
+('44444444-4444-4444-4444-444444440005', 'EMP-FIN-001', '主管', '財務', '財務主管', 'A123456681', '1985-01-01', 'FEMALE', 'fin.mgr@company.com', '11111111-1111-1111-1111-111111111111', '33333333-3333-3333-3333-333333330003', 'FULL_TIME', 'ACTIVE', '2020-01-01', '2020-01-01 00:00:00', '2020-01-01 00:00:00', FALSE);
+
 -- 測試場景說明:
 -- 1. findById: 根據 id 查詢 → 33333333-3333-3333-3333-333333330001 應返回研發部
 -- 2. findByCode: 根據 code 查詢 → RD 應返回研發部
@@ -42,3 +50,5 @@ INSERT INTO departments (id, code, name, name_en, organization_id, parent_id, le
 -- 10. existsByCode(NOTEXIST): 預期 false
 -- 11. countByParentId(33333333-3333-3333-3333-333333330001): 預期 3
 -- 12. countByOrganizationId(11111111-1111-1111-1111-111111111111): 預期 7
+
+SET REFERENTIAL_INTEGRITY TRUE;

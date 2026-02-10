@@ -27,6 +27,9 @@ public class InsuranceEnrollment {
     /**
      * 建立加保記錄
      */
+    /**
+     * 基本建構子 (用於新建)
+     */
     public InsuranceEnrollment(
             EnrollmentId id,
             String employeeId,
@@ -35,30 +38,34 @@ public class InsuranceEnrollment {
             LocalDate enrollDate,
             LevelId levelId,
             BigDecimal monthlySalary) {
+        this(id, employeeId, unitId, type, enrollDate, null, levelId, monthlySalary, EnrollmentStatus.ACTIVE, false);
+    }
 
-        if (id == null)
-            throw new IllegalArgumentException("EnrollmentId cannot be null");
-        if (employeeId == null || employeeId.isBlank())
-            throw new IllegalArgumentException("EmployeeId cannot be null or blank");
-        if (unitId == null)
-            throw new IllegalArgumentException("UnitId cannot be null");
-        if (type == null)
-            throw new IllegalArgumentException("InsuranceType cannot be null");
-        if (enrollDate == null)
-            throw new IllegalArgumentException("EnrollDate cannot be null");
-        if (monthlySalary == null || monthlySalary.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("MonthlySalary must be positive");
-        }
+    /**
+     * 全參數建構子 (用於 Repository 重建)
+     */
+    public InsuranceEnrollment(
+            EnrollmentId id,
+            String employeeId,
+            UnitId unitId,
+            InsuranceType type,
+            LocalDate enrollDate,
+            LocalDate withdrawDate,
+            LevelId levelId,
+            BigDecimal monthlySalary,
+            EnrollmentStatus status,
+            boolean isReported) {
 
         this.id = id;
         this.employeeId = employeeId;
         this.insuranceUnitId = unitId;
         this.insuranceType = type;
         this.enrollDate = enrollDate;
+        this.withdrawDate = withdrawDate;
         this.insuranceLevelId = levelId;
         this.monthlySalary = monthlySalary;
-        this.status = EnrollmentStatus.ACTIVE;
-        this.isReported = false;
+        this.status = status;
+        this.isReported = isReported;
     }
 
     /**

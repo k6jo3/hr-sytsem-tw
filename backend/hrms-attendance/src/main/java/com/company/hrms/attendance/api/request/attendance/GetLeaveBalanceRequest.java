@@ -23,7 +23,7 @@ public class GetLeaveBalanceRequest {
     private String employeeId;
 
     @Schema(description = "部門 ID")
-    @EQ("departmentId")
+    @EQ("department_id")
     private String deptId;
 
     @Schema(description = "年度 (YYYY)")
@@ -31,6 +31,6 @@ public class GetLeaveBalanceRequest {
     private Integer year;
 
     @Schema(description = "假別代碼")
-    @EQ("leaveTypeId")
+    @EQ("leave_type_id")
     private String leaveType;
 }

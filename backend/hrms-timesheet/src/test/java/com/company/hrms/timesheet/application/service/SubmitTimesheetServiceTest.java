@@ -60,7 +60,7 @@ public class SubmitTimesheetServiceTest {
         SubmitTimesheetResponse response = service.execCommand(request, new JWTModel(), "");
 
         // Assert
-        assertEquals(TimesheetStatus.SUBMITTED, response.getStatus());
+        assertEquals(TimesheetStatus.PENDING, response.getStatus());
         assertNotNull(response.getSubmittedAt());
 
         verify(timesheetRepository).save(any(Timesheet.class));

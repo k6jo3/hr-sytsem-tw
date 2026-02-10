@@ -37,12 +37,13 @@ public class CalculatePayslipsTask implements PipelineTask<CalculatePayrollConte
                 Payslip payslip = Payslip.create(
                         context.getPayrollRun().getId(),
                         struct.getEmployeeId(),
-                        struct.getEmployeeId(), // 員工編號暫用 ID
-                        "員工 " + struct.getEmployeeId(), // 員工姓名暫用
+                        struct.getEmployeeId(), // TODO: 員工編號暫用 ID
+                        "員工 " + struct.getEmployeeId(), // TODO: 員工姓名暫用
                         context.getPayrollRun().getPayPeriod(),
                         context.getPayrollRun().getPayDate());
 
                 // 準備計算輸入（目前使用預設值）
+                // TODO: 需對接考勤服務 (HR03) 取得實際工時與假別扣減
                 PayrollCalculationInput input = PayrollCalculationInput.builder()
                         .workingHours(new BigDecimal("160"))
                         .weekdayOvertimeHours(BigDecimal.ZERO)

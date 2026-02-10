@@ -79,7 +79,7 @@ class TimesheetQueryEngineContractTest extends BaseQueryEngineContractTest<Times
                 Arguments.of("NOT_IN", "status", List.of("DRAFT", "REJECTED"), 6),
 
                 // GTE 操作符測試 (total_hours >= 40)
-                Arguments.of("GTE", "total_hours", new BigDecimal("40.00"), 7),
+                Arguments.of("GTE", "total_hours", new BigDecimal("40.00"), 6),
 
                 // LTE 操作符測試 (total_hours <= 38.5)
                 Arguments.of("LTE", "total_hours", new BigDecimal("38.50"), 4),

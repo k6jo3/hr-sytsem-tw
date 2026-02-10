@@ -33,4 +33,6 @@ public interface ITimesheetRepository {
      * 查詢待審核工時表
      */
     Page<Timesheet> findPendingApprovals(UUID approverId, Pageable pageable);
+
+    Page<Timesheet> findPageByQuery(QueryGroup query, Pageable pageable);
 }

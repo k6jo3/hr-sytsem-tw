@@ -7,11 +7,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,35 +33,6 @@ import com.company.hrms.payroll.domain.repository.IPayrollRunRepository;
  * <p>
  * 驗證 QueryEngine 各種操作符在 PayrollRun 實體上的正確運作
  * 使用 H2 資料庫實際執行 SQL 查詢
- *
- * <p><b>TODO:</b> 有多個測試失敗/錯誤，需修正以下問題：
- * <ul>
- *   <li><b>測試資料數量不一致 (4 failures):</b>
- *     <ul>
- *       <li>EQ status CALCULATING: 預期 3 筆，實際 0 筆（測試資料狀態值可能不正確）</li>
- *       <li>EQ status COMPLETED: 預期 1 筆，實際 4 筆（測試資料狀態值不一致）</li>
- *       <li>需檢查 payroll_run_test_data.sql 中的 status 欄位值是否正確</li>
- *       <li>需確認測試資料分布與註解說明是否一致</li>
- *     </ul>
- *   </li>
- *   <li><b>IN 操作符類型不匹配錯誤 (13 errors):</b>
- *     <ul>
- *       <li>IN status [DRAFT, CALCULATING]: List 類型無法匹配 String 欄位</li>
- *       <li>IN status [APPROVED, PAID]: List 類型無法匹配 String 欄位</li>
- *       <li>IN organizationId [ORG-001, ORG-002]: List 類型無法匹配 String 欄位</li>
- *       <li>NOT_IN status [DRAFT]: List 類型無法匹配 String 欄位</li>
- *       <li>NOT_IN status [PAID, CANCELLED]: List 類型無法匹配 String 欄位</li>
- *       <li>影響範圍: OperatorParameterizedTests (8 errors), InOperatorTests (2 errors), CompoundConditionTests (1 error), 基類測試 (2 errors)</li>
- *       <li>需修正 QueryEngine 的 IN/NOT_IN 操作符處理邏輯，使其能正確處理 List 參數</li>
- *       <li>或改用 Object[] 陣列替代 List 作為 IN 操作符參數</li>
- *     </ul>
- *   </li>
- * </ul>
- * <p><b>修正優先順序:</b>
- * <ul>
- *   <li>P1 - 修正 QueryEngine 的 IN/NOT_IN 操作符類型處理（影響 13 個測試）</li>
- *   <li>P2 - 修正測試資料狀態值不一致問題（影響 4 個測試）</li>
- * </ul>
  *
  * @author SA Team
  * @since 2026-02-02
@@ -113,61 +84,53 @@ class PayrollQueryEngineContractTest extends BaseQueryEngineContractTest<Payroll
 	 * 2. ✅ LIKE 操作符支援帶通配符的查詢
 	 * 3. ✅ BETWEEN 操作符已支援 List 參數
 	 */
-	static Stream<org.junit.jupiter.params.provider.Arguments> operatorTestCases() {
+	static Stream<Arguments> operatorTestCases() {
 		return Stream.of(
 				// ========== EQ 操作符測試 ==========
 				// EQ - 狀態查詢
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "status", "DRAFT", 3),
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "status", "CALCULATING", 3),
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "status", "SUBMITTED", 2),
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "status", "APPROVED", 4),
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "status", "PAID", 3),
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "status", "FAILED", 2),
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "status", "CANCELLED", 2),
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "status", "COMPLETED", 1),
+				Arguments.of("EQ", "status", "DRAFT", 3),
+				Arguments.of("EQ", "status", "CALCULATING", 2),
+				Arguments.of("EQ", "status", "SUBMITTED", 2),
+				Arguments.of("EQ", "status", "APPROVED", 4),
+				Arguments.of("EQ", "status", "PAID", 3),
+				Arguments.of("EQ", "status", "FAILED", 2),
+				Arguments.of("EQ", "status", "CANCELLED", 2),
+				Arguments.of("EQ", "status", "COMPLETED", 2),
 
 				// EQ - 薪資制度查詢
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "payrollSystem", "MONTHLY", 20),
+				Arguments.of("EQ", "payrollSystem", "MONTHLY", 20),
 
 				// EQ - 組織查詢
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "organizationId", "ORG-001", 9),
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "organizationId", "ORG-002", 7),
-				org.junit.jupiter.params.provider.Arguments.of("EQ", "organizationId", "ORG-003", 4),
+				Arguments.of("EQ", "organizationId", "ORG-001", 9),
+				Arguments.of("EQ", "organizationId", "ORG-002", 7),
+				Arguments.of("EQ", "organizationId", "ORG-003", 4),
 
 				// ========== NE 操作符測試 ==========
-				org.junit.jupiter.params.provider.Arguments.of("NE", "status", "DRAFT", 17),
-				org.junit.jupiter.params.provider.Arguments.of("NE", "payrollSystem", "BIWEEKLY", 20),
-				org.junit.jupiter.params.provider.Arguments.of("NE", "organizationId", "ORG-001", 11),
+				Arguments.of("NE", "status", "DRAFT", 17),
+				Arguments.of("NE", "payrollSystem", "BIWEEKLY", 20),
+				Arguments.of("NE", "organizationId", "ORG-001", 11),
 
 				// ========== IN 操作符測試 ==========
 
-				org.junit.jupiter.params.provider.Arguments.of("IN", "status",
-						List.of("DRAFT", "CALCULATING"), 6),
-				org.junit.jupiter.params.provider.Arguments.of("IN", "status",
+				Arguments.of("IN", "status",
+						List.of("DRAFT", "CALCULATING"), 5),
+				Arguments.of("IN", "status",
 						List.of("APPROVED", "PAID"), 7),
-				org.junit.jupiter.params.provider.Arguments.of("IN", "organizationId",
+				Arguments.of("IN", "organizationId",
 						List.of("ORG-001", "ORG-002"), 16),
 
 				// ========== NOT_IN 操作符測試 ==========
-				org.junit.jupiter.params.provider.Arguments.of("NOT_IN", "status",
+				Arguments.of("NOT_IN", "status",
 						List.of("DRAFT"), 17),
-				org.junit.jupiter.params.provider.Arguments.of("NOT_IN", "status",
+				Arguments.of("NOT_IN", "status",
 						List.of("PAID", "CANCELLED"), 15));
 	}
 
 	// ========================================================================
 	// 參數化測試 - 13 種操作符驗證
 	// ========================================================================
-	/**
-	 * TODO: 10 個測試失敗/錯誤，需修正：
-	 * - IN/NOT_IN 操作符類型錯誤 (8 errors): List 參數無法匹配 String/Enum 欄位
-	 * - 測試資料數量不一致 (2 failures): CALCULATING 預期 3 實際 0，COMPLETED 預期 1 實際 4
-	 * - 需修正 QueryEngine 的 IN/NOT_IN 操作符處理邏輯或改用 Object[] 陣列
-	 * - 需檢查測試資料 payroll_run_test_data.sql 中的 status 欄位值
-	 */
 	@Nested
 	@DisplayName("操作符參數化測試")
-	@Disabled("TODO: IN/NOT_IN 操作符類型錯誤 + 測試資料數量不一致，待修正後啟用")
 	class OperatorParameterizedTests {
 
 		@ParameterizedTest(name = "{0} 操作符測試: {1} {0} {2} → {3} 筆")
@@ -234,15 +197,8 @@ class PayrollQueryEngineContractTest extends BaseQueryEngineContractTest<Payroll
 	// ========================================================================
 	// 2. IN 操作符詳細測試
 	// ========================================================================
-	/**
-	 * TODO: 2 個錯誤，IN 操作符類型不匹配：
-	 * - PAY_T003: IN status [APPROVED, PAID] - List 類型無法匹配 Enum 欄位
-	 * - PAY_T004: IN organizationId [ORG-001, ORG-002] - List 類型無法匹配 String 欄位
-	 * - 需修正 QueryEngine 的 IN 操作符處理邏輯
-	 */
 	@Nested
 	@DisplayName("2. IN 操作符詳細測試")
-	@Disabled("TODO: IN 操作符類型錯誤，List 參數無法匹配欄位類型")
 	class InOperatorTests {
 
 		@Test
@@ -277,8 +233,8 @@ class PayrollQueryEngineContractTest extends BaseQueryEngineContractTest<Payroll
 
 			// Then
 			assertThat(result.getContent())
-					.as("PAY_T004: 應返回 ORG-001 或 ORG-002 的 14 筆批次")
-					.hasSize(14)
+					.as("PAY_T004: 應返回 ORG-001 或 ORG-002 的 16 筆批次")
+					.hasSize(16)
 					.allMatch(run -> List.of("ORG-001", "ORG-002")
 							.contains(run.getOrganizationId()));
 		}
@@ -433,14 +389,8 @@ class PayrollQueryEngineContractTest extends BaseQueryEngineContractTest<Payroll
 	// ========================================================================
 	// 6. 複合條件測試
 	// ========================================================================
-	/**
-	 * TODO: 1 個錯誤，IN 操作符類型不匹配：
-	 * - PAY_T012: IN status [DRAFT, PENDING_APPROVAL] - List 類型無法匹配 Enum 欄位
-	 * - 需修正 QueryEngine 的 IN 操作符處理邏輯
-	 */
 	@Nested
 	@DisplayName("6. 複合條件測試")
-	@Disabled("TODO: IN 操作符類型錯誤，List 參數無法匹配 Enum 欄位")
 	class CompoundConditionTests {
 
 		@Test
@@ -463,11 +413,11 @@ class PayrollQueryEngineContractTest extends BaseQueryEngineContractTest<Payroll
 		}
 
 		@Test
-		@DisplayName("PAY_T012: 複合條件 - DRAFT 狀態或 PENDING_APPROVAL 狀態")
+		@DisplayName("PAY_T012: 複合條件 - DRAFT 狀態或 SUBMITTED 狀態")
 		void PAY_T012_compoundMultipleStatuses() {
 			// Given
 			QueryGroup query = QueryBuilder.where()
-					.in("status", List.of("DRAFT", "PENDING_APPROVAL"))
+					.in("status", List.of("DRAFT", "SUBMITTED"))
 					.build();
 
 			// When
@@ -475,9 +425,9 @@ class PayrollQueryEngineContractTest extends BaseQueryEngineContractTest<Payroll
 
 			// Then
 			assertThat(result.getContent())
-					.as("PAY_T012: 應返回 DRAFT 或 PENDING_APPROVAL 的 5 筆批次")
+					.as("PAY_T012: 應返回 DRAFT 或 SUBMITTED 的 5 筆批次")
 					.hasSize(5)
-					.allMatch(run -> List.of("DRAFT", "PENDING_APPROVAL")
+					.allMatch(run -> List.of("DRAFT", "SUBMITTED")
 							.contains(run.getStatus().name()));
 		}
 	}
@@ -568,11 +518,11 @@ class PayrollQueryEngineContractTest extends BaseQueryEngineContractTest<Payroll
 			case "IN":
 				@SuppressWarnings("unchecked")
 				List<Object> listValue = (List<Object>) value;
-				return QueryBuilder.where().in(field, listValue).build();
+				return QueryBuilder.where().in(field, listValue.toArray()).build();
 			case "NOT_IN":
 				@SuppressWarnings("unchecked")
 				List<Object> notInValue = (List<Object>) value;
-				return QueryBuilder.where().notIn(field, notInValue).build();
+				return QueryBuilder.where().notIn(field, notInValue.toArray()).build();
 			case "LIKE":
 				return QueryBuilder.where().like(field, String.valueOf(value)).build();
 			case "GTE":

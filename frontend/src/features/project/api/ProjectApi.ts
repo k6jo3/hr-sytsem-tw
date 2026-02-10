@@ -1,12 +1,15 @@
 import { apiClient } from '@shared/api';
 import type {
-  GetProjectListRequest,
-  GetProjectListResponse,
-  GetProjectDetailResponse,
-  CreateProjectRequest,
-  CreateProjectResponse,
-  UpdateProjectRequest,
-  GetCustomerListResponse,
+    CreateProjectRequest,
+    CreateProjectResponse,
+    CreateTaskRequest,
+    GetCustomerListResponse,
+    GetProjectDetailResponse,
+    GetProjectListRequest,
+    GetProjectListResponse,
+    TaskDto,
+    UpdateProjectRequest,
+    UpdateTaskProgressRequest,
 } from './ProjectTypes';
 
 /**
@@ -48,6 +51,29 @@ export class ProjectApi {
    * 取得客戶列表
    */
   static async getCustomerList(): Promise<GetCustomerListResponse> {
-    return apiClient.get<GetCustomerListResponse>('/customers');
+    return apiClient.get<GetCustomerListResponse>('/projects/customers');
+  }
+
+  // ========== WBS / Task APIs ==========
+
+  /**
+   * GET /api/v1/projects/{id}/tasks - 取得專案工項
+   */
+  static async getProjectTasks(projectId: string): Promise<TaskDto[]> {
+    return apiClient.get<TaskDto[]>(`${this.BASE_PATH}/${projectId}/tasks`);
+  }
+
+  /**
+   * POST /api/v1/projects/{id}/tasks - 建立工項
+   */
+  static async createTask(projectId: string, request: CreateTaskRequest): Promise<TaskDto> {
+    return apiClient.post<TaskDto>(`${this.BASE_PATH}/${projectId}/tasks`, request);
+  }
+
+  /**
+   * PUT /api/v1/tasks/{id}/progress - 更新工項進度
+   */
+  static async updateTaskProgress(taskId: string, request: UpdateTaskProgressRequest): Promise<void> {
+    return apiClient.put(`${this.BASE_PATH}/tasks/${taskId}/progress`, request);
   }
 }

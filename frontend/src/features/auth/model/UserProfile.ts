@@ -55,6 +55,29 @@ export interface UserViewModel {
   canResetPassword: boolean;
 }
 
+/**
+ * 使用者列表項目 ViewModel (List Item)
+ * Used in UserTable
+ */
+export interface UserListViewModel {
+  id: string;
+  username: string;
+  email: string;
+  displayName: string;
+  fullName: string;
+  employeeId?: string;
+  status: UserStatus;
+  statusLabel: string;
+  statusColor: string;
+  roles: Array<{ id: string; name: string }>;
+  roleLabels: string[];
+  avatarUrl?: string;
+  lastLoginAt?: string;
+  lastLoginDisplay: string;
+  mustChangePassword: boolean;
+  createdAt: string;
+}
+
 // ========== Role ViewModels ==========
 
 /**

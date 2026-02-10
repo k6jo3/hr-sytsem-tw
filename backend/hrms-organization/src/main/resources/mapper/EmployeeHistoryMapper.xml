@@ -3,27 +3,26 @@
 <mapper namespace="com.company.hrms.organization.infrastructure.mapper.EmployeeHistoryMapper">
 
     <resultMap id="EmployeeHistoryResultMap" type="com.company.hrms.organization.infrastructure.po.EmployeeHistoryPO">
-        <id column="id" property="id"/>
+        <id column="history_id" property="id"/>
         <result column="employee_id" property="employeeId"/>
         <result column="event_type" property="eventType"/>
         <result column="event_date" property="eventDate"/>
         <result column="description" property="description"/>
         <result column="old_value" property="oldValue"/>
         <result column="new_value" property="newValue"/>
-        <result column="remarks" property="remarks"/>
         <result column="created_at" property="createdAt"/>
         <result column="created_by" property="createdBy"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, employee_id, event_type, event_date, description, old_value, new_value, remarks,
+        history_id, employee_id, event_type, event_date, description, old_value, new_value,
         created_at, created_by
     </sql>
 
     <select id="selectById" resultMap="EmployeeHistoryResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM employee_history
-        WHERE id = #{id}
+        WHERE history_id = #{id}
     </select>
 
     <select id="selectByEmployeeId" resultMap="EmployeeHistoryResultMap">
@@ -49,11 +48,11 @@
 
     <insert id="insert">
         INSERT INTO employee_history (
-            id, employee_id, event_type, event_date, description, old_value, new_value, remarks,
+            history_id, employee_id, event_type, event_date, description, old_value, new_value,
             created_at, created_by
         ) VALUES (
             #{id}, #{employeeId}, #{eventType}, #{eventDate}, #{description}, #{oldValue}, #{newValue},
-            #{remarks}, #{createdAt}, #{createdBy}
+            #{createdAt}, #{createdBy}
         )
     </insert>
 
@@ -64,13 +63,12 @@
             event_date = #{eventDate},
             description = #{description},
             old_value = #{oldValue},
-            new_value = #{newValue},
-            remarks = #{remarks}
-        WHERE id = #{id}
+            new_value = #{newValue}
+        WHERE history_id = #{id}
     </update>
 
     <delete id="deleteById">
-        DELETE FROM employee_history WHERE id = #{id}
+        DELETE FROM employee_history WHERE history_id = #{id}
     </delete>
 
     <delete id="deleteByEmployeeId">
@@ -78,7 +76,7 @@
     </delete>
 
     <select id="existsById" resultType="boolean">
-        SELECT EXISTS(SELECT 1 FROM employee_history WHERE id = #{id})
+        SELECT EXISTS(SELECT 1 FROM employee_history WHERE history_id = #{id})
     </select>
 
 </mapper>

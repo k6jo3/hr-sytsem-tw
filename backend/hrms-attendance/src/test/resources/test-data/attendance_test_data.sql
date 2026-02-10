@@ -9,25 +9,25 @@ DELETE FROM attendance_records;
 
 -- 出勤紀錄測試資料 (共 10 筆)
 -- 狀態分布: NORMAL=6, ABNORMAL=2, LATE=1, EARLY_LEAVE=1
-INSERT INTO attendance_records (record_id, employee_id, department_id, attendance_date, clock_in, clock_out, status, late_flag, early_leave_flag, created_at, updated_at, is_deleted) VALUES
+INSERT INTO attendance_records (id, employee_id, record_date, check_in_time, check_out_time, status, is_late, late_minutes, is_early_leave, early_leave_minutes, anomaly_type, is_corrected, created_at, updated_at) VALUES
 -- 正常出勤
-('AR001', 'E001', 'D001', '2025-01-15', '2025-01-15 09:00:00', '2025-01-15 18:00:00', 'NORMAL', 0, 0, '2025-01-15 09:00:00', '2025-01-15 18:00:00', 0),
-('AR002', 'E001', 'D001', '2025-01-16', '2025-01-16 08:55:00', '2025-01-16 18:05:00', 'NORMAL', 0, 0, '2025-01-16 08:55:00', '2025-01-16 18:05:00', 0),
-('AR003', 'E002', 'D001', '2025-01-15', '2025-01-15 09:00:00', '2025-01-15 18:00:00', 'NORMAL', 0, 0, '2025-01-15 09:00:00', '2025-01-15 18:00:00', 0),
-('AR004', 'E002', 'D001', '2025-01-16', '2025-01-16 09:00:00', '2025-01-16 18:00:00', 'NORMAL', 0, 0, '2025-01-16 09:00:00', '2025-01-16 18:00:00', 0),
-('AR005', 'E003', 'D002', '2025-01-15', '2025-01-15 09:00:00', '2025-01-15 18:00:00', 'NORMAL', 0, 0, '2025-01-15 09:00:00', '2025-01-15 18:00:00', 0),
-('AR006', 'E003', 'D002', '2025-01-16', '2025-01-16 09:00:00', '2025-01-16 18:00:00', 'NORMAL', 0, 0, '2025-01-16 09:00:00', '2025-01-16 18:00:00', 0),
+('AR001', 'E001', '2025-01-15', '2025-01-15 09:00:00', '2025-01-15 18:00:00', 'NORMAL', false, 0, false, 0, 'NORMAL', false, '2025-01-15 09:00:00', '2025-01-15 18:00:00'),
+('AR002', 'E001', '2025-01-16', '2025-01-16 08:55:00', '2025-01-16 18:05:00', 'NORMAL', false, 0, false, 0, 'NORMAL', false, '2025-01-16 08:55:00', '2025-01-16 18:05:00'),
+('AR003', 'E002', '2025-01-15', '2025-01-15 09:00:00', '2025-01-15 18:00:00', 'NORMAL', false, 0, false, 0, 'NORMAL', false, '2025-01-15 09:00:00', '2025-01-15 18:00:00'),
+('AR004', 'E002', '2025-01-16', '2025-01-16 09:00:00', '2025-01-16 18:00:00', 'NORMAL', false, 0, false, 0, 'NORMAL', false, '2025-01-16 09:00:00', '2025-01-16 18:00:00'),
+('AR005', 'E003', '2025-01-15', '2025-01-15 09:00:00', '2025-01-15 18:00:00', 'NORMAL', false, 0, false, 0, 'NORMAL', false, '2025-01-15 09:00:00', '2025-01-15 18:00:00'),
+('AR006', 'E003', '2025-01-16', '2025-01-16 09:00:00', '2025-01-16 18:00:00', 'NORMAL', false, 0, false, 0, 'NORMAL', false, '2025-01-16 09:00:00', '2025-01-16 18:00:00'),
 -- 異常出勤
-('AR007', 'E001', 'D001', '2025-01-17', '2025-01-17 09:30:00', NULL, 'ABNORMAL', 1, 0, '2025-01-17 09:30:00', '2025-01-17 09:30:00', 0),
-('AR008', 'E002', 'D001', '2025-01-17', NULL, '2025-01-17 18:00:00', 'ABNORMAL', 0, 0, '2025-01-17 18:00:00', '2025-01-17 18:00:00', 0),
+('AR007', 'E001', '2025-01-17', '2025-01-17 09:30:00', NULL, 'ABNORMAL', true, 30, false, 0, 'ABNORMAL', false, '2025-01-17 09:30:00', '2025-01-17 09:30:00'),
+('AR008', 'E002', '2025-01-17', NULL, '2025-01-17 18:00:00', 'ABNORMAL', false, 0, false, 0, 'ABNORMAL', false, '2025-01-17 18:00:00', '2025-01-17 18:00:00'),
 -- 遲到
-('AR009', 'E003', 'D002', '2025-01-17', '2025-01-17 09:15:00', '2025-01-17 18:00:00', 'NORMAL', 1, 0, '2025-01-17 09:15:00', '2025-01-17 18:00:00', 0),
+('AR009', 'E003', '2025-01-17', '2025-01-17 09:15:00', '2025-01-17 18:00:00', 'NORMAL', true, 15, false, 0, 'NORMAL', false, '2025-01-17 09:15:00', '2025-01-17 18:00:00'),
 -- 早退
-('AR010', 'E001', 'D001', '2025-01-18', '2025-01-18 09:00:00', '2025-01-18 17:00:00', 'NORMAL', 0, 1, '2025-01-18 09:00:00', '2025-01-18 17:00:00', 0);
+('AR010', 'E001', '2025-01-18', '2025-01-18 09:00:00', '2025-01-18 17:00:00', 'NORMAL', false, 0, true, 60, 'NORMAL', false, '2025-01-18 09:00:00', '2025-01-18 17:00:00');
 
 -- 請假申請測試資料 (共 8 筆)
 -- 狀態分布: PENDING=3, APPROVED=3, REJECTED=2
-INSERT INTO leave_applications (application_id, employee_id, department_id, leave_type, start_date, end_date, hours, reason, status, approver_id, created_at, updated_at, is_deleted) VALUES
+INSERT INTO leave_applications (id, employee_id, department_id, leave_type_id, start_date, end_date, hours, reason, status, approver_id, created_at, updated_at, is_deleted) VALUES
 -- 待審核
 ('LA001', 'E001', 'D001', 'ANNUAL', '2025-02-01', '2025-02-03', 24, '出國旅遊', 'PENDING', NULL, '2025-01-15 10:00:00', '2025-01-15 10:00:00', 0),
 ('LA002', 'E002', 'D001', 'SICK', '2025-01-20', '2025-01-20', 8, '感冒', 'PENDING', NULL, '2025-01-19 09:00:00', '2025-01-19 09:00:00', 0),
@@ -42,7 +42,7 @@ INSERT INTO leave_applications (application_id, employee_id, department_id, leav
 
 -- 加班申請測試資料 (共 6 筆)
 -- 狀態分布: PENDING=2, APPROVED=3, REJECTED=1
-INSERT INTO overtime_applications (application_id, employee_id, department_id, overtime_type, overtime_date, start_time, end_time, hours, reason, status, approver_id, created_at, updated_at, is_deleted) VALUES
+INSERT INTO overtime_applications (id, employee_id, department_id, overtime_type, overtime_date, start_time, end_time, hours, reason, status, approver_id, created_at, updated_at, is_deleted) VALUES
 -- 待審核
 ('OT001', 'E001', 'D001', 'WORKDAY', '2025-01-20', '18:00:00', '21:00:00', 3, '專案趕工', 'PENDING', NULL, '2025-01-19 17:00:00', '2025-01-19 17:00:00', 0),
 ('OT002', 'E002', 'D001', 'HOLIDAY', '2025-01-25', '09:00:00', '17:00:00', 8, '系統上線支援', 'PENDING', NULL, '2025-01-20 10:00:00', '2025-01-20 10:00:00', 0),

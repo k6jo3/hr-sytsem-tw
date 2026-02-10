@@ -1,9 +1,9 @@
 package com.company.hrms.organization.application.service.department.task;
 
-import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
+import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.organization.application.service.department.context.DepartmentContext;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
 import com.company.hrms.organization.domain.repository.IDepartmentRepository;
@@ -24,8 +24,7 @@ public class LoadDeptTask implements PipelineTask<DepartmentContext> {
         String deptId = context.getDepartmentId();
 
         var department = departmentRepository.findById(new DepartmentId(deptId))
-                .orElseThrow(() -> new ResourceNotFoundException("DEPT_NOT_FOUND",
-                        "部門不存在: " + deptId));
+                .orElseThrow(() -> new EntityNotFoundException("Department", deptId));
 
         context.setDepartment(department);
     }

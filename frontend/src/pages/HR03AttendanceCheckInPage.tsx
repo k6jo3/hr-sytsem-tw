@@ -1,10 +1,10 @@
-import React from 'react';
-import { Layout, Row, Col, Space, message, Card, Typography } from 'antd';
 import { CheckInButton } from '@features/attendance/components/CheckInButton';
 import { TodayAttendanceCard } from '@features/attendance/components/TodayAttendanceCard';
 import { useAttendance } from '@features/attendance/hooks/useAttendance';
+import { PageLayout } from '@shared/components';
+import { Card, Col, Row, Space, Typography, message } from 'antd';
+import React from 'react';
 
-const { Content } = Layout;
 const { Title } = Typography;
 
 /**
@@ -12,7 +12,7 @@ const { Title } = Typography;
  * 頁面代碼：HR03-P01
  */
 const HR03AttendanceCheckInPage: React.FC = () => {
-  const { summary, loading, error, checkingIn, handleCheckIn, refresh } = useAttendance();
+  const { summary, loading, error, checkingIn, handleCheckIn } = useAttendance();
 
   // 顯示錯誤訊息
   React.useEffect(() => {
@@ -42,42 +42,40 @@ const HR03AttendanceCheckInPage: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
-      <Content style={{ padding: 24 }}>
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <Title level={3} style={{ marginBottom: 24 }}>
-            考勤打卡
-          </Title>
+    <PageLayout>
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 0' }}>
+        <Title level={3} style={{ marginBottom: 24 }}>
+          考勤打卡
+        </Title>
 
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            {/* 打卡按鈕卡片 */}
-            <Card>
-              <Row gutter={16}>
-                <Col span={12}>
-                  <CheckInButton
-                    type="CHECK_IN"
-                    disabled={!summary?.canCheckIn || checkingIn}
-                    loading={checkingIn}
-                    onClick={handleCheckInClick}
-                  />
-                </Col>
-                <Col span={12}>
-                  <CheckInButton
-                    type="CHECK_OUT"
-                    disabled={!summary?.canCheckOut || checkingIn}
-                    loading={checkingIn}
-                    onClick={handleCheckOutClick}
-                  />
-                </Col>
-              </Row>
-            </Card>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          {/* 打卡按鈕卡片 */}
+          <Card>
+            <Row gutter={16}>
+              <Col span={12}>
+                <CheckInButton
+                  type="CHECK_IN"
+                  disabled={!summary?.canCheckIn || checkingIn}
+                  loading={checkingIn}
+                  onClick={handleCheckInClick}
+                />
+              </Col>
+              <Col span={12}>
+                <CheckInButton
+                  type="CHECK_OUT"
+                  disabled={!summary?.canCheckOut || checkingIn}
+                  loading={checkingIn}
+                  onClick={handleCheckOutClick}
+                />
+              </Col>
+            </Row>
+          </Card>
 
-            {/* 今日考勤卡片 */}
-            <TodayAttendanceCard summary={summary} loading={loading} />
-          </Space>
-        </div>
-      </Content>
-    </Layout>
+          {/* 今日考勤卡片 */}
+          <TodayAttendanceCard summary={summary} loading={loading} />
+        </Space>
+      </div>
+    </PageLayout>
   );
 };
 

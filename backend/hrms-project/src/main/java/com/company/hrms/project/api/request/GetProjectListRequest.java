@@ -31,4 +31,25 @@ public class GetProjectListRequest {
     @Schema(description = "負責人ID")
     @com.company.hrms.common.query.QueryCondition.EQ("ownerId")
     private String ownerId;
+
+    @Schema(description = "客戶ID")
+    private String customerId;
+
+    @Schema(description = "專案經理ID")
+    private String pmId;
+
+    @Schema(description = "部門ID")
+    private String deptId;
+
+    @Schema(description = "是否延遲")
+    private Boolean isDelayed;
+
+    @Schema(description = "是否預算超支")
+    private Boolean isBudgetExceeded;
+
+    @Schema(description = "開始日期起 (yyyy-MM-dd)")
+    private String startDateFrom;
+
+    @Schema(description = "參與者ID (查詢參與的專案)")
+    private String participantId;
 }

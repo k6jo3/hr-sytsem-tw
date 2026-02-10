@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.company.hrms.common.annotation.CurrentUser;
@@ -47,20 +46,9 @@ public class HR01UserQryController extends QueryBaseController {
         })
         @GetMapping
         public ResponseEntity<PageResponse<UserListResponse>> getUserList(
-                        @RequestParam(required = false) String status,
-                        @RequestParam(required = false) String keyword,
+                        @org.springdoc.core.annotations.ParameterObject GetUserListRequest request,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-                // 建立查詢請求物件
-                // UserQueryRequest request = new UserQueryRequest(status, keyword);
-                // 改用 GetUserListRequest 以支援進階查詢與統一 Service 介面
-                GetUserListRequest request = GetUserListRequest
-                                .builder()
-                                .status(status)
-                                .keyword(keyword)
-                                .page(1) // 預設第一頁
-                                .size(100) // 預設查詢 100 筆 (相容舊 API 行為)
-                                .build();
-
+                // 直接使用 request 物件，它會由 Spring 自動綁定 URL 參數
                 PageResponse<UserListResponse> response = getResponse(request, currentUser);
                 return ResponseEntity.ok(response);
         }

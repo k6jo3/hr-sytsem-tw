@@ -1,10 +1,10 @@
 package com.company.hrms.organization.application.service.department.task;
 
-import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
 import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.common.exception.ValidationException;
 import com.company.hrms.organization.application.service.department.context.DepartmentContext;
 import com.company.hrms.organization.domain.model.aggregate.Department;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
@@ -29,7 +29,7 @@ public class ValidateParentDeptTask implements PipelineTask<DepartmentContext> {
             DepartmentId parentId = new DepartmentId(request.getParentId());
 
             Department parent = departmentRepository.findById(parentId)
-                    .orElseThrow(() -> new ResourceNotFoundException("PARENT_DEPT_NOT_FOUND",
+                    .orElseThrow(() -> new ValidationException("parentId",
                             "父部門不存在: " + request.getParentId()));
 
             // 驗證層級
