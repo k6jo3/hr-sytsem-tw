@@ -79,7 +79,7 @@ public class OrganizationApiContractTest extends BaseApiContractTest {
 
         @Nested
         @DisplayName("1. 員工查詢 API 合約")
-        class EmployeeQueryApiContractTests {
+        public class EmployeeQueryApiContractTests {
 
                 @Test
                 @DisplayName("ORG_QRY_E001: 查詢在職員工")
@@ -205,7 +205,7 @@ public class OrganizationApiContractTest extends BaseApiContractTest {
 
         @Nested
         @DisplayName("2. 部門查詢 API 合約")
-        class DepartmentQueryApiContractTests {
+        public class DepartmentQueryApiContractTests {
 
                 @Test
                 @DisplayName("ORG_QRY_D001: 查詢所有啟用部門")

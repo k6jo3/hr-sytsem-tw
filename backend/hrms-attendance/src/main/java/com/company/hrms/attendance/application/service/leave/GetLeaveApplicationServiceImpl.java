@@ -2,6 +2,7 @@ package com.company.hrms.attendance.application.service.leave;
 
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import com.company.hrms.attendance.api.response.leave.LeaveApplicationDetailResp
 import com.company.hrms.attendance.domain.model.aggregate.LeaveApplication;
 import com.company.hrms.attendance.domain.model.valueobject.ApplicationId;
 import com.company.hrms.attendance.domain.repository.ILeaveApplicationRepository;
+import com.company.hrms.attendance.infrastructure.client.organization.OrganizationServiceClient;
 import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
@@ -29,6 +31,7 @@ public class GetLeaveApplicationServiceImpl
         implements QueryApiService<HR03LeaveQryController.GetLeaveApplicationRequest, LeaveApplicationDetailResponse> {
 
     private final ILeaveApplicationRepository leaveApplicationRepository;
+    private final OrganizationServiceClient organizationServiceClient;
 
     @Override
     public LeaveApplicationDetailResponse getResponse(HR03LeaveQryController.GetLeaveApplicationRequest request,
@@ -52,10 +55,20 @@ public class GetLeaveApplicationServiceImpl
             days = BigDecimal.valueOf(daysDiff);
         }
 
+        String employeeName = "Unknown";
+        try {
+            var employee = organizationServiceClient.getEmployeeDetail(entity.getEmployeeId());
+            if (employee != null) {
+                employeeName = employee.getFullName();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch employee details for id: {}", entity.getEmployeeId(), e);
+        }
+
         return LeaveApplicationDetailResponse.builder()
                 .applicationId(entity.getId().getValue())
                 .employeeId(entity.getEmployeeId())
-                // .employeeName("TODO")
+                .employeeName(employeeName)
                 .leaveTypeCode(entity.getLeaveTypeId().getValue())
                 .leaveTypeName(entity.getLeaveTypeId().getValue())
                 .startDate(entity.getStartDate())
@@ -66,8 +79,8 @@ public class GetLeaveApplicationServiceImpl
                 .reason(entity.getReason())
                 .status(entity.getStatus().name())
                 .attachments(entity.getProofAttachmentUrl() != null
-                        ? java.util.Collections.singletonList(entity.getProofAttachmentUrl())
-                        : java.util.Collections.emptyList())
+                        ? Collections.singletonList(entity.getProofAttachmentUrl())
+                        : Collections.emptyList())
                 .build();
     }
 }

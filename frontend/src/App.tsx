@@ -1,31 +1,50 @@
 import {
-  HR01LoginPage,
-  HR01UserManagementPage,
-  HR01RoleManagementPage,
-  HR01PasswordChangePage,
-  HR02EmployeeListPage,
-  HR03CheckInPage,
-  HR03LeaveListPage,
-  HR04PayrollListPage,
-  HR04PayslipPage,
-  HR05InsuranceListPage,
-  HR06ProjectListPage,
-  HR06ProjectDetailPage,
-  HR07TimesheetPage,
-  HR08MyPerformancePage,
-  HR08PerformanceListPage,
-  HR09RecruitmentPage,
-  HR10TrainingListPage,
-  HR11WorkflowListPage,
-  HR12NotificationPage,
-  HR13DocumentListPage,
-  HR14ReportDashboardPage,
+    HR01LoginPage,
+    HR01PasswordChangePage,
+    HR01RoleManagementPage,
+    HR01UserManagementPage,
+    HR02EmployeeDetailPage,
+    HR02EmployeeListPage,
+    HR03ApprovalListPage,
+    HR03AttendanceReportPage,
+    HR03CheckInPage,
+    HR03LeaveBalancePage,
+    HR03LeaveListPage,
+    HR03LeaveTypeManagementPage,
+    HR03MonthClosePage,
+    HR03MyAttendanceListPage,
+    HR03OvertimeListPage,
+    HR03ShiftManagementPage,
+    HR04BankTransferPage,
+    HR04PayrollApprovalPage,
+    HR04PayrollBatchDetailPage,
+    HR04PayrollHistoryPage,
+    HR04PayrollItemPage,
+    HR04PayrollListPage,
+    HR04PayslipPage,
+    HR04SalaryStructurePage,
+    HR05InsuranceCalculatorPage,
+    HR05InsuranceEnrollmentPage,
+    HR05MyInsurancePage,
+    HR06ProjectDetailPage,
+    HR06ProjectListPage,
+    HR07TimesheetApprovalPage,
+    HR07TimesheetPage,
+    HR07TimesheetReportPage,
+    HR08MyPerformancePage,
+    HR08PerformanceListPage,
+    HR09RecruitmentPage,
+    HR10TrainingListPage,
+    HR11WorkflowListPage,
+    HR12NotificationPage,
+    HR13DocumentListPage,
+    HR14ReportDashboardPage
 } from '@pages/index';
+import { ProtectedRoute } from '@shared/components';
 import { ConfigProvider } from 'antd';
 import zhTW from 'antd/locale/zh_TW';
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { ProtectedRoute } from '@shared/components';
 
 /**
  * 主應用程式元件
@@ -69,15 +88,45 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        {/* TODO: <Route path="/attendance/my-records" element={<ProtectedRoute><HR03MyRecordsPage /></ProtectedRoute>} /> */}
-        {/* TODO: <Route path="/attendance/leave/balance" element={<ProtectedRoute><HR03LeaveBalancePage /></ProtectedRoute>} /> */}
+        <Route
+          path="/attendance/overtime"
+          element={
+            <ProtectedRoute>
+              <HR03OvertimeListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendance/my-records"
+          element={
+            <ProtectedRoute>
+              <HR03MyAttendanceListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendance/approvals"
+          element={
+            <ProtectedRoute>
+              <HR03ApprovalListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/attendance/leave/balance"
+          element={
+            <ProtectedRoute>
+              <HR03LeaveBalancePage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* HR04 - 我的薪資單 */}
         <Route
           path="/profile/payslips"
           element={
             <ProtectedRoute>
-              <HR04PayrollListPage />
+              <HR04PayslipPage />
             </ProtectedRoute>
           }
         />
@@ -95,7 +144,7 @@ const App: React.FC = () => {
           path="/profile/insurance"
           element={
             <ProtectedRoute>
-              <HR05InsuranceListPage />
+              <HR05MyInsurancePage />
             </ProtectedRoute>
           }
         />
@@ -159,7 +208,125 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        {/* TODO: <Route path="/admin/employees/:id" element={<ProtectedRoute><HR02EmployeeDetailPage /></ProtectedRoute>} /> */}
+        {/* HR02 - 員工詳情 */}
+        <Route
+          path="/admin/employees/:id"
+          element={
+            <ProtectedRoute>
+              <HR02EmployeeDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* HR03 - 差勤管理 */}
+        <Route
+          path="/admin/attendance/shifts"
+          element={
+            <ProtectedRoute>
+              <HR03ShiftManagementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/attendance/leave-types"
+          element={
+            <ProtectedRoute>
+              <HR03LeaveTypeManagementPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/attendance/reports"
+          element={
+            <ProtectedRoute>
+              <HR03AttendanceReportPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/attendance/monthly-close"
+          element={
+            <ProtectedRoute>
+              <HR03MonthClosePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* HR04 - 薪資管理 */}
+        <Route
+          path="/admin/payroll/structures"
+          element={
+            <ProtectedRoute>
+              <HR04SalaryStructurePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payroll/items"
+          element={
+            <ProtectedRoute>
+              <HR04PayrollItemPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payroll/approval"
+          element={
+            <ProtectedRoute>
+              <HR04PayrollApprovalPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payroll/bank-transfer"
+          element={
+            <ProtectedRoute>
+              <HR04BankTransferPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payroll/employees"
+          element={
+            <ProtectedRoute>
+              <HR04PayrollHistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payroll/runs"
+          element={
+            <ProtectedRoute>
+              <HR04PayrollListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/payroll/runs/:id"
+          element={
+            <ProtectedRoute>
+              <HR04PayrollBatchDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* HR05 - 保險管理 */}
+        <Route
+          path="/admin/insurance/enrollments"
+          element={
+            <ProtectedRoute>
+              <HR05InsuranceEnrollmentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/insurance/calculator"
+          element={
+            <ProtectedRoute>
+              <HR05InsuranceCalculatorPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* HR06 - 專案管理 */}
         <Route
@@ -175,6 +342,22 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <HR06ProjectDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/timesheets/approval"
+          element={
+            <ProtectedRoute>
+              <HR07TimesheetApprovalPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/timesheets/reports"
+          element={
+            <ProtectedRoute>
+              <HR07TimesheetReportPage />
             </ProtectedRoute>
           }
         />

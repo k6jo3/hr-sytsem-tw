@@ -23,6 +23,11 @@ public class JWTModel {
     private String userId;
 
     /**
+     * 員工ID
+     */
+    private String employeeId;
+
+    /**
      * 使用者名稱
      */
     private String username;

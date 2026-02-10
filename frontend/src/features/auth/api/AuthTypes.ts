@@ -251,7 +251,7 @@ export interface PaginationInfo {
  * 使用者列表回應
  */
 export interface GetUsersResponse {
-  users: UserDto[];
+  content: UserDto[];
   pagination: PaginationInfo;
 }
 

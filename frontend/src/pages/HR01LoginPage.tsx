@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
-import { Card, Typography, message } from 'antd';
-import { useNavigate, useLocation } from 'react-router-dom';
+import type { LoginFormData } from '@features/auth/api/AuthTypes';
+import { ForgotPasswordModal } from '@features/auth/components/ForgotPasswordModal';
 import { LoginForm } from '@features/auth/components/LoginForm';
 import { useLogin } from '@features/auth/hooks/useLogin';
 import { useAppSelector } from '@store/hooks';
-import type { LoginFormData } from '@features/auth/api/AuthTypes';
+import { Card, Typography, message } from 'antd';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
 
@@ -17,6 +18,7 @@ export const HR01LoginPage: React.FC = () => {
   const location = useLocation();
   const { login, loading, error } = useLogin();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [forgotPasswordVisible, setForgotPasswordVisible] = React.useState(false);
 
   // 如果已經登入，重定向到首頁或原本要去的頁面
   useEffect(() => {
@@ -73,6 +75,12 @@ export const HR01LoginPage: React.FC = () => {
           onSubmit={handleSubmit}
           loading={loading}
           error={error?.message ?? null}
+          onForgotPassword={() => setForgotPasswordVisible(true)}
+        />
+
+        <ForgotPasswordModal
+          visible={forgotPasswordVisible}
+          onCancel={() => setForgotPasswordVisible(false)}
         />
 
         <div style={{ textAlign: 'center', marginTop: 16 }}>

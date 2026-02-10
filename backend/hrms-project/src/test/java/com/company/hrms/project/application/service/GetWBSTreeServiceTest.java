@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,7 +28,6 @@ public class GetWBSTreeServiceTest {
     @Mock
     private ITaskRepository taskRepository;
 
-    @InjectMocks
     private GetWBSTreeServiceImpl getWBSTreeService;
 
     private GetWBSTreeRequest request;
@@ -44,6 +42,11 @@ public class GetWBSTreeServiceTest {
 
         request = new GetWBSTreeRequest();
         request.setProjectId(PROJ_ID);
+
+        // 手動注入實例，確保 Pipeline 中的 Task 不是 null
+        var loadTask = new com.company.hrms.project.application.service.task.LoadProjectTasksTask(taskRepository);
+        var buildTask = new com.company.hrms.project.application.service.task.BuildWBSTreeTask();
+        getWBSTreeService = new GetWBSTreeServiceImpl(loadTask, buildTask);
     }
 
     @Test

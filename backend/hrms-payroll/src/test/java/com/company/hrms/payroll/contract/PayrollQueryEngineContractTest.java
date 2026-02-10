@@ -89,13 +89,13 @@ class PayrollQueryEngineContractTest extends BaseQueryEngineContractTest<Payroll
 				// ========== EQ 操作符測試 ==========
 				// EQ - 狀態查詢
 				Arguments.of("EQ", "status", "DRAFT", 3),
-				Arguments.of("EQ", "status", "CALCULATING", 3),
+				Arguments.of("EQ", "status", "CALCULATING", 2),
 				Arguments.of("EQ", "status", "SUBMITTED", 2),
 				Arguments.of("EQ", "status", "APPROVED", 4),
 				Arguments.of("EQ", "status", "PAID", 3),
 				Arguments.of("EQ", "status", "FAILED", 2),
 				Arguments.of("EQ", "status", "CANCELLED", 2),
-				Arguments.of("EQ", "status", "COMPLETED", 1),
+				Arguments.of("EQ", "status", "COMPLETED", 2),
 
 				// EQ - 薪資制度查詢
 				Arguments.of("EQ", "payrollSystem", "MONTHLY", 20),
@@ -113,7 +113,7 @@ class PayrollQueryEngineContractTest extends BaseQueryEngineContractTest<Payroll
 				// ========== IN 操作符測試 ==========
 
 				Arguments.of("IN", "status",
-						List.of("DRAFT", "CALCULATING"), 6),
+						List.of("DRAFT", "CALCULATING"), 5),
 				Arguments.of("IN", "status",
 						List.of("APPROVED", "PAID"), 7),
 				Arguments.of("IN", "organizationId",

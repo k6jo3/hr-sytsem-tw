@@ -107,7 +107,7 @@ public class CreateEntryServiceTest {
         CreateEntryRequest request = new CreateEntryRequest();
         request.setEmployeeId(employeeId);
         request.setProjectId(projectId);
-        request.setWorkDate(weekStart.plusDays(1)); // Tuesday
+        request.setWorkDate(weekStart); // Use Monday (today or in the past)
         request.setHours(new BigDecimal("8.0"));
         request.setDescription("Existing Timesheet Work");
 

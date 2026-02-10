@@ -5,11 +5,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,244 +15,202 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.attendance.api.request.overtime.ApplyOvertimeRequest;
 import com.company.hrms.attendance.api.request.overtime.ApproveOvertimeRequest;
+import com.company.hrms.attendance.api.request.overtime.RejectOvertimeRequest;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.test.base.BaseApiIntegrationTest;
 
 /**
- * 加班管理 API 整合測試
- * 驗證加班 API 的完整流程（Controller → Service → Repository → H2 DB）
- *
- * <p>
- * <b>測試涵蓋範圍:</b>
- * <ul>
- * <li>加班申請 API（新增、更新、查詢）</li>
- * <li>加班審核 API（審核、駁回）</li>
- * <li>加班查詢 API（列表、詳情、過濾）</li>
- * </ul>
- *
- * TODO: 需建立測試資料腳本
- * - attendance_base_data.sql (員工基礎資料)
- * - overtime_test_data.sql (加班測試資料)
- * - cleanup.sql (清理腳本)
- *
- * @author SA Team
- * @since 2026-02-05
+ * 加班 API 整合測試
+ * 基於合約: attendance_contracts_v2.md
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-@ActiveProfiles("test")
 @Transactional
-@Disabled("TODO:測試失敗 - 需建立測試資料腳本 (attendance_base_data.sql, overtime_test_data.sql)")
-@DisplayName("加班管理 API 整合測試")
-class OvertimeApiIntegrationTest extends BaseApiIntegrationTest {
+@Sql(scripts = {
+		"classpath:test-data/cleanup.sql",
+		"classpath:test-data/attendance_base_data.sql",
+		"classpath:test-data/overtime_test_data.sql"
+}, config = @SqlConfig(encoding = "UTF-8"))
+@DisplayName("加班 API 整合測試")
+public class OvertimeApiIntegrationTest extends BaseApiIntegrationTest {
 
 	@BeforeEach
 	void setupSecurity() {
 		JWTModel mockUser = new JWTModel();
 		mockUser.setUserId("test-emp-001");
-		mockUser.setUsername("test_employee");
-		mockUser.setRoles(Collections.singletonList("EMPLOYEE"));
-
-		List<SimpleGrantedAuthority> authorities = mockUser.getRoles().stream()
-				.map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-				.collect(Collectors.toList());
-		authorities.add(new SimpleGrantedAuthority("overtime:apply"));
-		authorities.add(new SimpleGrantedAuthority("overtime:approve"));
+		mockUser.setUsername("test-user");
+		mockUser.setTenantId("test-tenant");
+		mockUser.setRoles(Collections.singletonList("HR"));
 
 		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-				mockUser, null, authorities);
+				mockUser,
+				null,
+				Collections.singletonList(new SimpleGrantedAuthority("ROLE_HR")));
+
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
 	/**
-	 * 加班申請 CRUD API 測試
+	 * 查詢操作測試 (Query Contracts)
+	 * 對應合約: 2.3 加班申請查詢
 	 */
 	@Nested
-	@DisplayName("加班申請 CRUD API")
-	class OvertimeCrudApiTests {
+	@DisplayName("查詢操作測試")
+	class OvertimeQueryApiTests {
 
 		@Test
-		@DisplayName("ATT_OT_API_001: 新增加班申請 - 應返回申請 ID")
-		void ATT_OT_API_001_createOvertime_ShouldReturnId() throws Exception {
-			// Given
-			ApplyOvertimeRequest request = new ApplyOvertimeRequest();
-			request.setEmployeeId("test-emp-001");
-			request.setDate(LocalDate.now());
-			request.setHours(3.0);
-			request.setOvertimeType("WEEKDAY");
-			request.setReason("專案趕工");
-
-			// When & Then
-			var response = performPost("/api/v1/overtime", request)
+		@DisplayName("ATT_QRY_O001: 查詢待審核加班 - 應只返回 PENDING 狀態")
+		void ATT_QRY_O001_filterByStatusPending_ShouldReturnOnlyPending() throws Exception {
+			performGet("/api/v1/overtime/applications?status=PENDING")
 					.andExpect(status().isOk())
-					.andReturn();
-
-			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("applicationId");
-			assertThat(responseBody).contains("status");
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items[0].status").value("PENDING"));
 		}
 
 		@Test
-		@DisplayName("ATT_OT_API_002: 查詢加班申請列表 - 應返回列表")
-		void ATT_OT_API_002_getOvertimeList_ShouldReturnList() throws Exception {
-			// When & Then
-			var response = performGet("/api/v1/overtime")
+		@DisplayName("ATT_QRY_O002: 查詢已核准加班 - 應只返回 APPROVED 狀態")
+		void ATT_QRY_O002_filterByStatusApproved_ShouldReturnOnlyApproved() throws Exception {
+			performGet("/api/v1/overtime/applications?status=APPROVED")
 					.andExpect(status().isOk())
-					.andReturn();
-
-			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("items");
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items[0].status").value("APPROVED"));
 		}
 
 		@Test
-		@DisplayName("ATT_OT_API_003: 查詢加班申請詳情 - 應返回完整資訊")
-		void ATT_OT_API_003_getOvertimeDetail_ShouldReturnDetail() throws Exception {
-			// Given
+		@DisplayName("ATT_QRY_O003: 依員工查詢加班 - 應返回該員工的所有加班")
+		void ATT_QRY_O003_filterByEmployee_ShouldReturnEmployeeOvertimes() throws Exception {
+			performGet("/api/v1/overtime/applications?employeeId=test-emp-001")
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items[0].employeeId").value("test-emp-001"));
+		}
+
+		@Test
+		@DisplayName("ATT_QRY_O004: 依加班類型查詢 - 應只返回 WORKDAY 類型")
+		void ATT_QRY_O004_filterByTypeWorkday_ShouldReturnWorkdayOnly() throws Exception {
+			performGet("/api/v1/overtime/applications?overtimeType=WORKDAY")
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.items").isArray())
+					.andExpect(jsonPath("$.items[0].overtimeType").value("WORKDAY"));
+		}
+
+		@Test
+		@DisplayName("ATT_QRY_O008: 依日期範圍查詢加班 - 應返回指定日期後的加班")
+		void ATT_QRY_O008_filterByDateRange_ShouldReturnFiltered() throws Exception {
+			performGet("/api/v1/overtime/applications?startDate=2026-02-11")
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.items").isArray());
+		}
+
+		@Test
+		@DisplayName("查詢加班申請詳情 - 應返回完整資訊")
+		void getOvertimeDetail_ShouldReturnDetail() throws Exception {
 			String overtimeId = "test-overtime-001";
-
-			// When & Then
-			var response = performGet("/api/v1/overtime/" + overtimeId)
+			performGet("/api/v1/overtime/applications/" + overtimeId)
 					.andExpect(status().isOk())
-					.andReturn();
-
-			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("applicationId");
-			assertThat(responseBody).contains("date");
-		}
-	}
-
-	/**
-	 * 加班審核 API 測試
-	 */
-	@Nested
-	@DisplayName("加班審核 API")
-	class OvertimeApprovalApiTests {
-
-		@Test
-		@DisplayName("ATT_OT_API_004: 審核通過加班申請 - 應更新狀態為 APPROVED")
-		void ATT_OT_API_004_approveOvertime_ShouldUpdateStatus() throws Exception {
-			// Given
-			String overtimeId = "test-overtime-001";
-			ApproveOvertimeRequest request = new ApproveOvertimeRequest();
-			request.setComment("同意加班");
-
-			// When & Then
-			var response = performPost("/api/v1/overtime/" + overtimeId + "/approve", request)
-					.andExpect(status().isOk())
-					.andReturn();
-
-			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("applicationId");
+					.andExpect(jsonPath("$.applicationId").value(overtimeId))
+					.andExpect(jsonPath("$.employeeId").exists())
+					.andExpect(jsonPath("$.overtimeDate").exists());
 		}
 
 		@Test
-		@DisplayName("ATT_OT_API_005: 審核不存在的加班申請 - 應返回 404")
-		void ATT_OT_API_005_approveOvertime_NotFound_ShouldReturn404() throws Exception {
-			// Given
-			String overtimeId = "non-existent-overtime";
-			ApproveOvertimeRequest request = new ApproveOvertimeRequest();
-			request.setComment("測試");
-
-			// When & Then
-			performPost("/api/v1/overtime/" + overtimeId + "/approve", request)
+		@DisplayName("查詢不存在的加班申請 - 應返回 404")
+		void getOvertimeDetail_NotFound_ShouldReturn404() throws Exception {
+			performGet("/api/v1/overtime/applications/non-existent-overtime")
 					.andExpect(status().isNotFound());
 		}
 	}
 
 	/**
-	 * 加班查詢與過濾 API 測試
+	 * 命令操作測試 (Command Contracts)
+	 * 對應合約: 3.3 加班操作
 	 */
 	@Nested
-	@DisplayName("加班查詢與過濾 API")
-	class OvertimeQueryApiTests {
+	@DisplayName("命令操作測試")
+	class OvertimeCmdApiTests {
 
 		@Test
-		@DisplayName("ATT_OT_API_006: 依狀態過濾 - 應返回符合條件的加班申請")
-		void ATT_OT_API_006_filterByStatus_ShouldReturnFiltered() throws Exception {
-			// When & Then
-			var response = performGet("/api/v1/overtime?status=PENDING")
+		@DisplayName("ATT_CMD_009: 員工申請平日加班 - 應返回申請 ID")
+		void ATT_CMD_009_applyWorkdayOvertime_ShouldReturnId() throws Exception {
+			ApplyOvertimeRequest request = new ApplyOvertimeRequest();
+			request.setEmployeeId("test-emp-001");
+			request.setDate(LocalDate.of(2026, 2, 25));
+			request.setHours(2.0);
+			request.setOvertimeType("WORKDAY");
+			request.setReason("Emergency Fix");
+
+			var response = performPost("/api/v1/overtime/applications", request)
 					.andExpect(status().isOk())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("items");
+			assertThat(responseBody).contains("applicationId");
+			assertThat(responseBody).contains("success");
 		}
 
 		@Test
-		@DisplayName("ATT_OT_API_007: 依日期範圍查詢 - 應返回符合期間的加班申請")
-		void ATT_OT_API_007_filterByDateRange_ShouldReturnFiltered() throws Exception {
-			// When & Then
-			var response = performGet("/api/v1/overtime?startDate=2026-02-01&endDate=2026-02-28")
-					.andExpect(status().isOk())
-					.andReturn();
+		@DisplayName("ATT_CMD_010: 員工申請休息日加班 - 應返回申請 ID")
+		void ATT_CMD_010_applyRestDayOvertime_ShouldReturnId() throws Exception {
+			ApplyOvertimeRequest request = new ApplyOvertimeRequest();
+			request.setEmployeeId("test-emp-001");
+			request.setDate(LocalDate.of(2026, 2, 16));
+			request.setHours(8.0);
+			request.setOvertimeType("REST_DAY");
+			request.setReason("Weekend Support");
 
-			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("items");
+			performPost("/api/v1/overtime/applications", request)
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.applicationId").exists());
 		}
 
 		@Test
-		@DisplayName("ATT_OT_API_008: 依員工過濾 - 應返回該員工的加班申請")
-		void ATT_OT_API_008_filterByEmployee_ShouldReturnFiltered() throws Exception {
-			// When & Then
-			var response = performGet("/api/v1/overtime?employeeId=test-emp-001")
-					.andExpect(status().isOk())
-					.andReturn();
+		@DisplayName("ATT_CMD_011: 主管核准加班 - 應更新狀態為 APPROVED")
+		void ATT_CMD_011_approveOvertime_ShouldUpdateStatus() throws Exception {
+			String overtimeId = "test-overtime-001";
+			ApproveOvertimeRequest request = new ApproveOvertimeRequest();
+			request.setComment("Looks good");
 
-			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("items");
+			performPut("/api/v1/overtime/applications/" + overtimeId + "/approve", request)
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.overtimeId").value(overtimeId))
+					.andExpect(jsonPath("$.status").value("APPROVED"));
 		}
 
 		@Test
-		@DisplayName("ATT_OT_API_009: 分頁查詢 - 應返回分頁結果")
-		void ATT_OT_API_009_pagination_ShouldReturnPagedResults() throws Exception {
-			// When & Then
-			var response = performGet("/api/v1/overtime?page=1&size=10")
-					.andExpect(status().isOk())
-					.andReturn();
+		@DisplayName("ATT_CMD_012: 主管駁回加班 - 應更新狀態為 REJECTED")
+		void ATT_CMD_012_rejectOvertime_ShouldUpdateStatus() throws Exception {
+			String overtimeId = "test-overtime-001";
+			RejectOvertimeRequest request = new RejectOvertimeRequest();
+			request.setReason("Not needed");
 
-			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("items");
-			assertThat(responseBody).contains("total");
+			performPut("/api/v1/overtime/applications/" + overtimeId + "/reject", request)
+					.andExpect(status().isOk())
+					.andExpect(jsonPath("$.overtimeId").value(overtimeId))
+					.andExpect(jsonPath("$.status").value("REJECTED"));
 		}
 	}
 
 	/**
-	 * 異常情況處理測試
+	 * 異常處理測試
 	 */
 	@Nested
-	@DisplayName("異常情況處理")
-	class ExceptionHandlingTests {
+	@DisplayName("異常處理測試")
+	class OvertimeExceptionTests {
 
 		@Test
-		@DisplayName("應返回 400 當新增加班申請缺少必填欄位")
-		void shouldReturn400WhenCreateOvertimeRequestMissingFields() throws Exception {
-			// Given
-			ApplyOvertimeRequest request = new ApplyOvertimeRequest();
-			// 缺少必填欄位
+		@DisplayName("駁回加班時未提供原因 - 應返回 400")
+		void rejectOvertime_MissingReason_ShouldReturn400() throws Exception {
+			String overtimeId = "test-overtime-001";
+			RejectOvertimeRequest request = new RejectOvertimeRequest();
+			// Missing reason
 
-			// When & Then
-			performPost("/api/v1/overtime", request)
-					.andExpect(status().isBadRequest());
-		}
-
-		@Test
-		@DisplayName("應返回 400 當加班時數不正確")
-		void shouldReturn400WhenOvertimeHoursInvalid() throws Exception {
-			// Given
-			ApplyOvertimeRequest request = new ApplyOvertimeRequest();
-			request.setEmployeeId("test-emp-001");
-			request.setDate(LocalDate.now());
-			request.setHours(-1.0); // 負數時數
-			request.setOvertimeType("WEEKDAY");
-			request.setReason("測試");
-
-			// When & Then
-			performPost("/api/v1/overtime", request)
+			performPut("/api/v1/overtime/applications/" + overtimeId + "/reject", request)
 					.andExpect(status().isBadRequest());
 		}
 	}

@@ -59,7 +59,7 @@ class DepartmentRepositoryIntegrationTest {
                 @DisplayName("findById - 存在的部門應返回正確資料")
                 void findById_ExistingDepartment_ShouldReturnDepartment() {
                         // Given
-                        DepartmentId deptId = new DepartmentId("D001");
+                        DepartmentId deptId = new DepartmentId("33333333-3333-3333-3333-333333330001");
 
                         // When
                         Optional<Department> result = departmentRepository.findById(deptId);
@@ -83,7 +83,7 @@ class DepartmentRepositoryIntegrationTest {
                 @DisplayName("findById - 不存在的部門應返回空")
                 void findById_NonExistingDepartment_ShouldReturnEmpty() {
                         // Given
-                        DepartmentId deptId = new DepartmentId("DEPT-NOT-EXIST");
+                        DepartmentId deptId = new DepartmentId("33333333-9999-9999-9999-999999999999");
 
                         // When
                         Optional<Department> result = departmentRepository.findById(deptId);
@@ -141,36 +141,36 @@ class DepartmentRepositoryIntegrationTest {
         class FindByOrganizationIdTests {
 
                 @Test
-                @DisplayName("findByOrganizationId(ORG001) - 應返回所有 ORG001 部門")
+                @DisplayName("findByOrganizationId(11111111-1111-1111-1111-111111111111) - 應返回所有 11111111-1111-1111-1111-111111111111 部門")
                 void findByOrganizationId_ORG001_ShouldReturnAllDepartments() {
                         // Given
-                        OrganizationId orgId = new OrganizationId("ORG001");
+                        OrganizationId orgId = new OrganizationId("11111111-1111-1111-1111-111111111111");
 
                         // When
                         List<Department> result = departmentRepository.findByOrganizationId(orgId);
 
                         // Then
                         assertThat(result)
-                                        .as("ORG001 應有 7 個部門")
+                                        .as("11111111-1111-1111-1111-111111111111 應有 7 個部門")
                                         .hasSize(7)
-                                        .allMatch(dept -> "ORG001"
+                                        .allMatch(dept -> "11111111-1111-1111-1111-111111111111"
                                                         .equals(dept.getOrganizationId().getValue().toString()));
                 }
 
                 @Test
-                @DisplayName("findByOrganizationId(ORG002) - 應返回所有 ORG002 部門")
+                @DisplayName("findByOrganizationId(22222222-2222-2222-2222-222222222222) - 應返回所有 22222222-2222-2222-2222-222222222222 部門")
                 void findByOrganizationId_ORG002_ShouldReturnAllDepartments() {
                         // Given
-                        OrganizationId orgId = new OrganizationId("ORG002");
+                        OrganizationId orgId = new OrganizationId("22222222-2222-2222-2222-222222222222");
 
                         // When
                         List<Department> result = departmentRepository.findByOrganizationId(orgId);
 
                         // Then
                         assertThat(result)
-                                        .as("ORG002 應有 3 個部門")
+                                        .as("22222222-2222-2222-2222-222222222222 應有 3 個部門")
                                         .hasSize(3)
-                                        .allMatch(dept -> "ORG002"
+                                        .allMatch(dept -> "22222222-2222-2222-2222-222222222222"
                                                         .equals(dept.getOrganizationId().getValue().toString()));
                 }
 
@@ -179,7 +179,8 @@ class DepartmentRepositoryIntegrationTest {
                 void findByOrganizationId_NonExisting_ShouldReturnEmpty() {
                         // When
                         List<Department> result = departmentRepository
-                                        .findByOrganizationId(new OrganizationId("ORG999"));
+                                        .findByOrganizationId(
+                                                        new OrganizationId("99999999-9999-9999-9999-999999999999"));
 
                         // Then
                         assertThat(result)
@@ -199,7 +200,7 @@ class DepartmentRepositoryIntegrationTest {
                 @DisplayName("findByParentId(D001) - 應返回研發部的所有子部門")
                 void findByParentId_D001_ShouldReturnChildren() {
                         // Given
-                        DepartmentId parentId = new DepartmentId("D001");
+                        DepartmentId parentId = new DepartmentId("33333333-3333-3333-3333-333333330001");
 
                         // When
                         List<Department> result = departmentRepository.findByParentId(parentId);
@@ -208,14 +209,15 @@ class DepartmentRepositoryIntegrationTest {
                         assertThat(result)
                                         .as("研發部應有 3 個子部門 (前端組、後端組、QA組)")
                                         .hasSize(3)
-                                        .allMatch(dept -> "D001".equals(dept.getParentId().getValue().toString()));
+                                        .allMatch(dept -> "33333333-3333-3333-3333-333333330001"
+                                                        .equals(dept.getParentId().getValue().toString()));
                 }
 
                 @Test
                 @DisplayName("findByParentId(D004) - 應返回前端組的子部門")
                 void findByParentId_D004_ShouldReturnChildren() {
                         // Given
-                        DepartmentId parentId = new DepartmentId("D004");
+                        DepartmentId parentId = new DepartmentId("33333333-3333-3333-3333-333333330004");
 
                         // When
                         List<Department> result = departmentRepository.findByParentId(parentId);
@@ -233,7 +235,7 @@ class DepartmentRepositoryIntegrationTest {
                 @DisplayName("findByParentId - 無子部門的部門應返回空列表")
                 void findByParentId_NoChildren_ShouldReturnEmpty() {
                         // Given - D007 (Web前端) 沒有子部門
-                        DepartmentId parentId = new DepartmentId("D007");
+                        DepartmentId parentId = new DepartmentId("33333333-3333-3333-3333-333333330007");
 
                         // When
                         List<Department> result = departmentRepository.findByParentId(parentId);
@@ -253,34 +255,34 @@ class DepartmentRepositoryIntegrationTest {
         class FindRootDepartmentsTests {
 
                 @Test
-                @DisplayName("findRootDepartments(ORG001) - 應返回 ORG001 的根部門")
+                @DisplayName("findRootDepartments(11111111-1111-1111-1111-111111111111) - 應返回 11111111-1111-1111-1111-111111111111 的根部門")
                 void findRootDepartments_ORG001_ShouldReturnRootDepts() {
                         // Given
-                        OrganizationId orgId = new OrganizationId("ORG001");
+                        OrganizationId orgId = new OrganizationId("11111111-1111-1111-1111-111111111111");
 
                         // When
                         List<Department> result = departmentRepository.findRootDepartments(orgId);
 
                         // Then
                         assertThat(result)
-                                        .as("ORG001 應有 3 個根部門")
+                                        .as("11111111-1111-1111-1111-111111111111 應有 3 個根部門")
                                         .hasSize(3)
                                         .allMatch(dept -> dept.getParentId() == null)
                                         .allMatch(dept -> dept.getLevel() == 1);
                 }
 
                 @Test
-                @DisplayName("findRootDepartments(ORG002) - 應返回 ORG002 的根部門")
+                @DisplayName("findRootDepartments(22222222-2222-2222-2222-222222222222) - 應返回 22222222-2222-2222-2222-222222222222 的根部門")
                 void findRootDepartments_ORG002_ShouldReturnRootDepts() {
                         // Given
-                        OrganizationId orgId = new OrganizationId("ORG002");
+                        OrganizationId orgId = new OrganizationId("22222222-2222-2222-2222-222222222222");
 
                         // When
                         List<Department> result = departmentRepository.findRootDepartments(orgId);
 
                         // Then
                         assertThat(result)
-                                        .as("ORG002 應有 1 個根部門")
+                                        .as("22222222-2222-2222-2222-222222222222 應有 1 個根部門")
                                         .hasSize(1);
                         assertThat(result.get(0).getCode())
                                         .as("根部門應為 ORG2-ADMIN")
@@ -323,7 +325,8 @@ class DepartmentRepositoryIntegrationTest {
                 @DisplayName("existsById - 存在的 ID 應返回 true")
                 void existsById_Existing_ShouldReturnTrue() {
                         // When
-                        boolean exists = departmentRepository.existsById(new DepartmentId("D001"));
+                        boolean exists = departmentRepository
+                                        .existsById(new DepartmentId("33333333-3333-3333-3333-333333330001"));
 
                         // Then
                         assertThat(exists)
@@ -335,7 +338,8 @@ class DepartmentRepositoryIntegrationTest {
                 @DisplayName("existsById - 不存在的 ID 應返回 false")
                 void existsById_NonExisting_ShouldReturnFalse() {
                         // When
-                        boolean exists = departmentRepository.existsById(new DepartmentId("D999"));
+                        boolean exists = departmentRepository
+                                        .existsById(new DepartmentId("33333333-9999-9999-9999-999999999999"));
 
                         // Then
                         assertThat(exists)
@@ -355,9 +359,12 @@ class DepartmentRepositoryIntegrationTest {
                 @DisplayName("countByParentId - 應返回子部門數量")
                 void countByParentId_ShouldReturnCount() {
                         // When
-                        int countD001 = departmentRepository.countByParentId(new DepartmentId("D001"));
-                        int countD004 = departmentRepository.countByParentId(new DepartmentId("D004"));
-                        int countD007 = departmentRepository.countByParentId(new DepartmentId("D007"));
+                        int countD001 = departmentRepository
+                                        .countByParentId(new DepartmentId("33333333-3333-3333-3333-333333330001"));
+                        int countD004 = departmentRepository
+                                        .countByParentId(new DepartmentId("33333333-3333-3333-3333-333333330004"));
+                        int countD007 = departmentRepository
+                                        .countByParentId(new DepartmentId("33333333-3333-3333-3333-333333330007"));
 
                         // Then
                         assertThat(countD001)
@@ -375,19 +382,22 @@ class DepartmentRepositoryIntegrationTest {
                 @DisplayName("countByOrganizationId - 應返回組織內部門數量")
                 void countByOrganizationId_ShouldReturnCount() {
                         // When
-                        int countORG001 = departmentRepository.countByOrganizationId(new OrganizationId("ORG001"));
-                        int countORG002 = departmentRepository.countByOrganizationId(new OrganizationId("ORG002"));
-                        int countORG999 = departmentRepository.countByOrganizationId(new OrganizationId("ORG999"));
+                        int countOrg001 = departmentRepository.countByOrganizationId(
+                                        new OrganizationId("11111111-1111-1111-1111-111111111111"));
+                        int countOrg002 = departmentRepository.countByOrganizationId(
+                                        new OrganizationId("22222222-2222-2222-2222-222222222222"));
+                        int countOrg999 = departmentRepository.countByOrganizationId(
+                                        new OrganizationId("99999999-9999-9999-9999-999999999999"));
 
                         // Then
-                        assertThat(countORG001)
-                                        .as("ORG001 應有 7 個部門")
+                        assertThat(countOrg001)
+                                        .as("11111111-1111-1111-1111-111111111111 應有 7 個部門")
                                         .isEqualTo(7);
-                        assertThat(countORG002)
-                                        .as("ORG002 應有 3 個部門")
+                        assertThat(countOrg002)
+                                        .as("22222222-2222-2222-2222-222222222222 應有 3 個部門")
                                         .isEqualTo(3);
-                        assertThat(countORG999)
-                                        .as("ORG999 應沒有部門")
+                        assertThat(countOrg999)
+                                        .as("99999999-9999-9999-9999-999999999999 應沒有部門")
                                         .isEqualTo(0);
                 }
         }
@@ -404,18 +414,22 @@ class DepartmentRepositoryIntegrationTest {
                 void organizationIsolation_DataShouldBeIsolated() {
                         // When
                         List<Department> org001Depts = departmentRepository
-                                        .findByOrganizationId(new OrganizationId("ORG001"));
+                                        .findByOrganizationId(
+                                                        new OrganizationId("11111111-1111-1111-1111-111111111111"));
                         List<Department> org002Depts = departmentRepository
-                                        .findByOrganizationId(new OrganizationId("ORG002"));
+                                        .findByOrganizationId(
+                                                        new OrganizationId("22222222-2222-2222-2222-222222222222"));
 
                         // Then
                         assertThat(org001Depts)
-                                        .as("ORG001 只能看到自己的部門")
-                                        .allMatch(d -> "ORG001".equals(d.getOrganizationId().getValue().toString()));
+                                        .as("11111111-1111-1111-1111-111111111111 只能看到自己的部門")
+                                        .allMatch(d -> "11111111-1111-1111-1111-111111111111"
+                                                        .equals(d.getOrganizationId().getValue().toString()));
 
                         assertThat(org002Depts)
-                                        .as("ORG002 只能看到自己的部門")
-                                        .allMatch(d -> "ORG002".equals(d.getOrganizationId().getValue().toString()));
+                                        .as("22222222-2222-2222-2222-222222222222 只能看到自己的部門")
+                                        .allMatch(d -> "22222222-2222-2222-2222-222222222222"
+                                                        .equals(d.getOrganizationId().getValue().toString()));
 
                         // 驗證資料總和
                         int total = org001Depts.size() + org002Depts.size();
@@ -452,9 +466,12 @@ class DepartmentRepositoryIntegrationTest {
                 @DisplayName("部門階層結構正確")
                 void hierarchy_ShouldBeCorrect() {
                         // Given
-                        Optional<Department> level1 = departmentRepository.findById(new DepartmentId("D001")); // 研發部
-                        Optional<Department> level2 = departmentRepository.findById(new DepartmentId("D004")); // 前端組
-                        Optional<Department> level3 = departmentRepository.findById(new DepartmentId("D007")); // Web前端
+                        Optional<Department> level1 = departmentRepository
+                                        .findById(new DepartmentId("33333333-3333-3333-3333-333333330001")); // 研發部
+                        Optional<Department> level2 = departmentRepository
+                                        .findById(new DepartmentId("33333333-3333-3333-3333-333333330004")); // 前端組
+                        Optional<Department> level3 = departmentRepository
+                                        .findById(new DepartmentId("33333333-3333-3333-3333-333333330007")); // Web前端
 
                         // Then
                         assertThat(level1).isPresent();
@@ -477,17 +494,18 @@ class DepartmentRepositoryIntegrationTest {
                                         .isNull();
                         assertThat(level2.get().getParentId().getValue().toString())
                                         .as("前端組的父部門應為研發部")
-                                        .isEqualTo("D001");
+                                        .isEqualTo("33333333-3333-3333-3333-333333330001");
                         assertThat(level3.get().getParentId().getValue().toString())
                                         .as("Web前端的父部門應為前端組")
-                                        .isEqualTo("D004");
+                                        .isEqualTo("33333333-3333-3333-3333-333333330004");
                 }
 
                 @Test
                 @DisplayName("路徑正確反映階層結構")
                 void path_ShouldReflectHierarchy() {
                         // Given
-                        Optional<Department> webFrontend = departmentRepository.findById(new DepartmentId("D007"));
+                        Optional<Department> webFrontend = departmentRepository
+                                        .findById(new DepartmentId("33333333-3333-3333-3333-333333330007"));
 
                         // Then
                         assertThat(webFrontend).isPresent();

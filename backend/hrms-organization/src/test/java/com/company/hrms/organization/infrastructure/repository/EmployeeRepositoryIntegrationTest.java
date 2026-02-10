@@ -39,7 +39,8 @@ import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-@Sql(scripts = "classpath:test-data/organization_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = { "classpath:test-data/organization_base_data.sql",
+                "classpath:test-data/organization_test_data.sql" }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("Employee Repository 整合測試")
 class EmployeeRepositoryIntegrationTest extends BaseTest {
@@ -60,7 +61,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         // Given - 合約 ORG_E001
                         QueryGroup query = QueryBuilder.where()
                                         .eq("employment_status", "ACTIVE")
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -79,7 +80,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         // Given - 合約 ORG_E002
                         QueryGroup query = QueryBuilder.where()
                                         .eq("employment_status", "TERMINATED")
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -97,8 +98,8 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                 void findByDepartment_EQ_ShouldReturnDepartmentEmployees() {
                         // Given - 合約 ORG_E003
                         QueryGroup query = QueryBuilder.where()
-                                        .eq("department_id", "D001")
-                                        .eq("is_deleted", 0)
+                                        .eq("department_id", "d0000001-0001-0001-0001-000000000001")
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -116,16 +117,16 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         // Given - 合約 ORG_E004
                         QueryGroup query = QueryBuilder.where()
                                         .like("full_name", "%王%")
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
                         List<Employee> result = employeeRepository.findByQuery(query, PageRequest.of(0, 100));
 
-                        // Then - 預期找到姓王的員工
+                        // Then - 預期找到姓王的員工 (王小明, 張老王)
                         assertThat(result)
                                         .as("應返回姓名包含'王'的員工")
-                                        .hasSize(1)
+                                        .hasSize(2)
                                         .allMatch(e -> e.getFullName().contains("王"));
                 }
 
@@ -135,7 +136,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         // Given - 合約 ORG_E007
                         QueryGroup query = QueryBuilder.where()
                                         .eq("employment_status", "PROBATION")
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -162,16 +163,16 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         // Given - 合約 ORG_E011
                         QueryGroup query = QueryBuilder.where()
                                         .gte("hire_date", "2025-01-01")
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
                         List<Employee> result = employeeRepository.findByQuery(query, PageRequest.of(0, 100));
 
-                        // Then - 預期 3 筆 2025-01-01 之後到職的員工
+                        // Then - 預期 6 筆 2025-01-01 之後到職的員工 (3 ACTIVE + 3 PROBATION)
                         assertThat(result)
                                         .as("應返回 2025-01-01 之後到職的員工")
-                                        .hasSize(3);
+                                        .hasSize(6);
                 }
         }
 
@@ -188,7 +189,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         // Given
                         QueryGroup query = QueryBuilder.where()
                                         .in("employment_status", List.of("ACTIVE", "PROBATION"))
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -215,7 +216,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                 void findAll_Page0_ShouldReturnFirstPage() {
                         // Given
                         QueryGroup query = QueryBuilder.where()
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -232,7 +233,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                 void findAll_Page1_ShouldReturnSecondPage() {
                         // Given
                         QueryGroup query = QueryBuilder.where()
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -259,7 +260,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         // Given
                         QueryGroup query = QueryBuilder.where()
                                         .eq("employment_status", "ACTIVE")
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -284,7 +285,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                 void findAll_WithSoftDeleteFilter_ShouldExcludeDeleted() {
                         // Given
                         QueryGroup queryWithFilter = QueryBuilder.where()
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         QueryGroup queryWithoutFilter = QueryBuilder.where().build();
@@ -316,9 +317,9 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                 void findByDepartmentAndStatus_ShouldReturnMatchingEmployees() {
                         // Given
                         QueryGroup query = QueryBuilder.where()
-                                        .eq("department_id", "D001")
+                                        .eq("department_id", "d0000001-0001-0001-0001-000000000001")
                                         .eq("employment_status", "ACTIVE")
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -336,10 +337,10 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                 void findByMultipleConditions_ShouldReturnMatchingEmployees() {
                         // Given
                         QueryGroup query = QueryBuilder.where()
-                                        .eq("department_id", "D001")
+                                        .eq("department_id", "d0000001-0001-0001-0001-000000000001")
                                         .eq("employment_status", "ACTIVE")
-                                        .like("full_name", "%大明%")
-                                        .eq("is_deleted", 0)
+                                        .like("full_name", "%小明%")
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -349,7 +350,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         assertThat(result)
                                         .as("應返回符合所有條件的員工")
                                         .hasSize(1)
-                                        .allMatch(e -> e.getFullName().contains("大明"));
+                                        .allMatch(e -> e.getFullName().contains("小明"));
                 }
         }
 
@@ -366,7 +367,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         // Given - 合約 ORG_E012
                         QueryGroup query = QueryBuilder.where()
                                         .eq("employment_status", "UNPAID_LEAVE")
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When
@@ -385,7 +386,7 @@ class EmployeeRepositoryIntegrationTest extends BaseTest {
                         // Given
                         QueryGroup query = QueryBuilder.where()
                                         .eq("employment_status", "PARENTAL_LEAVE")
-                                        .eq("is_deleted", 0)
+                                        .eq("is_deleted", false)
                                         .build();
 
                         // When

@@ -1,7 +1,8 @@
-import React from 'react';
-import { Button, Card, Space, Table, Tag, Typography } from 'antd';
 import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Button, Card, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { EmployeeViewModel } from '../model/EmployeeViewModel';
 
 const { Title } = Typography;
@@ -30,6 +31,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
   onAdd,
   onPageChange,
 }) => {
+  const navigate = useNavigate();
+
   const columns: ColumnsType<EmployeeViewModel> = [
     {
       title: '員工編號',
@@ -119,6 +122,12 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
             showTotal: (total) => `共 ${total} 筆`,
           }}
           onChange={handleTableChange}
+          onRow={(record) => ({
+            onClick: () => {
+              navigate(`/admin/employees/${record.id}`);
+            },
+            style: { cursor: 'pointer' },
+          })}
         />
       </Card>
     </div>

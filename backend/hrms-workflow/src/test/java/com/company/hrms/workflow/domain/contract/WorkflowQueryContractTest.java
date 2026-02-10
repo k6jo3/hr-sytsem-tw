@@ -28,7 +28,7 @@ public class WorkflowQueryContractTest extends BaseContractTest {
     void searchPendingTasks_ShouldMatchContract() throws Exception {
         // 1. 載入合約 (WFL_T001: 查詢個人待辦)
         String contract = loadContractSpecFromPath(
-                "d:/java/hr-sytsem-2/knowledge/05_Testing_Standards/Contracts/workflow_contracts.md");
+                "d:/git/hr-system2/hr-sytsem-2/contracts/workflow_contracts.md");
 
         // 2. 準備請求
         GetPendingTasksRequest req = new GetPendingTasksRequest();

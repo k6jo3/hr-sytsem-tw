@@ -1,12 +1,12 @@
 import type {
-  TimesheetEntryDto,
-  WeeklyTimesheetDto,
-  TimesheetStatus,
+    TimesheetEntryDto,
+    TimesheetStatus,
+    WeeklyTimesheetDto,
 } from '../api/TimesheetTypes';
 import type {
-  TimesheetEntryViewModel,
-  WeeklyTimesheetSummary,
-  DailyHoursSummary,
+    DailyHoursSummary,
+    TimesheetEntryViewModel,
+    WeeklyTimesheetSummary,
 } from '../model/TimesheetViewModel';
 
 /**
@@ -47,15 +47,20 @@ export class TimesheetViewModelFactory {
    */
   static createWeeklySummary(dto: WeeklyTimesheetDto): WeeklyTimesheetSummary {
     return {
+      id: dto.id,
+      employeeId: dto.employee_id,
+      employeeName: dto.employee_name,
       weekStartDate: dto.week_start_date,
       weekEndDate: dto.week_end_date,
       weekDisplay: this.formatWeekDisplay(dto.week_start_date, dto.week_end_date),
       entries: this.createListFromDTOs(dto.entries),
       totalHours: dto.total_hours,
+      status: dto.status,
       statusLabel: this.mapStatusLabel(dto.status),
       statusColor: this.mapStatusColor(dto.status),
       canSubmit: this.canSubmit(dto.status),
       canEdit: this.canEdit(dto.status),
+      rejectionReason: dto.rejection_reason,
     };
   }
 
@@ -92,6 +97,7 @@ export class TimesheetViewModelFactory {
       SUBMITTED: '已提交',
       APPROVED: '已核准',
       REJECTED: '已駁回',
+      LOCKED: '已鎖定',
     };
     return labelMap[status];
   }
@@ -105,6 +111,7 @@ export class TimesheetViewModelFactory {
       SUBMITTED: 'processing',
       APPROVED: 'success',
       REJECTED: 'error',
+      LOCKED: 'warning',
     };
     return colorMap[status];
   }

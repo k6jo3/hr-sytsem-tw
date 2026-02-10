@@ -19,6 +19,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.attendance.api.request.leave.ApplyLeaveRequest;
@@ -51,6 +52,29 @@ import com.company.hrms.common.test.base.BaseApiIntegrationTest;
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("請假管理 API 整合測試")
 class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
+
+	@org.springframework.boot.test.mock.mockito.MockBean
+	private com.company.hrms.attendance.infrastructure.client.organization.OrganizationServiceClient organizationServiceClient;
+
+	@Override
+	protected ResultActions performGet(String url) throws Exception {
+		return super.performGet(url);
+	}
+
+	@Override
+	protected ResultActions performPost(String url, Object request) throws Exception {
+		return super.performPost(url, request);
+	}
+
+	@Override
+	protected ResultActions performPut(String url, Object request) throws Exception {
+		return super.performPut(url, request);
+	}
+
+	@Override
+	protected ResultActions performDelete(String url) throws Exception {
+		return super.performDelete(url);
+	}
 
 	@BeforeEach
 	void setupSecurity() {

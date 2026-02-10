@@ -47,8 +47,8 @@ public class NationalId {
             throw new DomainException("NATIONAL_ID_FORMAT_INVALID", "身分證字號格式無效");
         }
 
-        if (!validateChecksum(value)) {
-            throw new DomainException("INVALID_NATIONAL_ID_CHECKSUM", "身分證字號檢核錯誤");
+        if (!validateChecksum(normalized)) {
+            throw new DomainException("NATIONAL_ID_CHECKSUM_INVALID", "身分證字號檢核錯誤");
         }
 
         this.value = normalized;

@@ -13,6 +13,10 @@ describe('UserViewModelFactory', () => {
       email: 'john.doe@example.com',
       status: 'ACTIVE',
       role_list: ['ADMIN', 'HR_MANAGER'],
+      role_ids: ['role-001', 'role-002'],
+      display_name: 'John Doe',
+      must_change_password: false,
+      updated_at: '2024-01-01T00:00:00Z',
       avatar_url: 'https://example.com/avatar.jpg',
       created_at: '2024-01-01T00:00:00Z',
       last_login_at: '2024-12-01T00:00:00Z',
@@ -41,6 +45,10 @@ describe('UserViewModelFactory', () => {
       email: 'jane.smith@example.com',
       status: 'ACTIVE',
       role_list: ['EMPLOYEE'],
+      role_ids: ['role-003'],
+      display_name: 'Jane Smith',
+      must_change_password: false,
+      updated_at: '2024-01-01T00:00:00Z',
       created_at: '2024-01-01T00:00:00Z',
     };
 
@@ -66,6 +74,10 @@ describe('UserViewModelFactory', () => {
         email: 'test@example.com',
         status,
         role_list: [],
+        role_ids: [],
+        display_name: 'Test User',
+        must_change_password: false,
+        updated_at: '2024-01-01T00:00:00Z',
         created_at: '2024-01-01T00:00:00Z',
       };
 
@@ -84,6 +96,10 @@ describe('UserViewModelFactory', () => {
         email: 'user1@example.com',
         status: 'ACTIVE',
         role_list: ['ADMIN'],
+        role_ids: ['role-001'],
+        display_name: 'User One',
+        must_change_password: false,
+        updated_at: '2024-01-01T00:00:00Z',
         created_at: '2024-01-01T00:00:00Z',
       },
       {
@@ -94,6 +110,10 @@ describe('UserViewModelFactory', () => {
         email: 'user2@example.com',
         status: 'INACTIVE',
         role_list: ['EMPLOYEE'],
+        role_ids: ['role-002'],
+        display_name: 'User Two',
+        must_change_password: false,
+        updated_at: '2024-01-01T00:00:00Z',
         created_at: '2024-01-01T00:00:00Z',
       },
     ];

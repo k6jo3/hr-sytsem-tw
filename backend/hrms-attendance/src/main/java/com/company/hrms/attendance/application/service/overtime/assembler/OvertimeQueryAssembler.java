@@ -14,36 +14,33 @@ public class OvertimeQueryAssembler {
     public QueryGroup toQueryGroup(GetOvertimeListRequest request) {
         QueryGroup query = QueryGroup.and();
 
-        // 1. 基礎過濾: 未刪除
-        query.eq("is_deleted", 0);
-
-        // 2. 狀態
+        // 1. 狀態
         if (request.getStatus() != null && !request.getStatus().isBlank()) {
             query.eq("status", request.getStatus());
         }
 
-        // 3. 員工 ID
+        // 2. 員工 ID
         if (request.getEmployeeId() != null && !request.getEmployeeId().isBlank()) {
             query.eq("employee_id", request.getEmployeeId());
         }
 
-        // 4. 加班類型
+        // 3. 加班類型
         if (request.getOvertimeType() != null && !request.getOvertimeType().isBlank()) {
             query.eq("overtime_type", request.getOvertimeType());
         }
 
-        // 5. 部門
+        // 4. 部門
         if (request.getDeptId() != null && !request.getDeptId().isBlank()) {
             query.eq("department_id", request.getDeptId());
         }
 
-        // 6. 日期 (大於等於)
+        // 4. 日期
         if (request.getStartDate() != null) {
-            query.gte("overtime_date", request.getStartDate().toString());
+            query.gte("overtime_date", request.getStartDate());
         }
 
         if (request.getEndDate() != null) {
-            query.lte("overtime_date", request.getEndDate().toString());
+            query.lte("overtime_date", request.getEndDate());
         }
 
         return query;

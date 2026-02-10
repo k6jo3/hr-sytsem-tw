@@ -26,15 +26,20 @@ export interface TimesheetEntryViewModel {
  * Weekly Timesheet Summary ViewModel
  */
 export interface WeeklyTimesheetSummary {
+  id: string;
+  employeeId: string;
+  employeeName: string;
   weekStartDate: string;
   weekEndDate: string;
   weekDisplay: string;
   entries: TimesheetEntryViewModel[];
   totalHours: number;
+  status: string;
   statusLabel: string;
   statusColor: string;
   canSubmit: boolean;
   canEdit: boolean;
+  rejectionReason?: string;
 }
 
 /**

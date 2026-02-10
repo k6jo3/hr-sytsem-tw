@@ -62,7 +62,7 @@ class AttendanceRecordRepositoryIntegrationTest extends BaseTest {
                         // 輸入: {"employeeId":"E001","date":"2025-01-15"}
                         QueryGroup query = QueryBuilder.where()
                                         .eq("employeeId", "E001")
-                                        .eq("date", "2025-01-15")
+                                        .eq("recordDate", "2025-01-15")
                                         .build();
 
                         // When
@@ -152,8 +152,8 @@ class AttendanceRecordRepositoryIntegrationTest extends BaseTest {
                         // Note: departmentId not in PO, commenting out for now or just fixing date
                         QueryGroup query = QueryBuilder.where()
                                         // .eq("departmentId", "D001")
-                                        .gte("date", "2025-01-01")
-                                        .lte("date", "2025-01-31")
+                                        .gte("recordDate", "2025-01-01")
+                                        .lte("recordDate", "2025-01-31")
                                         .build();
 
                         // When
@@ -172,7 +172,7 @@ class AttendanceRecordRepositoryIntegrationTest extends BaseTest {
                 void queryBySpecificDate() {
                         // Given
                         QueryGroup query = QueryBuilder.where()
-                                        .eq("date", "2025-01-17")
+                                        .eq("recordDate", "2025-01-17")
                                         .build();
 
                         // When
@@ -220,8 +220,8 @@ class AttendanceRecordRepositoryIntegrationTest extends BaseTest {
                         // Given
                         QueryGroup query = QueryBuilder.where()
                                         .eq("employeeId", "E001")
-                                        .gte("date", "2025-01-15")
-                                        .lte("date", "2025-01-18")
+                                        .gte("recordDate", "2025-01-15")
+                                        .lte("recordDate", "2025-01-18")
                                         .build();
 
                         // When

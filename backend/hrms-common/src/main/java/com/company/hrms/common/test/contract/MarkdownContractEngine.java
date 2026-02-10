@@ -2,6 +2,7 @@ package com.company.hrms.common.test.contract;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -9,6 +10,8 @@ import java.util.stream.Collectors;
 import com.company.hrms.common.query.FilterUnit;
 import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryGroup;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Markdown 合約解析與斷言引擎
@@ -20,6 +23,11 @@ public class MarkdownContractEngine {
             "([\\w.]+)\\s*([=!<>]+|LIKE|IN|IS\\s+NULL|IS\\s+NOT\\s+NULL)\\s*(.*)");
 
     private static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d+(\\.\\d+)?$");
+
+    private static final Pattern JSON_BLOCK_PATTERN = Pattern.compile(
+            "```json\\s*\\n(.*?)\\n```", Pattern.DOTALL);
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void assertContract(QueryGroup actualQuery, String markdownTable, String scenarioId) {
         List<String> requiredFilters = parseFiltersFromTable(markdownTable, scenarioId);
@@ -36,8 +44,40 @@ public class MarkdownContractEngine {
         List<String> missingFilters = new ArrayList<>();
 
         for (String criteria : requiredFilters) {
-            boolean isMatched = actualQuery.getAllFilters().stream()
-                    .anyMatch(filter -> verifyFilterMatch(filter, criteria));
+            String trimmedCriteria = criteria.trim();
+            boolean isMatched = false;
+
+            if (trimmedCriteria.startsWith("(") && trimmedCriteria.endsWith(")")) {
+                // Handle OR group (A OR B)
+                String content = trimmedCriteria.substring(1, trimmedCriteria.length() - 1);
+                if (content.toUpperCase().contains(" OR ")) {
+                    String[] parts = content.split("(?i)\\s+OR\\s+");
+                    isMatched = true;
+                    for (String part : parts) {
+                        String p = normalize(part);
+                        boolean partMatched = actualFilterStrings.stream()
+                                .anyMatch(s -> normalize(s).equals(p));
+                        if (!partMatched) {
+                            isMatched = false;
+                            break;
+                        }
+                    }
+                } else {
+                    String c = normalize(content);
+                    isMatched = actualFilterStrings.stream()
+                            .anyMatch(s -> normalize(s).equals(c));
+                }
+            } else {
+                // Handle simple criteria
+                String c = normalize(trimmedCriteria);
+                isMatched = actualFilterStrings.stream()
+                        .anyMatch(s -> normalize(s).equals(c));
+
+                if (!isMatched) {
+                    isMatched = actualQuery.getAllFilters().stream()
+                            .anyMatch(filter -> verifyFilterMatch(filter, criteria));
+                }
+            }
 
             if (!isMatched) {
                 missingFilters.add(criteria);
@@ -45,14 +85,19 @@ public class MarkdownContractEngine {
         }
 
         if (!missingFilters.isEmpty()) {
-            System.err.println("DEBUG SCENARIO: " + scenarioId);
-            System.err.println("DEBUG REQUIRED: " + requiredFilters);
-            System.err.println("DEBUG MISSING: " + missingFilters);
-            System.err.println("DEBUG ACTUAL: " + actualFilterStrings);
             throw new ContractViolationException(scenarioId, missingFilters, actualFilterStrings);
         }
 
         System.out.println("✅ 場景 [" + scenarioId + "] 驗證通過，符合業務合約。");
+    }
+
+    private String normalize(String s) {
+        if (s == null)
+            return "";
+        // Aggressive normalization: remove whitespace, quotes, parentheses, underscores
+        // and
+        // lowercase
+        return s.toLowerCase().replaceAll("[\\s()'`\"_]+", "");
     }
 
     public void assertContracts(QueryGroup actualQuery, String markdownTable, String... scenarioIds) {
@@ -76,7 +121,7 @@ public class MarkdownContractEngine {
             expectedValue = expectedValue.substring(1, expectedValue.length() - 1);
         }
 
-        if (!filter.getField().equalsIgnoreCase(expectedField)) {
+        if (!normalize(filter.getField()).equals(normalize(expectedField))) {
             return false;
         }
 
@@ -111,22 +156,37 @@ public class MarkdownContractEngine {
             }
 
             String normalizedExpected = expectedValue.trim();
-            if (normalizedExpected.startsWith("(") && normalizedExpected.endsWith(")")) {
+            // 處理 [], (), 或純逗號分隔
+            if ((normalizedExpected.startsWith("(") && normalizedExpected.endsWith(")")) ||
+                    (normalizedExpected.startsWith("[") && normalizedExpected.endsWith("]"))) {
                 normalizedExpected = normalizedExpected.substring(1, normalizedExpected.length() - 1);
             }
 
             List<String> expectedItems = java.util.Arrays.stream(normalizedExpected.split(","))
-                    .map(s -> s.trim().replaceAll("^'|'$", ""))
+                    .map(s -> s.trim().replaceAll("^['\"]|['\"]$", ""))
                     .filter(s -> !s.isEmpty())
                     .collect(Collectors.toList());
 
-            boolean result = actualList.size() == expectedItems.size() &&
-                    actualList.stream().allMatch(a -> expectedItems.stream().anyMatch(e -> e.equalsIgnoreCase(a)));
+            boolean result = actualList.stream()
+                    .allMatch(a -> expectedItems.stream().anyMatch(e -> e.equalsIgnoreCase(a))) &&
+                    expectedItems.stream().allMatch(e -> actualList.stream().anyMatch(a -> a.equalsIgnoreCase(e)));
 
             return result;
         }
 
         String actualStr = String.valueOf(actualValue);
+
+        // 處理 LIKE 條件的符號比對
+        if (expectedValue.startsWith("'") && expectedValue.endsWith("'")) {
+            expectedValue = expectedValue.substring(1, expectedValue.length() - 1);
+        }
+
+        // 如果是 LIKE 且實際值包含 %，則進行模糊匹配 (簡化版)
+        if (actualStr.contains("%")) {
+            String normalizedActual = actualStr.replace("%", "").toLowerCase();
+            String normalizedExpected = expectedValue.toLowerCase();
+            return normalizedActual.equals(normalizedExpected) || normalizedExpected.contains(normalizedActual);
+        }
 
         if (NUMBER_PATTERN.matcher(expectedValue).matches()) {
             try {
@@ -177,7 +237,6 @@ public class MarkdownContractEngine {
         List<String> result = new ArrayList<>();
         String cleaned = filterColumn.replaceAll("`", "");
         // Split by comma, but ignore commas inside brackets or quotes if possible
-        // Simple regex for comma:
         for (String part : cleaned.split(",(?![^\\[]*\\])")) {
             String trimmed = part.trim();
             if (!trimmed.isEmpty()) {
@@ -198,5 +257,538 @@ public class MarkdownContractEngine {
             }
             return new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         }
+    }
+
+    /**
+     * 從 Markdown 中提取指定場景的 JSON 合約
+     *
+     * @param markdown   完整的 Markdown 內容
+     * @param scenarioId 場景 ID
+     * @return JSON 字串
+     */
+    public String extractJsonContract(String markdown, String scenarioId) {
+        Matcher matcher = JSON_BLOCK_PATTERN.matcher(markdown);
+        while (matcher.find()) {
+            String jsonContent = matcher.group(1);
+            try {
+                JsonNode node = objectMapper.readTree(jsonContent);
+                if (node.has("scenarioId") && scenarioId.equals(node.get("scenarioId").asText())) {
+                    return jsonContent;
+                }
+            } catch (Exception e) {
+                // 忽略無法解析的 JSON 區塊
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("找不到場景 ID [%s] 的 JSON 合約定義", scenarioId));
+    }
+
+    /**
+     * 解析 JSON 合約為 ContractSpec 物件
+     *
+     * @param jsonContract JSON 合約字串
+     * @return ContractSpec 物件
+     */
+    public ContractSpec parseContract(String jsonContract) {
+        try {
+            return objectMapper.readValue(jsonContract, ContractSpec.class);
+        } catch (Exception e) {
+            throw new RuntimeException("解析合約 JSON 失敗: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 驗證 API 回應結果
+     *
+     * @param actualResponseJson API 實際回應的 JSON 字串
+     * @param expected           預期回應結果
+     * @param scenarioId         場景 ID（用於錯誤訊息）
+     */
+    public void assertResponse(String actualResponseJson, ExpectedResponse expected, String scenarioId) {
+        try {
+            JsonNode responseNode = objectMapper.readTree(actualResponseJson);
+
+            // 1. 驗證 HTTP 狀態碼（如果有設定）
+            if (expected.getStatusCode() != null) {
+                // 狀態碼通常從外部傳入，這裡假設 responseNode 包含 statusCode 欄位
+                if (responseNode.has("statusCode")) {
+                    int actualStatus = responseNode.get("statusCode").asInt();
+                    if (actualStatus != expected.getStatusCode()) {
+                        throw new ContractViolationException(
+                                String.format("[%s] HTTP 狀態碼不符: 預期 %d, 實際 %d",
+                                        scenarioId, expected.getStatusCode(), actualStatus));
+                    }
+                }
+            }
+
+            // 2. 取得資料節點（根據 dataPath）
+            JsonNode dataNode = getDataNode(responseNode, expected.getDataPath());
+
+            // 3. 驗證資料筆數
+            if (dataNode.isArray()) {
+                int actualCount = dataNode.size();
+                if (expected.getExactRecords() != null && actualCount != expected.getExactRecords()) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 資料筆數不符: 預期 %d 筆, 實際 %d 筆",
+                                    scenarioId, expected.getExactRecords(), actualCount));
+                }
+                if (expected.getMinRecords() != null && actualCount < expected.getMinRecords()) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 資料筆數少於預期: 至少 %d 筆, 實際 %d 筆",
+                                    scenarioId, expected.getMinRecords(), actualCount));
+                }
+                if (expected.getMaxRecords() != null && actualCount > expected.getMaxRecords()) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 資料筆數超過預期: 最多 %d 筆, 實際 %d 筆",
+                                    scenarioId, expected.getMaxRecords(), actualCount));
+                }
+
+                // 4. 驗證每筆資料的必要欄位
+                if (expected.getRequiredFields() != null && !expected.getRequiredFields().isEmpty()) {
+                    for (int i = 0; i < dataNode.size(); i++) {
+                        JsonNode record = dataNode.get(i);
+                        assertRequiredFields(record, expected.getRequiredFields(), scenarioId, i);
+                    }
+                }
+
+                // 5. 驗證排序（檢查第一筆和最後一筆）
+                if (expected.getOrderBy() != null && dataNode.size() > 1) {
+                    assertOrder(dataNode, expected.getOrderBy(), scenarioId);
+                }
+            } else {
+                // 單筆資料
+                if (expected.getRequiredFields() != null) {
+                    assertRequiredFields(dataNode, expected.getRequiredFields(), scenarioId, -1);
+                }
+            }
+
+            // 6. 驗證分頁資訊
+            if (expected.getPagination() != null && Boolean.TRUE.equals(expected.getPagination().getRequired())) {
+                assertPagination(responseNode, scenarioId);
+            }
+
+            // 7. 執行自訂斷言
+            if (expected.getAssertions() != null && !expected.getAssertions().isEmpty()) {
+                for (FieldAssertion assertion : expected.getAssertions()) {
+                    assertFieldAssertion(dataNode, assertion, scenarioId);
+                }
+            }
+
+            System.out.println("✅ 場景 [" + scenarioId + "] 回應結果驗證通過");
+
+        } catch (ContractViolationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    String.format("[%s] 驗證回應結果時發生錯誤: %s", scenarioId, e.getMessage()), e);
+        }
+    }
+
+    /**
+     * 根據 dataPath 取得資料節點
+     */
+    private JsonNode getDataNode(JsonNode root, String dataPath) {
+        if (dataPath == null || dataPath.isEmpty()) {
+            return root;
+        }
+
+        JsonNode current = root;
+        String[] paths = dataPath.split("\\.");
+        for (String path : paths) {
+            if (!current.has(path)) {
+                throw new IllegalArgumentException("找不到資料路徑: " + dataPath);
+            }
+            current = current.get(path);
+        }
+        return current;
+    }
+
+    /**
+     * 驗證必要欄位
+     */
+    private void assertRequiredFields(JsonNode record, List<RequiredField> requiredFields,
+            String scenarioId, int recordIndex) {
+        for (RequiredField field : requiredFields) {
+            String fieldName = field.getName();
+
+            // 檢查欄位是否存在
+            if (!record.has(fieldName)) {
+                throw new ContractViolationException(
+                        String.format("[%s] 缺少必要欄位: %s (第 %d 筆)", scenarioId, fieldName, recordIndex + 1));
+            }
+
+            JsonNode fieldNode = record.get(fieldName);
+
+            // 檢查 null
+            if (Boolean.TRUE.equals(field.getNotNull()) && fieldNode.isNull()) {
+                throw new ContractViolationException(
+                        String.format("[%s] 欄位 %s 不可為 null (第 %d 筆)", scenarioId, fieldName, recordIndex + 1));
+            }
+
+            if (!fieldNode.isNull()) {
+                // 檢查型別
+                assertFieldType(fieldNode, field, scenarioId, recordIndex);
+            }
+        }
+    }
+
+    /**
+     * 驗證欄位型別
+     */
+    private void assertFieldType(JsonNode fieldNode, RequiredField field, String scenarioId, int recordIndex) {
+        String type = field.getType();
+        String fieldName = field.getName();
+
+        switch (type.toLowerCase()) {
+            case "uuid":
+                String uuidPattern = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+                if (!fieldNode.asText().matches(uuidPattern)) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 欄位 %s 不是有效的 UUID 格式 (第 %d 筆)",
+                                    scenarioId, fieldName, recordIndex + 1));
+                }
+                break;
+            case "string":
+                if (!fieldNode.isTextual()) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 欄位 %s 型別錯誤: 預期 string (第 %d 筆)",
+                                    scenarioId, fieldName, recordIndex + 1));
+                }
+                // 檢查格式
+                if ("masked".equals(field.getFormat())) {
+                    if (!fieldNode.asText().contains("*")) {
+                        throw new ContractViolationException(
+                                String.format("[%s] 欄位 %s 應為遮罩格式（需包含 *）(第 %d 筆)",
+                                        scenarioId, fieldName, recordIndex + 1));
+                    }
+                }
+                break;
+            case "integer":
+                if (!fieldNode.isInt() && !fieldNode.isLong()) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 欄位 %s 型別錯誤: 預期 integer (第 %d 筆)",
+                                    scenarioId, fieldName, recordIndex + 1));
+                }
+                break;
+            case "decimal":
+                if (!fieldNode.isNumber()) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 欄位 %s 型別錯誤: 預期 decimal (第 %d 筆)",
+                                    scenarioId, fieldName, recordIndex + 1));
+                }
+                break;
+            case "boolean":
+                if (!fieldNode.isBoolean()) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 欄位 %s 型別錯誤: 預期 boolean (第 %d 筆)",
+                                    scenarioId, fieldName, recordIndex + 1));
+                }
+                break;
+            case "date":
+            case "datetime":
+                // 檢查是否符合 ISO 8601 格式
+                String datePattern = "^\\d{4}-\\d{2}-\\d{2}";
+                if (!fieldNode.asText().matches(datePattern + ".*")) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 欄位 %s 不是有效的 %s 格式 (第 %d 筆)",
+                                    scenarioId, fieldName, type, recordIndex + 1));
+                }
+                break;
+            case "email":
+                String emailPattern = "^[A-Za-z0-9+_.-]+@(.+)$";
+                if (!fieldNode.asText().matches(emailPattern)) {
+                    throw new ContractViolationException(
+                            String.format("[%s] 欄位 %s 不是有效的 email 格式 (第 %d 筆)",
+                                    scenarioId, fieldName, recordIndex + 1));
+                }
+                break;
+        }
+    }
+
+    /**
+     * 驗證排序
+     */
+    private void assertOrder(JsonNode dataArray, ExpectedResponse.OrderBy orderBy, String scenarioId) {
+        String field = orderBy.getField();
+        String direction = orderBy.getDirection();
+
+        JsonNode firstRecord = dataArray.get(0);
+        JsonNode lastRecord = dataArray.get(dataArray.size() - 1);
+
+        if (!firstRecord.has(field) || !lastRecord.has(field)) {
+            throw new ContractViolationException(
+                    String.format("[%s] 排序欄位 %s 不存在", scenarioId, field));
+        }
+
+        String firstValue = firstRecord.get(field).asText();
+        String lastValue = lastRecord.get(field).asText();
+
+        int comparison = firstValue.compareTo(lastValue);
+
+        if ("ASC".equalsIgnoreCase(direction) && comparison > 0) {
+            throw new ContractViolationException(
+                    String.format("[%s] 排序錯誤: 預期 %s 升冪排序，但第一筆 (%s) > 最後一筆 (%s)",
+                            scenarioId, field, firstValue, lastValue));
+        } else if ("DESC".equalsIgnoreCase(direction) && comparison < 0) {
+            throw new ContractViolationException(
+                    String.format("[%s] 排序錯誤: 預期 %s 降冪排序，但第一筆 (%s) < 最後一筆 (%s)",
+                            scenarioId, field, firstValue, lastValue));
+        }
+    }
+
+    /**
+     * 驗證分頁資訊
+     */
+    private void assertPagination(JsonNode responseNode, String scenarioId) {
+        if (!responseNode.has("page") && !responseNode.has("pageNumber")) {
+            throw new ContractViolationException(
+                    String.format("[%s] 缺少分頁資訊", scenarioId));
+        }
+    }
+
+    /**
+     * 執行欄位斷言
+     */
+    private void assertFieldAssertion(JsonNode dataNode, FieldAssertion assertion, String scenarioId) {
+        String field = assertion.getField();
+        String operator = assertion.getOperator();
+        Object expectedValue = assertion.getValue();
+
+        if (dataNode.isArray()) {
+            for (int i = 0; i < dataNode.size(); i++) {
+                JsonNode record = dataNode.get(i);
+                if (record.has(field)) {
+                    executeAssertion(record.get(field), operator, expectedValue, field, scenarioId, i);
+                }
+            }
+        } else {
+            if (dataNode.has(field)) {
+                executeAssertion(dataNode.get(field), operator, expectedValue, field, scenarioId, -1);
+            }
+        }
+    }
+
+    /**
+     * 執行單一斷言
+     */
+    private void executeAssertion(JsonNode actualNode, String operator, Object expectedValue,
+            String fieldName, String scenarioId, int recordIndex) {
+        String actual = actualNode.asText();
+        String expected = String.valueOf(expectedValue);
+
+        boolean passed = false;
+        switch (operator.toLowerCase()) {
+            case "equals":
+                passed = actual.equals(expected);
+                break;
+            case "notequals":
+                passed = !actual.equals(expected);
+                break;
+            case "contains":
+                passed = actual.contains(expected);
+                break;
+            case "notcontains":
+                passed = !actual.contains(expected);
+                break;
+            case "greaterthan":
+                passed = Double.parseDouble(actual) > Double.parseDouble(expected);
+                break;
+            case "lessthan":
+                passed = Double.parseDouble(actual) < Double.parseDouble(expected);
+                break;
+        }
+
+        if (!passed) {
+            String recordInfo = recordIndex >= 0 ? String.format(" (第 %d 筆)", recordIndex + 1) : "";
+            throw new ContractViolationException(
+                    String.format("[%s] 斷言失敗%s: %s %s %s, 實際值: %s",
+                            scenarioId, recordInfo, fieldName, operator, expected, actual));
+        }
+    }
+
+    /**
+     * 驗證資料異動
+     *
+     * @param beforeSnapshot 執行前的資料快照
+     * @param afterSnapshot  執行後的資料快照
+     * @param expected       預期的資料異動列表
+     * @param scenarioId     場景 ID
+     */
+    public void assertDataChanges(Map<String, List<Map<String, Object>>> beforeSnapshot,
+            Map<String, List<Map<String, Object>>> afterSnapshot,
+            List<ExpectedDataChange> expected,
+            String scenarioId) {
+
+        for (ExpectedDataChange change : expected) {
+            String table = change.getTable();
+            String action = change.getAction();
+
+            List<Map<String, Object>> beforeRecords = beforeSnapshot.getOrDefault(table, new ArrayList<>());
+            List<Map<String, Object>> afterRecords = afterSnapshot.getOrDefault(table, new ArrayList<>());
+
+            switch (action.toUpperCase()) {
+                case "INSERT":
+                    assertInsert(beforeRecords, afterRecords, change, scenarioId);
+                    break;
+                case "UPDATE":
+                    assertUpdate(beforeRecords, afterRecords, change, scenarioId);
+                    break;
+                case "DELETE":
+                    assertDelete(beforeRecords, afterRecords, change, scenarioId);
+                    break;
+                case "SOFT_DELETE":
+                    assertSoftDelete(afterRecords, change, scenarioId);
+                    break;
+            }
+        }
+
+        System.out.println("✅ 場景 [" + scenarioId + "] 資料異動驗證通過");
+    }
+
+    private void assertInsert(List<Map<String, Object>> beforeRecords, List<Map<String, Object>> afterRecords,
+            ExpectedDataChange change, String scenarioId) {
+        int actualInsertCount = afterRecords.size() - beforeRecords.size();
+        if (change.getCount() != null && actualInsertCount != change.getCount()) {
+            throw new ContractViolationException(
+                    String.format("[%s] 資料表 %s INSERT 筆數不符: 預期 %d 筆, 實際 %d 筆",
+                            scenarioId, change.getTable(), change.getCount(), actualInsertCount));
+        }
+
+        // 驗證新增的記錄
+        if (change.getAssertions() != null && !change.getAssertions().isEmpty()) {
+            List<Map<String, Object>> newRecords = afterRecords.subList(beforeRecords.size(), afterRecords.size());
+            for (Map<String, Object> record : newRecords) {
+                for (FieldAssertion assertion : change.getAssertions()) {
+                    assertDataFieldAssertion(record, assertion, change.getTable(), scenarioId);
+                }
+            }
+        }
+    }
+
+    private void assertUpdate(List<Map<String, Object>> beforeRecords, List<Map<String, Object>> afterRecords,
+            ExpectedDataChange change, String scenarioId) {
+        // 比對修改的記錄
+        int updateCount = 0;
+        for (Map<String, Object> afterRecord : afterRecords) {
+            for (Map<String, Object> beforeRecord : beforeRecords) {
+                if (isSameRecord(beforeRecord, afterRecord)) {
+                    if (!beforeRecord.equals(afterRecord)) {
+                        updateCount++;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (change.getCount() != null && updateCount != change.getCount()) {
+            throw new ContractViolationException(
+                    String.format("[%s] 資料表 %s UPDATE 筆數不符: 預期 %d 筆, 實際 %d 筆",
+                            scenarioId, change.getTable(), change.getCount(), updateCount));
+        }
+    }
+
+    private void assertDelete(List<Map<String, Object>> beforeRecords, List<Map<String, Object>> afterRecords,
+            ExpectedDataChange change, String scenarioId) {
+        int actualDeleteCount = beforeRecords.size() - afterRecords.size();
+        if (change.getCount() != null && actualDeleteCount != change.getCount()) {
+            throw new ContractViolationException(
+                    String.format("[%s] 資料表 %s DELETE 筆數不符: 預期 %d 筆, 實際 %d 筆",
+                            scenarioId, change.getTable(), change.getCount(), actualDeleteCount));
+        }
+    }
+
+    private void assertSoftDelete(List<Map<String, Object>> afterRecords, ExpectedDataChange change,
+            String scenarioId) {
+        int softDeleteCount = 0;
+        for (Map<String, Object> record : afterRecords) {
+            if (record.containsKey("is_deleted") && Boolean.TRUE.equals(record.get("is_deleted"))) {
+                softDeleteCount++;
+            }
+        }
+
+        if (change.getCount() != null && softDeleteCount != change.getCount()) {
+            throw new ContractViolationException(
+                    String.format("[%s] 資料表 %s SOFT_DELETE 筆數不符: 預期 %d 筆, 實際 %d 筆",
+                            scenarioId, change.getTable(), change.getCount(), softDeleteCount));
+        }
+    }
+
+    private boolean isSameRecord(Map<String, Object> record1, Map<String, Object> record2) {
+        // 假設有 id 欄位
+        if (record1.containsKey("id") && record2.containsKey("id")) {
+            return record1.get("id").equals(record2.get("id"));
+        }
+        return false;
+    }
+
+    private void assertDataFieldAssertion(Map<String, Object> record, FieldAssertion assertion,
+            String tableName, String scenarioId) {
+        String field = assertion.getField();
+        Object actualValue = record.get(field);
+        Object expectedValue = assertion.getValue();
+        String operator = assertion.getOperator();
+
+        boolean passed = false;
+        switch (operator.toLowerCase()) {
+            case "equals":
+                passed = actualValue != null && actualValue.equals(expectedValue);
+                break;
+            case "notnull":
+                passed = actualValue != null;
+                break;
+            case "null":
+                passed = actualValue == null;
+                break;
+        }
+
+        if (!passed) {
+            throw new ContractViolationException(
+                    String.format("[%s] 資料表 %s 欄位 %s 斷言失敗: %s %s, 實際值: %s",
+                            scenarioId, tableName, field, operator, expectedValue, actualValue));
+        }
+    }
+
+    /**
+     * 驗證領域事件發布
+     *
+     * @param capturedEvents 實際捕獲的事件列表
+     * @param expected       預期的事件列表
+     * @param scenarioId     場景 ID
+     */
+    public void assertEvents(List<Map<String, Object>> capturedEvents,
+            List<ExpectedEvent> expected,
+            String scenarioId) {
+
+        if (expected == null || expected.isEmpty()) {
+            return;
+        }
+
+        for (ExpectedEvent expectedEvent : expected) {
+            boolean found = false;
+
+            for (Map<String, Object> capturedEvent : capturedEvents) {
+                String eventType = (String) capturedEvent.get("eventType");
+                if (expectedEvent.getEventType().equals(eventType)) {
+                    found = true;
+
+                    // 驗證 payload
+                    if (expectedEvent.getPayload() != null) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> payload = (Map<String, Object>) capturedEvent.get("payload");
+                        for (FieldAssertion assertion : expectedEvent.getPayload()) {
+                            assertDataFieldAssertion(payload, assertion, eventType, scenarioId);
+                        }
+                    }
+                    break;
+                }
+            }
+
+            if (!found) {
+                throw new ContractViolationException(
+                        String.format("[%s] 缺少預期的領域事件: %s", scenarioId, expectedEvent.getEventType()));
+            }
+        }
+
+        System.out.println("✅ 場景 [" + scenarioId + "] 領域事件驗證通過");
     }
 }

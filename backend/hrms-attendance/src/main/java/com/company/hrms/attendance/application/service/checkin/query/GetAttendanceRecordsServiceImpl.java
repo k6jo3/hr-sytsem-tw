@@ -37,11 +37,11 @@ public class GetAttendanceRecordsServiceImpl
         }
 
         if (request.getStartDate() != null) {
-            builder.and("date", Operator.GTE, request.getStartDate());
+            builder.and("recordDate", Operator.GTE, request.getStartDate());
         }
 
         if (request.getEndDate() != null) {
-            builder.and("date", Operator.LTE, request.getEndDate());
+            builder.and("recordDate", Operator.LTE, request.getEndDate());
         }
 
         if (request.getStatus() != null && !request.getStatus().isBlank()) {

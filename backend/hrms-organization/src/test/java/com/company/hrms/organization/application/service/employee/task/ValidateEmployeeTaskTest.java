@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.organization.api.request.employee.CreateEmployeeRequest;
 import com.company.hrms.organization.application.service.employee.context.EmployeeContext;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
@@ -84,7 +85,7 @@ class ValidateEmployeeTaskTest {
             when(employeeRepository.existsByEmployeeNumber("EMP-001")).thenReturn(true);
 
             // When & Then
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            DomainException exception = assertThrows(DomainException.class,
                     () -> task.execute(context));
             assertTrue(exception.getMessage().contains("員工編號已存在"));
         }
@@ -97,7 +98,7 @@ class ValidateEmployeeTaskTest {
             when(employeeRepository.existsByEmail("wang@company.com")).thenReturn(true);
 
             // When & Then
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            DomainException exception = assertThrows(DomainException.class,
                     () -> task.execute(context));
             assertTrue(exception.getMessage().contains("Email 已存在"));
         }
@@ -111,7 +112,7 @@ class ValidateEmployeeTaskTest {
             when(employeeRepository.existsByNationalId("A123456789")).thenReturn(true);
 
             // When & Then
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            DomainException exception = assertThrows(DomainException.class,
                     () -> task.execute(context));
             assertTrue(exception.getMessage().contains("身分證號已存在"));
         }
@@ -130,6 +131,7 @@ class ValidateEmployeeTaskTest {
                     () -> task.execute(context));
             assertTrue(exception.getMessage().contains("部門不存在"));
         }
+
     }
 
     @Test

@@ -1,29 +1,29 @@
-import React, { type ReactNode } from 'react';
-import { Layout, Menu, type MenuProps, Avatar, Dropdown, Space } from 'antd';
 import {
-  HomeOutlined,
-  TeamOutlined,
-  ClockCircleOutlined,
-  DollarOutlined,
-  SafetyOutlined,
-  ProjectOutlined,
-  FieldTimeOutlined,
-  TrophyOutlined,
-  UserAddOutlined,
-  BookOutlined,
-  AuditOutlined,
-  BellOutlined,
-  FileOutlined,
-  BarChartOutlined,
-  UserOutlined,
-  SafetyCertificateOutlined,
-  LockOutlined,
-  LogoutOutlined,
-  SettingOutlined,
+    AuditOutlined,
+    BarChartOutlined,
+    BellOutlined,
+    BookOutlined,
+    ClockCircleOutlined,
+    DollarOutlined,
+    FieldTimeOutlined,
+    FileOutlined,
+    HomeOutlined,
+    LockOutlined,
+    LogoutOutlined,
+    ProjectOutlined,
+    SafetyCertificateOutlined,
+    SafetyOutlined,
+    SettingOutlined,
+    TeamOutlined,
+    TrophyOutlined,
+    UserAddOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '@store/hooks';
 import { logout } from '@store/authSlice';
+import { useAppDispatch, useAppSelector } from '@store/hooks';
+import { Avatar, Dropdown, Layout, Menu, Space, type MenuProps } from 'antd';
+import React, { type ReactNode } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const { Header, Sider, Content } = Layout;
 
@@ -81,6 +81,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
       icon: <SettingOutlined />,
       label: '系統管理',
       children: [
+        { key: '/admin/organization-tree', icon: <TeamOutlined />, label: '組織架構圖' },
         { key: '/admin/users', icon: <UserOutlined />, label: '使用者管理' },
         { key: '/admin/roles', icon: <SafetyCertificateOutlined />, label: '角色權限管理' },
         { key: '/admin/employees', icon: <TeamOutlined />, label: '員工管理' },
@@ -175,7 +176,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
             <Space style={{ cursor: 'pointer' }}>
               <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#667eea' }} />
-              <span>{user.fullName}</span>
+              <span>{user.username}</span>
             </Space>
           </Dropdown>
         )}

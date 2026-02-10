@@ -23,6 +23,7 @@ import com.company.hrms.attendance.domain.model.valueobject.ApplicationId;
 import com.company.hrms.attendance.domain.model.valueobject.LeavePeriodType;
 import com.company.hrms.attendance.domain.model.valueobject.LeaveTypeId;
 import com.company.hrms.attendance.domain.repository.ILeaveApplicationRepository;
+import com.company.hrms.common.exception.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LoadLeaveApplicationTask 測試")
@@ -85,7 +86,7 @@ class LoadLeaveApplicationTaskTest {
                     .thenReturn(Optional.empty());
 
             // When & Then
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
                     () -> task.execute(context));
             assertTrue(exception.getMessage().contains("找不到請假申請"));
         }

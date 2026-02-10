@@ -5,12 +5,13 @@
     <resultMap id="OvertimeApplicationResultMap" type="com.company.hrms.attendance.infrastructure.po.OvertimeApplicationPO">
         <id column="id" property="id"/>
         <result column="employee_id" property="employeeId"/>
-        <result column="date" property="date"/>
+        <result column="overtime_date" property="date"/>
         <result column="hours" property="hours"/>
         <result column="status" property="status"/>
         <result column="reason" property="reason"/>
         <result column="overtime_type" property="overtimeType"/>
         <result column="rejection_reason" property="rejectionReason"/>
+        <result column="is_deleted" property="isDeleted"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="created_by" property="createdBy"/>
@@ -18,7 +19,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, employee_id, date, hours, status, reason, overtime_type, rejection_reason,
+        id, employee_id, overtime_date, hours, status, reason, overtime_type, rejection_reason, is_deleted,
         created_at, updated_at, created_by, updated_by
     </sql>
 
@@ -32,24 +33,26 @@
         SELECT <include refid="Base_Column_List"/>
         FROM overtime_applications
         WHERE employee_id = #{employeeId}
-        ORDER BY date DESC
+          AND (is_deleted IS NULL OR is_deleted = 0)
+        ORDER BY overtime_date DESC
     </select>
 
     <select id="selectByEmployeeIdAndMonth" resultMap="OvertimeApplicationResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM overtime_applications
         WHERE employee_id = #{employeeId}
-          AND EXTRACT(YEAR FROM date) = #{year}
-          AND EXTRACT(MONTH FROM date) = #{month}
-        ORDER BY date
+          AND EXTRACT(YEAR FROM overtime_date) = #{year}
+          AND EXTRACT(MONTH FROM overtime_date) = #{month}
+          AND (is_deleted IS NULL OR is_deleted = 0)
+        ORDER BY overtime_date
     </select>
 
     <insert id="insert">
         INSERT INTO overtime_applications (
-            id, employee_id, date, hours, status, reason, overtime_type, rejection_reason,
+            id, employee_id, overtime_date, hours, status, reason, overtime_type, rejection_reason, is_deleted,
             created_at, updated_at, created_by, updated_by
         ) VALUES (
-            #{id}, #{employeeId}, #{date}, #{hours}, #{status}, #{reason}, #{overtimeType}, #{rejectionReason},
+            #{id}, #{employeeId}, #{date}, #{hours}, #{status}, #{reason}, #{overtimeType}, #{rejectionReason}, #{isDeleted},
             #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
         )
     </insert>
@@ -57,12 +60,13 @@
     <update id="update">
         UPDATE overtime_applications SET
             employee_id = #{employeeId},
-            date = #{date},
+            overtime_date = #{date},
             hours = #{hours},
             status = #{status},
             reason = #{reason},
             overtime_type = #{overtimeType},
             rejection_reason = #{rejectionReason},
+            is_deleted = #{isDeleted},
             updated_at = #{updatedAt},
             updated_by = #{updatedBy}
         WHERE id = #{id}

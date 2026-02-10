@@ -38,4 +38,4 @@ INSERT INTO leave_applications (id, employee_id, leave_type_id, start_date, end_
 -- 7. findByStatus(REJECTED): 預期 2 筆
 -- 8. findByStatus(CANCELLED): 預期 1 筆
 -- 9. findByEmployeeIdAndDateRange(E001, 2025-01-01, 2025-01-31): 預期 3 筆 (LA005, LA008, LA010)
--- 10. findByEmployeeIdAndDateRange(E002, 2025-01-01, 2025-01-31): 預期 3 筆 (LA006, LA009, LA011)
+-- 10. findByEmployeeIdAndDateRange(E002, 2025-01-01, 2025-01-31): 預期 4 筆 (LA002, LA006, LA009, LA011)

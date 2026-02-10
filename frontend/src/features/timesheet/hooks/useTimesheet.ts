@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import * as TimesheetApi from '../api/TimesheetApi';
+import { message } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
+import { TimesheetApi } from '../api/TimesheetApi';
+import type { SaveTimesheetEntryRequest } from '../api/TimesheetTypes';
 import { TimesheetViewModelFactory } from '../factory/TimesheetViewModelFactory';
 import type { WeeklyTimesheetSummary } from '../model/TimesheetViewModel';
 
@@ -24,25 +26,53 @@ export const useTimesheet = (weekStartDate: string) => {
   }, [weekStartDate]);
 
   useEffect(() => {
-    fetchWeeklyTimesheet();
-  }, [fetchWeeklyTimesheet]);
+    if (weekStartDate) {
+      fetchWeeklyTimesheet();
+    }
+  }, [weekStartDate, fetchWeeklyTimesheet]);
 
-  const handleSubmit = useCallback(async () => {
-    if (!summary) return;
+  const handleSaveEntry = async (entry: SaveTimesheetEntryRequest) => {
     try {
-      await TimesheetApi.submitTimesheet({
-        entries: summary.entries.map(e => ({
-          project_id: '',
-          work_date: e.workDate,
-          hours: e.hours,
-          description: e.description,
-        })),
+      await TimesheetApi.saveEntry({
+        ...entry,
+        timesheet_id: summary?.id,
       });
+      message.success('工時已儲存');
       await fetchWeeklyTimesheet();
     } catch (err) {
+      message.error(err instanceof Error ? err.message : '儲存失敗');
       throw err;
+    }
+  };
+
+  const handleDeleteEntry = async (entryId: string) => {
+    try {
+      await TimesheetApi.deleteEntry(entryId);
+      message.success('已刪除工時記錄');
+      await fetchWeeklyTimesheet();
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '刪除失敗');
+    }
+  };
+
+  const handleSubmit = useCallback(async () => {
+    if (!summary?.id) return;
+    try {
+      await TimesheetApi.submitTimesheet(summary.id);
+      message.success('工時已送出審核');
+      await fetchWeeklyTimesheet();
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : '送出失敗');
     }
   }, [summary, fetchWeeklyTimesheet]);
 
-  return { summary, loading, error, handleSubmit, refresh: fetchWeeklyTimesheet };
+  return { 
+    summary, 
+    loading, 
+    error, 
+    handleSaveEntry,
+    handleDeleteEntry,
+    handleSubmit, 
+    refresh: fetchWeeklyTimesheet 
+  };
 };

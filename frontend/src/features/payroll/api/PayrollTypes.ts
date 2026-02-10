@@ -33,14 +33,87 @@ export type PayrollItemCode =
 // ========== DTOs ==========
 
 /**
+ * 薪資結構項目 DTO
+ */
+export interface SalaryItemDto {
+  itemId: string;
+  code: string;
+  name: string;
+  type: 'EARNING' | 'DEDUCTION';
+  amount: number;
+  fixedAmount: boolean;
+  taxable: boolean;
+  insurable: boolean;
+}
+
+/**
+ * 薪資結構 DTO
+ */
+export interface SalaryStructureDto {
+  id: string;
+  employeeId: string;
+  payrollSystem: 'MONTHLY' | 'HOURLY';
+  payrollCycle: 'DAILY' | 'WEEKLY' | 'BI_WEEKLY' | 'MONTHLY';
+  monthlySalary?: number;
+  hourlyRate?: number;
+  calculatedHourlyRate?: number;
+  effectiveDate: string;
+  endDate?: string;
+  active: boolean;
+  items: SalaryItemDto[];
+}
+
+/**
+ * 薪資批次 DTO
+ */
+export interface PayrollRunDto {
+  runId: string;
+  organizationId: string;
+  name: string;
+  status: 'DRAFT' | 'CALCULATING' | 'COMPLETED' | 'APPROVED' | 'REJECTED' | 'PAID';
+  payrollSystem: string;
+  start: string;
+  end: string;
+  totalDays: number;
+  totalEmployees: number;
+  processedEmployees: number;
+  successCount: number;
+  failureCount: number;
+  totalGrossPay: number;
+  totalNetPay: number;
+  totalDeductions: number;
+  executedAt?: string;
+  completedAt?: string;
+  approvedAt?: string;
+  paidAt?: string;
+}
+
+/**
  * 薪資項目 DTO
  */
 export interface PayrollItemDto {
+// ... existing code ...
   item_code: PayrollItemCode;
   item_name: string;
   item_type: PayrollItemType;
   amount: number;
   description?: string;
+}
+
+/**
+ * 薪資項目定義 DTO
+ */
+export interface PayrollItemDefinitionDto {
+  id: string;
+  itemCode: string;
+  itemName: string;
+  itemType: 'EARNING' | 'DEDUCTION';
+  taxable: boolean;
+  insurable: boolean;
+  calculationFormula?: string;
+  description?: string;
+  displayOrder: number;
+  active: boolean;
 }
 
 /**
@@ -91,9 +164,61 @@ export interface PayslipSummaryDto {
 // ========== Request/Response Types ==========
 
 /**
+ * 薪資結構請求
+ */
+export interface CreateSalaryStructureRequest {
+  employeeId: string;
+  payrollSystem: string;
+  payrollCycle: string;
+  monthlySalary?: number;
+  hourlyRate?: number;
+  effectiveDate: string;
+  items: Omit<SalaryItemDto, 'itemId'>[];
+}
+
+export interface UpdateSalaryStructureRequest extends Partial<CreateSalaryStructureRequest> {
+  active?: boolean;
+}
+
+/**
+ * 薪資批次請求
+ */
+export interface StartPayrollRunRequest {
+  name: string;
+  payrollSystem: string;
+  start: string;
+  end: string;
+  payDate: string;
+}
+
+export interface PayrollRunActionRequest {
+  runId: string;
+  reason?: string;
+}
+
+/**
+ * 薪資單列表查詢請求
+ */
+export interface GetPayslipListRequest {
+  runId?: string;
+  employeeId?: string;
+  status?: string;
+  yearMonth?: string;
+  page?: number;
+  page_size?: number;
+}
+
+export interface GetPayslipListResponse {
+  items: PayslipDto[];
+  total: number;
+}
+
+/**
  * 取得我的薪資單列表請求
  */
 export interface GetMyPayslipsRequest {
+// ... existing code ...
+// ... existing code ...
   year?: number; // 年度篩選
   page?: number;
   page_size?: number;

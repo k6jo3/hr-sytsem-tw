@@ -96,9 +96,23 @@ class ValidateCheckInTaskTest {
                     .thenReturn(List.of(existingRecord));
 
             // When & Then
-            IllegalStateException exception = assertThrows(IllegalStateException.class,
+            com.company.hrms.common.exception.ResourceAlreadyExistsException exception = assertThrows(
+                    com.company.hrms.common.exception.ResourceAlreadyExistsException.class,
                     () -> task.execute(context));
             assertTrue(exception.getMessage().contains("已完成上班打卡"));
+        }
+
+        @Test
+        @DisplayName("員工 ID 為空應拋出 ValidationException")
+        void shouldThrowExceptionWhenEmployeeIdIsEmpty() {
+            // Given
+            request.setEmployeeId("");
+
+            // When & Then
+            com.company.hrms.common.exception.ValidationException exception = assertThrows(
+                    com.company.hrms.common.exception.ValidationException.class,
+                    () -> task.execute(context));
+            assertTrue(exception.getMessage().contains("員工 ID 為必填"));
         }
     }
 

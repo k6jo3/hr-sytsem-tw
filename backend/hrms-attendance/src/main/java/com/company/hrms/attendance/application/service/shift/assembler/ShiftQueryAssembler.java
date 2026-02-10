@@ -9,15 +9,31 @@ import com.company.hrms.common.query.QueryGroup;
 
 /**
  * 班別查詢組裝器
- * 符合 Fluent-Query-Engine 的設計
  */
 @Component
 public class ShiftQueryAssembler {
 
     public QueryGroup toQueryGroup(GetShiftListRequest request) {
-        return QueryBuilder.where()
-                .fromDto(request)
-                .and("isDeleted", Operator.EQ, 0)
-                .build();
+        QueryBuilder builder = QueryBuilder.where();
+
+        // 班別狀態
+        if (request.getIsActive() != null) {
+            builder.and("is_active", Operator.EQ, request.getIsActive());
+        } else {
+            // 預設查詢啟用的班別 (依合約 ATT_QRY_S001)
+            builder.and("is_active", Operator.EQ, true);
+        }
+
+        // 組織 ID
+        if (request.getOrganizationId() != null && !request.getOrganizationId().isBlank()) {
+            builder.and("organization_id", Operator.EQ, request.getOrganizationId());
+        }
+
+        // 班別類型
+        if (request.getShiftType() != null && !request.getShiftType().isBlank()) {
+            builder.and("shift_type", Operator.EQ, request.getShiftType());
+        }
+
+        return builder.build();
     }
 }

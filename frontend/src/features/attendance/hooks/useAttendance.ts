@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import * as AttendanceApi from '../api/AttendanceApi';
+import { RootState } from '@/store';
+import { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { AttendanceApi } from '../api/AttendanceApi';
+import type { CheckType } from '../api/AttendanceTypes';
 import { AttendanceViewModelFactory } from '../factory/AttendanceViewModelFactory';
 import type { TodayAttendanceSummary } from '../model/AttendanceRecordViewModel';
-import type { CheckType } from '../api/AttendanceTypes';
 
 /**
  * useAttendance Hook
@@ -13,6 +15,7 @@ export const useAttendance = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [checkingIn, setCheckingIn] = useState(false);
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const fetchTodayAttendance = useCallback(async () => {
     setLoading(true);
@@ -21,9 +24,9 @@ export const useAttendance = () => {
       const response = await AttendanceApi.getTodayAttendance();
       const todaySummary = AttendanceViewModelFactory.createTodaySummary(
         response.records,
-        response.has_checked_in,
-        response.has_checked_out,
-        response.total_work_hours
+        response.hasCheckedIn,
+        response.hasCheckedOut,
+        response.totalWorkHours
       );
       setSummary(todaySummary);
     } catch (err) {
@@ -51,12 +54,27 @@ export const useAttendance = () => {
     ) => {
       setCheckingIn(true);
       try {
-        await AttendanceApi.checkIn({
-          check_type: checkType,
-          latitude: location?.latitude,
-          longitude: location?.longitude,
-          address: location?.address,
-        });
+        if (!user?.employeeId) {
+          throw new Error('未找到員工 ID');
+        }
+
+        if (checkType === 'CHECK_IN') {
+          await AttendanceApi.checkIn({
+            employeeId: user.employeeId,
+            latitude: location?.latitude,
+            longitude: location?.longitude,
+            address: location?.address,
+          });
+        } else if (checkType === 'CHECK_OUT') {
+          await AttendanceApi.checkOut({
+            employeeId: user.employeeId,
+            latitude: location?.latitude,
+            longitude: location?.longitude,
+            address: location?.address,
+          });
+        } else {
+          throw new Error('不支援的打卡類型: ' + checkType);
+        }
         
         // 打卡成功後自動刷新資料
         await fetchTodayAttendance();

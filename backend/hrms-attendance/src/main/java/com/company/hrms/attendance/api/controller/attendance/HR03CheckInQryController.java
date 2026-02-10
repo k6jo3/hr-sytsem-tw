@@ -15,6 +15,7 @@ import com.company.hrms.attendance.api.request.attendance.GetCorrectionListReque
 import com.company.hrms.attendance.api.response.checkin.AttendanceRecordDetailResponse;
 import com.company.hrms.attendance.api.response.checkin.AttendanceRecordListResponse;
 import com.company.hrms.attendance.api.response.checkin.CorrectionListResponse;
+import com.company.hrms.attendance.api.response.checkin.TodayRecordResponse;
 import com.company.hrms.common.annotation.CurrentUser;
 import com.company.hrms.common.api.response.PageResponse;
 import com.company.hrms.common.controller.QueryBaseController;
@@ -34,6 +35,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/v1/attendance")
 @Tag(name = "HR03-CheckIn-Query", description = "打卡管理查詢操作")
 public class HR03CheckInQryController extends QueryBaseController {
+
+        /**
+         * 取得今日打卡資訊
+         */
+        @Operation(summary = "取得今日打卡資訊", operationId = "getTodayRecord")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "成功"),
+                        @ApiResponse(responseCode = "401", description = "未授權")
+        })
+        @GetMapping("/today")
+        public ResponseEntity<TodayRecordResponse> getTodayRecord(
+                        @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+                return ResponseEntity.ok(getResponse(new GetTodayRecordRequest(), currentUser));
+        }
 
         /**
          * 查詢出勤記錄列表
@@ -134,5 +149,11 @@ public class HR03CheckInQryController extends QueryBaseController {
                         String status,
                         LocalDate startDate,
                         LocalDate endDate) {
+        }
+
+        /**
+         * 取得今日打卡資訊請求
+         */
+        public record GetTodayRecordRequest() {
         }
 }

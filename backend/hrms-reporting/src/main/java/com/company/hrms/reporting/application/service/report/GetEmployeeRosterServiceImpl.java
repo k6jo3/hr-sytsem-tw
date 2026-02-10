@@ -44,7 +44,9 @@ public class GetEmployeeRosterServiceImpl
                         String... args) throws Exception {
 
                 // 設定租戶ID (多租戶隔離)
-                request.setTenantId(currentUser.getTenantId());
+                if (currentUser != null) {
+                        request.setTenantId(currentUser.getTenantId());
+                }
 
                 // 建立查詢條件
                 Specification<EmployeeRosterReadModel> spec = buildSpecification(request);

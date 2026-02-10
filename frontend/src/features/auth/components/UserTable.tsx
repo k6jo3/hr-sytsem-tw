@@ -3,37 +3,35 @@
  * Domain Code: HR01
  */
 
-import React from 'react';
 import {
-  Table,
-  Space,
-  Button,
-  Avatar,
-  Tag,
-  Dropdown,
-  Popconfirm,
-  Tooltip,
+    CheckCircleOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    KeyOutlined,
+    MoreOutlined,
+    StopOutlined,
+    UnlockOutlined,
+    UserOutlined
+} from '@ant-design/icons';
+import {
+    Avatar,
+    Button,
+    Dropdown,
+    Space,
+    Table,
+    Tag,
+    Tooltip
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import {
-  EditOutlined,
-  LockOutlined,
-  UnlockOutlined,
-  DeleteOutlined,
-  KeyOutlined,
-  MoreOutlined,
-  UserOutlined,
-  StopOutlined,
-  CheckCircleOutlined,
-} from '@ant-design/icons';
-import type { UserViewModel } from '../hooks/useUsers';
+import React from 'react';
+import type { UserListViewModel } from '../model/UserProfile';
 
 export interface UserTableProps {
-  users: UserViewModel[];
+  users: UserListViewModel[];
   loading: boolean;
   selectedRowKeys: React.Key[];
   onSelectionChange: (keys: React.Key[]) => void;
-  onEdit: (user: UserViewModel) => void;
+  onEdit: (user: UserListViewModel) => void;
   onDeactivate: (userId: string) => void;
   onActivate: (userId: string) => void;
   onUnlock: (userId: string) => void;
@@ -76,7 +74,7 @@ export const UserTable: React.FC<UserTableProps> = ({
     return labels[status] || status;
   };
 
-  const columns: ColumnsType<UserViewModel> = [
+  const columns: ColumnsType<UserListViewModel> = [
     {
       title: '使用者',
       key: 'user',
@@ -215,13 +213,13 @@ export const UserTable: React.FC<UserTableProps> = ({
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectionChange,
-    getCheckboxProps: (record: UserViewModel) => ({
+    getCheckboxProps: (record: UserListViewModel) => ({
       disabled: record.status === 'DELETED',
     }),
   };
 
   return (
-    <Table<UserViewModel>
+    <Table<UserListViewModel>
       columns={columns}
       dataSource={users}
       rowKey="id"

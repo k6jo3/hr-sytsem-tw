@@ -51,3 +51,8 @@ VALUES
 INSERT INTO employees (employee_id, employee_number, first_name, last_name, full_name, national_id, date_of_birth, gender, company_email, mobile_phone, organization_id, department_id, employment_type, employment_status, hire_date, created_at, updated_at, is_deleted)
 VALUES 
 ('e0000014-0014-0014-0014-000000000014', 'EMP202201-077', '阿豪', '鄭', '鄭阿豪', 'A123456798', '1990-07-07', 'MALE', 'zheng.ah@company.com', '0945678902', '11111111-1111-1111-1111-111111111111', 'd0000004-0004-0004-0004-000000000004', 'CONTRACT', 'UNPAID_LEAVE', '2022-01-01', '2022-01-01 09:00:00', '2024-01-01 09:00:00', FALSE);
+
+-- 1 個 PARENTAL_LEAVE 員工 (育嬰留職停薪)
+INSERT INTO employees (employee_id, employee_number, first_name, last_name, full_name, national_id, date_of_birth, gender, company_email, mobile_phone, organization_id, department_id, employment_type, employment_status, hire_date, created_at, updated_at, is_deleted)
+VALUES 
+('e0000015-0015-0015-0015-000000000015', 'EMP202201-066', '小美', '陳', '陳小美', 'A223456781', '1992-06-06', 'FEMALE', 'chen.xm@company.com', '0956789033', '11111111-1111-1111-1111-111111111111', 'd0000004-0004-0004-0004-000000000004', 'FULL_TIME', 'PARENTAL_LEAVE', '2022-06-01', '2022-06-01 09:00:00', '2024-06-01 09:00:00', FALSE);

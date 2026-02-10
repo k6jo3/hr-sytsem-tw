@@ -4,8 +4,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.company.hrms.common.query.QueryGroup;
 
@@ -20,6 +28,10 @@ public abstract class BaseContractTest {
 
     /** 合約引擎 */
     protected final MarkdownContractEngine contractEngine = new MarkdownContractEngine();
+
+    /** JDBC Template - 用於資料快照 */
+    @Autowired(required = false)
+    protected JdbcTemplate jdbcTemplate;
 
     /**
      * 載入合約規格文件
@@ -96,5 +108,122 @@ public abstract class BaseContractTest {
 
     protected String getTestClassName() {
         return this.getClass().getSimpleName();
+    }
+
+    /**
+     * 從 Markdown 合約文件中載入並解析指定場景的合約規格
+     *
+     * @param serviceName 服務名稱 (例如: "reporting")
+     * @param scenarioId  場景 ID (例如: "RPT_QRY_001")
+     * @return ContractSpec 合約規格物件
+     */
+    protected ContractSpec loadContract(String serviceName, String scenarioId) throws IOException {
+        String markdown = loadContractSpec(serviceName);
+        String jsonContract = contractEngine.extractJsonContract(markdown, scenarioId);
+        return contractEngine.parseContract(jsonContract);
+    }
+
+    /**
+     * 驗證 Query 操作的完整合約
+     * 包含：查詢過濾條件 + API 回應結果
+     *
+     * @param actualQuery        實際的 QueryGroup（從 Repository 捕獲）
+     * @param actualResponseJson API 實際回應的 JSON 字串
+     * @param contract           合約規格物件
+     */
+    protected void verifyQueryContract(QueryGroup actualQuery, String actualResponseJson, ContractSpec contract) {
+        String scenarioId = contract.getScenarioId();
+
+        // 1. 驗證查詢過濾條件（原有功能）
+        if (contract.getExpectedQueryFilters() != null && !contract.getExpectedQueryFilters().isEmpty()) {
+            List<String> expectedFilters = new ArrayList<>();
+            for (ContractSpec.ExpectedFilter filter : contract.getExpectedQueryFilters()) {
+                String filterStr = String.format("%s %s %s",
+                        filter.getField(), filter.getOperator(), filter.getValue());
+                expectedFilters.add(filterStr);
+            }
+
+            List<String> actualFilterStrings = actualQuery.getAllFilters().stream()
+                    .map(f -> f.toString())
+                    .toList();
+
+            List<String> missingFilters = new ArrayList<>();
+            for (String expected : expectedFilters) {
+                boolean found = actualFilterStrings.stream()
+                        .anyMatch(actual -> normalize(actual).equals(normalize(expected)));
+                if (!found) {
+                    missingFilters.add(expected);
+                }
+            }
+
+            if (!missingFilters.isEmpty()) {
+                throw new ContractViolationException(scenarioId, missingFilters, actualFilterStrings);
+            }
+
+            System.out.println("✅ 場景 [" + scenarioId + "] 查詢條件驗證通過");
+        }
+
+        // 2. 驗證 API 回應結果（新功能）
+        if (contract.getExpectedResponse() != null) {
+            contractEngine.assertResponse(actualResponseJson, contract.getExpectedResponse(), scenarioId);
+        }
+    }
+
+    /**
+     * 驗證 Command 操作的完整合約
+     * 包含：業務規則 + 資料異動 + 領域事件
+     *
+     * @param beforeSnapshot 執行前的資料快照
+     * @param afterSnapshot  執行後的資料快照
+     * @param capturedEvents 捕獲的領域事件列表
+     * @param contract       合約規格物件
+     */
+    protected void verifyCommandContract(
+            Map<String, List<Map<String, Object>>> beforeSnapshot,
+            Map<String, List<Map<String, Object>>> afterSnapshot,
+            List<Map<String, Object>> capturedEvents,
+            ContractSpec contract) {
+
+        String scenarioId = contract.getScenarioId();
+
+        // 1. 驗證資料異動
+        if (contract.getExpectedDataChanges() != null && !contract.getExpectedDataChanges().isEmpty()) {
+            contractEngine.assertDataChanges(beforeSnapshot, afterSnapshot,
+                    contract.getExpectedDataChanges(), scenarioId);
+        }
+
+        // 2. 驗證領域事件發布
+        if (contract.getExpectedEvents() != null && !contract.getExpectedEvents().isEmpty()) {
+            contractEngine.assertEvents(capturedEvents, contract.getExpectedEvents(), scenarioId);
+        }
+    }
+
+    /**
+     * 擷取資料庫表的資料快照（用於 Command 測試）
+     *
+     * @param tables 需要擷取快照的資料表名稱列表
+     * @return 資料快照 Map (表名 -> 記錄列表)
+     */
+    protected Map<String, List<Map<String, Object>>> captureDataSnapshot(String... tables) {
+        if (jdbcTemplate == null) {
+            throw new IllegalStateException("JdbcTemplate 未注入，無法擷取資料快照");
+        }
+
+        Map<String, List<Map<String, Object>>> snapshot = new HashMap<>();
+        for (String table : tables) {
+            String sql = String.format("SELECT * FROM %s", table);
+            List<Map<String, Object>> records = jdbcTemplate.queryForList(sql);
+            snapshot.put(table, records);
+        }
+        return snapshot;
+    }
+
+    /**
+     * 正規化字串（移除空格、引號、括號等）
+     */
+    private String normalize(String s) {
+        if (s == null)
+            return "";
+        return s.toLowerCase().replaceAll("[\\s()'`\"_]+", "");
     }
 }

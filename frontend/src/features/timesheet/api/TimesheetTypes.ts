@@ -1,18 +1,14 @@
 /**
- * Timesheet API Types
- * 工時填報相關的 API 資料型別定義
- */
-
-/**
  * 工時狀態
  */
-export type TimesheetStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+export type TimesheetStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'LOCKED';
 
 /**
  * Timesheet Entry DTO (from API)
  */
 export interface TimesheetEntryDto {
   id: string;
+  timesheet_id?: string;
   employee_id: string;
   employee_name: string;
   project_id: string;
@@ -31,24 +27,28 @@ export interface TimesheetEntryDto {
  * Weekly Timesheet DTO
  */
 export interface WeeklyTimesheetDto {
+  id: string;
+  employee_id: string;
+  employee_name: string;
   week_start_date: string;
   week_end_date: string;
   entries: TimesheetEntryDto[];
   total_hours: number;
   status: TimesheetStatus;
+  submitted_at?: string;
+  rejection_reason?: string;
 }
 
 /**
- * Submit Timesheet Request
+ * Submit Timesheet Entry (Individual)
  */
-export interface SubmitTimesheetRequest {
-  entries: {
-    project_id: string;
-    wbs_code?: string;
-    work_date: string;
-    hours: number;
-    description?: string;
-  }[];
+export interface SaveTimesheetEntryRequest {
+  timesheet_id?: string;
+  project_id: string;
+  wbs_code?: string;
+  work_date: string;
+  hours: number;
+  description?: string;
 }
 
 /**
@@ -63,8 +63,9 @@ export interface SubmitTimesheetResponse {
  * Get Weekly Timesheet Request
  */
 export interface GetWeeklyTimesheetRequest {
+  id?: string;
   employee_id?: string;
-  week_start_date: string;
+  week_start_date?: string;
 }
 
 /**
@@ -75,25 +76,45 @@ export interface GetWeeklyTimesheetResponse {
 }
 
 /**
- * Get Timesheet History Request
+ * Get Pending Approvals Request
  */
-export interface GetTimesheetHistoryRequest {
+export interface GetPendingApprovalsRequest {
+  project_id?: string;
   employee_id?: string;
-  start_date?: string;
-  end_date?: string;
-  status?: TimesheetStatus;
   page?: number;
   page_size?: number;
 }
 
 /**
- * Get Timesheet History Response
+ * Get Pending Approvals Response
  */
-export interface GetTimesheetHistoryResponse {
-  entries: TimesheetEntryDto[];
+export interface GetPendingApprovalsResponse {
+  timesheets: WeeklyTimesheetDto[];
   total: number;
-  page: number;
-  page_size: number;
+}
+
+/**
+ * Approve/Reject Request
+ */
+export interface TimesheetApprovalRequest {
+  rejection_reason?: string;
+}
+
+/**
+ * Batch Approval Request
+ */
+export interface BatchApprovalRequest {
+  timesheet_ids: string[];
+}
+
+/**
+ * Timesheet Report Summary DTO
+ */
+export interface TimesheetReportSummaryDto {
+  total_hours: number;
+  project_hours: { project_name: string; hours: number }[];
+  department_hours: { department_name: string; hours: number }[];
+  unreported_employees: { id: string; name: string }[];
 }
 
 /**
@@ -110,6 +131,7 @@ export interface ProjectDto {
  * WBS Item DTO (簡化版，用於選擇器)
  */
 export interface WbsItemDto {
+  id: string;
   code: string;
   name: string;
   level: number;

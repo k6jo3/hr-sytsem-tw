@@ -13,14 +13,14 @@ import lombok.Getter;
 public class OvertimeApplication extends AggregateRoot<OvertimeId> {
 
     private String employeeId;
-    private LocalDate date;
+    private LocalDate overtimeDate;
     private Double hours;
     private OvertimeType overtimeType;
     private String reason;
     private ApplicationStatus status;
     private String rejectionReason;
 
-    public OvertimeApplication(OvertimeId id, String employeeId, LocalDate date,
+    public OvertimeApplication(OvertimeId id, String employeeId, LocalDate overtimeDate,
             Double hours, OvertimeType overtimeType, String reason) {
         super(id);
         if (hours == null || hours <= 0) {
@@ -28,7 +28,7 @@ public class OvertimeApplication extends AggregateRoot<OvertimeId> {
         }
 
         this.employeeId = employeeId;
-        this.date = date;
+        this.overtimeDate = overtimeDate;
         this.hours = hours;
         this.overtimeType = overtimeType;
         this.reason = reason;
@@ -50,12 +50,12 @@ public class OvertimeApplication extends AggregateRoot<OvertimeId> {
         this.rejectionReason = reason;
     }
 
-    private OvertimeApplication(OvertimeId id, String employeeId, LocalDate date,
+    private OvertimeApplication(OvertimeId id, String employeeId, LocalDate overtimeDate,
             Double hours, OvertimeType overtimeType, String reason,
             ApplicationStatus status, String rejectionReason) {
         super(id);
         this.employeeId = employeeId;
-        this.date = date;
+        this.overtimeDate = overtimeDate;
         this.hours = hours;
         this.overtimeType = overtimeType;
         this.reason = reason;
@@ -63,9 +63,10 @@ public class OvertimeApplication extends AggregateRoot<OvertimeId> {
         this.rejectionReason = rejectionReason;
     }
 
-    public static OvertimeApplication reconstitute(OvertimeId id, String employeeId, LocalDate date,
+    public static OvertimeApplication reconstitute(OvertimeId id, String employeeId, LocalDate overtimeDate,
             Double hours, OvertimeType overtimeType, String reason,
             ApplicationStatus status, String rejectionReason) {
-        return new OvertimeApplication(id, employeeId, date, hours, overtimeType, reason, status, rejectionReason);
+        return new OvertimeApplication(id, employeeId, overtimeDate, hours, overtimeType, reason, status,
+                rejectionReason);
     }
 }

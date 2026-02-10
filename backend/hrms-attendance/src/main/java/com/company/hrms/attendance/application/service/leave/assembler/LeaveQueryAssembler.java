@@ -14,33 +14,28 @@ public class LeaveQueryAssembler {
     public QueryGroup toQueryGroup(GetLeaveListRequest request) {
         QueryGroup query = QueryGroup.and();
 
-        // 1. 基礎過濾: 未刪除 (申請類須包含)
-        query.eq("is_deleted", 0);
-
-        // 2. 狀態
+        // 1. 狀態
         if (request.getStatus() != null && !request.getStatus().isBlank()) {
             query.eq("status", request.getStatus());
         }
 
-        // 3. 員工 ID
+        // 2. 員工 ID
         if (request.getEmployeeId() != null && !request.getEmployeeId().isBlank()) {
             query.eq("employee_id", request.getEmployeeId());
         }
 
-        // 4. 假別
+        // 3. 假別
         if (request.getLeaveType() != null && !request.getLeaveType().isBlank()) {
-            query.eq("leave_type", request.getLeaveType());
+            query.eq("leave_type_id",
+                    "(SELECT leave_type_id FROM leave_types WHERE leave_code = '" + request.getLeaveType() + "')");
         }
 
-        // 5. 部門
+        // 4. 部門
         if (request.getDeptId() != null && !request.getDeptId().isBlank()) {
             query.eq("department_id", request.getDeptId());
         }
 
-        // 6. 日期範圍 (重疊查詢)
-        // ATT_L006: query range covers request range
-        // Request: start, end
-        // Spec: start_date <= request.end AND end_date >= request.start
+        // 5. 日期範圍 (重疊查詢)
         if (request.getStartDate() != null) {
             query.gte("end_date", request.getStartDate().toString());
         }

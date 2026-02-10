@@ -3,22 +3,51 @@ package com.company.hrms.payroll.application.dto.request;
 import java.time.LocalDate;
 
 import com.company.hrms.common.api.request.PageRequest;
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryFilter;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+/**
+ * 薪資批次查詢請求
+ */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class GetPayrollRunListRequest extends PageRequest {
-    @com.company.hrms.common.query.QueryCondition.EQ("organizationId")
+
+    /**
+     * 組織編號
+     */
+    @QueryFilter(operator = Operator.EQ)
     private String organizationId;
 
-    @com.company.hrms.common.query.QueryCondition.GTE("periodStartDate")
+    /**
+     * 狀態
+     */
+    @QueryFilter(operator = Operator.EQ)
+    private String status;
+
+    /**
+     * 開始日期 (查詢期間)
+     */
+    @QueryFilter(property = "periodStartDate", operator = Operator.GTE)
     private LocalDate startDate;
 
-    @com.company.hrms.common.query.QueryCondition.LTE("periodEndDate")
+    /**
+     * 結束日期 (查詢期間)
+     */
+    @QueryFilter(property = "periodEndDate", operator = Operator.LTE)
     private LocalDate endDate;
 
-    @com.company.hrms.common.query.QueryCondition.EQ("status")
-    private String status;
+    /**
+     * 是否排除已取消的批次
+     */
+    private Boolean excludeCancelled;
 }

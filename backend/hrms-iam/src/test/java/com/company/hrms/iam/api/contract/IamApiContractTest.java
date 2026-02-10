@@ -90,7 +90,7 @@ public class IamApiContractTest extends BaseApiContractTest {
         if (contractPath == null)
             throw new RuntimeException("Cannot find contract file");
 
-        contractSpec = Files.readString(contractPath);
+        contractSpec = Files.readString(contractPath, java.nio.charset.StandardCharsets.UTF_8);
         contractSpec = contractSpec.replace("{currentUserTenantId}", "T001");
     }
 

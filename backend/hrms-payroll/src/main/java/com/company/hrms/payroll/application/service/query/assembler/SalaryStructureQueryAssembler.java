@@ -1,11 +1,11 @@
 package com.company.hrms.payroll.application.service.query.assembler;
 
+import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.payroll.application.dto.request.GetSalaryStructureListRequest;
 
 /**
  * 薪資結構查詢組裝器
- * 將 GetSalaryStructureListRequest 轉換為 QueryGroup
  */
 public class SalaryStructureQueryAssembler {
 
@@ -16,26 +16,22 @@ public class SalaryStructureQueryAssembler {
      * @return QueryGroup 查詢條件群組
      */
     public QueryGroup toQueryGroup(GetSalaryStructureListRequest request) {
-        QueryGroup queryGroup = QueryGroup.and();
+        QueryBuilder builder = QueryBuilder.where().fromDto(request);
 
-        // 員工過濾
-        if (request.getEmployeeId() != null && !request.getEmployeeId().isEmpty()) {
-            queryGroup.eq("employee_id", request.getEmployeeId());
+        // 特定生效日期查詢 (HR04 v2.1.2 PAY_QRY_S007)
+        if (request.getEffectiveDate() != null) {
+            builder.lte("effectiveDate", request.getEffectiveDate());
+            builder.orGroup(sub -> sub
+                    .isNull("endDate")
+                    .gt("endDate", request.getEffectiveDate()));
         }
 
-        // 有效狀態過濾
-        if (request.getActive() != null) {
-            queryGroup.eq("active", request.getActive());
+        // 軟刪除過濾 (HR04 v2.0): 不使用 is_deleted，改用 isActive
+        // 如果 request 中沒有指定 isActive，預設應查詢有效結構
+        if (request.getIsActive() == null && request.getEffectiveDate() == null) {
+            builder.eq("isActive", true);
         }
 
-        // 薪資制度過濾
-        if (request.getPayrollSystem() != null && !request.getPayrollSystem().isEmpty()) {
-            queryGroup.eq("payroll_system", request.getPayrollSystem());
-        }
-
-        // 軟刪除過濾 (始終添加)
-        queryGroup.eq("is_deleted", 0);
-
-        return queryGroup;
+        return builder.build();
     }
 }

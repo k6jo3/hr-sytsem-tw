@@ -38,7 +38,7 @@ public class AttendanceRecordRepositoryImpl extends BaseRepository<AttendanceRec
     public List<AttendanceRecord> findByEmployeeIdAndDate(String employeeId, LocalDate date) {
         QueryGroup query = QueryBuilder.where()
                 .and("employeeId", Operator.EQ, employeeId)
-                .and("date", Operator.EQ, date)
+                .and("recordDate", Operator.EQ, date)
                 .build();
         return findByQuery(query);
     }
@@ -48,8 +48,8 @@ public class AttendanceRecordRepositoryImpl extends BaseRepository<AttendanceRec
             LocalDate endDate) {
         QueryGroup query = QueryBuilder.where()
                 .and("employeeId", Operator.EQ, employeeId)
-                .and("date", Operator.GTE, startDate)
-                .and("date", Operator.LTE, endDate)
+                .and("recordDate", Operator.GTE, startDate)
+                .and("recordDate", Operator.LTE, endDate)
                 .build();
         return findByQuery(query);
     }
@@ -88,7 +88,7 @@ public class AttendanceRecordRepositoryImpl extends BaseRepository<AttendanceRec
         return AttendanceRecord.reconstitute(
                 new RecordId(po.getId()),
                 po.getEmployeeId(),
-                po.getDate(),
+                po.getRecordDate(),
                 po.getShiftId(),
                 po.getCheckInTime(),
                 po.getCheckOutTime(),
@@ -104,7 +104,7 @@ public class AttendanceRecordRepositoryImpl extends BaseRepository<AttendanceRec
         return AttendanceRecordPO.builder()
                 .id(record.getId().getValue())
                 .employeeId(record.getEmployeeId())
-                .date(record.getDate())
+                .recordDate(record.getDate())
                 .shiftId(record.getShiftId())
                 .checkInTime(record.getCheckInTime())
                 .checkOutTime(record.getCheckOutTime())

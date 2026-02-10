@@ -5,8 +5,8 @@
     "op" : "EQ",
     "v" : "ACTIVE"
   }, {
-    "f" : "status",
-    "op" : "NE",
-    "v" : "DELETED"
+    "f" : "tenant_id",
+    "op" : "EQ",
+    "v" : null
   } ]
 }

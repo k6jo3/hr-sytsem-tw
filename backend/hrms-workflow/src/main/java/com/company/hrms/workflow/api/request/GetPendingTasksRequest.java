@@ -14,7 +14,7 @@ import lombok.Data;
 public class GetPendingTasksRequest {
 
     @Schema(description = "使用者 ID (自動填入)", hidden = true)
-    @QueryFilter(property = "assigneeId", operator = Operator.EQ)
+    @QueryFilter(property = "assignee_id", operator = Operator.EQ)
     private String userId;
 
     // Status is implicitly PENDING for this service, or we can allow filtering

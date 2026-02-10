@@ -27,7 +27,7 @@ public class AttendanceRecordPO {
     private String employeeId;
 
     @Column(name = "record_date")
-    private LocalDate date;
+    private LocalDate recordDate;
 
     @Column(name = "shift_id", length = 50)
     private String shiftId;

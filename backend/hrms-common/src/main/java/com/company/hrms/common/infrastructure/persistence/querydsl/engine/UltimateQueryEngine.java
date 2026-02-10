@@ -13,6 +13,8 @@ import com.company.hrms.common.query.LogicalOp;
 import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryGroup;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.CollectionExpression;
+import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
@@ -112,6 +114,7 @@ public class UltimateQueryEngine<T> {
     /**
      * 建構單一條件的 BooleanExpression
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private BooleanExpression buildExpression(FilterUnit unit) {
         String[] parts = unit.getField().split("\\.");
         PathBuilder<?> currentPath = entityPath;
@@ -162,7 +165,6 @@ public class UltimateQueryEngine<T> {
                     }
 
                     String joinAlias = part + "_" + i + "_" + System.nanoTime() % 1000;
-                    @SuppressWarnings({ "unchecked", "rawtypes" })
                     PathBuilder<?> nextPath = new PathBuilder<>(nextType, joinAlias);
 
                     try {
@@ -170,21 +172,21 @@ public class UltimateQueryEngine<T> {
                             // 使用更具體的集合路徑方法，協助 Querydsl/Hibernate 正確解析實體類型
                             // 使用 Raw Type 轉型以避開 Querydsl/Hibernate 泛型路徑解析的限制
                             if (java.util.List.class.isAssignableFrom(originalFieldType)) {
-                                query.leftJoin((com.querydsl.core.types.CollectionExpression) currentPath.getList(part,
+                                query.leftJoin((CollectionExpression) currentPath.getList(part,
                                         nextType), nextPath);
                             } else if (java.util.Set.class.isAssignableFrom(originalFieldType)) {
-                                query.leftJoin((com.querydsl.core.types.CollectionExpression) currentPath.getSet(part,
+                                query.leftJoin((CollectionExpression) currentPath.getSet(part,
                                         nextType), nextPath);
                             } else {
-                                query.leftJoin((com.querydsl.core.types.CollectionExpression) currentPath
+                                query.leftJoin((CollectionExpression) currentPath
                                         .getCollection(part, nextType), nextPath);
                             }
                         } else {
-                            query.leftJoin((com.querydsl.core.types.EntityPath) currentPath.get(part), nextPath);
+                            query.leftJoin((EntityPath) currentPath.get(part), nextPath);
                         }
                     } catch (Exception e) {
                         // 發生錯誤時嘗試回退到基本 EntityPath 轉型
-                        query.leftJoin((com.querydsl.core.types.EntityPath) currentPath.get(part), nextPath);
+                        query.leftJoin((EntityPath) currentPath.get(part), nextPath);
                     }
                     joinedPaths.put(pathAcc, nextPath);
                 }

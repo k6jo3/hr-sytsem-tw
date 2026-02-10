@@ -27,7 +27,7 @@ INSERT INTO attendance_records (id, employee_id, record_date, check_in_time, che
 
 -- 請假申請測試資料 (共 8 筆)
 -- 狀態分布: PENDING=3, APPROVED=3, REJECTED=2
-INSERT INTO leave_applications (application_id, employee_id, department_id, leave_type, start_date, end_date, hours, reason, status, approver_id, created_at, updated_at, is_deleted) VALUES
+INSERT INTO leave_applications (id, employee_id, department_id, leave_type_id, start_date, end_date, hours, reason, status, approver_id, created_at, updated_at, is_deleted) VALUES
 -- 待審核
 ('LA001', 'E001', 'D001', 'ANNUAL', '2025-02-01', '2025-02-03', 24, '出國旅遊', 'PENDING', NULL, '2025-01-15 10:00:00', '2025-01-15 10:00:00', 0),
 ('LA002', 'E002', 'D001', 'SICK', '2025-01-20', '2025-01-20', 8, '感冒', 'PENDING', NULL, '2025-01-19 09:00:00', '2025-01-19 09:00:00', 0),
@@ -42,7 +42,7 @@ INSERT INTO leave_applications (application_id, employee_id, department_id, leav
 
 -- 加班申請測試資料 (共 6 筆)
 -- 狀態分布: PENDING=2, APPROVED=3, REJECTED=1
-INSERT INTO overtime_applications (application_id, employee_id, department_id, overtime_type, overtime_date, start_time, end_time, hours, reason, status, approver_id, created_at, updated_at, is_deleted) VALUES
+INSERT INTO overtime_applications (id, employee_id, department_id, overtime_type, overtime_date, start_time, end_time, hours, reason, status, approver_id, created_at, updated_at, is_deleted) VALUES
 -- 待審核
 ('OT001', 'E001', 'D001', 'WORKDAY', '2025-01-20', '18:00:00', '21:00:00', 3, '專案趕工', 'PENDING', NULL, '2025-01-19 17:00:00', '2025-01-19 17:00:00', 0),
 ('OT002', 'E002', 'D001', 'HOLIDAY', '2025-01-25', '09:00:00', '17:00:00', 8, '系統上線支援', 'PENDING', NULL, '2025-01-20 10:00:00', '2025-01-20 10:00:00', 0),

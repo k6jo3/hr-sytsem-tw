@@ -6,20 +6,23 @@
         <id column="department_id" property="id"/>
         <result column="department_code" property="code"/>
         <result column="department_name" property="name"/>
+        <result column="department_name_en" property="nameEn"/>
         <result column="organization_id" property="organizationId"/>
         <result column="parent_department_id" property="parentId"/>
         <result column="level" property="level"/>
+        <result column="path" property="path"/>
         <result column="manager_id" property="managerId"/>
         <result column="status" property="status"/>
         <result column="display_order" property="sortOrder"/>
+        <result column="description" property="description"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="is_deleted" property="isDeleted"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        department_id, department_code, department_name, organization_id, parent_department_id, level, manager_id,
-        status, display_order, created_at, updated_at, is_deleted
+        department_id, department_code, department_name, department_name_en, organization_id, parent_department_id, level, path, manager_id,
+        status, display_order, description, created_at, updated_at, is_deleted
     </sql>
 
     <select id="selectById" resultMap="DepartmentResultMap">
@@ -71,11 +74,11 @@
 
     <insert id="insert">
         INSERT INTO departments (
-            department_id, department_code, department_name, organization_id, parent_department_id, level, manager_id,
-            status, display_order, created_at, updated_at, is_deleted
+            department_id, department_code, department_name, department_name_en, organization_id, parent_department_id, level, path, manager_id,
+            status, display_order, description, created_at, updated_at, is_deleted
         ) VALUES (
-            #{id}, #{code}, #{name}, #{organizationId}, #{parentId}, #{level},
-            #{managerId}, #{status}, #{sortOrder},
+            #{id}, #{code}, #{name}, #{nameEn}, #{organizationId}, #{parentId}, #{level}, #{path},
+            #{managerId}, #{status}, #{sortOrder}, #{description},
             #{createdAt}, #{updatedAt}, #{isDeleted}
         )
     </insert>
@@ -84,12 +87,15 @@
         UPDATE departments SET
             department_code = #{code},
             department_name = #{name},
+            department_name_en = #{nameEn},
             organization_id = #{organizationId},
             parent_department_id = #{parentId},
             level = #{level},
+            path = #{path},
             manager_id = #{managerId},
             status = #{status},
             display_order = #{sortOrder},
+            description = #{description},
             is_deleted = #{isDeleted},
             updated_at = #{updatedAt}
         WHERE department_id = #{id}

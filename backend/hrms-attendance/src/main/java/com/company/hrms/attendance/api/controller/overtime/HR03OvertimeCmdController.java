@@ -37,14 +37,14 @@ public class HR03OvertimeCmdController extends CommandBaseController {
     /**
      * 提交加班申請
      */
-    @Operation(summary = "提交加班申請", operationId = "createOvertimeApplication")
+    @Operation(summary = "提交加班申請", operationId = "applyOvertime")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "成功"),
             @ApiResponse(responseCode = "400", description = "請求格式錯誤或超過加班上限"),
             @ApiResponse(responseCode = "401", description = "未授權")
     })
     @PostMapping("/applications")
-    public ResponseEntity<ApplyOvertimeResponse> createOvertimeApplication(
+    public ResponseEntity<ApplyOvertimeResponse> applyOvertime(
             @RequestBody @Valid ApplyOvertimeRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(execCommand(request, currentUser));
