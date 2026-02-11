@@ -111,13 +111,36 @@ public class AggregateMonthlyReportTask implements PipelineTask<MonthlyReportCon
             double absentDays = Math.max(0, scheduledDaysInMonth - actualDays - leaveDays);
             item.setAbsentDays(BigDecimal.valueOf(absentDays));
 
-            // 5. 加班時數
+            // 5. 加班時數 (含明細)
             List<OvertimeApplication> overtimes = overtimeMap.get(emp.getEmployeeId());
-            double otHours = 0.0;
+            double totalOt = 0.0;
+            double workdayOt = 0.0;
+            double restDayOt = 0.0;
+            double holidayOt = 0.0;
+
             if (overtimes != null) {
-                otHours = overtimes.stream().mapToDouble(OvertimeApplication::getHours).sum();
+                for (OvertimeApplication ot : overtimes) {
+                    if (ot.getStatus() == com.company.hrms.attendance.domain.model.valueobject.ApplicationStatus.APPROVED) {
+                        double hrs = ot.getHours();
+                        totalOt += hrs;
+                        switch (ot.getOvertimeType()) {
+                            case WORKDAY:
+                                workdayOt += hrs;
+                                break;
+                            case REST_DAY:
+                                restDayOt += hrs;
+                                break;
+                            case HOLIDAY:
+                                holidayOt += hrs;
+                                break;
+                        }
+                    }
+                }
             }
-            item.setOvertimeHours(BigDecimal.valueOf(otHours));
+            item.setOvertimeHours(BigDecimal.valueOf(totalOt));
+            item.setWorkdayOvertimeHours(BigDecimal.valueOf(workdayOt));
+            item.setRestDayOvertimeHours(BigDecimal.valueOf(restDayOt));
+            item.setHolidayOvertimeHours(BigDecimal.valueOf(holidayOt));
 
             items.add(item);
 

@@ -1,5 +1,5 @@
-import { DownloadOutlined, EyeOutlined, FilePdfOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Descriptions, Divider, Modal, Row, Space, Statistic, Table, Tag, Typography, message } from 'antd';
+import { DownloadOutlined, EyeOutlined, FilePdfOutlined, ProjectOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Descriptions, Divider, List, Modal, Progress, Row, Space, Statistic, Table, Tag, Typography, message } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { PayrollApi } from '../features/payroll/api/PayrollApi';
@@ -174,6 +174,31 @@ export const HR04PayslipPage: React.FC = () => {
                 </Row>
               </Col>
             </Row>
+
+            {selectedPayslip.project_costs && selectedPayslip.project_costs.length > 0 && (
+              <div style={{ marginTop: 24 }}>
+                <Divider orientation="left"><Space><ProjectOutlined /><span>專案工時分佈 (HR07 同步)</span></Space></Divider>
+                <List
+                  size="small"
+                  dataSource={selectedPayslip.project_costs}
+                  renderItem={(item) => (
+                    <List.Item>
+                      <div style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                          <Text>{item.project_name}</Text>
+                          <Text type="secondary">{item.hours}h (${item.amount.toLocaleString()})</Text>
+                        </div>
+                        <Progress 
+                          percent={Math.round((item.amount / selectedPayslip.gross_pay) * 100)} 
+                          size="small" 
+                          strokeColor="#1890ff"
+                        />
+                      </div>
+                    </List.Item>
+                  )}
+                />
+              </div>
+            )}
 
             <Card style={{ marginTop: 24, background: '#f6ffed', border: '1px solid #b7eb8f' }}>
               <Statistic 

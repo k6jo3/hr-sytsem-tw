@@ -12,7 +12,10 @@ import com.company.hrms.payroll.application.factory.PayrollRunDtoFactory;
 import com.company.hrms.payroll.application.service.context.CalculatePayrollContext;
 import com.company.hrms.payroll.application.service.task.CalculatePayslipsTask;
 import com.company.hrms.payroll.application.service.task.CompleteExecutionTask;
+import com.company.hrms.payroll.application.service.task.FetchAttendanceDataTask;
 import com.company.hrms.payroll.application.service.task.FetchEligibleStructuresTask;
+import com.company.hrms.payroll.application.service.task.FetchEmployeeInfoTask;
+import com.company.hrms.payroll.application.service.task.FetchInsuranceDataTask;
 import com.company.hrms.payroll.application.service.task.FetchPayrollRunTask;
 import com.company.hrms.payroll.application.service.task.StartExecutionTask;
 
@@ -29,6 +32,9 @@ public class CalculatePayrollServiceImpl extends AbstractCommandService<Calculat
 
     private final FetchPayrollRunTask fetchPayrollRunTask;
     private final FetchEligibleStructuresTask fetchEligibleStructuresTask;
+    private final FetchEmployeeInfoTask fetchEmployeeInfoTask;
+    private final FetchAttendanceDataTask fetchAttendanceDataTask;
+    private final FetchInsuranceDataTask fetchInsuranceDataTask;
     private final StartExecutionTask startExecutionTask;
     private final CalculatePayslipsTask calculatePayslipsTask;
     private final CompleteExecutionTask completeExecutionTask;
@@ -44,6 +50,9 @@ public class CalculatePayrollServiceImpl extends AbstractCommandService<Calculat
         BusinessPipeline.start(context)
                 .next(fetchPayrollRunTask) // 載入批次
                 .next(fetchEligibleStructuresTask) // 載入符合條件的薪資結構
+                .next(fetchEmployeeInfoTask) // 獲取員工基本資訊 (新加入)
+                .next(fetchAttendanceDataTask) // 從 HR03 獲取考勤/加班數據
+                .next(fetchInsuranceDataTask) // 從 HR05 獲取保險扣除額 (新加入)
                 .next(startExecutionTask) // 開始執行
                 .next(calculatePayslipsTask) // 計算薪資單
                 .next(completeExecutionTask) // 完成並彙總統計

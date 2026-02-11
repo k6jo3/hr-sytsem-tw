@@ -69,6 +69,8 @@ export class ProjectViewModelFactory {
     return {
       key: dto.id,
       id: dto.id,
+      projectId: dto.project_id,
+      parentTaskId: dto.parent_task_id,
       taskCode: dto.task_code,
       taskName: dto.task_name,
       level: dto.level,
@@ -76,8 +78,10 @@ export class ProjectViewModelFactory {
       actualHours: dto.actual_hours,
       progress: dto.progress,
       progressDisplay: this.formatPercentage(dto.progress),
+      status: dto.status,
       statusLabel: this.mapTaskStatusLabel(dto.status),
       statusColor: this.mapTaskStatusColor(dto.status),
+      assigneeId: dto.assignee_id,
       assigneeName: dto.assignee_name || '-',
       children: dto.children && dto.children.length > 0 
         ? dto.children.map(child => this.createTaskViewModel(child))

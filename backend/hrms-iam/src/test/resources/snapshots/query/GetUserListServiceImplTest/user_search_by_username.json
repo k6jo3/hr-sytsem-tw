@@ -5,6 +5,10 @@
     "op" : "LIKE",
     "v" : "john_doe"
   }, {
+    "f" : "is_deleted",
+    "op" : "EQ",
+    "v" : false
+  }, {
     "f" : "tenant_id",
     "op" : "EQ",
     "v" : null

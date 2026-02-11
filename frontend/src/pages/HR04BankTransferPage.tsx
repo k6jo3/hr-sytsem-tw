@@ -5,9 +5,9 @@ import {
     ReloadOutlined
 } from '@ant-design/icons';
 import { Button, Card, Col, message, Popconfirm, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
-import React, { useEffect, useState } from 'react';
-import { PayrollApi } from '../features/payroll/api/PayrollApi';
-import type { PayrollRunDto } from '../features/payroll/api/PayrollTypes';
+import React, { useEffect } from 'react';
+import { usePayrollRuns } from '../features/payroll/hooks/usePayrollRuns';
+import type { PayrollRunViewModel } from '../features/payroll/model/PayrollViewModel';
 
 const { Title, Text } = Typography;
 
@@ -16,53 +16,31 @@ const { Title, Text } = Typography;
  * 頁面代碼：HR04-P08
  */
 export const HR04BankTransferPage: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<PayrollRunDto[]>([]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // 獲取已核准或已發薪的批次，這些才需要產生薪轉檔
-      const res = await PayrollApi.getPayrollRuns({ 
-        // 假設後端支持多個狀態篩選，若不支持則可能需要前端過濾或多次請求
-        // 這裡暫定查詢已核准以上的狀態
-      });
-      // 前端過濾以確保狀態正確
-      const filtered = (res.items || res.content || []).filter((run: PayrollRunDto) => 
-        ['APPROVED', 'PAID'].includes(run.status)
-      );
-      setData(filtered);
-    } catch (error) {
-      message.error('載入計薪批次失敗');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { runs, loading, error, fetchRuns, generateBankFile, getBankFileUrl } = usePayrollRuns();
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchRuns();
+  }, [fetchRuns]);
+
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
 
   const handleGenerate = async (runId: string) => {
-    try {
-      await PayrollApi.generateBankTransferFile(runId);
+    const success = await generateBankFile(runId);
+    if (success) {
       message.success('薪轉檔案產生成功');
-      fetchData();
-    } catch (error) {
-      message.error('產生失敗');
     }
   };
 
   const handleDownload = async (runId: string) => {
-    try {
-      const url = await PayrollApi.getBankTransferDownloadUrl(runId);
-      if (url) {
-        window.open(url, '_blank');
-      } else {
-        message.warning('尚未產生檔案或下載位址失效');
-      }
-    } catch (error) {
-      message.error('獲取下載連結失敗');
+    const url = await getBankFileUrl(runId);
+    if (url) {
+      window.open(url, '_blank');
+    } else {
+      message.warning('尚未產生檔案或下載位址失效');
     }
   };
 
@@ -71,10 +49,10 @@ export const HR04BankTransferPage: React.FC = () => {
       title: '批次名稱', 
       dataIndex: 'name', 
       key: 'name',
-      render: (text: string, record: PayrollRunDto) => (
+      render: (text: string, record: PayrollRunViewModel) => (
         <Space direction="vertical" size={0}>
           <Text strong>{text}</Text>
-          <Text type="secondary" style={{ fontSize: '12px' }}>{record.start} ~ {record.end}</Text>
+          <Text type="secondary" style={{ fontSize: '12px' }}>{record.periodDisplay}</Text>
         </Space>
       )
     },
@@ -85,9 +63,9 @@ export const HR04BankTransferPage: React.FC = () => {
     },
     { 
       title: '實發總額', 
-      dataIndex: 'totalNetPay', 
-      key: 'totalNetPay',
-      render: (val: number) => <Text strong type="success">${(val || 0).toLocaleString()}</Text>
+      dataIndex: 'totalNetPayDisplay', 
+      key: 'totalNetPayDisplay',
+      render: (val: string) => <Text strong type="success">{val}</Text>
     },
     { 
       title: '人數', 
@@ -97,21 +75,15 @@ export const HR04BankTransferPage: React.FC = () => {
     },
     { 
       title: '狀態', 
-      dataIndex: 'status', 
       key: 'status',
-      render: (status: string) => {
-        const statusMap: any = {
-          'APPROVED': { color: 'green', text: '已核准 (待薪轉)' },
-          'PAID': { color: 'cyan', text: '已發薪' }
-        };
-        const config = statusMap[status] || { color: 'default', text: status };
-        return <Tag color={config.color}>{config.text}</Tag>;
-      }
+      render: (_: any, record: PayrollRunViewModel) => (
+        <Tag color={record.statusColor}>{record.statusLabel}</Tag>
+      )
     },
     {
       title: '操作',
       key: 'action',
-      render: (_: any, record: PayrollRunDto) => (
+      render: (_: any, record: PayrollRunViewModel) => (
         <Space>
           <Popconfirm title="確認產生此批次的銀行薪轉檔？" onConfirm={() => handleGenerate(record.runId)}>
             <Button icon={<BankOutlined />} type="primary" size="small">產生薪轉檔</Button>
@@ -128,6 +100,8 @@ export const HR04BankTransferPage: React.FC = () => {
     }
   ];
 
+  const displayData = runs.filter(record => ['APPROVED', 'PAID'].includes(record.status));
+
   return (
     <div style={{ padding: '24px' }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -137,7 +111,7 @@ export const HR04BankTransferPage: React.FC = () => {
             <Text type="secondary">在此產生並下載符合銀行格式的薪資發放媒體檔。</Text>
           </Col>
           <Col>
-            <Button icon={<ReloadOutlined />} onClick={fetchData}>重新整理</Button>
+            <Button icon={<ReloadOutlined />} onClick={() => fetchRuns()}>重新整理</Button>
           </Col>
         </Row>
 
@@ -156,12 +130,12 @@ export const HR04BankTransferPage: React.FC = () => {
             <Card title="本月待產製概況" size="small">
               <Row>
                 <Col span={12}>
-                  <Statistic title="待處理批次" value={data.filter(r => r.status === 'APPROVED').length} suffix="個" />
+                  <Statistic title="待處理批次" value={displayData.filter(r => r.status === 'APPROVED').length} suffix="個" />
                 </Col>
                 <Col span={12}>
                   <Statistic 
                     title="待撥付金額" 
-                    value={data.filter(r => r.status === 'APPROVED').reduce((sum, r) => sum + (r.totalNetPay || 0), 0)} 
+                    value={displayData.filter(r => r.status === 'APPROVED').reduce((sum, r) => sum + (r.totalNetPay || 0), 0)} 
                     prefix="$" 
                   />
                 </Col>
@@ -173,7 +147,7 @@ export const HR04BankTransferPage: React.FC = () => {
         <Card title="薪轉批次清單">
           <Table 
             columns={columns} 
-            dataSource={data} 
+            dataSource={displayData} 
             rowKey="runId" 
             loading={loading}
           />

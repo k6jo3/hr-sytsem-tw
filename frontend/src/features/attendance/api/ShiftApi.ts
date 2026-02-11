@@ -1,9 +1,11 @@
 import { apiClient } from '@shared/api';
+import { MockConfig } from '../../../config/MockConfig';
 import type {
     CreateShiftRequest,
     ShiftDto,
     UpdateShiftRequest,
 } from './AttendanceTypes';
+import { MockAttendanceApi } from './MockAttendanceApi';
 
 /**
  * Shift Management API (班別管理 API)
@@ -16,6 +18,7 @@ export class ShiftApi {
    * 查詢班別列表
    */
   static async getShiftList(params?: any): Promise<ShiftDto[]> {
+    if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getShifts();
     return apiClient.get(this.BASE_PATH, { params });
   }
 
@@ -23,6 +26,7 @@ export class ShiftApi {
    * 建立班別
    */
   static async createShift(request: CreateShiftRequest): Promise<any> {
+    if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.createShift(request);
     return apiClient.post(this.BASE_PATH, request);
   }
 
@@ -30,6 +34,7 @@ export class ShiftApi {
    * 更新班別
    */
   static async updateShift(shiftId: string, request: UpdateShiftRequest): Promise<any> {
+    if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.updateShift(shiftId, request);
     return apiClient.put(`${this.BASE_PATH}/${shiftId}`, request);
   }
 
@@ -37,6 +42,7 @@ export class ShiftApi {
    * 停用班別
    */
   static async deactivateShift(shiftId: string): Promise<any> {
+    if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.deleteShift(shiftId);
     return apiClient.put(`${this.BASE_PATH}/${shiftId}/deactivate`, {});
   }
 }

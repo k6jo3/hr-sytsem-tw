@@ -124,6 +124,19 @@ public abstract class BaseContractTest {
     }
 
     /**
+     * 從已載入的 Markdown 字串中解析指定場景的合約規格
+     * 支援已經過變數替換的 Markdown 文件
+     *
+     * @param markdown   已載入的 Markdown 合約文件（可能已替換變數）
+     * @param scenarioId 場景 ID (例如: "RPT_QRY_001")
+     * @return ContractSpec 合約規格物件
+     */
+    protected ContractSpec loadContractFromMarkdown(String markdown, String scenarioId) {
+        String jsonContract = contractEngine.extractJsonContract(markdown, scenarioId);
+        return contractEngine.parseContract(jsonContract);
+    }
+
+    /**
      * 驗證 Query 操作的完整合約
      * 包含：查詢過濾條件 + API 回應結果
      *

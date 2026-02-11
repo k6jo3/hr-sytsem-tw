@@ -8,7 +8,9 @@ import { Button, Card, Col, DatePicker, Form, Input, message, Row, Select, Space
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PayrollApi } from '../features/payroll/api/PayrollApi';
-import type { GetPayslipListRequest, PayslipDto } from '../features/payroll/api/PayrollTypes';
+import type { GetPayslipListRequest } from '../features/payroll/api/PayrollTypes';
+import { PayslipViewModelFactory } from '../features/payroll/factory/PayslipViewModelFactory';
+import type { PayslipDetailViewModel } from '../features/payroll/model/PayrollViewModel';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -21,7 +23,7 @@ const { Option } = Select;
 export const HR04PayrollHistoryPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<PayslipDto[]>([]);
+  const [data, setData] = useState<PayslipDetailViewModel[]>([]);
   const [total, setTotal] = useState(0);
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +42,8 @@ export const HR04PayrollHistoryPage: React.FC = () => {
       };
       
       const res = await PayrollApi.getPayslips(params);
-      setData(res.items || []);
+      const viewModels = (res.items || []).map(dto => PayslipViewModelFactory.createDetailFromDTO(dto));
+      setData(viewModels);
       setTotal(res.total || 0);
       setCurrentPage(page);
     } catch (error) {
@@ -83,59 +86,49 @@ export const HR04PayrollHistoryPage: React.FC = () => {
     { 
       title: '員工資訊', 
       key: 'employee',
-      render: (_: any, record: PayslipDto) => (
+      render: (_: any, record: PayslipDetailViewModel) => (
         <Space direction="vertical" size={0}>
-          <Text strong>{record.employee_name}</Text>
-          <Text type="secondary" style={{ fontSize: '12px' }}>{record.employee_code}</Text>
+          <Text strong>{record.employeeName}</Text>
+          <Text type="secondary" style={{ fontSize: '12px' }}>{record.employeeCode}</Text>
         </Space>
       )
     },
-    { title: '部門', dataIndex: 'department_name', key: 'department_name' },
+    { title: '部門', dataIndex: 'departmentName', key: 'departmentName' },
     { 
       title: '計薪期間', 
-      key: 'period',
-      render: (_: any, record: PayslipDto) => `${record.pay_period_start} ~ ${record.pay_period_end}`
+      dataIndex: 'payPeriodDisplay',
+      key: 'payPeriodDisplay',
     },
-    { title: '發薪日', dataIndex: 'payment_date', key: 'payment_date' },
+    { title: '發薪日', dataIndex: 'paymentDateDisplay', key: 'paymentDateDisplay' },
     { 
       title: '應發薪資', 
-      dataIndex: 'gross_pay', 
-      key: 'gross_pay',
-      render: (val: number) => `$${(val || 0).toLocaleString()}`
+      dataIndex: 'grossPayDisplay', 
+      key: 'grossPayDisplay',
     },
     { 
       title: '實發薪資', 
-      dataIndex: 'net_pay', 
-      key: 'net_pay',
-      render: (val: number) => <Text strong type="success">${(val || 0).toLocaleString()}</Text>
+      dataIndex: 'netPayDisplay', 
+      key: 'netPayDisplay',
+      render: (val: string) => <Text strong type="success">{val}</Text>
     },
     { 
       title: '狀態', 
-      dataIndex: 'status', 
       key: 'status',
-      render: (status: string) => {
-        const statusMap: any = {
-          'DRAFT': { color: 'default', text: '草稿' },
-          'CALCULATED': { color: 'blue', text: '已計算' },
-          'APPROVED': { color: 'green', text: '已核准' },
-          'PAID': { color: 'cyan', text: '已發放' },
-          'VOID': { color: 'red', text: '作廢' }
-        };
-        const config = statusMap[status] || { color: 'default', text: status };
-        return <Tag color={config.color}>{config.text}</Tag>;
-      }
+      render: (_: any, record: PayslipDetailViewModel) => (
+        <Tag color={record.statusColor}>{record.statusLabel}</Tag>
+      )
     },
     {
       title: '操作',
       key: 'action',
-      render: (_: any, record: PayslipDto) => (
+      render: (_: any, record: PayslipDetailViewModel) => (
         <Space>
           <Tooltip title="查看詳情">
             <Button 
               icon={<EyeOutlined />} 
               size="small" 
-              onClick={() => navigate(`/admin/payroll/runs/${record.id}`)} // 這裡假設詳情與批次明細相關或有獨立詳情頁
-              disabled // 暫時停用，直到明確詳情頁路徑
+              onClick={() => navigate(`/admin/payroll/runs/${record.id}`)} 
+              disabled 
             />
           </Tooltip>
           <Tooltip title="下載 PDF">

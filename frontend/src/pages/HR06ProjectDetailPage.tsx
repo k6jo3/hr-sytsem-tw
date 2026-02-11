@@ -23,6 +23,8 @@ import {
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ProjectCostTab } from '../features/project/components/ProjectCostTab';
+import { ProjectMembersTab } from '../features/project/components/ProjectMembersTab';
 import { ProjectWbsTree } from '../features/project/components/ProjectWbsTree';
 import { useProject } from '../features/project/hooks/useProject';
 
@@ -115,7 +117,7 @@ export const HR06ProjectDetailPage: React.FC = () => {
       ),
       children: (
         <Card size="small" bordered={false}>
-          <Text type="secondary">TODO: 實作專案成員管理 (HR06-M02)</Text>
+          <ProjectMembersTab projectId={id!} />
         </Card>
       ),
     },
@@ -129,7 +131,7 @@ export const HR06ProjectDetailPage: React.FC = () => {
       ),
       children: (
         <Card size="small" bordered={false}>
-          <Text type="secondary">TODO: 實作專案成本分析頁面 (HR06-P06)</Text>
+          <ProjectCostTab projectId={id!} />
         </Card>
       ),
     },
@@ -154,7 +156,8 @@ export const HR06ProjectDetailPage: React.FC = () => {
           </Col>
           <Col>
             <Space>
-              <Button icon={<EditOutlined />} type="primary">編輯專案</Button>
+              <Button icon={<BarsOutlined />} onClick={() => navigate(`/admin/projects/${id}/tasks`)}>管理工項</Button>
+              <Button icon={<EditOutlined />} type="primary" onClick={() => navigate(`/admin/projects/edit/${id}`)}>編輯專案</Button>
             </Space>
           </Col>
         </Row>

@@ -1,4 +1,5 @@
-import { Progress, Table, Tag, Typography } from 'antd';
+import { EditOutlined, PlusSquareOutlined } from '@ant-design/icons';
+import { Button, Progress, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import React from 'react';
 import type { TaskViewModel } from '../model/ProjectViewModel';
@@ -8,12 +9,19 @@ const { Text } = Typography;
 interface ProjectWbsTreeProps {
   tasks: TaskViewModel[];
   loading?: boolean;
+  onEdit?: (task: TaskViewModel) => void;
+  onAddSubTask?: (parent: TaskViewModel) => void;
 }
 
 /**
  * 專案 WBS 工項樹狀組件
  */
-export const ProjectWbsTree: React.FC<ProjectWbsTreeProps> = ({ tasks, loading }) => {
+export const ProjectWbsTree: React.FC<ProjectWbsTreeProps> = ({ 
+  tasks, 
+  loading,
+  onEdit,
+  onAddSubTask 
+}) => {
   const columns: ColumnsType<TaskViewModel> = [
     {
       title: '工項名稱',
@@ -64,6 +72,36 @@ export const ProjectWbsTree: React.FC<ProjectWbsTreeProps> = ({ tasks, loading }
       width: 100,
       render: (text: string, record: TaskViewModel) => (
         <Tag color={record.statusColor}>{text}</Tag>
+      ),
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: 100,
+      fixed: 'right',
+      render: (_, record: TaskViewModel) => (
+        <Space>
+          {onAddSubTask && record.level < 5 && (
+            <Tooltip title="新增子工項">
+              <Button 
+                type="text" 
+                size="small" 
+                icon={<PlusSquareOutlined />} 
+                onClick={() => onAddSubTask(record)} 
+              />
+            </Tooltip>
+          )}
+          {onEdit && (
+            <Tooltip title="編輯進度">
+              <Button 
+                type="text" 
+                size="small" 
+                icon={<EditOutlined />} 
+                onClick={() => onEdit(record)} 
+              />
+            </Tooltip>
+          )}
+        </Space>
       ),
     },
   ];

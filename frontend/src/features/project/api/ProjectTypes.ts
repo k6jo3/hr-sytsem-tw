@@ -56,9 +56,11 @@ export interface CustomerDto {
   id: string;
   customer_code: string;
   customer_name: string;
-  contact_person?: string;
-  contact_email?: string;
-  contact_phone?: string;
+  tax_id?: string;
+  industry?: string;
+  email?: string;
+  phone_number?: string;
+  status: 'ACTIVE' | 'INACTIVE';
   created_at: string;
 }
 
@@ -133,11 +135,46 @@ export interface UpdateProjectRequest {
 }
 
 /**
+ * 取得客戶列表請求
+ */
+export interface GetCustomerListRequest {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  status?: string;
+  industry?: string;
+}
+
+/**
  * 取得客戶列表回應
  */
 export interface GetCustomerListResponse {
   customers: CustomerDto[];
   total: number;
+}
+
+/**
+ * 建立客戶請求
+ */
+export interface CreateCustomerRequest {
+  customer_code: string;
+  customer_name: string;
+  tax_id?: string;
+  industry?: string;
+  email?: string;
+  phone_number?: string;
+}
+
+/**
+ * 更新客戶請求
+ */
+export interface UpdateCustomerRequest {
+  customer_name?: string;
+  tax_id?: string;
+  industry?: string;
+  email?: string;
+  phone_number?: string;
+  status?: 'ACTIVE' | 'INACTIVE';
 }
 
 // ========== WBS / Task Types ==========
@@ -195,4 +232,57 @@ export interface CreateTaskRequest {
 export interface UpdateTaskProgressRequest {
   progress: number;
   status?: TaskStatus;
+}
+
+// ========== Member / Cost Types ==========
+
+/**
+ * 專案成員 DTO
+ */
+export interface ProjectMemberDto {
+  member_id: string;
+  project_id: string;
+  employee_id: string;
+  employee_name: string;
+  role: string;
+  allocated_hours: number;
+  actual_hours: number;
+  join_date: string;
+}
+
+/**
+ * 專案成本統計 DTO
+ */
+export interface ProjectCostDto {
+  project_id: string;
+  budget_amount: number;
+  actual_cost: number;
+  cost_utilization: number;
+  budget_hours: number;
+  actual_hours: number;
+  hour_utilization: number;
+  profit_margin: number;
+  member_costs: MemberCostDto[];
+}
+
+/**
+ * 成員成本 DTO
+ */
+export interface MemberCostDto {
+  employee_id: string;
+  employee_name: string;
+  role: string;
+  hours: number;
+  hourly_rate: number;
+  cost: number;
+}
+
+/**
+ * 新增專案成員請求
+ */
+export interface AddProjectMemberRequest {
+  employee_id: string;
+  role: string;
+  allocated_hours: number;
+  join_date: string;
 }

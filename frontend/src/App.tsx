@@ -26,13 +26,19 @@ import {
     HR05InsuranceCalculatorPage,
     HR05InsuranceEnrollmentPage,
     HR05MyInsurancePage,
+    HR06CustomerPage,
     HR06ProjectDetailPage,
+    HR06ProjectEditPage,
     HR06ProjectListPage,
+    HR06ProjectTasksPage,
     HR07TimesheetApprovalPage,
     HR07TimesheetPage,
     HR07TimesheetReportPage,
+    HR08CycleManagementPage,
     HR08MyPerformancePage,
-    HR08PerformanceListPage,
+    HR08ReportPage,
+    HR08TeamPerformancePage,
+    HR08TemplateDesignPage,
     HR09RecruitmentPage,
     HR10TrainingListPage,
     HR11WorkflowListPage,
@@ -338,10 +344,42 @@ const App: React.FC = () => {
           }
         />
         <Route
+          path="/admin/projects/customers"
+          element={
+            <ProtectedRoute>
+              <HR06CustomerPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/projects/new"
+          element={
+            <ProtectedRoute>
+              <HR06ProjectEditPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/projects/edit/:id"
+          element={
+            <ProtectedRoute>
+              <HR06ProjectEditPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin/projects/:id"
           element={
             <ProtectedRoute>
               <HR06ProjectDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/projects/:id/tasks"
+          element={
+            <ProtectedRoute>
+              <HR06ProjectTasksPage />
             </ProtectedRoute>
           }
         />
@@ -365,9 +403,37 @@ const App: React.FC = () => {
         {/* HR08 - 績效管理 */}
         <Route
           path="/admin/performance"
+          element={<Navigate to="/admin/performance/cycles" replace />}
+        />
+        <Route
+          path="/admin/performance/cycles"
           element={
             <ProtectedRoute>
-              <HR08PerformanceListPage />
+              <HR08CycleManagementPage />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/admin/performance/cycles/:id/template"
+          element={
+            <ProtectedRoute>
+              <HR08TemplateDesignPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/performance/team"
+          element={
+            <ProtectedRoute>
+              <HR08TeamPerformancePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/performance/reports"
+          element={
+            <ProtectedRoute>
+              <HR08ReportPage />
             </ProtectedRoute>
           }
         />

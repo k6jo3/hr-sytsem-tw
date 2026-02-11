@@ -1,0 +1,289 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< com.company.hrms:hrms-iam >----------------------
+[INFO] Building HRMS IAM Service 1.0.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:resources (default-resources) @ hrms-iam ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 4 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ hrms-iam ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-resources-plugin:3.3.1:testResources (default-testResources) @ hrms-iam ---
+[INFO] Copying 8 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.11.0:testCompile (default-testCompile) @ hrms-iam ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- maven-surefire-plugin:3.2.2:test (default-test) @ hrms-iam ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.company.hrms.iam.api.contract.ProfileApiContractTest
+12:22:47.383 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.company.hrms.iam.api.contract.ProfileApiContractTest]: ProfileApiContractTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+12:22:47.577 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.company.hrms.iam.IamApplication for test class com.company.hrms.iam.api.contract.ProfileApiContractTest
+[INFO] Running com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileCommandApiContractTests
+12:22:47.785 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileCommandApiContractTests]: ProfileCommandApiContractTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+12:22:47.792 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.company.hrms.iam.IamApplication for test class com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileCommandApiContractTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2026-02-11 12:22:48 [main] INFO  c.c.h.i.a.c.ProfileApiContractTest - Starting ProfileApiContractTest using Java 21.0.9 with PID 43072 (started by T900067056 in D:\git\hr-system2\hr-sytsem-2\backend\hrms-iam)
+2026-02-11 12:22:48 [main] DEBUG c.c.h.i.a.c.ProfileApiContractTest - Running with Spring Boot v3.2.0, Spring v6.1.1
+2026-02-11 12:22:48 [main] INFO  c.c.h.i.a.c.ProfileApiContractTest - The following 1 profile is active: "test"
+2026-02-11 12:22:49 [main] DEBUG o.m.s.b.a.MybatisAutoConfiguration - Searching for mappers annotated with @Mapper
+2026-02-11 12:22:49 [main] DEBUG o.m.s.b.a.MybatisAutoConfiguration - Using auto-configuration base package 'com.company.hrms.iam'
+2026-02-11 12:22:50 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2026-02-11 12:22:50 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-02-11 12:22:50 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 21 ms. Found 0 JPA repository interfaces.
+2026-02-11 12:22:50 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2026-02-11 12:22:50 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-02-11 12:22:50 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 9 ms. Found 0 Redis repository interfaces.
+2026-02-11 12:22:50 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\git\hr-system2\hr-sytsem-2\backend\hrms-iam\target\classes\com\company\hrms\iam\infrastructure\dao\PermissionDAO.class]
+2026-02-11 12:22:50 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\git\hr-system2\hr-sytsem-2\backend\hrms-iam\target\classes\com\company\hrms\iam\infrastructure\dao\RoleDAO.class]
+2026-02-11 12:22:50 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Identified candidate component class: file [D:\git\hr-system2\hr-sytsem-2\backend\hrms-iam\target\classes\com\company\hrms\iam\infrastructure\mapper\UserMapper.class]
+2026-02-11 12:22:50 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'permissionDAO' and 'com.company.hrms.iam.infrastructure.dao.PermissionDAO' mapperInterface
+2026-02-11 12:22:50 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'roleDAO' and 'com.company.hrms.iam.infrastructure.dao.RoleDAO' mapperInterface
+2026-02-11 12:22:50 [main] DEBUG o.m.s.mapper.ClassPathMapperScanner - Creating MapperFactoryBean with name 'userMapper' and 'com.company.hrms.iam.infrastructure.mapper.UserMapper' mapperInterface
+2026-02-11 12:22:50 [main] INFO  o.s.cloud.context.scope.GenericScope - BeanFactory id=494038b8-1c77-3419-8e2e-f23faf3f4fb5
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$RetryInterceptorAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$RetryInterceptorAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration' of type [org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration' of type [org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.commons.config.CommonsConfigAutoConfiguration' of type [org.springframework.cloud.commons.config.CommonsConfigAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'loadBalancerClientsDefaultsMappingsProvider' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration$$Lambda/0x000001cd9056ec60] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'defaultsBindHandlerAdvisor' of type [org.springframework.cloud.commons.config.DefaultsBindHandlerAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'spring.cloud.loadbalancer-org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'default.org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration.LoadBalancerClientSpecification' of type [org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'default.org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration.LoadBalancerClientSpecification' of type [org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'loadBalancerClientFactory' of type [org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'blockingLoadBalancerClient' of type [org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'loadBalancerServiceInstanceCookieTransformer' of type [org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'xForwarderHeadersTransformer' of type [org.springframework.cloud.loadbalancer.blocking.XForwardedHeadersTransformer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'loadBalancerRequestFactory' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerRequestFactory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration$BlockingLoadBalancerRetryConfig' of type [org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration$BlockingLoadBalancerRetryConfig$$SpringCGLIB$$0] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'loadBalancedRetryFactory' of type [org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] WARN  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker - Bean 'loadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.RetryLoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-02-11 12:22:51 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-02-11 12:22:51 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.3.1.Final
+2026-02-11 12:22:51 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-02-11 12:22:52 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-02-11 12:22:52 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-02-11 12:22:52 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2026-02-11 12:22:52 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-02-11 12:22:52 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-02-11 12:22:53 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-02-11 12:22:53 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-02-11 12:22:54 [main] DEBUG o.m.spring.SqlSessionFactoryBean - Parsed mapper file: 'file [D:\git\hr-system2\hr-sytsem-2\backend\hrms-iam\target\classes\mapper\PermissionMapper.xml]'
+2026-02-11 12:22:54 [main] DEBUG o.m.spring.SqlSessionFactoryBean - Parsed mapper file: 'file [D:\git\hr-system2\hr-sytsem-2\backend\hrms-iam\target\classes\mapper\RoleMapper.xml]'
+2026-02-11 12:22:55 [main] WARN  o.s.aop.framework.CglibAopProxy - Unable to proxy interface-implementing method [public final java.lang.Object com.company.hrms.common.application.service.AbstractQueryService.getResponse(java.lang.Object,com.company.hrms.common.model.JWTModel,java.lang.String[]) throws java.lang.Exception] because it is marked as final, consider using interface-based JDK proxies instead.
+2026-02-11 12:22:55 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-02-11 12:22:55 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 9363fad5-7eb1-473b-8132-c79e8919997d
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-02-11 12:22:56 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@522941b2, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@4e44b713, org.springframework.security.web.context.SecurityContextHolderFilter@53e7cc08, org.springframework.security.web.header.HeaderWriterFilter@70796b21, org.springframework.web.filter.CorsFilter@4a83740e, org.springframework.security.web.authentication.logout.LogoutFilter@2d170dac, com.company.hrms.iam.infrastructure.security.JwtAuthenticationFilter@269fe2fe, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@7119d1da, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@3057728e, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5d8319a7, org.springframework.security.web.session.SessionManagementFilter@12515d64, org.springframework.security.web.access.ExceptionTranslationFilter@5aac9d67, org.springframework.security.web.access.intercept.AuthorizationFilter@6b8de9dc]
+2026-02-11 12:22:57 [main] DEBUG o.m.s.b.a.MybatisAutoConfiguration - Not found configuration for registering mapper bean using @MapperScan, MapperFactoryBean and MapperScannerConfigurer.
+2026-02-11 12:22:58 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-02-11 12:22:58 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-02-11 12:22:58 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 2 ms
+2026-02-11 12:22:58 [main] INFO  o.s.c.n.e.c.DiscoveryClientOptionalArgsConfiguration - Eureka HTTP Client uses RestTemplate.
+2026-02-11 12:22:58 [main] WARN  o.s.c.l.c.LoadBalancerCacheAutoConfiguration$LoadBalancerCaffeineWarnLogger - Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-02-11 12:22:58 [main] INFO  c.c.h.i.a.c.ProfileApiContractTest - Started ProfileApiContractTest in 10.421 seconds (process running for 12.027)
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-02-11 12:22:59 [main] INFO  c.c.h.i.a.s.p.UpdateProfileServiceImpl - 更新個人資料: userId=user-current-id
+2026-02-11 12:22:59 [main] INFO  c.c.h.c.a.pipeline.BusinessPipeline - Pipeline started with 2 tasks
+2026-02-11 12:22:59 [main] DEBUG c.c.h.c.a.pipeline.BusinessPipeline - Executing task: [載入使用者]
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Creating a new SqlSession
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Registering transaction synchronization for SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5416bc77]
+2026-02-11 12:22:59 [main] DEBUG o.m.s.t.SpringManagedTransaction - JDBC Connection [HikariProxyConnection@890556836 wrapping conn0: url=jdbc:h2:mem:testdb user=SA] will be managed by Spring
+2026-02-11 12:22:59 [main] DEBUG c.c.h.i.i.m.UserMapper.selectById - ==>  Preparing: SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, status, failed_login_attempts, locked_until, last_login_at, last_logout_at, password_changed_at, must_change_password, created_at, updated_at FROM users WHERE user_id = ?
+2026-02-11 12:22:59 [main] DEBUG c.c.h.i.i.m.UserMapper.selectById - ==> Parameters: user-current-id(String)
+2026-02-11 12:22:59 [main] DEBUG c.c.h.i.i.m.UserMapper.selectById - <==      Total: 1
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5416bc77]
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5416bc77] from current transaction
+2026-02-11 12:22:59 [main] DEBUG c.c.h.i.i.m.U.selectUserRoles - ==>  Preparing: SELECT role_id FROM user_roles WHERE user_id = ?
+2026-02-11 12:22:59 [main] DEBUG c.c.h.i.i.m.U.selectUserRoles - ==> Parameters: user-current-id(String)
+2026-02-11 12:22:59 [main] DEBUG c.c.h.i.i.m.U.selectUserRoles - <==      Total: 1
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5416bc77]
+2026-02-11 12:22:59 [main] DEBUG c.c.h.c.a.pipeline.BusinessPipeline - Task [載入使用者] completed in 76 ms
+2026-02-11 12:22:59 [main] DEBUG c.c.h.c.a.pipeline.BusinessPipeline - Executing task: [更新個人資料]
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5416bc77] from current transaction
+2026-02-11 12:22:59 [main] DEBUG c.c.h.i.i.mapper.UserMapper.update - ==>  Preparing: UPDATE users SET username = ?, email = ?, password_hash = ?, display_name = ?, employee_id = ?, tenant_id = ?, status = ?, failed_login_attempts = ?, locked_until = ?, last_login_at = ?, last_logout_at = ?, password_changed_at = ?, must_change_password = ?, updated_at = ? WHERE user_id = ?
+2026-02-11 12:22:59 [main] DEBUG c.c.h.i.i.mapper.UserMapper.update - ==> Parameters: john.doe@company.com(String), john.doe@company.com(String), $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy(String), John Doe(String), null, T001(String), ACTIVE(String), 0(Integer), null, null, null, null, false(Boolean), 2026-02-11 12:22:59.7820603(Timestamp), user-current-id(String)
+2026-02-11 12:22:59 [main] DEBUG c.c.h.i.i.mapper.UserMapper.update - <==    Updates: 1
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5416bc77]
+2026-02-11 12:22:59 [main] INFO  c.c.h.i.a.s.p.task.UpdateProfileTask - 個人資料更新成功: userId=user-current-id
+2026-02-11 12:22:59 [main] DEBUG c.c.h.c.a.pipeline.BusinessPipeline - Task [更新個人資料] completed in 8 ms
+2026-02-11 12:22:59 [main] INFO  c.c.h.c.a.pipeline.BusinessPipeline - Pipeline completed: 2 executed, 0 skipped, total 84 ms
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Transaction synchronization committing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5416bc77]
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Transaction synchronization deregistering SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5416bc77]
+2026-02-11 12:22:59 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Transaction synchronization closing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5416bc77]
+
+MockHttpServletRequest:
+      HTTP Method = PUT
+      Request URI = /api/v1/profile
+       Parameters = {}
+          Headers = [Content-Type:"application/json", Content-Length:"79"]
+             Body = <no character encoding set>
+    Session Attrs = {}
+
+Handler:
+             Type = com.company.hrms.iam.api.controller.profile.HR01ProfileCmdController
+           Method = com.company.hrms.iam.api.controller.profile.HR01ProfileCmdController#updateProfile(UpdateProfileRequest, JWTModel)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [Content-Type:"application/json"]
+     Content type = application/json
+             Body = {"userId":"user-current-id","username":"john.doe@company.com","email":"john.doe@company.com","displayName":"John Doe","employeeId":null,"tenantId":"T001","roles":["role-0001"],"lastLoginAt":null,"mustChangePassword":false}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+2026-02-11 12:22:59 [main] INFO  c.c.h.i.a.s.p.ChangePasswordServiceImpl - 變更密碼: userId=user-current-id
+2026-02-11 12:22:59 [main] INFO  c.c.h.c.a.pipeline.BusinessPipeline - Pipeline started with 4 tasks
+2026-02-11 12:22:59 [main] DEBUG c.c.h.c.a.pipeline.BusinessPipeline - Executing task: [驗證新密碼格式]
+2026-02-11 12:22:59 [main] ERROR c.c.h.c.a.pipeline.BusinessPipeline - Task [驗證新密碼格式] failed: 密碼強度不足，需包含: 特殊字元
+2026-02-11 12:22:59 [main] WARN  c.c.h.c.i.web.GlobalExceptionHandler - Pipeline task [驗證新密碼格式] failed due to domain rule: 密碼強度不足，需包含: 特殊字元
+
+MockHttpServletRequest:
+      HTTP Method = PUT
+      Request URI = /api/v1/profile/change-password
+       Parameters = {}
+          Headers = [Content-Type:"application/json", Content-Length:"103"]
+             Body = <no character encoding set>
+    Session Attrs = {}
+
+Handler:
+             Type = com.company.hrms.iam.api.controller.profile.HR01ProfileCmdController
+           Method = com.company.hrms.iam.api.controller.profile.HR01ProfileCmdController#changePassword(ChangePasswordRequest, JWTModel)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = com.company.hrms.common.application.pipeline.PipelineExecutionException
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 400
+    Error message = null
+          Headers = [Content-Type:"application/json"]
+     Content type = application/json
+             Body = {"success":false,"code":"PASSWORD_WEAK","message":"密碼強度不足，需包含: 特殊字元","timestamp":"2026-02-11T12:22:59.9065756"}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 12.15 s <<< FAILURE! -- in com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileCommandApiContractTests
+[ERROR] com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileCommandApiContractTests.updateProfile_AsAuthenticatedUser_IAM_CMD_301 -- Time elapsed: 1.410 s <<< FAILURE!
+com.company.hrms.common.test.contract.ContractViolationException: [IAM_CMD_301] 資料表 users UPDATE 筆數不符: 預期 1 筆, 實際 0 筆
+	at com.company.hrms.common.test.contract.MarkdownContractEngine.assertUpdate(MarkdownContractEngine.java:685)
+	at com.company.hrms.common.test.contract.MarkdownContractEngine.assertDataChanges(MarkdownContractEngine.java:634)
+	at com.company.hrms.common.test.contract.BaseContractTest.verifyCommandContract(BaseContractTest.java:204)
+	at com.company.hrms.iam.api.contract.ProfileApiContractTest.access$2(ProfileApiContractTest.java:1)
+	at com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileCommandApiContractTests.updateProfile_AsAuthenticatedUser_IAM_CMD_301(ProfileApiContractTest.java:140)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[ERROR] com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileCommandApiContractTests.changePassword_AsAuthenticatedUser_IAM_CMD_302 -- Time elapsed: 0.060 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<400>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:59)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:122)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:637)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileCommandApiContractTests.changePassword_AsAuthenticatedUser_IAM_CMD_302(ProfileApiContractTest.java:162)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[INFO] Running com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileQueryApiContractTests
+2026-02-11 12:22:59 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileQueryApiContractTests]: ProfileQueryApiContractTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-02-11 12:22:59 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.company.hrms.iam.IamApplication for test class com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileQueryApiContractTests
+2026-02-11 12:23:00 [main] INFO  c.c.h.i.a.s.p.GetProfileServiceImpl - 查詢個人資料: userId=user-current-id
+2026-02-11 12:23:00 [main] INFO  c.c.h.c.a.pipeline.BusinessPipeline - Pipeline started with 1 tasks
+2026-02-11 12:23:00 [main] DEBUG c.c.h.c.a.pipeline.BusinessPipeline - Executing task: [載入使用者]
+2026-02-11 12:23:00 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Creating a new SqlSession
+2026-02-11 12:23:00 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Registering transaction synchronization for SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ebd3d4c]
+2026-02-11 12:23:00 [main] DEBUG o.m.s.t.SpringManagedTransaction - JDBC Connection [HikariProxyConnection@1061036503 wrapping conn0: url=jdbc:h2:mem:testdb user=SA] will be managed by Spring
+2026-02-11 12:23:00 [main] DEBUG c.c.h.i.i.m.UserMapper.selectById - ==>  Preparing: SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, status, failed_login_attempts, locked_until, last_login_at, last_logout_at, password_changed_at, must_change_password, created_at, updated_at FROM users WHERE user_id = ?
+2026-02-11 12:23:00 [main] DEBUG c.c.h.i.i.m.UserMapper.selectById - ==> Parameters: user-current-id(String)
+2026-02-11 12:23:00 [main] DEBUG c.c.h.i.i.m.UserMapper.selectById - <==      Total: 1
+2026-02-11 12:23:00 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ebd3d4c]
+2026-02-11 12:23:00 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Fetched SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ebd3d4c] from current transaction
+2026-02-11 12:23:00 [main] DEBUG c.c.h.i.i.m.U.selectUserRoles - ==>  Preparing: SELECT role_id FROM user_roles WHERE user_id = ?
+2026-02-11 12:23:00 [main] DEBUG c.c.h.i.i.m.U.selectUserRoles - ==> Parameters: user-current-id(String)
+2026-02-11 12:23:00 [main] DEBUG c.c.h.i.i.m.U.selectUserRoles - <==      Total: 1
+2026-02-11 12:23:00 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Releasing transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ebd3d4c]
+2026-02-11 12:23:00 [main] DEBUG c.c.h.c.a.pipeline.BusinessPipeline - Task [載入使用者] completed in 7 ms
+2026-02-11 12:23:00 [main] INFO  c.c.h.c.a.pipeline.BusinessPipeline - Pipeline completed: 1 executed, 0 skipped, total 8 ms
+2026-02-11 12:23:00 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Transaction synchronization committing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ebd3d4c]
+2026-02-11 12:23:00 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Transaction synchronization deregistering SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ebd3d4c]
+2026-02-11 12:23:00 [main] DEBUG org.mybatis.spring.SqlSessionUtils - Transaction synchronization closing SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4ebd3d4c]
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.122 s -- in com.company.hrms.iam.api.contract.ProfileApiContractTest$ProfileQueryApiContractTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.88 s -- in com.company.hrms.iam.api.contract.ProfileApiContractTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   ProfileApiContractTest$ProfileCommandApiContractTests.changePassword_AsAuthenticatedUser_IAM_CMD_302:162 Status expected:<200> but was:<400>
+[ERROR]   ProfileApiContractTest$ProfileCommandApiContractTests.updateProfile_AsAuthenticatedUser_IAM_CMD_301:140 [IAM_CMD_301] 資料表 users UPDATE 筆數不符: 預期 1 筆, 實際 0 筆
+[INFO] 
+[ERROR] Tests run: 3, Failures: 2, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  16.463 s
+[INFO] Finished at: 2026-02-11T12:23:00+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.2.2:test (default-test) on project hrms-iam: There are test failures.
+[ERROR] 
+[ERROR] Please refer to D:\git\hr-system2\hr-sytsem-2\backend\hrms-iam\target\surefire-reports for the individual test results.
+[ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

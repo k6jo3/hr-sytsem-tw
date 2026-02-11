@@ -201,6 +201,15 @@ export interface CreateCycleResponse {
   message: string;
 }
 
+export interface UpdateCycleRequest {
+  cycle_name?: string;
+  start_date?: string;
+  end_date?: string;
+  self_eval_deadline?: string;
+  manager_eval_deadline?: string;
+  status?: CycleStatus;
+}
+
 /**
  * GET /api/v1/performance/reports/distribution - 績效分佈報表
  */
@@ -212,4 +221,26 @@ export interface GetDistributionResponse {
   distribution: PerformanceDistributionDto[];
   total_employees: number;
   average_score: number;
+}
+
+// ========== Template Types ==========
+
+export interface EvaluationTemplateDto {
+  form_name: string;
+  scoring_system: 'FIVE_POINT' | 'FIVE_LEVEL' | 'PERCENTAGE';
+  forced_distribution: boolean;
+  distribution_rules?: Record<PerformanceRating, number>;
+  evaluation_items: EvaluationItemDto[];
+}
+
+export interface UpdateTemplateRequest {
+  form_name: string;
+  scoring_system: 'FIVE_POINT' | 'FIVE_LEVEL' | 'PERCENTAGE';
+  forced_distribution: boolean;
+  distribution_rules?: Record<PerformanceRating, number>;
+  evaluation_items: EvaluationItemDto[];
+}
+
+export interface GetTemplateResponse {
+  template: EvaluationTemplateDto;
 }

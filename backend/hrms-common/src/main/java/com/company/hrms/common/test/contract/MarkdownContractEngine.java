@@ -669,16 +669,23 @@ public class MarkdownContractEngine {
             ExpectedDataChange change, String scenarioId) {
         // 比對修改的記錄
         int updateCount = 0;
+        System.out.println("===== assertUpdate DEBUG =====");
+        System.out.println("Table: " + change.getTable());
+        System.out.println("Before records count: " + beforeRecords.size());
+        System.out.println("After records count: " + afterRecords.size());
+
         for (Map<String, Object> afterRecord : afterRecords) {
             for (Map<String, Object> beforeRecord : beforeRecords) {
                 if (isSameRecord(beforeRecord, afterRecord)) {
                     if (!beforeRecord.equals(afterRecord)) {
                         updateCount++;
+                        System.out.println("Updated record: " + afterRecord.get("user_id"));
                     }
                     break;
                 }
             }
         }
+        System.out.println("Total update count: " + updateCount);
 
         if (change.getCount() != null && updateCount != change.getCount()) {
             throw new ContractViolationException(
@@ -714,10 +721,20 @@ public class MarkdownContractEngine {
     }
 
     private boolean isSameRecord(Map<String, Object> record1, Map<String, Object> record2) {
-        // 假設有 id 欄位
-        if (record1.containsKey("id") && record2.containsKey("id")) {
-            return record1.get("id").equals(record2.get("id"));
+        // 嘗試多種常見的主鍵欄位名稱
+        String[] possibleIdFields = {"id", "user_id", "role_id", "permission_id", "tenant_id",
+                "employee_id", "token_id", "log_id", "link_id", "history_id"};
+
+        for (String idField : possibleIdFields) {
+            if (record1.containsKey(idField) && record2.containsKey(idField)) {
+                Object id1 = record1.get(idField);
+                Object id2 = record2.get(idField);
+                if (id1 != null && id2 != null && id1.equals(id2)) {
+                    return true;
+                }
+            }
         }
+
         return false;
     }
 

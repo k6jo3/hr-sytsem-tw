@@ -1,4 +1,5 @@
 import { apiClient } from '@shared/api';
+import { MockConfig } from '../../../config/MockConfig';
 import type {
     ApplyLeaveRequest,
     ApplyLeaveResponse,
@@ -8,6 +9,7 @@ import type {
     LeaveBalanceListResponse,
     UpdateLeaveTypeRequest
 } from './AttendanceTypes';
+import { MockAttendanceApi } from './MockAttendanceApi';
 
 /**
  * Leave API (請假 API)
@@ -20,6 +22,7 @@ export class LeaveApi {
    * 提交請假申請
    */
   static async applyLeave(request: ApplyLeaveRequest): Promise<ApplyLeaveResponse> {
+    if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.applyLeave(request);
     return apiClient.post(`${this.BASE_PATH}/applications`, request);
   }
 
@@ -29,6 +32,7 @@ export class LeaveApi {
   static async getLeaveApplications(
     params?: GetLeaveApplicationsRequest
   ): Promise<GetLeaveApplicationsResponse> {
+    if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getLeaveApplications(params);
     return apiClient.get(`${this.BASE_PATH}/applications`, { params });
   }
 
@@ -36,6 +40,7 @@ export class LeaveApi {
    * 查詢假期餘額
    */
   static async getLeaveBalances(employeeId: string): Promise<LeaveBalanceListResponse> {
+    if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getLeaveBalance(employeeId);
     return apiClient.get(`${this.BASE_PATH}/balances/${employeeId}`);
   }
 
@@ -43,6 +48,7 @@ export class LeaveApi {
    * 查詢假別列表
    */
   static async getLeaveTypes(): Promise<any[]> {
+    if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getLeaveTypes();
     return apiClient.get(`${this.BASE_PATH}/types`);
   }
 
@@ -50,6 +56,7 @@ export class LeaveApi {
    * 取消請假申請
    */
   static async cancelLeave(applicationId: string): Promise<void> {
+    // Mock not implemented yet
     return apiClient.put(`${this.BASE_PATH}/applications/${applicationId}/cancel`, {});
   }
 
@@ -57,6 +64,7 @@ export class LeaveApi {
    * 核准請假申請 (主管用)
    */
   static async approveLeave(applicationId: string, remark?: string): Promise<void> {
+    // Mock not implemented yet
     return apiClient.put(`${this.BASE_PATH}/applications/${applicationId}/approve`, { remark });
   }
 
@@ -64,6 +72,7 @@ export class LeaveApi {
    * 駁回請假申請 (主管用)
    */
   static async rejectLeave(applicationId: string, reason: string): Promise<void> {
+    // Mock not implemented yet
     return apiClient.put(`${this.BASE_PATH}/applications/${applicationId}/reject`, { reason });
   }
 
@@ -71,6 +80,7 @@ export class LeaveApi {
    * 建立假別 (管理員用)
    */
   static async createLeaveType(request: CreateLeaveTypeRequest): Promise<void> {
+    // Mock not implemented yet
     return apiClient.post(`${this.BASE_PATH}/types`, request);
   }
 
@@ -78,6 +88,7 @@ export class LeaveApi {
    * 更新假別 (管理員用)
    */
   static async updateLeaveType(leaveTypeId: string, request: UpdateLeaveTypeRequest): Promise<void> {
+    // Mock not implemented yet
     return apiClient.put(`${this.BASE_PATH}/types/${leaveTypeId}`, request);
   }
 
@@ -85,6 +96,7 @@ export class LeaveApi {
    * 停用假別 (管理員用)
    */
   static async deactivateLeaveType(leaveTypeId: string): Promise<void> {
+    // Mock not implemented yet
     return apiClient.put(`${this.BASE_PATH}/types/${leaveTypeId}/deactivate`, {});
   }
 }

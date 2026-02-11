@@ -1,19 +1,23 @@
 import type {
-  PerformanceCycleDto,
-  PerformanceReviewDto,
-  EvaluationItemDto,
-  MyPerformanceDto,
-  CycleType,
-  CycleStatus,
-  ReviewType,
-  ReviewStatus,
-  PerformanceRating,
+    CycleStatus,
+    CycleType,
+    EvaluationItemDto,
+    EvaluationTemplateDto,
+    MyPerformanceDto,
+    PerformanceCycleDto,
+    PerformanceRating,
+    PerformanceReviewDto,
+    ReviewStatus,
+    ReviewType,
+    TeamReviewItemDto,
 } from '../api/PerformanceTypes';
 import type {
-  PerformanceCycleViewModel,
-  PerformanceReviewViewModel,
-  EvaluationItemViewModel,
-  MyPerformanceViewModel,
+    EvaluationItemViewModel,
+    EvaluationTemplateViewModel,
+    MyPerformanceViewModel,
+    PerformanceCycleViewModel,
+    PerformanceReviewViewModel,
+    TeamReviewItemViewModel,
 } from '../model/PerformanceViewModel';
 
 /**
@@ -40,6 +44,29 @@ export class PerformanceViewModelFactory {
       isCompleted: dto.status === 'COMPLETED',
       daysRemaining: dto.self_eval_deadline ? this.calculateDaysRemaining(dto.self_eval_deadline) : undefined,
       daysRemainingDisplay: dto.self_eval_deadline ? this.formatDaysRemaining(dto.self_eval_deadline) : undefined,
+    };
+  }
+
+  /**
+   * 將 EvaluationTemplateDto 轉換為 EvaluationTemplateViewModel
+   */
+  static createTemplateViewModel(dto: EvaluationTemplateDto): EvaluationTemplateViewModel {
+    const evaluationItems = dto.evaluation_items.map((item) =>
+      this.createEvaluationItemViewModel(item)
+    );
+
+    const totalWeight = evaluationItems.reduce((sum, item) => sum + item.weight, 0);
+
+    return {
+      formName: dto.form_name,
+      scoringSystem: this.mapScoringSystemLabel(dto.scoring_system),
+      scoringSystemValue: dto.scoring_system,
+      forcedDistribution: dto.forced_distribution,
+      forcedDistributionLabel: dto.forced_distribution ? '啟用' : '停用',
+      distributionRules: dto.distribution_rules,
+      evaluationItems,
+      totalWeight: Math.round(totalWeight * 100),
+      isValid: Math.round(totalWeight * 100) === 100,
     };
   }
 
@@ -265,5 +292,44 @@ export class PerformanceViewModelFactory {
     if (days < 0) return '已逾期';
     if (days === 0) return '今天截止';
     return `剩餘 ${days} 天`;
+  }
+
+  /**
+   * 將 TeamReviewItemDto 轉換為 TeamReviewItemViewModel
+   */
+  static createTeamReviewItemViewModel(dto: TeamReviewItemDto): TeamReviewItemViewModel {
+      let completionRate = 0;
+      if (dto.manager_review_status === 'FINALIZED') completionRate = 100;
+      else if (dto.manager_review_status === 'SUBMITTED') completionRate = 90;
+      else if (dto.self_review_status === 'SUBMITTED') completionRate = 60;
+      else if (dto.self_review_status === 'DRAFT') completionRate = 20;
+
+    return {
+      employeeId: dto.employee_id,
+      employeeName: dto.employee_name,
+      employeeCode: dto.employee_code,
+      departmentName: dto.department_name,
+      positionName: dto.position_name,
+      selfReviewStatusLabel: this.mapReviewStatusLabel(dto.self_review_status),
+      selfReviewStatusColor: this.mapReviewStatusColor(dto.self_review_status),
+      managerReviewStatusLabel: this.mapReviewStatusLabel(dto.manager_review_status),
+      managerReviewStatusColor: this.mapReviewStatusColor(dto.manager_review_status),
+      overallScoreDisplay: dto.overall_score !== undefined ? dto.overall_score.toFixed(1) : '-',
+      overallRating: dto.overall_rating ? this.mapRatingDisplay(dto.overall_rating).split(' ')[0] : undefined, // simplified
+      overallRatingColor: dto.overall_rating ? this.mapRatingColor(dto.overall_rating) : undefined,
+      selfSubmittedAtDisplay: dto.self_submitted_at,
+      managerSubmittedAtDisplay: dto.manager_submitted_at,
+      needsManagerReview: dto.self_review_status === 'SUBMITTED' && dto.manager_review_status !== 'SUBMITTED' && dto.manager_review_status !== 'FINALIZED',
+      completionRate,
+    };
+  }
+
+  private static mapScoringSystemLabel(system: string): string {
+    const labelMap: Record<string, string> = {
+      FIVE_POINT: '五分制',
+      FIVE_LEVEL: '五等第',
+      PERCENTAGE: '百分制',
+    };
+    return labelMap[system] || system;
   }
 }

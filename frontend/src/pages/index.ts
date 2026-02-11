@@ -36,8 +36,11 @@ export { default as HR05InsuranceEnrollmentPage } from './HR05InsuranceEnrollmen
 export { default as HR05MyInsurancePage } from './HR05MyInsurancePage';
 
 // Project (HR06)
+export { HR06CustomerPage } from './HR06CustomerPage';
 export { HR06ProjectDetailPage } from './HR06ProjectDetailPage';
+export { HR06ProjectEditPage } from './HR06ProjectEditPage';
 export { HR06ProjectListPage } from './HR06ProjectListPage';
+export { HR06ProjectTasksPage } from './HR06ProjectTasksPage';
 
 // Timesheet (HR07)
 export { default as HR07TimesheetApprovalPage } from './HR07TimesheetApprovalPage';
@@ -45,8 +48,11 @@ export { default as HR07TimesheetPage } from './HR07TimesheetPage';
 export { default as HR07TimesheetReportPage } from './HR07TimesheetReportPage';
 
 // Performance (HR08)
+export { HR08CycleManagementPage } from './HR08CycleManagementPage';
 export { HR08MyPerformancePage } from './HR08MyPerformancePage';
-export { HR08PerformanceListPage } from './HR08PerformanceListPage';
+export { HR08ReportPage } from './HR08ReportPage';
+export { HR08TeamPerformancePage } from './HR08TeamPerformancePage';
+export { HR08TemplateDesignPage } from './HR08TemplateDesignPage';
 
 // Recruitment (HR09)
 export { HR09RecruitmentPage } from './HR09RecruitmentPage';

@@ -1,9 +1,26 @@
 import { EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Col, DatePicker, Divider, Form, Input, InputNumber, message, Modal, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import {
+    Button,
+    Card,
+    Col,
+    DatePicker,
+    Divider,
+    Form,
+    Input,
+    InputNumber,
+    message,
+    Modal,
+    Row,
+    Select,
+    Space,
+    Table,
+    Tag,
+    Typography
+} from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
-import { PayrollApi } from '../features/payroll/api/PayrollApi';
-import type { SalaryStructureDto } from '../features/payroll/api/PayrollTypes';
+import type { SalaryStructureViewModel } from '../features/payroll/factory/SalaryStructureViewModelFactory';
+import { useSalaryStructure } from '../features/payroll/hooks/useSalaryStructure';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -13,74 +30,61 @@ const { Option } = Select;
  * 頁面代碼：HR04-P01
  */
 export const HR04SalaryStructurePage: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<SalaryStructureDto[]>([]);
+  const { structures, loading, fetchStructures, createStructure, updateStructure } = useSalaryStructure();
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<SalaryStructureDto | null>(null);
+  const [editingRecord, setEditingRecord] = useState<SalaryStructureViewModel | null>(null);
   const [form] = Form.useForm();
-
-  const fetchData = async (filters: any = {}) => {
-    setLoading(true);
-    try {
-      const res = await PayrollApi.getSalaryStructures(filters);
-      setData(res.items || res.content || []);
-    } catch (error) {
-      message.error('載入薪資結構失敗');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [searchForm] = Form.useForm();
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchStructures();
+  }, [fetchStructures]);
 
   const handleSearch = () => {
-    const values = form.getFieldsValue(['searchEmployeeId', 'searchStatus', 'searchSystem']);
-    fetchData({
+    const values = searchForm.getFieldsValue();
+    fetchStructures({
       employeeId: values.searchEmployeeId,
       isActive: values.searchStatus,
       payrollSystem: values.searchSystem,
     });
   };
 
-  const handleEdit = (record: SalaryStructureDto) => {
-    // ... existing code ...
+  const handleEdit = (record: SalaryStructureViewModel) => {
     setEditingRecord(record);
+    // Find raw DTO data if needed, but here we can use what we have
+    // Actually we might need the raw DTO for complex fields like sub-items
     form.setFieldsValue({
       ...record,
       effectiveDate: record.effectiveDate ? dayjs(record.effectiveDate) : null,
-      endDate: record.endDate ? dayjs(record.endDate) : null,
     });
     setModalVisible(true);
   };
 
   const handleSave = async () => {
-    // ... existing code ...
     try {
       const values = await form.validateFields();
       const payload = {
         ...values,
         effectiveDate: values.effectiveDate?.format('YYYY-MM-DD'),
-        endDate: values.endDate?.format('YYYY-MM-DD'),
       };
 
+      let success = false;
       if (editingRecord) {
-        await PayrollApi.updateSalaryStructure(editingRecord.id, payload);
-        message.success('更新成功');
+        success = await updateStructure(editingRecord.id, payload);
       } else {
-        await PayrollApi.createSalaryStructure(payload);
-        message.success('建立成功');
+        success = await createStructure(payload);
       }
-      setModalVisible(false);
-      fetchData();
+
+      if (success) {
+        message.success(editingRecord ? '更新成功' : '建立成功');
+        setModalVisible(false);
+      }
     } catch (error) {
-      message.error('儲存失敗');
+      // Form validation failed or API error handled by hook
     }
   };
 
   const columns = [
-    // ... existing code ...
     { 
       title: '員工ID', 
       dataIndex: 'employeeId', 
@@ -88,18 +92,16 @@ export const HR04SalaryStructurePage: React.FC = () => {
     },
     { 
       title: '薪資制度', 
-      dataIndex: 'payrollSystem', 
+      dataIndex: 'payrollSystemLabel', 
       key: 'payrollSystem',
-      render: (val: string) => val === 'MONTHLY' ? <Tag color="blue">月薪制</Tag> : <Tag color="orange">時薪制</Tag>
+      render: (label: string, record: SalaryStructureViewModel) => (
+        <Tag color={record.payrollSystem === 'MONTHLY' ? 'blue' : 'orange'}>{label}</Tag>
+      )
     },
     { 
       title: '薪資/時薪', 
-      key: 'rate',
-      render: (_: any, record: SalaryStructureDto) => (
-        record.payrollSystem === 'MONTHLY' 
-          ? `$${record.monthlySalary?.toLocaleString()}` 
-          : `$${record.hourlyRate?.toLocaleString()}/時`
-      )
+      dataIndex: 'amountDisplay',
+      key: 'rate'
     },
     { 
       title: '生效日期', 
@@ -108,14 +110,15 @@ export const HR04SalaryStructurePage: React.FC = () => {
     },
     { 
       title: '狀態', 
-      dataIndex: 'active', 
       key: 'active',
-      render: (active: boolean) => active ? <Tag color="success">生效中</Tag> : <Tag color="default">已失效</Tag>
+      render: (_: any, record: SalaryStructureViewModel) => (
+        <Tag color={record.statusColor}>{record.statusLabel}</Tag>
+      )
     },
     {
       title: '操作',
       key: 'action',
-      render: (_: any, record: SalaryStructureDto) => (
+      render: (_: any, record: SalaryStructureViewModel) => (
         <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>編輯</Button>
       )
     }
@@ -138,7 +141,7 @@ export const HR04SalaryStructurePage: React.FC = () => {
         </Row>
 
         <Card>
-          <Form form={form} layout="inline" style={{ marginBottom: 16 }}>
+          <Form form={searchForm} layout="inline" style={{ marginBottom: 16 }}>
             <Form.Item name="searchEmployeeId">
               <Input placeholder="搜尋員工 ID" prefix={<SearchOutlined />} style={{ width: 200 }} />
             </Form.Item>
@@ -161,7 +164,7 @@ export const HR04SalaryStructurePage: React.FC = () => {
 
           <Table 
             columns={columns} 
-            dataSource={data} 
+            dataSource={structures} 
             rowKey="id" 
             loading={loading}
           />
@@ -170,7 +173,7 @@ export const HR04SalaryStructurePage: React.FC = () => {
 
       <Modal
         title={editingRecord ? '編輯薪資結構' : '新增薪資結構'}
-        visible={modalVisible}
+        open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onOk={handleSave}
         width={600}
@@ -222,11 +225,11 @@ export const HR04SalaryStructurePage: React.FC = () => {
             </Col>
           </Row>
 
-          <Divider orientation="left">固定津貼項目</Divider>
+          <Divider orientation="left">固定薪資項目</Divider>
           <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
             這裡可以設定員工每月的固定加給或扣額，如伙食津貼、職務加給等。
           </Text>
-          {/* TODO: Implement dynamic item list if needed, or simple fields */}
+          {/* TODO: Implement dynamic item list if needed */}
         </Form>
       </Modal>
     </div>

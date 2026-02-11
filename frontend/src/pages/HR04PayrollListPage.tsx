@@ -8,13 +8,13 @@ import {
     SearchOutlined,
     SendOutlined
 } from '@ant-design/icons';
-import { Button, Card, Col, DatePicker, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, DatePicker, Form, Input, message, Modal, Popconfirm, Progress, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PayrollApi } from '../features/payroll/api/PayrollApi';
-import type { PayrollRunDto } from '../features/payroll/api/PayrollTypes';
+import { usePayrollRuns } from '../features/payroll/hooks/usePayrollRuns';
+import type { PayrollRunViewModel } from '../features/payroll/model/PayrollViewModel';
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 const { Option } = Select;
 
 /**
@@ -23,31 +23,24 @@ const { Option } = Select;
  */
 export const HR04PayrollListPage: React.FC = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<PayrollRunDto[]>([]);
+  const { runs, loading, error, fetchRuns, startRun, calculateRun, approveRun } = usePayrollRuns();
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [searchForm] = Form.useForm();
 
-  const fetchData = async (filters: any = {}) => {
-    setLoading(true);
-    try {
-      const res = await PayrollApi.getPayrollRuns(filters);
-      setData(res.items || res.content || []);
-    } catch (error) {
-      message.error('載入薪資批次失敗');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    fetchRuns();
+  }, [fetchRuns]);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
 
   const handleSearch = () => {
     const values = searchForm.getFieldsValue();
-    fetchData({
+    fetchRuns({
       status: values.status,
       startDate: values.range?.[0]?.format('YYYY-MM-DD'),
       endDate: values.range?.[1]?.format('YYYY-MM-DD'),
@@ -55,7 +48,6 @@ export const HR04PayrollListPage: React.FC = () => {
   };
 
   const handleCreate = async () => {
-    // ... existing code ...
     try {
       const values = await form.validateFields();
       const payload = {
@@ -65,82 +57,67 @@ export const HR04PayrollListPage: React.FC = () => {
         end: values.period[1].format('YYYY-MM-DD'),
         payDate: values.payDate.format('YYYY-MM-DD'),
       };
-      await PayrollApi.startPayrollRun(payload);
-      message.success('批次建立成功');
-      setModalVisible(false);
-      fetchData();
+      const success = await startRun(payload);
+      if (success) {
+        message.success('批次建立成功');
+        setModalVisible(false);
+      }
     } catch (error) {
-      message.error('建立失敗');
+      // 錯誤訊息由 Hook 處理或是 validation error
     }
   };
 
-  const handleExecute = async (runId: string) => {
-    // ... existing code ...
-    try {
-      message.loading({ content: '計算中...', key: 'calc' });
-      await PayrollApi.executePayrollRun(runId);
+  const onExecute = async (runId: string) => {
+    message.loading({ content: '計算中...', key: 'calc' });
+    const success = await calculateRun(runId);
+    if (success) {
       message.success({ content: '計算完成', key: 'calc' });
-      fetchData();
-    } catch (error) {
+    } else {
       message.error({ content: '計算失敗', key: 'calc' });
     }
   };
 
-  const handleApprove = async (runId: string) => {
-    // ... existing code ...
-    try {
-      await PayrollApi.approvePayrollRun(runId);
+  const onApprove = async (runId: string) => {
+    const success = await approveRun(runId);
+    if (success) {
       message.success('已核准批次');
-      fetchData();
-    } catch (error) {
-      message.error('核准失敗');
     }
   };
 
-  const getStatusTag = (status: string) => {
-    // ... existing code ...
-    const statusMap: Record<string, { color: string; text: string }> = {
-      'DRAFT': { color: 'default', text: '草稿' },
-      'CALCULATING': { color: 'processing', text: '計算中' },
-      'COMPLETED': { color: 'warning', text: '待審核' },
-      'APPROVED': { color: 'success', text: '已核准' },
-      'REJECTED': { color: 'error', text: '已退回' },
-      'PAID': { color: 'cyan', text: '已發薪' },
-    };
-    const config = statusMap[status] || { color: 'default', text: status };
-    return <Tag color={config.color}>{config.text}</Tag>;
-  };
-
   const columns = [
-    // ... existing code ...
     { title: '批次名稱', dataIndex: 'name', key: 'name' },
     { 
       title: '計薪期間', 
-      key: 'period',
-      render: (_: any, record: PayrollRunDto) => `${record.start} ~ ${record.end}`
+      dataIndex: 'periodDisplay',
+      key: 'periodDisplay',
     },
     { title: '發薪日', dataIndex: 'payDate', key: 'payDate' },
     { 
-      title: '人數', 
-      key: 'employees',
-      render: (_: any, record: PayrollRunDto) => `${record.processedEmployees}/${record.totalEmployees}`
+      title: '進度', 
+      key: 'progress',
+      render: (_: any, record: PayrollRunViewModel) => (
+        <Space direction="vertical" size={2} style={{ width: '100%' }}>
+          <Text type="secondary">{record.processedEmployees}/{record.totalEmployees}</Text>
+          <Progress percent={record.progress} size="small" />
+        </Space>
+      )
     },
     { 
       title: '實發總額', 
-      dataIndex: 'totalNetPay', 
-      key: 'totalNetPay',
-      render: (val: number) => `$${(val || 0).toLocaleString()}`
+      dataIndex: 'totalNetPayDisplay', 
+      key: 'totalNetPayDisplay',
     },
     { 
       title: '狀態', 
-      dataIndex: 'status', 
       key: 'status',
-      render: (status: string) => getStatusTag(status)
+      render: (_: any, record: PayrollRunViewModel) => (
+        <Tag color={record.statusColor}>{record.statusLabel}</Tag>
+      )
     },
     {
       title: '操作',
       key: 'action',
-      render: (_: any, record: PayrollRunDto) => (
+      render: (_: any, record: PayrollRunViewModel) => (
         <Space>
           <Tooltip title="查看明細">
             <Button 
@@ -151,13 +128,13 @@ export const HR04PayrollListPage: React.FC = () => {
           </Tooltip>
           
           {record.status === 'DRAFT' && (
-            <Popconfirm title="確認執行計算？" onConfirm={() => handleExecute(record.runId)}>
+            <Popconfirm title="確認執行計算？" onConfirm={() => onExecute(record.runId)}>
               <Button type="primary" icon={<PlayCircleOutlined />} size="small">執行計算</Button>
             </Popconfirm>
           )}
 
           {record.status === 'COMPLETED' && (
-            <Popconfirm title="確認核准此批次？" onConfirm={() => handleApprove(record.runId)}>
+            <Popconfirm title="確認核准此批次？" onConfirm={() => onApprove(record.runId)}>
               <Button type="primary" ghost icon={<CheckCircleOutlined />} size="small">核准發放</Button>
             </Popconfirm>
           )}
@@ -169,7 +146,7 @@ export const HR04PayrollListPage: React.FC = () => {
             </Space>
           )}
 
-          <Button icon={<ReloadOutlined />} size="small" onClick={() => fetchData()} />
+          <Button icon={<ReloadOutlined />} size="small" onClick={() => fetchRuns()} />
         </Space>
       )
     }
@@ -209,7 +186,7 @@ export const HR04PayrollListPage: React.FC = () => {
         <Card>
           <Table 
             columns={columns} 
-            dataSource={data} 
+            dataSource={runs} 
             rowKey="runId" 
             loading={loading}
           />
@@ -218,7 +195,7 @@ export const HR04PayrollListPage: React.FC = () => {
 
       <Modal
         title="建立薪資計算批次"
-        visible={modalVisible}
+        open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onOk={handleCreate}
         width={500}
