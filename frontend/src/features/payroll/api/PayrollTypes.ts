@@ -74,6 +74,7 @@ export interface PayrollRunDto {
   payrollSystem: string;
   start: string;
   end: string;
+  payDate: string;
   totalDays: number;
   totalEmployees: number;
   processedEmployees: number;
@@ -86,6 +87,14 @@ export interface PayrollRunDto {
   completedAt?: string;
   approvedAt?: string;
   paidAt?: string;
+  
+  // 專案統計 (HR07 Integration)
+  project_stats?: {
+    project_id: string;
+    project_name: string;
+    total_hours: number;
+    total_amount: number;
+  }[];
 }
 
 /**
@@ -143,9 +152,22 @@ export interface PayslipDto {
   work_days?: number;
   overtime_hours?: number;
   leave_days?: number;
+  
+  // 專案工時連結 (HR07 Integration)
+  project_costs?: ProjectCostDto[];
 
   created_at: string;
   updated_at: string;
+}
+
+/**
+ * 專案成本分配 DTO
+ */
+export interface ProjectCostDto {
+  project_id: string;
+  project_name: string;
+  hours: number;
+  amount: number; // 該專案分攤的薪資成本
 }
 
 /**

@@ -3,18 +3,28 @@
  * 前端顯示用的資料模型
  */
 
+import type { ChangeType, EnrollmentStatus, InsuranceType } from '../api/InsuranceTypes';
+
 /**
  * 投保記錄 ViewModel
  */
 export interface EnrollmentViewModel {
-  enrollmentId: string;
+  id: string;
+  employeeId: string;
   employeeName: string;
+  insuranceUnitName: string;
+  insuranceType: InsuranceType;
   insuranceTypeLabel: string;
   insuranceTypeColor: string;
+  enrollDate: string;
   enrollDateDisplay: string;
+  withdrawDate?: string;
   withdrawDateDisplay?: string;
+  monthlySalary: number;
   monthlySalaryDisplay: string;
+  levelNumber: number;
   levelDisplay: string;
+  status: EnrollmentStatus;
   statusLabel: string;
   statusColor: string;
   isActive: boolean;
@@ -27,6 +37,13 @@ export interface EnrollmentViewModel {
  * 保費明細 ViewModel
  */
 export interface InsuranceFeesViewModel {
+  laborEmployee: number;
+  laborEmployer: number;
+  healthEmployee: number;
+  healthEmployer: number;
+  pensionEmployer: number;
+  totalEmployee: number;
+  totalEmployer: number;
   laborEmployeeDisplay: string;
   laborEmployerDisplay: string;
   healthEmployeeDisplay: string;
@@ -42,7 +59,9 @@ export interface InsuranceFeesViewModel {
  */
 export interface EnrollmentHistoryViewModel {
   historyId: string;
+  changeDate: string;
   changeDateDisplay: string;
+  changeType: ChangeType;
   changeTypeLabel: string;
   changeTypeColor: string;
   insuranceTypeLabel: string;

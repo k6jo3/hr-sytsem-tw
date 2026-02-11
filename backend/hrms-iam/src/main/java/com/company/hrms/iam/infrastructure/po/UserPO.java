@@ -94,6 +94,11 @@ public class UserPO {
     private Boolean mustChangePassword;
 
     /**
+     * 是否已刪除 (軟刪除標記)
+     */
+    private Boolean isDeleted;
+
+    /**
      * 建立時間
      */
     private Timestamp createdAt;

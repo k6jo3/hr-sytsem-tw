@@ -5,11 +5,13 @@ import {
     ReloadOutlined,
     SendOutlined
 } from '@ant-design/icons';
-import { Breadcrumb, Button, Card, Col, message, Popconfirm, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
+import { Breadcrumb, Button, Card, Col, List, message, Popconfirm, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PayrollApi } from '../features/payroll/api/PayrollApi';
-import type { PayrollRunDto, PayslipDto } from '../features/payroll/api/PayrollTypes';
+import { PayslipViewModelFactory } from '../features/payroll/factory/PayslipViewModelFactory';
+import { usePayrollRuns } from '../features/payroll/hooks/usePayrollRuns';
+import type { PayrollItemViewModel, PayslipDetailViewModel } from '../features/payroll/model/PayrollViewModel';
 
 const { Title, Text } = Typography;
 
@@ -20,20 +22,18 @@ const { Title, Text } = Typography;
 export const HR04PayrollBatchDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [run, setRun] = useState<PayrollRunDto | null>(null);
-  const [payslips, setPayslips] = useState<PayslipDto[]>([]);
+  const { currentRun, fetchRunDetail, approveRun, loading: runLoading } = usePayrollRuns();
+  const [payslips, setPayslips] = useState<PayslipDetailViewModel[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchData = async () => {
     if (!id) return;
     setLoading(true);
     try {
-      const [runRes, payslipsRes] = await Promise.all([
-        PayrollApi.getPayrollRunById(id),
-        PayrollApi.getPayslips({ runId: id })
-      ]);
-      setRun(runRes);
-      setPayslips(payslipsRes.items || []);
+      await fetchRunDetail(id);
+      const payslipsRes = await PayrollApi.getPayslips({ runId: id });
+      const viewModels = (payslipsRes.items || []).map((dto: any) => PayslipViewModelFactory.createDetailFromDTO(dto));
+      setPayslips(viewModels);
     } catch (error) {
       message.error('載入資料失敗');
     } finally {
@@ -45,45 +45,42 @@ export const HR04PayrollBatchDetailPage: React.FC = () => {
     fetchData();
   }, [id]);
 
-  const handleApprove = async () => {
+  const onApprove = async () => {
     if (!id) return;
-    try {
-      await PayrollApi.approvePayrollRun(id);
+    const success = await approveRun(id);
+    if (success) {
       message.success('已核准批次');
       fetchData();
-    } catch (error) {
-      message.error('核准失敗');
     }
   };
 
   const columns = [
-    { title: '員工編號', dataIndex: 'employee_code', key: 'employee_code' },
-    { title: '姓名', dataIndex: 'employee_name', key: 'employee_name' },
+    { title: '員工編號', dataIndex: 'employeeCode', key: 'employeeCode' },
+    { title: '姓名', dataIndex: 'employeeName', key: 'employeeName' },
     { 
       title: '底薪', 
       key: 'base',
-      render: (_: any, record: PayslipDto) => {
-        const base = record.items.find(i => i.item_code === 'BASE_SALARY')?.amount || 0;
+      render: (_: any, record: PayslipDetailViewModel) => {
+        const base = record.incomeItems.find((i: PayrollItemViewModel) => i.itemCode === 'BASE_SALARY')?.amount || 0;
         return `$${base.toLocaleString()}`;
       }
     },
     { 
       title: '應發總額', 
-      dataIndex: 'gross_pay', 
-      key: 'gross_pay',
-      render: (val: number) => `$${val.toLocaleString()}`
+      dataIndex: 'grossPayDisplay', 
+      key: 'grossPayDisplay',
     },
     { 
       title: '扣除總額', 
-      dataIndex: 'total_deductions', 
-      key: 'total_deductions',
-      render: (val: number) => <Text type="danger">${val.toLocaleString()}</Text>
+      dataIndex: 'totalDeductionsDisplay', 
+      key: 'totalDeductionsDisplay',
+      render: (val: string) => <Text type="danger">{val}</Text>
     },
     { 
       title: '實發薪資', 
-      dataIndex: 'net_pay', 
-      key: 'net_pay',
-      render: (val: number) => <Text strong type="success">${val.toLocaleString()}</Text>
+      dataIndex: 'netPayDisplay', 
+      key: 'netPayDisplay',
+      render: (val: string) => <Text strong type="success">{val}</Text>
     }
   ];
 
@@ -113,18 +110,18 @@ export const HR04PayrollBatchDetailPage: React.FC = () => {
           <Col>
             <Space>
               <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/admin/payroll/runs')} />
-              <Title level={2} style={{ margin: 0 }}>{run?.name || '載入中...'}</Title>
-              {run && getStatusTag(run.status)}
+              <Title level={2} style={{ margin: 0 }}>{currentRun?.name || '載入中...'}</Title>
+              {currentRun && getStatusTag(currentRun.status)}
             </Space>
           </Col>
           <Col>
             <Space>
-              {run?.status === 'COMPLETED' && (
-                <Popconfirm title="核准後資料將鎖定，確認核准？" onConfirm={handleApprove}>
+              {currentRun?.status === 'COMPLETED' && (
+                <Popconfirm title="核准後資料將鎖定，確認核准？" onConfirm={onApprove}>
                   <Button type="primary" icon={<CheckCircleOutlined />}>核准發放</Button>
                 </Popconfirm>
               )}
-              {run?.status === 'APPROVED' && (
+              {currentRun?.status === 'APPROVED' && (
                 <>
                   <Button icon={<SendOutlined />}>發送薪資單</Button>
                   <Button icon={<BankOutlined />}>產生薪轉檔</Button>
@@ -135,29 +132,56 @@ export const HR04PayrollBatchDetailPage: React.FC = () => {
           </Col>
         </Row>
 
-        {run && (
+        {currentRun && (
           <Row gutter={16}>
             <Col span={6}>
               <Card size="small">
-                <Statistic title="總人數" value={run.totalEmployees} suffix="人" />
+                <Statistic title="總人數" value={currentRun.totalEmployees} suffix="人" />
               </Card>
             </Col>
             <Col span={6}>
               <Card size="small">
-                <Statistic title="應發總額" value={run.totalGrossPay} prefix="$" />
+                <Statistic title="應發總額" value={currentRun.totalGrossPayDisplay} prefix="$" />
               </Card>
             </Col>
             <Col span={6}>
               <Card size="small">
-                <Statistic title="扣額合計" value={run.totalDeductions} prefix="$" valueStyle={{ color: '#cf1322' }} />
+                <Statistic title="扣額合計" value={currentRun.totalDeductionsDisplay} prefix="$" valueStyle={{ color: '#cf1322' }} />
               </Card>
             </Col>
             <Col span={6}>
               <Card size="small">
-                <Statistic title="實發合計" value={run.totalNetPay} prefix="$" valueStyle={{ color: '#3f8600' }} />
+                <Statistic title="實發合計" value={currentRun.totalNetPayDisplay} prefix="$" valueStyle={{ color: '#3f8600' }} />
               </Card>
             </Col>
           </Row>
+        )}
+
+        {currentRun && currentRun.projectStats && currentRun.projectStats.length > 0 && (
+          <Card title={<Space><BankOutlined /><span>專案成本分佈 (HR07 數據同步)</span></Space>}>
+            <List
+              grid={{ gutter: 16, xs: 1, sm: 2, lg: 3 }}
+              dataSource={currentRun.projectStats}
+              renderItem={(item) => (
+                <List.Item>
+                  <Card size="small" bordered={false} style={{ background: '#fafafa' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <Text strong>{item.projectName}</Text>
+                      <Text type="secondary">{item.totalHours}h</Text>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Title level={4} style={{ margin: 0 }}>{item.totalAmountDisplay}</Title>
+                      <Progress 
+                        percent={Math.round((item.totalAmount / (currentRun.totalGrossPay || 1)) * 100)} 
+                        size="small" 
+                        status="active"
+                      />
+                    </div>
+                  </Card>
+                </List.Item>
+              )}
+            />
+          </Card>
         )}
 
         <Card title="員工計薪結果清單">
@@ -165,7 +189,7 @@ export const HR04PayrollBatchDetailPage: React.FC = () => {
             columns={columns} 
             dataSource={payslips} 
             rowKey="id" 
-            loading={loading}
+            loading={loading || runLoading}
             pagination={{ pageSize: 50 }}
           />
         </Card>

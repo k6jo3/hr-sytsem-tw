@@ -1,10 +1,19 @@
 # Test Configuration for IAM Service
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    # 使用 H2 In-Memory Database (PostgreSQL 相容模式)
+    # DATABASE_TO_LOWER=TRUE: 保持欄位名稱小寫（PostgreSQL 預設行為）
+    # CASE_INSENSITIVE_IDENTIFIERS=TRUE: 不區分大小寫
+    # 直接使用 iam_base_data.sql 來初始化（包含 CREATE TABLE + 測試資料）
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password:
+
+  # 使用 @Sql 註解載入測試資料
+  sql:
+    init:
+      mode: never
 
   h2:
     console:
@@ -12,8 +21,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+      # 使用 none，因為我們已經有 schema-test.sql
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
 
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
@@ -42,3 +56,5 @@ logging:
   level:
     com.company.hrms: DEBUG
     org.springframework.security: DEBUG
+    com.company.hrms.iam.infrastructure.mapper: TRACE
+    org.mybatis: DEBUG

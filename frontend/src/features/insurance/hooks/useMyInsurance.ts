@@ -1,41 +1,35 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import { InsuranceApi } from '../api/InsuranceApi';
 import { InsuranceViewModelFactory } from '../factory/InsuranceViewModelFactory';
 import type { MyInsuranceInfoViewModel } from '../model/InsuranceViewModel';
 
 /**
- * 我的保險資訊 Hook (ESS)
+ * useMyInsurance Hook
+ * 用戶端 (ESS) 查詢個人保險資訊
  */
 export const useMyInsurance = () => {
-  const [insuranceInfo, setInsuranceInfo] = useState<MyInsuranceInfoViewModel | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [insuranceInfo, setInsuranceInfo] = useState<MyInsuranceInfoViewModel | null>(null);
 
   const fetchMyInsurance = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await InsuranceApi.getMyInsurance();
-      const viewModel = InsuranceViewModelFactory.createMyInsuranceInfoViewModel(
-        response.insurance_info
-      );
-      setInsuranceInfo(viewModel);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '無法取得保險資訊');
-      setInsuranceInfo(null);
+      const vm = InsuranceViewModelFactory.createMyInsuranceInfoViewModel(response.insurance_info);
+      setInsuranceInfo(vm);
+    } catch (err: any) {
+      setError(err.message || '載入個人保險資訊失敗');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchMyInsurance();
-  }, [fetchMyInsurance]);
-
   return {
     insuranceInfo,
     loading,
     error,
-    refresh: fetchMyInsurance,
+    refresh: fetchMyInsurance
   };
 };

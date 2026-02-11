@@ -59,7 +59,8 @@ public class HR01UserCmdController extends CommandBaseController {
     public ResponseEntity<CreateUserResponse> createUser(
             @RequestBody @Valid CreateUserRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-        return ResponseEntity.ok(execCommand(request, currentUser));
+        CreateUserResponse response = execCommand(request, currentUser);
+        return ResponseEntity.status(201).body(response);
     }
 
     /**

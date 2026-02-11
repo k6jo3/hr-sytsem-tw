@@ -1,110 +1,129 @@
+import { PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Input, Radio, Row, Space, Typography } from 'antd';
 import React from 'react';
-import { Card, message, Input, Select, Space } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useProjects } from '../features/project/hooks/useProjects';
 import { ProjectList } from '../features/project/components/ProjectList';
-import type { ProjectViewModel } from '../features/project/model/ProjectViewModel';
-import type { ProjectStatus, ProjectType } from '../features/project/api/ProjectTypes';
+import { useProjects } from '../features/project/hooks/useProjects';
 
-const { Search } = Input;
-const { Option } = Select;
+const { Title } = Typography;
 
 /**
  * HR06-P02: 專案列表頁面
  */
 export const HR06ProjectListPage: React.FC = () => {
   const navigate = useNavigate();
-  const {
-    projects,
-    loading,
-    error,
-    total,
-    page,
-    pageSize,
-    filters,
-    handlePageChange,
-    handleFilterChange,
-    refresh,
+  const { 
+    projects, 
+    loading, 
+    total, 
+    page, 
+    pageSize, 
+    filters, 
+    handlePageChange, 
+    handleFilterChange, 
+    refresh 
   } = useProjects();
 
-  // 顯示錯誤訊息
-  React.useEffect(() => {
-    if (error) {
-      message.error(error);
-    }
-  }, [error]);
-
-  const handleSearch = (keyword: string) => {
-    handleFilterChange({ ...filters, keyword });
+  const handleSearch = (value: string) => {
+    handleFilterChange({ ...filters, keyword: value });
   };
 
-  const handleStatusChange = (status?: ProjectStatus) => {
+  const handleStatusChange = (status: any) => {
     handleFilterChange({ ...filters, status });
   };
 
-  const handleTypeChange = (projectType?: ProjectType) => {
+  const handleTypeChange = (projectType: any) => {
     handleFilterChange({ ...filters, projectType });
   };
 
-  const handleAddProject = () => {
+  const handleCreate = () => {
     navigate('/admin/projects/new');
   };
 
-  const handleRowClick = (project: ProjectViewModel) => {
-    navigate(`/admin/projects/${project.id}`);
+  const handleManageCustomers = () => {
+    navigate('/admin/projects/customers');
   };
 
   return (
     <div style={{ padding: 24 }}>
-      <Card
-        title={<span style={{ fontSize: 20, fontWeight: 600 }}>專案管理</span>}
-        extra={
-          <Space>
-            <Select
-              placeholder="狀態"
-              allowClear
-              style={{ width: 120 }}
-              onChange={handleStatusChange}
-              value={filters.status}
-            >
-              <Option value="PLANNING">規劃中</Option>
-              <Option value="IN_PROGRESS">進行中</Option>
-              <Option value="COMPLETED">已結案</Option>
-              <Option value="ON_HOLD">暫停</Option>
-              <Option value="CANCELLED">已取消</Option>
-            </Select>
-            <Select
-              placeholder="類型"
-              allowClear
-              style={{ width: 120 }}
-              onChange={handleTypeChange}
-              value={filters.projectType}
-            >
-              <Option value="DEVELOPMENT">新開發</Option>
-              <Option value="MAINTENANCE">維護</Option>
-              <Option value="CONSULTING">顧問</Option>
-            </Select>
-            <Search
-              placeholder="搜尋專案..."
-              allowClear
-              onSearch={handleSearch}
-              style={{ width: 250 }}
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Row justify="space-between" align="middle">
+          <Col>
+            <Title level={3} style={{ margin: 0 }}>專案管理</Title>
+          </Col>
+          <Col>
+            <Space>
+              <Button icon={<TeamOutlined />} onClick={handleManageCustomers}>客戶管理</Button>
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+                新增專案
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+
+        <Card>
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Row gutter={16} align="middle">
+              <Col span={8}>
+                <Input
+                  placeholder="搜尋專案代碼、名稱或客戶..."
+                  prefix={<SearchOutlined />}
+                  onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                  allowClear
+                  onChange={(e) => !e.target.value && handleSearch('')}
+                />
+              </Col>
+              <Col span={16}>
+                <Space size="large">
+                  <div>
+                    <span style={{ marginRight: 8 }}>狀態:</span>
+                    <Radio.Group 
+                      value={filters.status} 
+                      onChange={(e) => handleStatusChange(e.target.value)}
+                      optionType="button"
+                      buttonStyle="solid"
+                      size="small"
+                    >
+                      <Radio.Button value={undefined}>全部</Radio.Button>
+                      <Radio.Button value="PLANNING">規劃中</Radio.Button>
+                      <Radio.Button value="IN_PROGRESS">進行中</Radio.Button>
+                      <Radio.Button value="COMPLETED">已結案</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                  <div>
+                    <span style={{ marginRight: 8 }}>類型:</span>
+                    <Radio.Group 
+                      value={filters.projectType} 
+                      onChange={(e) => handleTypeChange(e.target.value)}
+                      optionType="button"
+                      buttonStyle="solid"
+                      size="small"
+                    >
+                      <Radio.Button value={undefined}>全部</Radio.Button>
+                      <Radio.Button value="DEVELOPMENT">新開發</Radio.Button>
+                      <Radio.Button value="MAINTENANCE">維護</Radio.Button>
+                      <Radio.Button value="CONSULTING">顧問</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                </Space>
+              </Col>
+            </Row>
+
+            <ProjectList
+              projects={projects}
+              loading={loading}
+              total={total}
+              page={page}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onRowClick={(project) => navigate(`/admin/projects/${project.id}`)}
+              onRefresh={refresh}
             />
           </Space>
-        }
-      >
-        <ProjectList
-          projects={projects}
-          loading={loading}
-          total={total}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={handlePageChange}
-          onAdd={handleAddProject}
-          onRefresh={refresh}
-          onRowClick={handleRowClick}
-        />
-      </Card>
+        </Card>
+      </Space>
     </div>
   );
 };
+
+export default HR06ProjectListPage;

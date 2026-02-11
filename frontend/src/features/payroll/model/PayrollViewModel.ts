@@ -3,7 +3,7 @@
  * 前端顯示用的資料模型
  */
 
-import type { PayslipStatus, PayrollItemType } from '../api/PayrollTypes';
+import type { PayrollItemType, PayslipStatus } from '../api/PayrollTypes';
 
 /**
  * 薪資項目 ViewModel
@@ -73,4 +73,46 @@ export interface PayslipDetailViewModel {
 
   // 權限
   canDownload: boolean;
+}
+
+/**
+ * 薪資批次 ViewModel
+ */
+export interface PayrollRunViewModel {
+  runId: string;
+  organizationId: string;
+  name: string;
+  status: 'DRAFT' | 'CALCULATING' | 'COMPLETED' | 'APPROVED' | 'REJECTED' | 'PAID';
+  statusLabel: string;
+  statusColor: string;
+  payrollSystem: string;
+  start: string;
+  end: string;
+  periodDisplay: string;
+  payDate: string;
+  totalDays: number;
+  totalEmployees: number;
+  processedEmployees: number;
+  progress: number;
+  successCount: number;
+  failureCount: number;
+  totalGrossPay: number;
+  totalGrossPayDisplay: string;
+  totalNetPay: number;
+  totalNetPayDisplay: string;
+  totalDeductions: number;
+  totalDeductionsDisplay: string;
+  executedAt?: string;
+  completedAt?: string;
+  approvedAt?: string;
+  paidAt?: string;
+
+  // 專案統計 (HR07 Integration)
+  projectStats?: {
+    projectId: string;
+    projectName: string;
+    totalHours: number;
+    totalAmount: number;
+    totalAmountDisplay: string;
+  }[];
 }

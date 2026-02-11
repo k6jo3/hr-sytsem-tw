@@ -1,8 +1,8 @@
 import { EditOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Form, Input, InputNumber, Modal, Row, Select, Space, Switch, Table, Tag, Tooltip, Typography, message } from 'antd';
+import { Button, Card, Col, Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space, Switch, Table, Tag, Tooltip, Typography, message } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { PayrollApi } from '../features/payroll/api/PayrollApi';
 import type { PayrollItemDefinitionDto } from '../features/payroll/api/PayrollTypes';
+import { usePayrollItems } from '../features/payroll/hooks/usePayrollItems';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -12,27 +12,20 @@ const { Option } = Select;
  * 頁面代碼：HR04-P02
  */
 export const HR04PayrollItemPage: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<PayrollItemDefinitionDto[]>([]);
+  const { items, loading, error, fetchItems, createItem, updateItem, deleteItem } = usePayrollItems();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<PayrollItemDefinitionDto | null>(null);
   const [form] = Form.useForm();
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await PayrollApi.getPayrollItemDefinitions();
-      setData(res || []);
-    } catch (error) {
-      message.error('載入薪資項目失敗');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
 
   const handleEdit = (item: PayrollItemDefinitionDto) => {
     setEditingItem(item);
@@ -49,17 +42,19 @@ export const HR04PayrollItemPage: React.FC = () => {
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
+      let success = false;
       if (editingItem) {
-        await PayrollApi.updatePayrollItemDefinition(editingItem.id, values);
-        message.success('更新成功');
+        success = await updateItem(editingItem.id, values);
       } else {
-        await PayrollApi.createPayrollItemDefinition(values);
-        message.success('建立成功');
+        success = await createItem(values);
       }
-      setModalVisible(false);
-      fetchData();
+      
+      if (success) {
+        message.success(editingItem ? '更新成功' : '建立成功');
+        setModalVisible(false);
+      }
     } catch (error) {
-      message.error('儲存失敗');
+      // Validation error or handled by hook
     }
   };
 
@@ -104,7 +99,12 @@ export const HR04PayrollItemPage: React.FC = () => {
       title: '操作',
       key: 'action',
       render: (_: any, record: PayrollItemDefinitionDto) => (
-        <Button icon={<EditOutlined />} size="small" onClick={() => handleEdit(record)}>編輯</Button>
+        <Space>
+          <Button icon={<EditOutlined />} size="small" onClick={() => handleEdit(record)}>編輯</Button>
+          <Popconfirm title="確定刪除此項目？" onConfirm={() => deleteItem(record.id)}>
+            <Button danger size="small">刪除</Button>
+          </Popconfirm>
+        </Space>
       )
     }
   ];
@@ -124,7 +124,7 @@ export const HR04PayrollItemPage: React.FC = () => {
         <Card>
           <Table 
             columns={columns} 
-            dataSource={data} 
+            dataSource={items} 
             rowKey="id" 
             loading={loading}
           />
@@ -133,7 +133,7 @@ export const HR04PayrollItemPage: React.FC = () => {
 
       <Modal
         title={editingItem ? '編輯薪資項目' : '新增薪資項目'}
-        visible={modalVisible}
+        open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onOk={handleSave}
         width={600}

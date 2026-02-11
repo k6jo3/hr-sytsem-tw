@@ -45,7 +45,8 @@ public class HR01RoleCmdController extends CommandBaseController {
     public ResponseEntity<CreateRoleResponse> createRole(
             @RequestBody @Valid CreateRoleRequest request,
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-        return ResponseEntity.ok(execCommand(request, currentUser));
+        CreateRoleResponse response = execCommand(request, currentUser);
+        return ResponseEntity.status(201).body(response);
     }
 
     /**

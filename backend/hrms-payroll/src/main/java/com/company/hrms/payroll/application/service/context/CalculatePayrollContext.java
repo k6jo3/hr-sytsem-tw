@@ -31,6 +31,15 @@ public class CalculatePayrollContext extends PipelineContext {
     private List<SalaryStructure> eligibleStructures = new ArrayList<>();
     private List<Payslip> calculatedPayslips = new ArrayList<>();
 
+    // 考勤數據 Map (EmployeeId -> Item)
+    private java.util.Map<String, com.company.hrms.payroll.infrastructure.client.attendance.AttendanceServiceClient.MonthlyReportItem> attendanceMap = new java.util.HashMap<>();
+
+    // 員工資訊 Map (EmployeeId -> DTO)
+    private java.util.Map<String, com.company.hrms.payroll.infrastructure.client.organization.dto.EmployeeSummaryDto> employeeInfoMap = new java.util.HashMap<>();
+
+    // 保險扣除 Map (EmployeeId -> DTO)
+    private java.util.Map<String, com.company.hrms.payroll.infrastructure.client.insurance.dto.FeeCalculationResponseDto> insuranceMap = new java.util.HashMap<>();
+
     // === 統計資料 ===
     private int successCount = 0;
     private int failCount = 0;

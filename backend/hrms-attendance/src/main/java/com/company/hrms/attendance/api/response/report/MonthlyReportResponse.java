@@ -1,13 +1,13 @@
 package com.company.hrms.attendance.api.response.report;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * 月報表回應 DTO
@@ -68,8 +68,17 @@ public class MonthlyReportResponse {
         @Schema(description = "請假天數")
         private BigDecimal leaveDays;
 
-        @Schema(description = "加班時數")
+        @Schema(description = "總加班時數")
         private BigDecimal overtimeHours;
+
+        @Schema(description = "平日加班時數")
+        private BigDecimal workdayOvertimeHours;
+
+        @Schema(description = "休息日加班時數")
+        private BigDecimal restDayOvertimeHours;
+
+        @Schema(description = "國定假日加班時數")
+        private BigDecimal holidayOvertimeHours;
 
         @Schema(description = "總工作時數")
         private BigDecimal totalWorkHours;

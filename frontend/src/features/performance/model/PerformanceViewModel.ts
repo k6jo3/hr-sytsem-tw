@@ -115,3 +115,18 @@ export interface PerformanceDistributionViewModel {
   percentage: number;
   percentageDisplay: string; // "25.5%"
 }
+
+/**
+ * 考核表單模板 ViewModel
+ */
+export interface EvaluationTemplateViewModel {
+  formName: string;
+  scoringSystem: string; // "五分制" | "五等第" | "百分制"
+  scoringSystemValue: 'FIVE_POINT' | 'FIVE_LEVEL' | 'PERCENTAGE';
+  forcedDistribution: boolean;
+  forcedDistributionLabel: string; // "啟用" | "停用"
+  distributionRules?: Record<string, number>;
+  evaluationItems: EvaluationItemViewModel[];
+  totalWeight: number; // should always be 100
+  isValid: boolean;
+}

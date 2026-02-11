@@ -1,9 +1,7 @@
 import { CalculatorOutlined, DollarOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Divider, InputNumber, message, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
-import React, { useState } from 'react';
-import { InsuranceApi } from '../features/insurance/api/InsuranceApi';
-import { InsuranceViewModelFactory } from '../features/insurance/factory/InsuranceViewModelFactory';
-import type { InsuranceFeesViewModel } from '../features/insurance/model/InsuranceViewModel';
+import React, { useEffect, useState } from 'react';
+import { useInsuranceCalculator } from '../features/insurance/hooks';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -12,28 +10,21 @@ const { Title, Text, Paragraph } = Typography;
  */
 export const HR05InsuranceCalculatorPage: React.FC = () => {
   const [salary, setSalary] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<InsuranceFeesViewModel | null>(null);
-  const [levelNumber, setLevelNumber] = useState<number | null>(null);
+  const { calculateFees, result, levelNumber, loading, error } = useInsuranceCalculator();
 
   const handleCalculate = async () => {
     if (!salary || salary <= 0) {
       message.warning('請輸入有效的月薪金額');
       return;
     }
-
-    setLoading(true);
-    try {
-      const response = await InsuranceApi.calculateFees({ monthly_salary: salary });
-      const viewModel = InsuranceViewModelFactory.createFeesViewModel(response.fees);
-      setResult(viewModel);
-      setLevelNumber(response.level_number);
-    } catch (error) {
-      message.error('保費計算失敗');
-    } finally {
-      setLoading(false);
-    }
+    await calculateFees(salary);
   };
+
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
 
   const columns = [
     { title: '保險項目', dataIndex: 'item', key: 'item' },

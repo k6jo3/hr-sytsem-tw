@@ -9,6 +9,7 @@ public class RequiredField {
     private String format; // masked, etc.
     private Integer precision; // For decimal type
     private Boolean notNull;
+    private Object value; // 期望值（用於驗證欄位值是否符合預期）
 
     // Getters and Setters
     public String getName() {
@@ -49,5 +50,13 @@ public class RequiredField {
 
     public void setNotNull(Boolean notNull) {
         this.notNull = notNull;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
     }
 }

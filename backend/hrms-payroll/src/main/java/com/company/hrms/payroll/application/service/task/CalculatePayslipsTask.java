@@ -26,52 +26,81 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class CalculatePayslipsTask implements PipelineTask<CalculatePayrollContext> {
 
-    private final IPayslipRepository payslipRepository;
-    private final PayrollCalculationDomainService calculationService;
+        private final IPayslipRepository payslipRepository;
+        private final PayrollCalculationDomainService calculationService;
 
-    @Override
-    public void execute(CalculatePayrollContext context) {
-        for (SalaryStructure struct : context.getEligibleStructures()) {
-            try {
-                // 建立薪資單草稿
-                Payslip payslip = Payslip.create(
-                        context.getPayrollRun().getId(),
-                        struct.getEmployeeId(),
-                        struct.getEmployeeId(), // TODO: 員工編號暫用 ID
-                        "員工 " + struct.getEmployeeId(), // TODO: 員工姓名暫用
-                        context.getPayrollRun().getPayPeriod(),
-                        context.getPayrollRun().getPayDate());
+        @Override
+        public void execute(CalculatePayrollContext context) {
+                for (SalaryStructure struct : context.getEligibleStructures()) {
+                        try {
+                                // 獲取員工基本資訊
+                                com.company.hrms.payroll.infrastructure.client.organization.dto.EmployeeSummaryDto empInfo = context
+                                                .getEmployeeInfoMap().get(struct.getEmployeeId());
+                                String empCode = empInfo != null ? empInfo.getEmployeeCode() : struct.getEmployeeId();
+                                String empName = empInfo != null
+                                                ? (empInfo.getFirstName() + " " + empInfo.getLastName())
+                                                : "員工 " + struct.getEmployeeId();
 
-                // 準備計算輸入（目前使用預設值）
-                // TODO: 需對接考勤服務 (HR03) 取得實際工時與假別扣減
-                PayrollCalculationInput input = PayrollCalculationInput.builder()
-                        .workingHours(new BigDecimal("160"))
-                        .weekdayOvertimeHours(BigDecimal.ZERO)
-                        .restDayOvertimeHours(BigDecimal.ZERO)
-                        .holidayOvertimeHours(BigDecimal.ZERO)
-                        .unpaidLeaveHours(BigDecimal.ZERO)
-                        .sickLeaveHours(BigDecimal.ZERO)
-                        .insuranceDeductions(InsuranceDeductions.empty())
-                        .build();
+                                // 建立薪資單草稿
+                                Payslip payslip = Payslip.create(
+                                                context.getPayrollRun().getId(),
+                                                struct.getEmployeeId(),
+                                                empCode,
+                                                empName,
+                                                context.getPayrollRun().getPayPeriod(),
+                                                context.getPayrollRun().getPayDate());
 
-                // 執行計算
-                calculationService.calculate(payslip, struct, input, Collections.emptyList());
+                                // 獲取考勤數據 (HR03)
+                                com.company.hrms.payroll.infrastructure.client.attendance.AttendanceServiceClient.MonthlyReportItem att = context
+                                                .getAttendanceMap().get(struct.getEmployeeId());
 
-                // 儲存
-                payslipRepository.save(payslip);
+                                // 獲取保險數據 (HR05)
+                                com.company.hrms.payroll.infrastructure.client.insurance.dto.FeeCalculationResponseDto ins = context
+                                                .getInsuranceMap().get(struct.getEmployeeId());
 
-                // 更新統計
-                context.addSuccessPayslip(payslip);
+                                PayrollCalculationInput input = PayrollCalculationInput.builder()
+                                                .workingHours(att != null ? att.getTotalWorkingHours()
+                                                                : new BigDecimal("160"))
+                                                .weekdayOvertimeHours(att != null ? att.getWorkdayOvertimeHours()
+                                                                : BigDecimal.ZERO)
+                                                .restDayOvertimeHours(att != null ? att.getRestDayOvertimeHours()
+                                                                : BigDecimal.ZERO)
+                                                .holidayOvertimeHours(att != null ? att.getHolidayOvertimeHours()
+                                                                : BigDecimal.ZERO)
+                                                .unpaidLeaveHours(att != null
+                                                                ? (att.getUnpaidLeaveHours() != null
+                                                                                ? att.getUnpaidLeaveHours()
+                                                                                : BigDecimal.ZERO)
+                                                                : BigDecimal.ZERO)
+                                                .sickLeaveHours(att != null && att.getSickLeaveHours() != null
+                                                                ? att.getSickLeaveHours()
+                                                                : BigDecimal.ZERO)
+                                                .insuranceDeductions(ins != null ? InsuranceDeductions.of(
+                                                                ins.getLaborInsurance(),
+                                                                ins.getHealthInsurance(),
+                                                                ins.getPensionSelfContribution(),
+                                                                BigDecimal.ZERO // 補充保費目前預設為0
+                                                ) : InsuranceDeductions.empty())
+                                                .build();
 
-            } catch (Exception e) {
-                log.error("計算薪資單失敗，員工ID: {}, 錯誤: {}", struct.getEmployeeId(), e.getMessage());
-                context.incrementFailCount();
-            }
+                                // 執行計算
+                                calculationService.calculate(payslip, struct, input, Collections.emptyList());
+
+                                // 儲存
+                                payslipRepository.save(payslip);
+
+                                // 更新統計
+                                context.addSuccessPayslip(payslip);
+
+                        } catch (Exception e) {
+                                log.error("計算薪資單失敗，員工ID: {}, 錯誤: {}", struct.getEmployeeId(), e.getMessage());
+                                context.incrementFailCount();
+                        }
+                }
         }
-    }
 
-    @Override
-    public String getName() {
-        return "CalculatePayslipsTask";
-    }
+        @Override
+        public String getName() {
+                return "CalculatePayslipsTask";
+        }
 }

@@ -39,6 +39,9 @@
             ],
             "@store/*": [
                 "src/store/*"
+            ],
+            "@config/*": [
+                "src/config/*"
             ]
         },
         "forceConsistentCasingInFileNames": true

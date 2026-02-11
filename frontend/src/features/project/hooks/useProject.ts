@@ -42,6 +42,35 @@ export const useProject = (projectId?: string) => {
     }
   }, [projectId]);
 
+  const createTask = async (id: string, request: any) => {
+    setLoading(true);
+    try {
+      await ProjectApi.createTask(id, request);
+      await fetchTasks(id);
+      return true;
+    } catch (err: any) {
+      setError(err.message || '建立工項失敗');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateTaskProgress = async (taskId: string, progress: number, status?: any) => {
+    // Note: status is optional here but often updated together in UI
+    setLoading(true);
+    try {
+      await ProjectApi.updateTaskProgress(taskId, { progress, status });
+      if (projectId) await fetchTasks(projectId);
+      return true;
+    } catch (err: any) {
+      setError(err.message || '更新進度失敗');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     project,
     tasks,
@@ -49,5 +78,8 @@ export const useProject = (projectId?: string) => {
     error,
     fetchProject,
     fetchTasks,
+    createTask,
+    updateTaskProgress,
+    refreshTasks: fetchTasks,
   };
 };

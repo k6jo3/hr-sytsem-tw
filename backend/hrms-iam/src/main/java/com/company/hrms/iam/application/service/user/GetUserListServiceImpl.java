@@ -45,6 +45,9 @@ public class GetUserListServiceImpl
                 // Note: We need to handle specific complex logic manually to match contract
                 builder.fromDto(request);
 
+                // 1.5. Security: Soft Delete Filter (軟刪除過濾)
+                builder.eq("is_deleted", false);
+
                 // 2. Logic: Tenant Isolation
                 // If SUPER_ADMIN and specifying tenantId, allow it (already handled by DTO
                 // @QueryFilter if present)

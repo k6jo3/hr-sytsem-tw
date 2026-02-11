@@ -39,6 +39,9 @@ public class GetRoleListServiceImpl
 
         QueryBuilder builder = QueryBuilder.where();
 
+        // 0. 安全性：軟刪除過濾
+        builder.eq("is_deleted", false);
+
         // 1. 租戶隔離邏輯
         // 管理員只能看到自己租戶的角色 + 系統角色 (tenant_id IS NULL)
         // 超級管理員可以看到所有角色
