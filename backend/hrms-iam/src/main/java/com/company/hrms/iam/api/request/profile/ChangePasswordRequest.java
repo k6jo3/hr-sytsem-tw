@@ -2,12 +2,18 @@ package com.company.hrms.iam.api.request.profile;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 變更密碼請求
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChangePasswordRequest {
 
     /**

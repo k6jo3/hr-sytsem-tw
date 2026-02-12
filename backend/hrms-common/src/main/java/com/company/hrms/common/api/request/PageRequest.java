@@ -1,21 +1,20 @@
 package com.company.hrms.common.api.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 分頁請求基類
  * 所有需要分頁的查詢請求應繼承此類
- *
- * <p>
- * 使用範例：
- * 
- * <pre>
- * public class GetEmployeeListRequest extends PageRequest {
- *     private String department;
- *     private String status;
- * }
- * </pre>
  */
+@Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "分頁請求基類")
 public class PageRequest {
 
@@ -30,22 +29,19 @@ public class PageRequest {
     public static final int MAX_PAGE_SIZE = 100;
 
     @Schema(description = "頁碼（從 1 開始）", example = "1", minimum = "1")
-    private Integer page;
+    @Builder.Default
+    private Integer page = 1;
 
     @Schema(description = "每頁筆數", example = "20", minimum = "1", maximum = "100")
-    private Integer size;
+    @Builder.Default
+    private Integer size = DEFAULT_PAGE_SIZE;
 
     @Schema(description = "排序欄位", example = "createdAt")
     private String sortBy;
 
     @Schema(description = "排序方向 (ASC/DESC)", example = "DESC")
-    private SortDirection sortDirection;
-
-    public PageRequest() {
-        this.page = 1;
-        this.size = DEFAULT_PAGE_SIZE;
-        this.sortDirection = SortDirection.DESC;
-    }
+    @Builder.Default
+    private SortDirection sortDirection = SortDirection.DESC;
 
     /**
      * 取得頁碼（從 1 開始）
@@ -54,10 +50,6 @@ public class PageRequest {
      */
     public Integer getPage() {
         return page != null && page > 0 ? page : 1;
-    }
-
-    public void setPage(Integer page) {
-        this.page = page;
     }
 
     /**
@@ -72,24 +64,8 @@ public class PageRequest {
         return Math.min(size, MAX_PAGE_SIZE);
     }
 
-    public void setSize(Integer size) {
-        this.size = size;
-    }
-
-    public String getSortBy() {
-        return sortBy;
-    }
-
-    public void setSortBy(String sortBy) {
-        this.sortBy = sortBy;
-    }
-
     public SortDirection getSortDirection() {
         return sortDirection != null ? sortDirection : SortDirection.DESC;
-    }
-
-    public void setSortDirection(SortDirection sortDirection) {
-        this.sortDirection = sortDirection;
     }
 
     /**

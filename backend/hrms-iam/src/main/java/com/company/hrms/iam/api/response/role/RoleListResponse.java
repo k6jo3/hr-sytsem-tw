@@ -1,5 +1,10 @@
 package com.company.hrms.iam.api.response.role;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,17 +35,18 @@ public class RoleListResponse {
     private String roleCode;
 
     /**
-     * 角色描述
+     * 描述
      */
     private String description;
 
     /**
      * 是否為系統角色
      */
-    private boolean systemRole;
+    @JsonProperty("isSystemRole")
+    private boolean isSystemRole;
 
     /**
-     * 角色狀態
+     * 狀態
      */
     private String status;
 
@@ -48,4 +54,14 @@ public class RoleListResponse {
      * 權限數量
      */
     private int permissionCount;
+
+    /**
+     * 權限清單 (簡要)
+     */
+    private List<String> permissions;
+
+    /**
+     * 建立時間
+     */
+    private LocalDateTime createdAt;
 }

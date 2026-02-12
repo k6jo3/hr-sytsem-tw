@@ -9,11 +9,12 @@ import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.iam.application.service.user.context.UserPipelineContext;
 import com.company.hrms.iam.application.service.user.task.ActivateUserTask;
 import com.company.hrms.iam.application.service.user.task.LoadUserTask;
+import com.company.hrms.iam.application.service.user.task.PublishUserActivatedEventTask;
 import com.company.hrms.iam.application.service.user.task.SaveUserTask;
 
 /**
  * 啟用使用者 Application Service
- * 
+ *
  * <p>
  * 對應 API: PUT /api/v1/users/{userId}/activate
  * </p>
@@ -25,13 +26,16 @@ public class ActivateUserServiceImpl implements CommandApiService<Void, Void> {
     private final LoadUserTask loadUserTask;
     private final ActivateUserTask activateUserTask;
     private final SaveUserTask saveUserTask;
+    private final PublishUserActivatedEventTask publishUserActivatedEventTask;
 
     public ActivateUserServiceImpl(LoadUserTask loadUserTask,
             ActivateUserTask activateUserTask,
-            SaveUserTask saveUserTask) {
+            SaveUserTask saveUserTask,
+            PublishUserActivatedEventTask publishUserActivatedEventTask) {
         this.loadUserTask = loadUserTask;
         this.activateUserTask = activateUserTask;
         this.saveUserTask = saveUserTask;
+        this.publishUserActivatedEventTask = publishUserActivatedEventTask;
     }
 
     @Override
@@ -44,6 +48,7 @@ public class ActivateUserServiceImpl implements CommandApiService<Void, Void> {
                 .next(loadUserTask)
                 .next(activateUserTask)
                 .next(saveUserTask)
+                .next(publishUserActivatedEventTask)
                 .execute();
 
         return null;

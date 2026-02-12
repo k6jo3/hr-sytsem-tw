@@ -1,18 +1,41 @@
 package com.company.hrms.iam.api.request.auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 /**
  * 登出請求 DTO
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class LogoutRequest {
+
+    public LogoutRequest() {
+    }
+
+    public LogoutRequest(String token) {
+        this.token = token;
+    }
+
+    public static LogoutRequestBuilder builder() {
+        return new LogoutRequestBuilder();
+    }
+
+    public static class LogoutRequestBuilder {
+        private String token;
+
+        public LogoutRequestBuilder token(String token) {
+            this.token = token;
+            return this;
+        }
+
+        public LogoutRequest build() {
+            return new LogoutRequest(token);
+        }
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     /**
      * 要登出的 Token (Bearer Token)

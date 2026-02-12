@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import com.company.hrms.common.application.pipeline.PipelineExecutionException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.document.api.request.DeleteDocumentRequest;
 import com.company.hrms.document.application.assembler.DocumentResponseAssembler;
@@ -95,7 +96,7 @@ class DeleteDocumentServiceTest {
         when(documentRepository.findById(any(DocumentId.class))).thenReturn(Optional.of(document));
 
         // When & Then
-        var ex = assertThrows(com.company.hrms.common.application.pipeline.PipelineExecutionException.class,
+        var ex = assertThrows(PipelineExecutionException.class,
                 () -> service.execCommand(request, new JWTModel()));
         assertTrue(ex.getCause() instanceof IllegalStateException);
         assertEquals("Payslip cannot be deleted for audit reasons.", ex.getCause().getMessage());

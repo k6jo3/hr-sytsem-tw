@@ -11,6 +11,7 @@ import com.company.hrms.iam.application.service.role.context.RoleContext;
 import com.company.hrms.iam.application.service.role.task.DeactivateRoleTask;
 import com.company.hrms.iam.application.service.role.task.LoadRoleTask;
 import com.company.hrms.iam.application.service.role.task.SaveRoleTask;
+import com.company.hrms.iam.domain.model.aggregate.Role;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,35 +24,35 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional
 public class DeactivateRoleServiceImpl
-        implements CommandApiService<Object, RoleDetailResponse> {
+                implements CommandApiService<Object, RoleDetailResponse> {
 
-    private final LoadRoleTask loadRoleTask;
-    private final DeactivateRoleTask deactivateRoleTask;
-    private final SaveRoleTask saveRoleTask;
+        private final LoadRoleTask loadRoleTask;
+        private final DeactivateRoleTask deactivateRoleTask;
+        private final SaveRoleTask saveRoleTask;
 
-    @Override
-    public RoleDetailResponse execCommand(Object request, JWTModel currentUser, String... args)
-            throws Exception {
+        @Override
+        public RoleDetailResponse execCommand(Object request, JWTModel currentUser, String... args)
+                        throws Exception {
 
-        String roleId = args[0];
-        log.info("停用角色: roleId={}", roleId);
+                String roleId = args[0];
+                log.info("停用角色: roleId={}", roleId);
 
-        RoleContext context = new RoleContext(roleId);
+                RoleContext context = new RoleContext(roleId);
 
-        BusinessPipeline.start(context)
-                .next(loadRoleTask)
-                .next(deactivateRoleTask)
-                .next(saveRoleTask)
-                .execute();
+                BusinessPipeline.start(context)
+                                .next(loadRoleTask)
+                                .next(deactivateRoleTask)
+                                .next(saveRoleTask)
+                                .execute();
 
-        var role = context.getRole();
-        log.info("角色停用成功: roleId={}", roleId);
+                Role role = context.getRole();
+                log.info("角色停用成功: roleId={}", roleId);
 
-        return RoleDetailResponse.builder()
-                .roleId(role.getId().getValue())
-                .roleCode(role.getRoleCode())
-                .roleName(role.getRoleName())
-                .status(role.getStatus().name())
-                .build();
-    }
+                return RoleDetailResponse.builder()
+                                .roleId(role.getId().getValue())
+                                .roleCode(role.getRoleCode())
+                                .roleName(role.getRoleName())
+                                .status(role.getStatus().name())
+                                .build();
+        }
 }

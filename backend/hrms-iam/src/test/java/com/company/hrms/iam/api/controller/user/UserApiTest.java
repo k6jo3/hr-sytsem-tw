@@ -133,7 +133,7 @@ class UserApiTest extends BaseApiContractTest {
 
                         // Act & Assert
                         performPost("/api/v1/users", request)
-                                        .andExpect(status().isOk())
+                                        .andExpect(status().isCreated())
                                         .andExpect(jsonPath("$.userId").value("user-001"))
                                         .andExpect(jsonPath("$.username").value("newuser"))
                                         .andExpect(jsonPath("$.message").isNotEmpty());
@@ -334,10 +334,10 @@ class UserApiTest extends BaseApiContractTest {
                         // Act & Assert
                         performGet("/api/v1/users/" + userId)
                                         .andExpect(status().isOk())
-                                        .andExpect(jsonPath("$.userId").value(userId))
-                                        .andExpect(jsonPath("$.username").value("testuser"))
-                                        .andExpect(jsonPath("$.email").value("test@example.com"))
-                                        .andExpect(jsonPath("$.roles").isArray());
+                                        .andExpect(jsonPath("$.data.userId").value(userId))
+                                        .andExpect(jsonPath("$.data.username").value("testuser"))
+                                        .andExpect(jsonPath("$.data.email").value("test@example.com"))
+                                        .andExpect(jsonPath("$.data.roles").isArray());
                 }
 
                 @Test

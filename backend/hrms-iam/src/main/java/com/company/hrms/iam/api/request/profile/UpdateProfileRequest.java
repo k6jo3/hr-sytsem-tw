@@ -2,12 +2,18 @@ package com.company.hrms.iam.api.request.profile;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 更新個人資料請求
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateProfileRequest {
 
     /**

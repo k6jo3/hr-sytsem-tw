@@ -1,5 +1,7 @@
 package com.company.hrms.document.api.request;
 
+import com.company.hrms.common.query.QueryCondition;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +15,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetDocumentVersionListRequest {
-    @com.company.hrms.common.query.QueryCondition.EQ("document_id")
+    @QueryCondition.EQ("document_id")
     private String documentId;
 
-    @com.company.hrms.common.query.QueryCondition.EQ("version")
+    @QueryCondition.EQ("version")
     private String version;
 
     // isLatest logic often requires Boolean -> Integer mapping or handling in
@@ -35,9 +37,9 @@ public class GetDocumentVersionListRequest {
     // typically passes Boolean to JPA.
     // If DB is numeric (TINYINT), JPA usually handles true->1.
     // I'll annotate it.
-    @com.company.hrms.common.query.QueryCondition.EQ("is_latest")
+    @QueryCondition.EQ("is_latest")
     private Boolean isLatest;
 
-    @com.company.hrms.common.query.QueryCondition.EQ("uploader_id")
+    @QueryCondition.EQ("uploader_id")
     private String uploaderId;
 }

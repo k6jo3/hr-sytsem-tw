@@ -49,7 +49,7 @@ public class GetSystemRolesServiceImpl implements QueryApiService<GetSystemRoles
                 .roleName(role.getRoleName())
                 .roleCode(role.getRoleCode())
                 .description(role.getDescription())
-                .systemRole(role.isSystemRole())
+                .isSystemRole(role.isSystemRole())
                 .status(role.getStatus().name())
                 .permissionCount(role.getPermissionCount())
                 .build();

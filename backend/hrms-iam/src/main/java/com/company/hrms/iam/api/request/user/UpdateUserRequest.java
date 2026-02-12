@@ -1,5 +1,7 @@
 package com.company.hrms.iam.api.request.user;
 
+import java.util.List;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -8,7 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 更新使用者請求 VO
+ * 更新使用者請求
  */
 @Data
 @Builder
@@ -17,14 +19,24 @@ import lombok.NoArgsConstructor;
 public class UpdateUserRequest {
 
     /**
-     * Email
+     * Email (可選)
      */
     @Email(message = "Email 格式無效")
     private String email;
 
     /**
-     * 顯示名稱
+     * 顯示名稱 (可選)
      */
     @Size(max = 100, message = "顯示名稱長度不可超過 100 字元")
     private String displayName;
+
+    /**
+     * 角色列表 (可選)
+     */
+    private List<String> roles;
+
+    /**
+     * 是否需要變更密碼
+     */
+    private Boolean mustChangePassword;
 }

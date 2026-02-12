@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 重新整理 Token 請求 DTO
+ * 刷新 Token 請求 DTO
  */
 @Data
 @Builder

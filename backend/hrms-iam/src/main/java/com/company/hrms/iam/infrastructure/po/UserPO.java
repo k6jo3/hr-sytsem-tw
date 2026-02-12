@@ -84,6 +84,11 @@ public class UserPO {
     private Timestamp lastLogoutAt;
 
     /**
+     * 最後登入 IP
+     */
+    private String lastLoginIp;
+
+    /**
      * 密碼變更時間
      */
     private Timestamp passwordChangedAt;

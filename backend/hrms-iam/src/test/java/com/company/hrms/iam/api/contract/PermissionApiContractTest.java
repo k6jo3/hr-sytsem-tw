@@ -1,6 +1,5 @@
 package com.company.hrms.iam.api.contract;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -11,7 +10,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +22,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.contract.BaseContractTest;
 import com.company.hrms.iam.domain.repository.IPermissionRepository;
 
@@ -53,14 +50,14 @@ public class PermissionApiContractTest extends BaseContractTest {
     @BeforeEach
     void setUp() throws Exception {
         mockAdminUser = new JWTModel();
-        mockAdminUser.setUserId("user-admin-id");
-        mockAdminUser.setUsername("admin");
-        mockAdminUser.setEmail("admin@company.com");
+        mockAdminUser.setUserId(IamTestData.ADMIN_ID);
+        mockAdminUser.setUsername(IamTestData.ADMIN_USERNAME);
+        mockAdminUser.setEmail(IamTestData.ADMIN_EMAIL);
         mockAdminUser.setRoles(Collections.singletonList("ADMIN"));
-        mockAdminUser.setTenantId("T001");
+        mockAdminUser.setTenantId(IamTestData.TENANT_ID);
 
         contractSpec = loadContractSpec("iam");
-        contractSpec = contractSpec.replace("{currentUserTenantId}", "T001");
+        contractSpec = contractSpec.replace("{currentUserTenantId}", IamTestData.TENANT_ID);
     }
 
     private void mockSecurityContext(JWTModel user) {

@@ -24,6 +24,7 @@ public class PublishUserEventTask implements PipelineTask<UserPipelineContext> {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail().getValue(),
-                user.getDisplayName()));
+                user.getDisplayName(),
+                user.getEmployeeId()));
     }
 }

@@ -9,6 +9,7 @@ import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.iam.application.service.role.context.RoleContext;
 import com.company.hrms.iam.application.service.role.task.DeleteRoleTask;
 import com.company.hrms.iam.application.service.role.task.LoadRoleTask;
+import com.company.hrms.iam.application.service.role.task.PublishRoleDeletedEventTask;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class DeleteRoleServiceImpl
 
     private final LoadRoleTask loadRoleTask;
     private final DeleteRoleTask deleteRoleTask;
+    private final PublishRoleDeletedEventTask publishRoleDeletedEventTask;
 
     @Override
     public Void execCommand(Object request, JWTModel currentUser, String... args)
@@ -38,6 +40,7 @@ public class DeleteRoleServiceImpl
         BusinessPipeline.start(context)
                 .next(loadRoleTask)
                 .next(deleteRoleTask)
+                .next(publishRoleDeletedEventTask)
                 .execute();
 
         log.info("角色刪除成功: roleId={}", roleId);

@@ -7,6 +7,7 @@ describe('SalaryStructureViewModelFactory', () => {
     id: 'ss-1',
     employeeId: 'emp-1',
     payrollSystem: 'MONTHLY',
+    payrollCycle: 'MONTHLY',
     monthlySalary: 50000,
     effectiveDate: '2025-01-01',
     active: true,
@@ -17,6 +18,7 @@ describe('SalaryStructureViewModelFactory', () => {
         name: '底薪',
         type: 'EARNING',
         amount: 40000,
+        fixedAmount: true,
         taxable: true,
         insurable: true
       },
@@ -26,6 +28,7 @@ describe('SalaryStructureViewModelFactory', () => {
         name: '津貼',
         type: 'EARNING',
         amount: 10000,
+        fixedAmount: true,
         taxable: true,
         insurable: false
       }
@@ -36,6 +39,7 @@ describe('SalaryStructureViewModelFactory', () => {
     id: 'ss-2',
     employeeId: 'emp-2',
     payrollSystem: 'HOURLY',
+    payrollCycle: 'MONTHLY',
     hourlyRate: 250,
     effectiveDate: '2025-01-01',
     active: true,
@@ -83,13 +87,13 @@ describe('SalaryStructureViewModelFactory', () => {
       const vm = SalaryStructureViewModelFactory.createFromDTO(mockMonthlySalaryDto);
 
       expect(vm.items).toHaveLength(2);
-      expect(vm.items[0].code).toBe('BASE');
-      expect(vm.items[0].name).toBe('底薪');
-      expect(vm.items[0].type).toBe('EARNING');
-      expect(vm.items[0].amount).toBe(40000);
-      expect(vm.items[0].amountDisplay).toBe('$40,000');
-      expect(vm.items[0].taxable).toBe(true);
-      expect(vm.items[0].insurable).toBe(true);
+      expect(vm.items[0]?.code).toBe('BASE');
+      expect(vm.items[0]?.name).toBe('底薪');
+      expect(vm.items[0]?.type).toBe('EARNING');
+      expect(vm.items[0]?.amount).toBe(40000);
+      expect(vm.items[0]?.amountDisplay).toBe('$40,000');
+      expect(vm.items[0]?.taxable).toBe(true);
+      expect(vm.items[0]?.insurable).toBe(true);
     });
 
     it('應該處理沒有薪資項目的情況', () => {
@@ -98,7 +102,7 @@ describe('SalaryStructureViewModelFactory', () => {
     });
 
     it('應該處理 items 為 undefined 的情況', () => {
-      const dtoWithoutItems = { ...mockMonthlySalaryDto, items: undefined };
+      const dtoWithoutItems = { ...mockMonthlySalaryDto, items: undefined } as unknown as SalaryStructureDto;
       const vm = SalaryStructureViewModelFactory.createFromDTO(dtoWithoutItems);
       expect(vm.items).toHaveLength(0);
     });
@@ -110,8 +114,8 @@ describe('SalaryStructureViewModelFactory', () => {
       const vms = SalaryStructureViewModelFactory.createListFromDTOs(dtos);
 
       expect(vms).toHaveLength(2);
-      expect(vms[0].payrollSystem).toBe('MONTHLY');
-      expect(vms[1].payrollSystem).toBe('HOURLY');
+      expect(vms[0]?.payrollSystem).toBe('MONTHLY');
+      expect(vms[1]?.payrollSystem).toBe('HOURLY');
     });
 
     it('應該正確處理空列表', () => {

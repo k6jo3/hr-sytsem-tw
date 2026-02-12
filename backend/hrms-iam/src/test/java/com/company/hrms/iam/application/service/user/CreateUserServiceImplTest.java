@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.company.hrms.iam.api.request.user.CreateUserRequest;
 import com.company.hrms.iam.api.response.user.CreateUserResponse;
 import com.company.hrms.iam.application.service.user.context.UserPipelineContext;
+import com.company.hrms.iam.application.service.user.task.AssignUserRolesTask;
 import com.company.hrms.iam.application.service.user.task.CheckUserExistenceTask;
 import com.company.hrms.iam.application.service.user.task.CreateUserAggregateTask;
 import com.company.hrms.iam.application.service.user.task.HashPasswordTask;
@@ -32,6 +33,8 @@ class CreateUserServiceImplTest {
     @Mock
     private SaveUserTask saveUserTask;
     @Mock
+    private AssignUserRolesTask assignUserRolesTask;
+    @Mock
     private PublishUserEventTask publishUserEventTask;
 
     private CreateUserServiceImpl createUserService;
@@ -43,12 +46,14 @@ class CreateUserServiceImplTest {
                 hashPasswordTask,
                 createUserAggregateTask,
                 saveUserTask,
+                assignUserRolesTask,
                 publishUserEventTask);
 
         when(checkUserExistenceTask.shouldExecute(any())).thenReturn(true);
         when(hashPasswordTask.shouldExecute(any())).thenReturn(true);
         when(createUserAggregateTask.shouldExecute(any())).thenReturn(true);
         when(saveUserTask.shouldExecute(any())).thenReturn(true);
+        when(assignUserRolesTask.shouldExecute(any())).thenReturn(true);
         when(publishUserEventTask.shouldExecute(any())).thenReturn(true);
     }
 

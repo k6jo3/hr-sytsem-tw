@@ -96,7 +96,7 @@ class UserApiIntegrationTest extends BaseApiIntegrationTest {
 
 			// When & Then
 			var response = performPost("/api/v1/users", request)
-					.andExpect(status().isOk())
+					.andExpect(status().isCreated())
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();

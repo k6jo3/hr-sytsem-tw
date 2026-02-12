@@ -1,27 +1,42 @@
 package com.company.hrms.iam.domain.model.valueobject;
 
-import com.company.hrms.common.exception.DomainException;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.regex.Pattern;
+
+import com.company.hrms.common.exception.DomainException;
 
 /**
  * Email 值物件
  * 封裝 Email 驗證邏輯
  */
-@Getter
-@EqualsAndHashCode
 public class Email {
 
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Email email = (Email) o;
+        return value.equals(email.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
-            "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
-    );
+            "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
     private final String value;
 
     /**
      * 建構 Email 值物件
+     * 
      * @param value Email 地址
      * @throws DomainException 若 Email 格式無效
      */

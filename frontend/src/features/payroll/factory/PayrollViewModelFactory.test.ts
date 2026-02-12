@@ -53,7 +53,7 @@ describe('PayrollViewModelFactory', () => {
     });
 
     it('應該正確對應狀態標籤', () => {
-      const testCases = [
+      const testCases: Array<{ status: PayrollRunDto['status']; expected: string }> = [
         { status: 'DRAFT', expected: '草稿' },
         { status: 'CALCULATING', expected: '計算中' },
         { status: 'COMPLETED', expected: '待審核' },
@@ -63,14 +63,14 @@ describe('PayrollViewModelFactory', () => {
       ];
 
       testCases.forEach(({ status, expected }) => {
-        const dto = { ...mockPayrollRunDto, status };
+        const dto: PayrollRunDto = { ...mockPayrollRunDto, status };
         const vm = PayrollViewModelFactory.createFromDTO(dto);
         expect(vm.statusLabel).toBe(expected);
       });
     });
 
     it('應該正確對應狀態顏色', () => {
-      const testCases = [
+      const testCases: Array<{ status: PayrollRunDto['status']; expected: string }> = [
         { status: 'DRAFT', expected: 'default' },
         { status: 'CALCULATING', expected: 'processing' },
         { status: 'COMPLETED', expected: 'warning' },
@@ -80,7 +80,7 @@ describe('PayrollViewModelFactory', () => {
       ];
 
       testCases.forEach(({ status, expected }) => {
-        const dto = { ...mockPayrollRunDto, status };
+        const dto: PayrollRunDto = { ...mockPayrollRunDto, status };
         const vm = PayrollViewModelFactory.createFromDTO(dto);
         expect(vm.statusColor).toBe(expected);
       });
@@ -103,9 +103,12 @@ describe('PayrollViewModelFactory', () => {
       const vm = PayrollViewModelFactory.createFromDTO(mockPayrollRunDto);
 
       expect(vm.projectStats).toHaveLength(1);
-      expect(vm.projectStats![0].projectName).toBe('ERP專案');
-      expect(vm.projectStats![0].totalHours).toBe(1000);
-      expect(vm.projectStats![0].totalAmountDisplay).toBe('$500,000');
+      expect(vm.projectStats).toBeDefined();
+      if (vm.projectStats && vm.projectStats.length > 0 && vm.projectStats[0]) {
+        expect(vm.projectStats[0].projectName).toBe('ERP專案');
+        expect(vm.projectStats[0].totalHours).toBe(1000);
+        expect(vm.projectStats[0].totalAmountDisplay).toBe('$500,000');
+      }
     });
 
     it('應該處理沒有專案統計的情況', () => {
@@ -127,11 +130,11 @@ describe('PayrollViewModelFactory', () => {
     });
 
     it('應該處理缺少金額的情況', () => {
-      const dtoWithoutAmounts = { 
+      const dtoWithoutAmounts: PayrollRunDto = { 
         ...mockPayrollRunDto, 
-        totalGrossPay: undefined,
-        totalNetPay: undefined,
-        totalDeductions: undefined
+        totalGrossPay: 0,
+        totalNetPay: 0,
+        totalDeductions: 0
       };
       const vm = PayrollViewModelFactory.createFromDTO(dtoWithoutAmounts);
 
@@ -144,7 +147,7 @@ describe('PayrollViewModelFactory', () => {
 
   describe('createListFromDTOs', () => {
     it('應該批量轉換 DTO 列表', () => {
-      const dtos = [
+      const dtos: PayrollRunDto[] = [
         mockPayrollRunDto,
         { ...mockPayrollRunDto, runId: 'run-2', name: '2025年12月薪資' }
       ];
@@ -152,9 +155,13 @@ describe('PayrollViewModelFactory', () => {
       const vms = PayrollViewModelFactory.createListFromDTOs(dtos);
 
       expect(vms).toHaveLength(2);
-      expect(vms[0].runId).toBe('run-1');
-      expect(vms[1].runId).toBe('run-2');
-      expect(vms[1].name).toBe('2025年12月薪資');
+      expect(vms[0]).toBeDefined();
+      expect(vms[1]).toBeDefined();
+      if (vms[0] && vms[1]) {
+        expect(vms[0].runId).toBe('run-1');
+        expect(vms[1].runId).toBe('run-2');
+        expect(vms[1].name).toBe('2025年12月薪資');
+      }
     });
 
     it('應該正確處理空列表', () => {

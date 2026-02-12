@@ -1,48 +1,52 @@
 package com.company.hrms.iam.api.request.role;
 
-import com.company.hrms.common.query.Operator;
-import com.company.hrms.common.query.QueryFilter;
+import com.company.hrms.common.api.request.PageRequest;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
- * 取得角色列表請求 (支援分頁與過濾)
+ * 查詢角色列表請求
  */
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "取得角色列表請求")
-public class GetRoleListRequest {
+@EqualsAndHashCode(callSuper = true)
+@Schema(description = "查詢角色列表請求")
+public class GetRoleListRequest extends PageRequest {
 
-    @Schema(description = "角色名稱 (模糊查詢)")
-    @QueryFilter(property = "name", operator = Operator.LIKE)
+    /**
+     * 角色名稱/代碼搜尋
+     */
+    @Schema(description = "角色名稱/代碼搜尋")
     private String name;
 
-    @Schema(description = "角色狀態 (ACTIVE/INACTIVE)")
-    @QueryFilter(property = "status", operator = Operator.EQ)
+    /**
+     * 狀態篩選
+     */
+    @Schema(description = "狀態篩選 (ACTIVE, INACTIVE)")
     private String status;
 
-    @Schema(description = "角色類型 (SYSTEM/CUSTOM)")
-    @QueryFilter(property = "type", operator = Operator.EQ)
+    /**
+     * 是否為系統角色篩選
+     */
+    @Schema(description = "是否為系統角色篩選")
+    private Boolean isSystemRole;
+
+    /**
+     * 角色類型
+     */
+    @Schema(description = "角色類型")
     private String type;
 
-    @Schema(description = "租戶 ID (僅 SUPER_ADMIN 可用)")
-    @QueryFilter(property = "tenant_id", operator = Operator.EQ)
+    /**
+     * 租戶 ID
+     */
+    @Schema(description = "租戶 ID")
     private String tenantId;
-
-    @Schema(description = "頁碼 (預設 1)")
-    @Builder.Default
-    private int page = 1;
-
-    @Schema(description = "每頁筆數 (預設 20)")
-    @Builder.Default
-    private int size = 20;
-
-    @Schema(description = "排序欄位")
-    private String sort;
 }

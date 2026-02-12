@@ -1,10 +1,11 @@
 package com.company.hrms.iam.infrastructure.dao;
 
-import com.company.hrms.iam.infrastructure.po.RolePO;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.company.hrms.iam.infrastructure.po.RolePO;
 
 /**
  * Role DAO
@@ -52,6 +53,11 @@ public interface RoleDAO {
      * 根據使用者 ID 查詢角色列表
      */
     List<RolePO> selectByUserId(@Param("userId") String userId);
+
+    /**
+     * 統計角色的使用者數量
+     */
+    int countUsersByRoleId(@Param("roleId") String roleId);
 
     /**
      * 新增角色

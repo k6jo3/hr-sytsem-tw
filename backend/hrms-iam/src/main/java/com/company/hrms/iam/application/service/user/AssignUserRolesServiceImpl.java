@@ -30,11 +30,14 @@ public class AssignUserRolesServiceImpl implements CommandApiService<AssignUserR
 
         private final IUserRepository userRepository;
         private final IRoleRepository roleRepository;
+        private final com.company.hrms.common.domain.event.EventPublisher eventPublisher;
 
         public AssignUserRolesServiceImpl(IUserRepository userRepository,
-                        IRoleRepository roleRepository) {
+                        IRoleRepository roleRepository,
+                        com.company.hrms.common.domain.event.EventPublisher eventPublisher) {
                 this.userRepository = userRepository;
                 this.roleRepository = roleRepository;
+                this.eventPublisher = eventPublisher;
         }
 
         @Override
@@ -59,6 +62,10 @@ public class AssignUserRolesServiceImpl implements CommandApiService<AssignUserR
 
                 // 3. 更新使用者角色 (透過 Repository)
                 userRepository.updateUserRoles(new UserId(userId), request.getRoleIds());
+
+                // 發布領域事件
+                eventPublisher.publish(new com.company.hrms.iam.domain.event.UserRolesAssignedEvent(userId,
+                                request.getRoleIds()));
 
                 // 4. 回傳結果
                 List<AssignUserRolesResponse.RoleInfo> roleInfos = new ArrayList<>();
