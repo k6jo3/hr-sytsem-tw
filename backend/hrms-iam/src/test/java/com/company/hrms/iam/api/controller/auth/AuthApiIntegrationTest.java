@@ -248,7 +248,7 @@ class AuthApiIntegrationTest extends BaseApiIntegrationTest {
 		void IAM_AUTH_API_008_forgotPassword_ShouldSendEmail() throws Exception {
 			// Given
 			ForgotPasswordRequest request = new ForgotPasswordRequest();
-			request.setEmail("admin@company.com");
+			request.setEmail("admin.unique@company.com");
 
 			// When & Then
 			var response = performPost("/api/v1/auth/forgot-password", request)
@@ -284,6 +284,7 @@ class AuthApiIntegrationTest extends BaseApiIntegrationTest {
 		void IAM_AUTH_API_010_resetPassword_ShouldReturnSuccess() throws Exception {
 			// Given
 			ResetPasswordRequest request = new ResetPasswordRequest();
+			request.setToken("valid-token");
 			request.setCurrentPassword("Admin@123");
 			request.setNewPassword("NewPassword@123");
 			request.setConfirmPassword("NewPassword@123");

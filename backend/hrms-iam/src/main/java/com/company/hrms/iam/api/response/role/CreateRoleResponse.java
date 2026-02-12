@@ -20,12 +20,12 @@ public class CreateRoleResponse {
     private String roleId;
 
     /**
-     * 角色代碼
-     */
-    private String roleCode;
-
-    /**
      * 角色名稱
      */
     private String roleName;
+
+    /**
+     * 角色代碼
+     */
+    private String roleCode;
 }

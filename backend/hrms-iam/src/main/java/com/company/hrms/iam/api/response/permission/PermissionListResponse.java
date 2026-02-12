@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 權限列表回應
+ * 權限列表項目回應
  */
 @Data
 @Builder
@@ -20,22 +20,27 @@ public class PermissionListResponse {
     private String permissionId;
 
     /**
-     * 權限代碼
+     * 權限代碼 (e.g., user:read)
      */
     private String permissionCode;
 
     /**
-     * 資源名稱
+     * 權限名稱
+     */
+    private String permissionName;
+
+    /**
+     * 所屬資源
      */
     private String resource;
 
     /**
-     * 操作名稱
+     * 操作類型
      */
     private String action;
 
     /**
-     * 權限描述
+     * 描述
      */
     private String description;
 }

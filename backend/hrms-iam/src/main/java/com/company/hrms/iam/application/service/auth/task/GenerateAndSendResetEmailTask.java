@@ -20,6 +20,7 @@ public class GenerateAndSendResetEmailTask implements PipelineTask<AuthContext> 
 
     private final PasswordResetTokenDomainService passwordResetTokenService;
     private final EmailDomainService emailService;
+    private final com.company.hrms.common.domain.event.EventPublisher eventPublisher;
 
     @Override
     public void execute(AuthContext context) throws Exception {
@@ -40,6 +41,10 @@ public class GenerateAndSendResetEmailTask implements PipelineTask<AuthContext> 
                     user.getEmail().getValue(),
                     token,
                     user.getDisplayName());
+
+            eventPublisher.publish(new com.company.hrms.iam.domain.event.PasswordResetRequestedEvent(
+                    user.getId().getValue(),
+                    user.getEmail().getValue()));
 
             log.info("密碼重置郵件已發送，用戶: {}", user.getUsername());
         } catch (Exception e) {

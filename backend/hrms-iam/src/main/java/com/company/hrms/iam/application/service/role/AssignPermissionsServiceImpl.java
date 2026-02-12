@@ -6,11 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.company.hrms.common.application.pipeline.BusinessPipeline;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
-import com.company.hrms.iam.api.controller.role.HR01RoleCmdController.AssignPermissionsRequest;
+import com.company.hrms.iam.api.request.role.AssignPermissionsRequest;
 import com.company.hrms.iam.application.service.role.context.RoleContext;
 import com.company.hrms.iam.application.service.role.task.AssignPermissionsTask;
 import com.company.hrms.iam.application.service.role.task.LoadRoleTask;
-import com.company.hrms.iam.application.service.role.task.SaveRoleTask;
+import com.company.hrms.iam.application.service.role.task.PublishRolePermissionsUpdatedTask;
+import com.company.hrms.iam.application.service.role.task.UpdateRoleTask;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,8 @@ public class AssignPermissionsServiceImpl
 
     private final LoadRoleTask loadRoleTask;
     private final AssignPermissionsTask assignPermissionsTask;
-    private final SaveRoleTask saveRoleTask;
+    private final UpdateRoleTask updateRoleTask;
+    private final PublishRolePermissionsUpdatedTask publishRolePermissionsUpdatedTask;
 
     @Override
     public Void execCommand(AssignPermissionsRequest request, JWTModel currentUser, String... args)
@@ -41,7 +43,8 @@ public class AssignPermissionsServiceImpl
         BusinessPipeline.start(context)
                 .next(loadRoleTask)
                 .next(assignPermissionsTask)
-                .next(saveRoleTask)
+                .next(updateRoleTask)
+                .next(publishRolePermissionsUpdatedTask)
                 .execute();
 
         log.info("權限指派成功: roleId={}", roleId);

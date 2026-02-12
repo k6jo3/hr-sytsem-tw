@@ -1,22 +1,37 @@
 package com.company.hrms.iam.domain.model.valueobject;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.UUID;
 
 /**
  * UserId 值物件
  * 封裝使用者 ID
  */
-@Getter
-@EqualsAndHashCode
 public class UserId {
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        UserId userId = (UserId) o;
+        return value.equals(userId.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
 
     private final String value;
 
     /**
      * 建構 UserId 值物件
+     * 
      * @param value 使用者 ID
      */
     public UserId(String value) {
@@ -28,6 +43,7 @@ public class UserId {
 
     /**
      * 產生新的 UserId
+     * 
      * @return 新的 UserId
      */
     public static UserId generate() {

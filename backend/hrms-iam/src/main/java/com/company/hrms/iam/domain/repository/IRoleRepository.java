@@ -81,6 +81,14 @@ public interface IRoleRepository {
     List<Role> findByUserId(String userId);
 
     /**
+     * 統計角色的使用者數量
+     * 
+     * @param id 角色 ID
+     * @return 使用者數量
+     */
+    int countUsersByRole(RoleId id);
+
+    /**
      * 儲存角色
      * 
      * @param role 角色

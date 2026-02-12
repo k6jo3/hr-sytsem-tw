@@ -1,5 +1,6 @@
 package com.company.hrms.iam.api.response.permission;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -8,8 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 權限樹回應
- * 按資源分組的權限結構
+ * 權限樹結構回應
+ * 依據資源進行分組
  */
 @Data
 @Builder
@@ -18,19 +19,20 @@ import lombok.NoArgsConstructor;
 public class PermissionTreeResponse {
 
     /**
-     * 資源名稱
+     * 資源代碼 (e.g., user, role)
      */
     private String resource;
 
     /**
-     * 資源顯示名稱
+     * 資源顯示名稱 (e.g., 使用者管理, 角色管理)
      */
     private String resourceDisplayName;
 
     /**
-     * 該資源下的權限列表
+     * 該資源下的權限清單
      */
-    private List<PermissionItem> permissions;
+    @Builder.Default
+    private List<PermissionItem> permissions = new ArrayList<>();
 
     /**
      * 權限項目

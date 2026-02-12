@@ -3,12 +3,18 @@ package com.company.hrms.iam.api.request.user;
 import java.util.List;
 
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * 指派角色給使用者請求
+ * 指派使用者角色請求
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AssignUserRolesRequest {
 
     /**

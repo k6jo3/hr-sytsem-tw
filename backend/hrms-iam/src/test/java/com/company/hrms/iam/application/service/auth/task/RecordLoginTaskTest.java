@@ -26,6 +26,9 @@ class RecordLoginTaskTest {
     @Mock
     private IUserRepository userRepository;
 
+    @Mock
+    private com.company.hrms.common.domain.event.EventPublisher eventPublisher;
+
     @InjectMocks
     private RecordLoginTask task;
 

@@ -63,10 +63,11 @@ public class HR01UserQryController extends QueryBaseController {
                         @ApiResponse(responseCode = "404", description = "使用者不存在")
         })
         @GetMapping("/{userId}")
-        public ResponseEntity<UserDetailResponse> getUser(
+        public ResponseEntity<com.company.hrms.common.api.response.ApiResponse<UserDetailResponse>> getUser(
                         @PathVariable String userId,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-                return ResponseEntity.ok(getResponse(new GetUserRequest(), currentUser, userId));
+                UserDetailResponse detail = getResponse(new GetUserRequest(), currentUser, userId);
+                return ResponseEntity.ok(com.company.hrms.common.api.response.ApiResponse.success(detail));
         }
 
         /**

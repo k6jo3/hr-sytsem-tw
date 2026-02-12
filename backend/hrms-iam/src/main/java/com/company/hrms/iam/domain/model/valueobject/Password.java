@@ -6,9 +6,6 @@ import java.util.regex.Pattern;
 
 import com.company.hrms.common.exception.DomainException;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 /**
  * Password 值物件
  * 封裝密碼強度驗證邏輯
@@ -24,9 +21,26 @@ import lombok.Getter;
  * <li>至少一個特殊字元 (!@#$%^&*()_+-=[]{}|;':\",./<>?)</li>
  * </ul>
  */
-@Getter
-@EqualsAndHashCode
 public class Password {
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Password password = (Password) o;
+        return value.equals(password.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
 
     private static final int MIN_LENGTH = 8;
     private static final Pattern UPPERCASE_PATTERN = Pattern.compile("[A-Z]");

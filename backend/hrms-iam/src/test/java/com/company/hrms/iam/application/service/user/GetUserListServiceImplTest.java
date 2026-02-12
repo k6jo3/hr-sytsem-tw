@@ -53,7 +53,7 @@ class GetUserListServiceImplTest extends BaseServiceTest<GetUserListServiceImpl>
     void searchByUsername_ShouldMatchSnapshot() throws Exception {
         // Given
         GetUserListRequest request = GetUserListRequest.builder()
-                .username("john_doe")
+                .keyword("john_doe")
                 .build();
 
         when(repository.findPage(any(), any())).thenReturn(new PageImpl<>(Collections.emptyList()));

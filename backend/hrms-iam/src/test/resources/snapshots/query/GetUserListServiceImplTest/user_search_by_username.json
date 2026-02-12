@@ -1,16 +1,24 @@
 {
   "junction" : "AND",
   "conditions" : [ {
-    "f" : "username",
-    "op" : "LIKE",
-    "v" : "john_doe"
-  }, {
-    "f" : "is_deleted",
+    "f" : "isDeleted",
     "op" : "EQ",
     "v" : false
   }, {
-    "f" : "tenant_id",
+    "f" : "tenantId",
     "op" : "EQ",
     "v" : null
+  } ],
+  "subGroups" : [ {
+    "junction" : "OR",
+    "conditions" : [ {
+      "f" : "username",
+      "op" : "LIKE",
+      "v" : "john_doe"
+    }, {
+      "f" : "email",
+      "op" : "LIKE",
+      "v" : "john_doe"
+    } ]
   } ]
 }

@@ -2,13 +2,15 @@ package com.company.hrms.document.domain.model;
 
 import java.time.LocalDateTime;
 
+import com.company.hrms.common.domain.model.Entity;
+
 import lombok.Getter;
 
 /**
  * 文件存取紀錄實體
  */
 @Getter
-public class DocumentAccessLog extends com.company.hrms.common.domain.model.Entity<DocumentAccessLogId> {
+public class DocumentAccessLog extends Entity<DocumentAccessLogId> {
 
     private final String documentId;
     private final String userId;

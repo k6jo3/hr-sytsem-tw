@@ -1,15 +1,18 @@
 package com.company.hrms.common.api.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * 通用 API 回應包裝類
  * 提供統一的回應格式，包含狀態碼、訊息、資料與時間戳記
  *
- * <p>使用範例：
+ * <p>
+ * 使用範例：
+ * 
  * <pre>
  * // 成功回應
  * return ApiResponse.success(userData);
@@ -77,7 +80,7 @@ public class ApiResponse<T> {
      * 建立成功回應（帶訊息與資料）
      *
      * @param message 成功訊息
-     * @param data 回應資料
+     * @param data    回應資料
      */
     public static <T> ApiResponse<T> success(String message, T data) {
         return new ApiResponse<>(true, "200", message, data);
@@ -86,7 +89,7 @@ public class ApiResponse<T> {
     /**
      * 建立錯誤回應
      *
-     * @param code 錯誤碼
+     * @param code    錯誤碼
      * @param message 錯誤訊息
      */
     public static <T> ApiResponse<T> error(String code, String message) {
@@ -96,9 +99,9 @@ public class ApiResponse<T> {
     /**
      * 建立錯誤回應（帶資料）
      *
-     * @param code 錯誤碼
+     * @param code    錯誤碼
      * @param message 錯誤訊息
-     * @param data 額外資料（如驗證錯誤詳情）
+     * @param data    額外資料（如驗證錯誤詳情）
      */
     public static <T> ApiResponse<T> error(String code, String message, T data) {
         return new ApiResponse<>(false, code, message, data);

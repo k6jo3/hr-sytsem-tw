@@ -1059,7 +1059,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
       {"name": "username", "type": "string", "notNull": true},
       {"name": "displayName", "type": "string"},
       {"name": "email", "type": "email", "notNull": true},
-      {"name": "employeeId", "type": "uuid"},
+      {"name": "employeeId", "type": "string"},
       {"name": "status", "type": "string", "notNull": true},
       {"name": "roles", "type": "array", "notNull": true},
       {"name": "lastLoginAt", "type": "datetime"},

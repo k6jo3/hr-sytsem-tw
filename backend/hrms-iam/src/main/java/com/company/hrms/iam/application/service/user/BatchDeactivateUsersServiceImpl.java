@@ -6,10 +6,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.iam.api.request.user.BatchDeactivateUsersRequest;
 import com.company.hrms.iam.api.response.user.BatchDeactivateUsersResponse;
+import com.company.hrms.iam.domain.event.UsersBatchDeactivatedEvent;
 import com.company.hrms.iam.domain.model.aggregate.User;
 import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.model.valueobject.UserStatus;
@@ -28,9 +30,11 @@ public class BatchDeactivateUsersServiceImpl
         implements CommandApiService<BatchDeactivateUsersRequest, BatchDeactivateUsersResponse> {
 
     private final IUserRepository userRepository;
+    private final EventPublisher eventPublisher;
 
-    public BatchDeactivateUsersServiceImpl(IUserRepository userRepository) {
+    public BatchDeactivateUsersServiceImpl(IUserRepository userRepository, EventPublisher eventPublisher) {
         this.userRepository = userRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -74,6 +78,11 @@ public class BatchDeactivateUsersServiceImpl
                         .reason(e.getMessage())
                         .build());
             }
+        }
+
+        // 發布批次停用事件
+        if (!successIds.isEmpty()) {
+            eventPublisher.publish(new UsersBatchDeactivatedEvent(successIds, successIds.size()));
         }
 
         return BatchDeactivateUsersResponse.builder()

@@ -11,21 +11,25 @@ import com.company.hrms.iam.domain.model.valueobject.PermissionId;
 import com.company.hrms.iam.domain.model.valueobject.RoleId;
 import com.company.hrms.iam.domain.model.valueobject.RoleStatus;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Role 聚合根
  * IAM 領域的角色聚合根，封裝角色相關的業務邏輯
  */
-@Getter
+@Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Role {
 
     /**
      * 角色 ID
      */
-    private final RoleId id;
+    private RoleId id;
 
     /**
      * 角色名稱
@@ -35,7 +39,7 @@ public class Role {
     /**
      * 角色代碼 (如 ADMIN, HR_ADMIN, EMPLOYEE)
      */
-    private final String roleCode;
+    private String roleCode;
 
     /**
      * 角色描述
@@ -45,12 +49,12 @@ public class Role {
     /**
      * 租戶 ID (NULL 表示系統角色)
      */
-    private final String tenantId;
+    private String tenantId;
 
     /**
      * 是否為系統內建角色
      */
-    private final boolean systemRole;
+    private boolean systemRole;
 
     /**
      * 角色狀態
@@ -66,7 +70,7 @@ public class Role {
     /**
      * 建立時間
      */
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     /**
      * 更新時間
@@ -246,6 +250,16 @@ public class Role {
     }
 
     /**
+     * 更新權限列表 (用於 AssignPermissionsTask)
+     * 
+     * @param permissionIds
+     */
+    public void updatePermissions(List<PermissionId> permissionIds) {
+        this.permissionIds = permissionIds != null ? new ArrayList<>(permissionIds) : new ArrayList<>();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
      * 清除所有權限
      */
     public void clearPermissions() {
@@ -322,11 +336,11 @@ public class Role {
         if (o == null || getClass() != o.getClass())
             return false;
         Role role = (Role) o;
-        return id.equals(role.id);
+        return Objects.equals(id, role.id);
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Objects.hash(id);
     }
 }

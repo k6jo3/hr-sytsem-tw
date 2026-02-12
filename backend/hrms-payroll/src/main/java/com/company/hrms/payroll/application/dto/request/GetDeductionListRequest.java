@@ -5,16 +5,16 @@ import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryFilter;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 扣款項目查詢請求 (HR04-2.4)
  */
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)

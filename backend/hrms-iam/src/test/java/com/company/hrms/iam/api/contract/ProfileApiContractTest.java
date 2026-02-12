@@ -1,7 +1,5 @@
 package com.company.hrms.iam.api.contract;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -14,11 +12,9 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -30,10 +26,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.contract.BaseContractTest;
 import com.company.hrms.common.test.contract.ContractSpec;
-import com.company.hrms.iam.domain.repository.IUserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -48,7 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:test-data/iam_base_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Transactional(propagation = Propagation.NEVER)  // 不參與 Service 事務，確保能捕獲已提交的資料變更
+@Transactional(propagation = Propagation.NEVER) // 不參與 Service 事務，確保能捕獲已提交的資料變更
 public class ProfileApiContractTest extends BaseContractTest {
 
     @Autowired
@@ -67,23 +61,23 @@ public class ProfileApiContractTest extends BaseContractTest {
     @BeforeEach
     void setUp() throws Exception {
         mockAuthenticatedUser = new JWTModel();
-        mockAuthenticatedUser.setUserId("user-current-id");
-        mockAuthenticatedUser.setUsername("john.doe@company.com");
-        mockAuthenticatedUser.setEmail("john.doe@company.com");
+        mockAuthenticatedUser.setUserId(IamTestData.JOHN_DOE_ID);
+        mockAuthenticatedUser.setUsername(IamTestData.JOHN_DOE_USERNAME);
+        mockAuthenticatedUser.setEmail(IamTestData.JOHN_DOE_EMAIL);
         mockAuthenticatedUser.setRoles(Collections.singletonList("EMPLOYEE"));
-        mockAuthenticatedUser.setTenantId("T001");
+        mockAuthenticatedUser.setTenantId(IamTestData.TENANT_ID);
 
         contractSpec = loadContractSpec("iam");
         // 替換合約中的佔位符
-        contractSpec = contractSpec.replace("{currentUserId}", "user-current-id");
-        contractSpec = contractSpec.replace("{currentUserTenantId}", "T001");
+        contractSpec = contractSpec.replace("{currentUserId}", IamTestData.JOHN_DOE_ID);
+        contractSpec = contractSpec.replace("{currentUserTenantId}", IamTestData.TENANT_ID);
     }
 
     private void mockSecurityContext(JWTModel user) {
         List<String> auths = new ArrayList<>(user.getRoles());
         auths.add("authenticated");
-        auths.add("profile:read");   // Profile 查詢權限
-        auths.add("profile:write");  // Profile 修改權限
+        auths.add("profile:read"); // Profile 查詢權限
+        auths.add("profile:write"); // Profile 修改權限
         var authorities = AuthorityUtils.createAuthorityList(auths.toArray(new String[0]));
         var auth = new UsernamePasswordAuthenticationToken(user, "password", authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -104,7 +98,7 @@ public class ProfileApiContractTest extends BaseContractTest {
                     .andExpect(status().isOk())
                     .andReturn();
 
-            String responseJson = result.getResponse().getContentAsString();
+            String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
 
             // 驗證合約（查詢合約測試需要捕獲 QueryGroup，但這裡是個人資料查詢，直接驗證回應即可）
             // TODO: 如果需要驗證 QueryGroup，可以使用 AOP 或其他方式攔截
@@ -123,9 +117,8 @@ public class ProfileApiContractTest extends BaseContractTest {
             mockSecurityContext(mockAuthenticatedUser);
 
             Map<String, Object> request = new HashMap<>();
-            request.put("displayName", "John Doe");
-            request.put("preferredLanguage", "zh-TW");
-            request.put("timezone", "Asia/Taipei");
+            request.put("displayName", "John Doe Updated");
+            request.put("email", "john.updated@company.com");
 
             // 擷取快照
             Map<String, List<Map<String, Object>>> beforeSnapshot = captureDataSnapshot("users");
@@ -151,9 +144,9 @@ public class ProfileApiContractTest extends BaseContractTest {
             mockSecurityContext(mockAuthenticatedUser);
 
             Map<String, Object> request = new HashMap<>();
-            request.put("currentPassword", "password123");  // API 要求的欄位名稱
-            request.put("newPassword", "NewSecure@Pass456");  // 包含特殊字元
-            request.put("confirmPassword", "NewSecure@Pass456");  // 確認密碼
+            request.put("currentPassword", "password123"); // API 要求的欄位名稱
+            request.put("newPassword", "NewSecure@Pass456"); // 包含特殊字元
+            request.put("confirmPassword", "NewSecure@Pass456"); // 確認密碼
 
             // 擷取快照
             Map<String, List<Map<String, Object>>> beforeSnapshot = captureDataSnapshot("users");

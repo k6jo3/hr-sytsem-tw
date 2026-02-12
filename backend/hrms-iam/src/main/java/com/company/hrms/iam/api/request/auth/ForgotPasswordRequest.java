@@ -20,6 +20,6 @@ public class ForgotPasswordRequest {
      * 使用者 Email
      */
     @NotBlank(message = "Email 不可為空")
-    @Email(message = "Email 格式不正確")
+    @Email(message = "Email 格式無效")
     private String email;
 }

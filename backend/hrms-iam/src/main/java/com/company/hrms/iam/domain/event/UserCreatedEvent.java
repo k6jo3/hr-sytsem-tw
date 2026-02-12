@@ -18,13 +18,15 @@ public class UserCreatedEvent extends DomainEvent {
     private String username;
     private String email;
     private String displayName;
+    private String employeeId;
 
-    public UserCreatedEvent(UserId userId, String username, String email, String displayName) {
+    public UserCreatedEvent(UserId userId, String username, String email, String displayName, String employeeId) {
         super();
         this.userId = userId.getValue();
         this.username = username;
         this.email = email;
         this.displayName = displayName;
+        this.employeeId = employeeId;
     }
 
     @Override

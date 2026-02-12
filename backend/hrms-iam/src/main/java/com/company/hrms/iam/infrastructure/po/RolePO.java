@@ -1,11 +1,14 @@
 package com.company.hrms.iam.infrastructure.po;
 
+import java.sql.Timestamp;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.sql.Timestamp;
 
 /**
  * Role Persistent Object
@@ -15,11 +18,14 @@ import java.sql.Timestamp;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "roles")
 public class RolePO {
 
     /**
      * 角色 ID (主鍵)
      */
+    @Id
     private String roleId;
 
     /**
@@ -53,6 +59,11 @@ public class RolePO {
     private String status;
 
     /**
+     * 是否已刪除 (軟刪除標記)
+     */
+    private Boolean isDeleted;
+
+    /**
      * 建立時間
      */
     private Timestamp createdAt;
@@ -61,4 +72,9 @@ public class RolePO {
      * 更新時間
      */
     private Timestamp updatedAt;
+
+    /**
+     * 刪除時間
+     */
+    private Timestamp deletedAt;
 }

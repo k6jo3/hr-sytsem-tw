@@ -62,6 +62,7 @@ public class RoleMapper {
                 .tenantId(role.getTenantId())
                 .isSystemRole(role.isSystemRole())
                 .status(role.getStatus().name())
+                .isDeleted(role.getStatus() == RoleStatus.DELETED)
                 .createdAt(toTimestamp(role.getCreatedAt()))
                 .updatedAt(toTimestamp(role.getUpdatedAt()))
                 .build();

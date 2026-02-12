@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class LoginRequest {
 
     /**
-     * 使用者名稱
+     * 使用者名稱 (Email)
      */
     @NotBlank(message = "使用者名稱不可為空")
     private String username;

@@ -1,7 +1,6 @@
 package com.company.hrms.iam.api.request.auth;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 重設密碼請求
+ * 重置密碼請求
  */
 @Data
 @Builder
@@ -18,7 +17,13 @@ import lombok.NoArgsConstructor;
 public class ResetPasswordRequest {
 
     /**
-     * 當前密碼 (自行修改密碼時需要)
+     * 重置 Token
+     */
+    @NotBlank(message = "Token 不可為空")
+    private String token;
+
+    /**
+     * 目前密碼 (選填，若已登入狀態變更密碼時使用)
      */
     private String currentPassword;
 
@@ -26,11 +31,7 @@ public class ResetPasswordRequest {
      * 新密碼
      */
     @NotBlank(message = "新密碼不可為空")
-    @Size(min = 8, max = 128, message = "密碼長度須為 8-128 個字元")
-    @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-            message = "密碼須包含大寫字母、小寫字母、數字及特殊字元"
-    )
+    @Size(min = 8, max = 128, message = "密碼長度必須介於 8 到 128 個字元")
     private String newPassword;
 
     /**

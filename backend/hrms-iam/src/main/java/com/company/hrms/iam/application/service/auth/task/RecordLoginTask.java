@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RecordLoginTask implements PipelineTask<AuthContext> {
 
     private final IUserRepository userRepository;
+    private final com.company.hrms.common.domain.event.EventPublisher eventPublisher;
 
     @Override
     public void execute(AuthContext context) throws Exception {
@@ -25,6 +26,10 @@ public class RecordLoginTask implements PipelineTask<AuthContext> {
 
         user.recordLogin();
         userRepository.update(user);
+
+        eventPublisher.publish(new com.company.hrms.iam.domain.event.UserLoggedInEvent(
+                user.getId().getValue(),
+                user.getLastLoginAt()));
 
         log.info("使用者登入成功: username={}", user.getUsername());
     }

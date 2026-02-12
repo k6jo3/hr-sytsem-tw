@@ -168,10 +168,12 @@ public class UserRepositoryImpl implements IUserRepository {
                 .lockedUntil(toLocalDateTime(po.getLockedUntil()))
                 .lastLoginAt(toLocalDateTime(po.getLastLoginAt()))
                 .lastLogoutAt(toLocalDateTime(po.getLastLogoutAt()))
+                .lastLoginIp(po.getLastLoginIp())
                 .passwordChangedAt(toLocalDateTime(po.getPasswordChangedAt()))
                 .mustChangePassword(po.getMustChangePassword() != null
                         ? po.getMustChangePassword()
                         : false)
+                .isDeleted(po.getIsDeleted() != null ? po.getIsDeleted() : false)
                 .createdAt(toLocalDateTime(po.getCreatedAt()))
                 .updatedAt(toLocalDateTime(po.getUpdatedAt()))
                 .roles(userDAO.selectUserRoles(po.getUserId()))
@@ -195,8 +197,10 @@ public class UserRepositoryImpl implements IUserRepository {
                 .lockedUntil(toTimestamp(user.getLockedUntil()))
                 .lastLoginAt(toTimestamp(user.getLastLoginAt()))
                 .lastLogoutAt(toTimestamp(user.getLastLogoutAt()))
+                .lastLoginIp(user.getLastLoginIp())
                 .passwordChangedAt(toTimestamp(user.getPasswordChangedAt()))
                 .mustChangePassword(user.isMustChangePassword())
+                .isDeleted(user.isDeleted())
                 .createdAt(toTimestamp(user.getCreatedAt()))
                 .updatedAt(toTimestamp(user.getUpdatedAt()))
                 .build();

@@ -33,6 +33,9 @@ class GenerateAndSendResetEmailTaskTest {
     @Mock
     private EmailDomainService emailService;
 
+    @Mock
+    private com.company.hrms.common.domain.event.EventPublisher eventPublisher;
+
     @InjectMocks
     private GenerateAndSendResetEmailTask task;
 
@@ -86,7 +89,8 @@ class GenerateAndSendResetEmailTaskTest {
             when(mockUser.getId()).thenReturn(new UserId("user-123"));
             when(mockUser.getEmail()).thenReturn(new Email("john@example.com"));
             when(mockUser.getDisplayName()).thenReturn("John Doe");
-            // Note: getUsername() is not stubbed because it's only called in success path (log.info)
+            // Note: getUsername() is not stubbed because it's only called in success path
+            // (log.info)
             context.setUser(mockUser);
 
             when(passwordResetTokenService.generateToken("user-123")).thenReturn("token");

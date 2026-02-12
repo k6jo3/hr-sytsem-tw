@@ -1,15 +1,17 @@
 package com.company.hrms.iam.api.response.role;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 /**
- * 角色詳情回應
+ * 角色詳細資訊回應
  */
 @Data
 @Builder
@@ -33,9 +35,20 @@ public class RoleDetailResponse {
     private String roleCode;
 
     /**
-     * 角色描述
+     * 描述
      */
     private String description;
+
+    /**
+     * 是否為系統角色
+     */
+    @JsonProperty("isSystemRole")
+    private boolean isSystemRole;
+
+    /**
+     * 狀態 (ACTIVE, INACTIVE)
+     */
+    private String status;
 
     /**
      * 租戶 ID
@@ -43,19 +56,19 @@ public class RoleDetailResponse {
     private String tenantId;
 
     /**
-     * 是否為系統角色
+     * 關聯用戶數量
      */
-    private boolean systemRole;
+    private int userCount;
 
     /**
-     * 角色狀態
+     * 權限代碼列表
      */
-    private String status;
+    private List<String> permissions;
 
     /**
-     * 權限列表
+     * 權限詳細資訊列表
      */
-    private List<PermissionItem> permissions;
+    private List<PermissionItem> permissionDetails;
 
     /**
      * 建立時間
@@ -68,7 +81,7 @@ public class RoleDetailResponse {
     private LocalDateTime updatedAt;
 
     /**
-     * 權限項目
+     * 權限簡要資訊
      */
     @Data
     @Builder

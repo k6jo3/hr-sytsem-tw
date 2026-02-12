@@ -1,22 +1,37 @@
 package com.company.hrms.iam.domain.model.valueobject;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-
 import java.util.UUID;
 
 /**
  * PermissionId 值物件
  * 封裝權限 ID
  */
-@Getter
-@EqualsAndHashCode
 public class PermissionId {
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        PermissionId that = (PermissionId) o;
+        return value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
 
     private final String value;
 
     /**
      * 建構 PermissionId 值物件
+     * 
      * @param value 權限 ID
      */
     public PermissionId(String value) {
@@ -28,6 +43,7 @@ public class PermissionId {
 
     /**
      * 產生新的 PermissionId
+     * 
      * @return 新的 PermissionId
      */
     public static PermissionId generate() {
@@ -36,6 +52,7 @@ public class PermissionId {
 
     /**
      * 從字串建立 PermissionId
+     * 
      * @param value 權限 ID 字串
      * @return PermissionId
      */

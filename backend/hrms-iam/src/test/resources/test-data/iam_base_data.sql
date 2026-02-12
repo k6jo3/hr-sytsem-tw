@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS users (
     locked_until TIMESTAMP,
     last_login_at TIMESTAMP,
     last_logout_at TIMESTAMP,
+    last_login_ip VARCHAR(50),
     password_changed_at TIMESTAMP,
     must_change_password BOOLEAN DEFAULT FALSE,
     is_deleted BOOLEAN DEFAULT FALSE,
@@ -42,7 +43,9 @@ CREATE TABLE IF NOT EXISTS roles (
     description VARCHAR(255),
     tenant_id VARCHAR(36),
     is_system_role BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    deleted_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (role_code, tenant_id),
@@ -156,12 +159,12 @@ INSERT INTO tenants (tenant_id, tenant_name, tenant_code, status) VALUES
 ('T001', '測試租戶一', 'TENANT001', 'ACTIVE'),
 ('00000000-0000-0000-0000-000000000001', '預設租戶', 'DEFAULT', 'ACTIVE');
 
-INSERT INTO roles (role_id, role_name, role_code, description, tenant_id, is_system_role, status) VALUES
-('role-0001', '系統管理員', 'ADMIN', '系統最高權限管理員', NULL, TRUE, 'ACTIVE'),
-('role-0002', '員工', 'EMPLOYEE', '一般員工角色', 'T001', FALSE, 'ACTIVE'),
-('role-0003', '主管', 'MANAGER', '部門主管角色', 'T001', FALSE, 'ACTIVE'),
-('role-001', '測試角色', 'TEST_ROLE', '測試用角色', 'T001', FALSE, 'ACTIVE'),
-('00000000-0000-0000-0000-000000000007', 'HR 專員', 'HR', '人力資源專員角色', 'T001', FALSE, 'ACTIVE');
+INSERT INTO roles (role_id, role_name, role_code, description, tenant_id, is_system_role, is_deleted, status) VALUES
+('a0000000-0000-0000-0000-000000000001', '系統管理員', 'ADMIN', '系統最高權限管理員', NULL, TRUE, FALSE, 'ACTIVE'),
+('a0000000-0000-0000-0000-000000000002', '員工', 'EMPLOYEE', '一般員工角色', 'T001', FALSE, FALSE, 'ACTIVE'),
+('a0000000-0000-0000-0000-000000000003', '主管', 'MANAGER', '部門主管角色', 'T001', FALSE, FALSE, 'ACTIVE'),
+('a0000000-0000-0000-0000-000000000111', '測試角色', 'TEST_ROLE', '測試用角色', 'T001', FALSE, FALSE, 'ACTIVE'),
+('00000000-0000-0000-0000-000000000007', 'HR 專員', 'HR', '人力資源專員角色', 'T001', FALSE, FALSE, 'ACTIVE');
 
 INSERT INTO permissions (permission_id, permission_code, permission_name, description, resource, action) VALUES
 ('perm-0001', 'user:create', '建立使用者', '允許建立新使用者', 'user', 'create'),
@@ -177,33 +180,34 @@ INSERT INTO permissions (permission_id, permission_code, permission_name, descri
 ('perm-0011', 'role:assign-permission', '指派權限', '允許指派權限給角色', 'role', 'assign-permission');
 
 INSERT INTO role_permissions (role_id, permission_id) VALUES
-('role-0001', 'perm-0001'),
-('role-0001', 'perm-0002'),
-('role-0001', 'perm-0003'),
-('role-0001', 'perm-0004'),
-('role-0001', 'perm-0005'),
-('role-0001', 'perm-0006'),
-('role-0001', 'perm-0007'),
-('role-0001', 'perm-0008'),
-('role-0001', 'perm-0009'),
-('role-0001', 'perm-0010'),
-('role-0001', 'perm-0011');
+('a0000000-0000-0000-0000-000000000001', 'perm-0001'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0002'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0003'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0004'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0005'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0006'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0007'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0008'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0009'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0010'),
+('a0000000-0000-0000-0000-000000000001', 'perm-0011');
 
 -- 插入測試使用者（因為已經 TRUNCATE，直接 INSERT）
 -- 密碼都是 'password123' (BCrypt 加密, strength=12)
-INSERT INTO users (user_id, username, email, password_hash, display_name, tenant_id, status, is_deleted) VALUES
-('user-current-id', 'john.doe@company.com', 'john.doe@company.com',
- '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2',
- 'John Doe', 'T001', 'ACTIVE', FALSE),
-('user-admin-id', 'admin@company.com', 'admin@company.com',
- '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2',
- 'Admin User', 'T001', 'ACTIVE', FALSE),
-('user-001', 'test.user@company.com', 'test.user@company.com',
- '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2',
- 'Test User', 'T001', 'ACTIVE', FALSE);
+-- 明確指定 created_at 和 updated_at 為固定值，避免快照比對問題
+INSERT INTO users (user_id, username, email, password_hash, display_name, employee_id, tenant_id, status, last_login_ip, created_at, updated_at) VALUES
+('00000000-0000-0000-0000-000000000999', 'admin@company.com', 'admin@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Admin User', 'E000', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000001', 'system.admin@company.com', 'system.admin@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'System Admin', 'E001', '00000000-0000-0000-0000-000000000001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000111', 'test.user@company.com', 'test.user@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Test User', 'E111', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000222', 'inactive.user@company.com', 'inactive.user@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Inactive User', 'E222', 'T001', 'INACTIVE', NULL, '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000333', 'batch1@company.com', 'batch1@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Batch User 1', 'E333', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000444', 'batch2@company.com', 'batch2@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Batch User 2', 'E444', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00');
 
 -- 指派角色給使用者
 INSERT INTO user_roles (user_role_id, user_id, role_id) VALUES
-('ur-current', 'user-current-id', 'role-0001'),
-('ur-admin', 'user-admin-id', 'role-0001'),
-('ur-test', 'user-001', 'role-0002');
+('ur-current', '00000000-0000-0000-0000-000000000999', 'a0000000-0000-0000-0000-000000000001'),
+('ur-admin', '00000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001'),
+('ur-test', '00000000-0000-0000-0000-000000000111', 'a0000000-0000-0000-0000-000000000002'),
+('ur-test2', '00000000-0000-0000-0000-000000000222', 'a0000000-0000-0000-0000-000000000002'),
+('ur-test3', '00000000-0000-0000-0000-000000000333', 'a0000000-0000-0000-0000-000000000002'),
+('ur-test4', '00000000-0000-0000-0000-000000000444', 'a0000000-0000-0000-0000-000000000002');

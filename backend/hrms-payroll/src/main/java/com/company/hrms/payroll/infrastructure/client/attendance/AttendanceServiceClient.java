@@ -32,10 +32,12 @@ public interface AttendanceServiceClient {
     @Data
     class MonthlyReportItem {
         private String employeeId;
+        private BigDecimal totalWorkingHours;      // 總工時
         private BigDecimal workdayOvertimeHours;
         private BigDecimal restDayOvertimeHours;
         private BigDecimal holidayOvertimeHours;
         private BigDecimal leaveDays;
-        private BigDecimal unpaidLeaveHours; // 假設後續會增加
+        private BigDecimal unpaidLeaveHours;       // 事假時數
+        private BigDecimal sickLeaveHours;         // 病假時數
     }
 }

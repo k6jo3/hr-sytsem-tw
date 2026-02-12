@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { message } from 'antd';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PerformanceApi } from '../api/PerformanceApi';
+import type { PerformanceCycleDto } from '../api/PerformanceTypes';
 import { useCycles } from './useCycles';
 
 // Mock PerformanceApi
@@ -41,23 +42,23 @@ vi.mock('../factory/PerformanceViewModelFactory', () => ({
 }));
 
 describe('useCycles', () => {
-  const mockCycles = [
+  const mockCycles: PerformanceCycleDto[] = [
     {
       cycle_id: 'cycle-001',
       cycle_name: '2025年度考核',
-      cycle_type: 'ANNUAL',
+      cycle_type: 'ANNUAL' as const,
       start_date: '2025-01-01',
       end_date: '2025-12-31',
-      status: 'IN_PROGRESS',
+      status: 'IN_PROGRESS' as const,
       created_at: '2024-12-01T00:00:00Z',
     },
     {
       cycle_id: 'cycle-002',
       cycle_name: '2025 Q1考核',
-      cycle_type: 'QUARTERLY',
+      cycle_type: 'QUARTERLY' as const,
       start_date: '2025-01-01',
       end_date: '2025-03-31',
-      status: 'DRAFT',
+      status: 'DRAFT' as const,
       created_at: '2024-12-15T00:00:00Z',
     },
   ];
@@ -139,7 +140,10 @@ describe('useCycles', () => {
 
   describe('建立考核週期', () => {
     it('應該成功建立考核週期', async () => {
-      vi.mocked(PerformanceApi.createCycle).mockResolvedValue(mockCycles[0]);
+      vi.mocked(PerformanceApi.createCycle).mockResolvedValue({
+        cycle_id: 'cycle-001',
+        message: '建立成功',
+      });
       vi.mocked(PerformanceApi.getCycles).mockResolvedValue({
         cycles: mockCycles,
         total: 2,
@@ -185,7 +189,7 @@ describe('useCycles', () => {
 
   describe('更新考核週期', () => {
     it('應該成功更新考核週期', async () => {
-      vi.mocked(PerformanceApi.updateCycle).mockResolvedValue(mockCycles[0]);
+      vi.mocked(PerformanceApi.updateCycle).mockResolvedValue(undefined);
       vi.mocked(PerformanceApi.getCycles).mockResolvedValue({
         cycles: mockCycles,
         total: 2,
@@ -261,7 +265,7 @@ describe('useCycles', () => {
 
   describe('啟動考核週期', () => {
     it('應該成功啟動考核週期', async () => {
-      vi.mocked(PerformanceApi.startCycle).mockResolvedValue(undefined);
+      vi.mocked(PerformanceApi.startCycle).mockResolvedValue({ message: '啟動成功' });
       vi.mocked(PerformanceApi.getCycles).mockResolvedValue({
         cycles: mockCycles,
         total: 2,

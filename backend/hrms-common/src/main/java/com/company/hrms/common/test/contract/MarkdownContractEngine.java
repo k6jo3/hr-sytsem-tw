@@ -647,7 +647,21 @@ public class MarkdownContractEngine {
 
     private void assertInsert(List<Map<String, Object>> beforeRecords, List<Map<String, Object>> afterRecords,
             ExpectedDataChange change, String scenarioId) {
-        int actualInsertCount = afterRecords.size() - beforeRecords.size();
+        List<Map<String, Object>> trulyInserted = new ArrayList<>();
+        for (Map<String, Object> afterRecord : afterRecords) {
+            boolean foundInBefore = false;
+            for (Map<String, Object> beforeRecord : beforeRecords) {
+                if (isSameRecord(change.getTable(), beforeRecord, afterRecord)) {
+                    foundInBefore = true;
+                    break;
+                }
+            }
+            if (!foundInBefore) {
+                trulyInserted.add(afterRecord);
+            }
+        }
+
+        int actualInsertCount = trulyInserted.size();
         if (change.getCount() != null && actualInsertCount != change.getCount()) {
             throw new ContractViolationException(
                     String.format("[%s] 資料表 %s INSERT 筆數不符: 預期 %d 筆, 實際 %d 筆",
@@ -656,8 +670,7 @@ public class MarkdownContractEngine {
 
         // 驗證新增的記錄
         if (change.getAssertions() != null && !change.getAssertions().isEmpty()) {
-            List<Map<String, Object>> newRecords = afterRecords.subList(beforeRecords.size(), afterRecords.size());
-            for (Map<String, Object> record : newRecords) {
+            for (Map<String, Object> record : trulyInserted) {
                 for (FieldAssertion assertion : change.getAssertions()) {
                     assertDataFieldAssertion(record, assertion, change.getTable(), scenarioId);
                 }
@@ -676,10 +689,9 @@ public class MarkdownContractEngine {
 
         for (Map<String, Object> afterRecord : afterRecords) {
             for (Map<String, Object> beforeRecord : beforeRecords) {
-                if (isSameRecord(beforeRecord, afterRecord)) {
-                    if (!beforeRecord.equals(afterRecord)) {
+                if (isSameRecord(change.getTable(), beforeRecord, afterRecord)) {
+                    if (isRecordUpdated(beforeRecord, afterRecord)) {
                         updateCount++;
-                        System.out.println("Updated record: " + afterRecord.get("user_id"));
                     }
                     break;
                 }
@@ -696,11 +708,34 @@ public class MarkdownContractEngine {
 
     private void assertDelete(List<Map<String, Object>> beforeRecords, List<Map<String, Object>> afterRecords,
             ExpectedDataChange change, String scenarioId) {
-        int actualDeleteCount = beforeRecords.size() - afterRecords.size();
+        List<Map<String, Object>> trulyDeleted = new ArrayList<>();
+        for (Map<String, Object> beforeRecord : beforeRecords) {
+            boolean foundInAfter = false;
+            for (Map<String, Object> afterRecord : afterRecords) {
+                if (isSameRecord(change.getTable(), beforeRecord, afterRecord)) {
+                    foundInAfter = true;
+                    break;
+                }
+            }
+            if (!foundInAfter) {
+                trulyDeleted.add(beforeRecord);
+            }
+        }
+
+        int actualDeleteCount = trulyDeleted.size();
         if (change.getCount() != null && actualDeleteCount != change.getCount()) {
             throw new ContractViolationException(
                     String.format("[%s] 資料表 %s DELETE 筆數不符: 預期 %d 筆, 實際 %d 筆",
                             scenarioId, change.getTable(), change.getCount(), actualDeleteCount));
+        }
+
+        // 驗證刪除的記錄
+        if (change.getAssertions() != null && !change.getAssertions().isEmpty()) {
+            for (Map<String, Object> record : trulyDeleted) {
+                for (FieldAssertion assertion : change.getAssertions()) {
+                    assertDataFieldAssertion(record, assertion, change.getTable(), scenarioId);
+                }
+            }
         }
     }
 
@@ -720,22 +755,119 @@ public class MarkdownContractEngine {
         }
     }
 
-    private boolean isSameRecord(Map<String, Object> record1, Map<String, Object> record2) {
-        // 嘗試多種常見的主鍵欄位名稱
-        String[] possibleIdFields = {"id", "user_id", "role_id", "permission_id", "tenant_id",
-                "employee_id", "token_id", "log_id", "link_id", "history_id"};
+    private boolean isSameRecord(String tableName, Map<String, Object> record1, Map<String, Object> record2) {
+        if (record1 == null || record2 == null)
+            return false;
 
-        for (String idField : possibleIdFields) {
-            if (record1.containsKey(idField) && record2.containsKey(idField)) {
-                Object id1 = record1.get(idField);
-                Object id2 = record2.get(idField);
-                if (id1 != null && id2 != null && id1.equals(id2)) {
+        // 1. 正規化鍵值以便不區分大小寫比對
+        Map<String, Object> r1 = new java.util.HashMap<>();
+        record1.forEach((k, v) -> r1.put(k.toLowerCase(), v));
+        Map<String, Object> r2 = new java.util.HashMap<>();
+        record2.forEach((k, v) -> r2.put(k.toLowerCase(), v));
+
+        // 特殊處理 role_permissions (複合主鍵)
+        if ("role_permissions".equalsIgnoreCase(tableName)) {
+            return isValueEqual(r1, r2, "role_id") && isValueEqual(r1, r2, "permission_id");
+        }
+
+        // 2. 針對特定表名推導其專屬主鍵 (例如 users -> user_id)
+        String singular = tableName.toLowerCase();
+        if (singular.endsWith("s")) {
+            singular = singular.substring(0, singular.length() - 1);
+        }
+        String tableSpecificId = singular + "_id";
+
+        // 如果表中包含其名稱推導出的 ID，則以此為唯一比對標準
+        if (r1.containsKey(tableSpecificId) && r2.containsKey(tableSpecificId)) {
+            Object id1 = r1.get(tableSpecificId);
+            Object id2 = r2.get(tableSpecificId);
+            return id1 != null && id2 != null && id1.toString().equalsIgnoreCase(id2.toString());
+        }
+
+        // 3. 嘗試通用主鍵 "id"
+        if (r1.containsKey("id") && r2.containsKey("id")) {
+            Object id1 = r1.get("id");
+            Object id2 = r2.get("id");
+            return id1 != null && id2 != null && id1.toString().equalsIgnoreCase(id2.toString());
+        }
+
+        // 4. 其他常見主鍵 (排除可能造成誤判的外鍵，如 user_id 在 user_roles 表中不應作為主鍵比對)
+        // 只有當 tableSpecificId 不存在且 id 也不存在時才嘗試此列表
+        String[] fallbackIdFields = { "token_id", "log_id", "link_id", "history_id", "session_id", "audit_id" };
+        for (String idField : fallbackIdFields) {
+            if (r1.containsKey(idField) && r2.containsKey(idField)) {
+                Object id1 = r1.get(idField);
+                Object id2 = r2.get(idField);
+                if (id1 != null && id2 != null && id1.toString().equalsIgnoreCase(id2.toString())) {
                     return true;
                 }
             }
         }
 
         return false;
+
+    }
+
+    private boolean isValueEqual(Map<String, Object> r1, Map<String, Object> r2, String fieldName) {
+        if (!r1.containsKey(fieldName) || !r2.containsKey(fieldName)) {
+            return false;
+        }
+        Object v1 = r1.get(fieldName);
+        Object v2 = r2.get(fieldName);
+
+        if (v1 == null && v2 == null)
+            return true;
+        if (v1 == null || v2 == null)
+            return false;
+
+        return v1.toString().trim().equalsIgnoreCase(v2.toString().trim());
+    }
+
+    /**
+     * 判斷記錄是否被更新（排除時間戳欄位）
+     */
+    private boolean isRecordUpdated(Map<String, Object> beforeRecord, Map<String, Object> afterRecord) {
+        // 排除時間戳欄位的比對
+        String[] timestampFields = { "created_at", "updated_at", "deleted_at", "assigned_at", "granted_at",
+                "revoked_at", "expires_at", "used_at", "linked_at", "last_used_at", "last_login_at",
+                "last_logout_at", "password_changed_at", "locked_until", "login_at" };
+
+        Map<String, Object> beforeFiltered = new java.util.HashMap<>(beforeRecord);
+        Map<String, Object> afterFiltered = new java.util.HashMap<>(afterRecord);
+
+        // 移除時間戳欄位
+        for (String field : timestampFields) {
+            beforeFiltered.remove(field);
+            afterFiltered.remove(field);
+        }
+
+        boolean isUpdated = !beforeFiltered.equals(afterFiltered);
+
+        // 獲取記錄 ID 用於調試
+        String recordId = null;
+        String[] possibleIdFields = { "id", "user_id", "role_id", "permission_id" };
+        for (String idField : possibleIdFields) {
+            if (afterRecord.containsKey(idField)) {
+                recordId = String.valueOf(afterRecord.get(idField));
+                break;
+            }
+        }
+
+        System.out.println(">>> Checking record: " + recordId + ", isUpdated: " + isUpdated);
+
+        if (isUpdated) {
+            System.out.println("DEBUG: Record updated - " + recordId);
+            // 找出哪些欄位改變了
+            for (String key : beforeFiltered.keySet()) {
+                Object beforeVal = beforeFiltered.get(key);
+                Object afterVal = afterFiltered.get(key);
+                if ((beforeVal == null && afterVal != null) ||
+                        (beforeVal != null && !beforeVal.equals(afterVal))) {
+                    System.out.println("  Changed field: " + key + " from [" + beforeVal + "] to [" + afterVal + "]");
+                }
+            }
+        }
+        return isUpdated;
     }
 
     private void assertDataFieldAssertion(Map<String, Object> record, FieldAssertion assertion,
@@ -748,7 +880,13 @@ public class MarkdownContractEngine {
         boolean passed = false;
         switch (operator.toLowerCase()) {
             case "equals":
-                passed = actualValue != null && actualValue.equals(expectedValue);
+                if (actualValue instanceof Number && expectedValue instanceof Number) {
+                    passed = ((Number) actualValue).doubleValue() == ((Number) expectedValue).doubleValue();
+                } else if (actualValue instanceof Number && expectedValue instanceof String) {
+                    passed = Double.parseDouble(actualValue.toString()) == Double.parseDouble((String) expectedValue);
+                } else {
+                    passed = actualValue != null && actualValue.equals(expectedValue);
+                }
                 break;
             case "notnull":
                 passed = actualValue != null;
@@ -756,12 +894,32 @@ public class MarkdownContractEngine {
             case "null":
                 passed = actualValue == null;
                 break;
+            case "size":
+                if (actualValue instanceof java.util.Collection) {
+                    int expectedSize = Integer.parseInt(expectedValue.toString());
+                    passed = ((java.util.Collection<?>) actualValue).size() == expectedSize;
+                    actualValue = "size " + ((java.util.Collection<?>) actualValue).size();
+                } else if (actualValue != null && actualValue.getClass().isArray()) {
+                    int expectedSize = Integer.parseInt(expectedValue.toString());
+                    int actualSize = java.lang.reflect.Array.getLength(actualValue);
+                    passed = actualSize == expectedSize;
+                    actualValue = "size " + actualSize;
+                }
+                break;
+            case "notempty":
+                if (actualValue instanceof java.util.Collection) {
+                    passed = !((java.util.Collection<?>) actualValue).isEmpty();
+                } else if (actualValue instanceof String) {
+                    passed = !((String) actualValue).isEmpty();
+                }
+                break;
         }
 
         if (!passed) {
+            String actualType = actualValue != null ? actualValue.getClass().getSimpleName() : "null";
             throw new ContractViolationException(
-                    String.format("[%s] 資料表 %s 欄位 %s 斷言失敗: %s %s, 實際值: %s",
-                            scenarioId, tableName, field, operator, expectedValue, actualValue));
+                    String.format("[%s] 資料表 %s 欄位 %s 斷言失敗: %s %s, 實際值: %s (%s)",
+                            scenarioId, tableName, field, operator, expectedValue, actualValue, actualType));
         }
     }
 

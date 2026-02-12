@@ -41,8 +41,9 @@ public class HR01ProfileQryController extends QueryBaseController {
             @ApiResponse(responseCode = "401", description = "未授權")
     })
     @GetMapping
-    public ResponseEntity<ProfileResponse> getProfile(
+    public ResponseEntity<com.company.hrms.common.api.response.ApiResponse<ProfileResponse>> getProfile(
             @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-        return ResponseEntity.ok(getResponse(null, currentUser));
+        ProfileResponse profile = getResponse(null, currentUser);
+        return ResponseEntity.ok(com.company.hrms.common.api.response.ApiResponse.success(profile));
     }
 }

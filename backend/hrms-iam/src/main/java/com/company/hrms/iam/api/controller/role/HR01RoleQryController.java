@@ -11,27 +11,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.company.hrms.common.annotation.CurrentUser;
+import com.company.hrms.common.api.response.ApiResponse;
 import com.company.hrms.common.controller.QueryBaseController;
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.iam.api.request.role.GetRoleListRequest;
 import com.company.hrms.iam.api.response.role.RoleDetailResponse;
 import com.company.hrms.iam.api.response.role.RoleListResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * IAM - 角色管理 Query Controller
  * 負責角色的查詢操作
- *
- * <p>
- * 命名規範：HR{DD}{Screen}QryController
- * </p>
- * <p>
- * DD = 01 (IAM Domain)
- * </p>
  */
 @RestController
 @RequestMapping("/api/v1/roles")
@@ -43,8 +37,8 @@ public class HR01RoleQryController extends QueryBaseController {
          */
         @Operation(summary = "查詢角色列表", operationId = "getRoleList")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "成功"),
-                        @ApiResponse(responseCode = "401", description = "未授權")
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "未授權")
         })
         @GetMapping
         @PreAuthorize("hasAuthority('role:read')")
@@ -53,7 +47,13 @@ public class HR01RoleQryController extends QueryBaseController {
                         @RequestParam(required = false) String status,
                         @RequestParam(required = false, name = "isSystemRole") Boolean isSystemRole,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-                RoleQueryRequest request = new RoleQueryRequest(name, status, isSystemRole);
+
+                GetRoleListRequest request = GetRoleListRequest.builder()
+                                .name(name)
+                                .status(status)
+                                .isSystemRole(isSystemRole)
+                                .build();
+
                 return ResponseEntity.ok(getResponse(request, currentUser));
         }
 
@@ -62,16 +62,17 @@ public class HR01RoleQryController extends QueryBaseController {
          */
         @Operation(summary = "查詢單一角色", operationId = "getRole")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "成功"),
-                        @ApiResponse(responseCode = "401", description = "未授權"),
-                        @ApiResponse(responseCode = "404", description = "角色不存在")
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "未授權"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "角色不存在")
         })
         @GetMapping("/{roleId}")
         @PreAuthorize("hasAuthority('role:read')")
-        public ResponseEntity<RoleDetailResponse> getRole(
+        public ResponseEntity<ApiResponse<RoleDetailResponse>> getRole(
                         @PathVariable String roleId,
                         @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
-                return ResponseEntity.ok(getResponse(new GetRoleRequest(), currentUser, roleId));
+                RoleDetailResponse detail = getResponse(new GetRoleRequest(), currentUser, roleId);
+                return ResponseEntity.ok(ApiResponse.success(detail));
         }
 
         /**
@@ -79,8 +80,8 @@ public class HR01RoleQryController extends QueryBaseController {
          */
         @Operation(summary = "查詢系統角色列表", operationId = "getSystemRoles")
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "成功"),
-                        @ApiResponse(responseCode = "401", description = "未授權")
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "成功"),
+                        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "未授權")
         })
         @GetMapping("/system")
         @PreAuthorize("hasAuthority('role:read')")
@@ -90,20 +91,14 @@ public class HR01RoleQryController extends QueryBaseController {
         }
 
         /**
-         * 角色查詢請求 (內部類別)
-         */
-        public record RoleQueryRequest(String name, String status, Boolean isSystemRole) {
-        }
-
-        /**
          * 取得角色請求 (內部類別)
          */
-        public record GetRoleRequest() {
+        public static class GetRoleRequest {
         }
 
         /**
          * 取得系統角色請求 (內部類別)
          */
-        public record GetSystemRolesRequest() {
+        public static class GetSystemRolesRequest {
         }
 }
