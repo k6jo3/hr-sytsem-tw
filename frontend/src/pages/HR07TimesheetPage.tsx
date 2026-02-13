@@ -17,7 +17,7 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 
 /**
- * HR07-P01: 我的工時回報頁面
+ * HR07-P01: 每週工時填報 (Timesheet Entry)
  */
 export const HR07TimesheetPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
@@ -73,7 +73,7 @@ export const HR07TimesheetPage: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space align="baseline">
             <CalendarOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-            <Title level={2}>我的工時回報</Title>
+            <Title level={2}>每週工時填報</Title>
           </Space>
           <Space>
             <Button icon={<PlusOutlined />} type="primary" onClick={handleAddClick}>

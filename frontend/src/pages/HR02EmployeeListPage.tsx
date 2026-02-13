@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Layout, message } from 'antd';
 import { EmployeeList } from '@features/organization/components/EmployeeList';
 import { useEmployees } from '@features/organization/hooks/useEmployees';
+import { Layout, message } from 'antd';
+import React, { useState } from 'react';
 
 const { Content } = Layout;
 
 /**
  * HR02 員工列表頁面
- * 頁面代碼：HR02-P01
+ * 頁面代碼：HR02-P02
  */
 const HR02EmployeeListPage: React.FC = () => {
   const [page, setPage] = useState(1);

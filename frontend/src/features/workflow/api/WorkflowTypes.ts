@@ -197,6 +197,7 @@ export interface GetPendingTasksResponse {
 }
 
 export interface ApproveTaskRequest {
+  task_id: string;
   comments?: string;
 }
 
@@ -205,6 +206,7 @@ export interface ApproveTaskResponse {
 }
 
 export interface RejectTaskRequest {
+  task_id: string;
   comments: string;
 }
 

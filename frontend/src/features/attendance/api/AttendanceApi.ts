@@ -64,7 +64,7 @@ export class AttendanceApi {
    * 提交補卡申請
    */
   static async createCorrection(request: CreateCorrectionRequest): Promise<CreateCorrectionResponse> {
-    // Mock not implemented for corrections yet
+    if (MockConfig.isEnabled('ATTENDANCE')) return { success: true, message: '補卡申請已提交 (Mock)' } as any;
     return apiClient.post(`${this.BASE_PATH}/corrections`, request);
   }
 
@@ -72,7 +72,7 @@ export class AttendanceApi {
    * 查詢補卡申請列表 (主管用)
    */
   static async getCorrectionApplications(params?: GetCorrectionListRequest): Promise<GetCorrectionListResponse> {
-    // Mock not implemented for corrections yet
+    if (MockConfig.isEnabled('ATTENDANCE')) return { items: [], total: 0 } as any;
     return apiClient.get(`${this.BASE_PATH}/corrections`, { params });
   }
 
@@ -80,7 +80,7 @@ export class AttendanceApi {
    * 審核補卡申請 (主管用)
    */
   static async approveCorrection(correctionId: string, comment?: string): Promise<ApproveCorrectionResponse> {
-    // Mock not implemented for corrections yet
+    if (MockConfig.isEnabled('ATTENDANCE')) return { success: true, message: '補卡已核准 (Mock)' } as any;
     return apiClient.put(`${this.BASE_PATH}/corrections/${correctionId}/approve`, { comment });
   }
 }

@@ -7,6 +7,7 @@ export { default as HR01UserManagementPage } from './HR01UserManagementPage';
 // Organization (HR02)
 export { HR02EmployeeDetailPage } from './HR02EmployeeDetailPage';
 export { default as HR02EmployeeListPage } from './HR02EmployeeListPage';
+export { HR02OrganizationTreePage } from './HR02OrganizationTreePage';
 
 // Attendance (HR03)
 export { HR03ApprovalListPage } from './HR03ApprovalListPage';

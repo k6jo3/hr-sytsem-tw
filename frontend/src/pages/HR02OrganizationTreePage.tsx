@@ -10,7 +10,7 @@ import { OrganizationTreeView } from '../features/organization/components/Organi
 
 export const HR02OrganizationTreePage: React.FC = () => {
     return (
-        <Card title="組織架構圖" bordered={false}>
+        <Card title="部門與組織架構管理" bordered={false}>
             <OrganizationTreeView />
         </Card>
     );

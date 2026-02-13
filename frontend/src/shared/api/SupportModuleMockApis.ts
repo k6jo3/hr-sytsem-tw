@@ -36,12 +36,12 @@ export class MockTrainingApi {
     },
   ];
 
-  static async getCourses(): Promise<any> {
+  static async getCourseList(): Promise<any> {
     await this.delay(300);
     return { courses: this.mockCourses, total: this.mockCourses.length };
   }
 
-  static async enrollCourse(courseId: string): Promise<any> {
+  static async registerCourse(courseId: string): Promise<any> {
     await this.delay(500);
     return { message: '報名成功', course_id: courseId };
   }

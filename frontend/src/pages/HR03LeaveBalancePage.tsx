@@ -1,5 +1,4 @@
 import { RootState } from '@/store';
-import { PageLayout } from '@shared/components';
 import { Card, Col, message, Progress, Row, Statistic, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import React, { useEffect, useState } from 'react';
@@ -76,7 +75,7 @@ export const HR03LeaveBalancePage: React.FC = () => {
   ];
 
   return (
-    <PageLayout>
+    <>
       <div style={{ padding: '24px' }}>
         <Title level={2} style={{ marginBottom: 24 }}>我的假期餘額 ({new Date().getFullYear()}年度)</Title>
         
@@ -108,7 +107,7 @@ export const HR03LeaveBalancePage: React.FC = () => {
           />
         </Card>
       </div>
-    </PageLayout>
+    </>
   );
 };
 

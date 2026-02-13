@@ -1,5 +1,4 @@
 import { RootState } from '@/store';
-import { PageLayout } from '@shared/components';
 import { Button, Card, DatePicker, message, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -15,7 +14,7 @@ import { ApplyCorrectionModal } from '../features/attendance/components/ApplyCor
 
 /**
  * HR03 我的出勤記錄頁面
- * 頁面代碼：HR03-P02
+ * 頁面代碼：HR03-P03
  */
 export const HR03MyAttendanceListPage: React.FC = () => {
   const [data, setData] = useState<AttendanceRecordDto[]>([]);
@@ -119,10 +118,10 @@ export const HR03MyAttendanceListPage: React.FC = () => {
   ];
 
   return (
-    <PageLayout>
+    <>
       <div style={{ padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <Title level={3}>我的出勤記錄</Title>
+          <Title level={3}>我的考勤記錄查詢</Title>
           <RangePicker 
             value={dateRange} 
             onChange={(val) => setDateRange(val as any)}
@@ -157,7 +156,7 @@ export const HR03MyAttendanceListPage: React.FC = () => {
           }}
         />
       </div>
-    </PageLayout>
+    </>
   );
 };
 

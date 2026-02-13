@@ -10,7 +10,7 @@
 /**
  * 通用 API 回應包裝
  */
-export interface ApiResponse<T> {
+export interface StandardApiResponse<T> {
   success: boolean;
   code: string;
   message: string;

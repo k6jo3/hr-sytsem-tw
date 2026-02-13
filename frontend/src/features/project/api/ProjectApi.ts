@@ -110,7 +110,7 @@ export class ProjectApi {
    * 取得專案成員列表
    */
   static async getProjectMembers(projectId: string): Promise<ProjectMemberDto[]> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PROJECT')) return [] as any;
     return apiClient.get<ProjectMemberDto[]>(`${this.BASE_PATH}/${projectId}/members`);
   }
 
@@ -136,7 +136,7 @@ export class ProjectApi {
    * 取得專案成本分析
    */
   static async getProjectCost(projectId: string): Promise<ProjectCostDto> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PROJECT')) return { totalCost: 0, budget: 0, actualCost: 0 } as any;
     return apiClient.get<ProjectCostDto>(`${this.BASE_PATH}/${projectId}/cost`);
   }
 
@@ -146,7 +146,7 @@ export class ProjectApi {
    * GET /api/v1/projects/{id}/tasks - 取得專案工項
    */
   static async getProjectTasks(projectId: string): Promise<TaskDto[]> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PROJECT')) return [] as any;
     return apiClient.get<TaskDto[]>(`${this.BASE_PATH}/${projectId}/tasks`);
   }
 

@@ -85,7 +85,7 @@ export class TimesheetApi {
    * PUT /api/v1/timesheets/batch-approve - 批次核准
    */
   static async batchApprove(request: BatchApprovalRequest): Promise<void> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('TIMESHEET')) return;
     return apiClient.put(`${this.BASE_PATH}/batch-approve`, request);
   }
 

@@ -49,4 +49,11 @@ export class AuthApi {
     if (MockConfig.isEnabled('AUTH')) return MockAuthApi.getCurrentUser();
     return apiClient.get(`${this.BASE_PATH}/me`);
   }
+
+  /**
+   * 修改密碼
+   */
+  static async changePassword(data: any): Promise<void> {
+    return apiClient.post(`${this.BASE_PATH}/change-password`, data);
+  }
 }
