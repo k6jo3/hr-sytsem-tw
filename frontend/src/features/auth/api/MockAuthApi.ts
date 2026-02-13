@@ -27,8 +27,23 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export class MockAuthApi {
 
   // --- Mock Data ---
+  private static currentUserId: string = 'demo-u001';
 
   private static users: UserDto[] = [
+    {
+      id: 'demo-u001',
+      username: 'demo',
+      email: 'demo@example.com',
+      display_name: 'Demo User',
+      first_name: 'Demo',
+      last_name: 'User',
+      status: 'ACTIVE' as UserStatus,
+      role_list: ['USER'],
+      role_ids: ['r002'],
+      must_change_password: false,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    },
     {
       id: 'u001',
       username: 'admin',
@@ -131,15 +146,25 @@ export class MockAuthApi {
 
   // --- Auth Methods ---
 
-  static async login(_request: LoginRequest): Promise<LoginResponse> {
+  static async login(request: LoginRequest): Promise<LoginResponse> {
     await delay(500);
-    // Simple mock logic - always succeed for development
-    return {
-      access_token: 'mock-access-token-' + uuidv4(),
-      refresh_token: 'mock-refresh-token-' + uuidv4(),
-      expires_in: 3600,
-      user: this.users[0]!
-    };
+    
+    // Find user by username
+    const user = this.users.find(u => u.username === request.username);
+    
+    // Simple mock logic: allow login for any existing mock user
+    if (user) {
+      this.currentUserId = user.id;
+      return {
+        access_token: 'mock-access-token-' + uuidv4(),
+        refresh_token: 'mock-refresh-token-' + uuidv4(),
+        expires_in: 3600,
+        user: user
+      };
+    }
+    
+    // Simulate invalid login
+    throw new Error('帳號或密碼錯誤');
   }
 
   static async logout(): Promise<void> {
@@ -148,7 +173,8 @@ export class MockAuthApi {
 
   static async getCurrentUser(): Promise<UserDto> {
     await delay(300);
-    return this.users[0]!;
+    const user = this.users.find(u => u.id === this.currentUserId);
+    return user || this.users[0]!;
   }
 
   // --- User Management ---
