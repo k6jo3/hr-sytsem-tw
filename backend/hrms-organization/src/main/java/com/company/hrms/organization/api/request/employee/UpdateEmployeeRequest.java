@@ -1,6 +1,8 @@
 package com.company.hrms.organization.api.request.employee;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 /**
@@ -19,6 +21,9 @@ public class UpdateEmployeeRequest {
 
     @Email(message = "個人Email格式不正確")
     private String personalEmail;
+
+    @Email(message = "公司Email格式不正確")
+    private String companyEmail;
 
     @Pattern(regexp = "^09\\d{8}$", message = "手機號碼格式不正確")
     private String mobilePhone;

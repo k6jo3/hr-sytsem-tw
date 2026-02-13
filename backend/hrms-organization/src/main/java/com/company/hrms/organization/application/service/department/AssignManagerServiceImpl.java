@@ -12,6 +12,7 @@ import com.company.hrms.organization.application.service.department.context.Depa
 import com.company.hrms.organization.application.service.department.task.AssignManagerTask;
 import com.company.hrms.organization.application.service.department.task.LoadDeptStatsTask;
 import com.company.hrms.organization.application.service.department.task.LoadDeptTask;
+import com.company.hrms.organization.application.service.department.task.PublishDepartmentManagerChangedEventTask;
 import com.company.hrms.organization.application.service.department.task.SaveDeptTask;
 
 import lombok.RequiredArgsConstructor;
@@ -25,56 +26,61 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional
 public class AssignManagerServiceImpl
-        implements CommandApiService<AssignManagerRequest, DepartmentDetailResponse> {
+                implements CommandApiService<AssignManagerRequest, DepartmentDetailResponse> {
 
-    private final LoadDeptTask loadDeptTask;
-    private final AssignManagerTask assignManagerTask;
-    private final SaveDeptTask saveDeptTask;
-    private final LoadDeptStatsTask loadDeptStatsTask;
+        private final LoadDeptTask loadDeptTask;
+        private final AssignManagerTask assignManagerTask;
+        private final SaveDeptTask saveDeptTask;
+        private final LoadDeptStatsTask loadDeptStatsTask;
+        private final PublishDepartmentManagerChangedEventTask publishDepartmentManagerChangedEventTask;
 
-    @Override
-    public DepartmentDetailResponse execCommand(AssignManagerRequest request,
-            JWTModel currentUser, String... args) throws Exception {
+        @Override
+        public DepartmentDetailResponse execCommand(AssignManagerRequest request,
+                        JWTModel currentUser, String... args) throws Exception {
 
-        String departmentId = args[0];
-        log.info("指派部門主管: departmentId={}, managerId={}", departmentId, request.getManagerId());
+                String departmentId = args[0];
+                log.info("指派部門主管: departmentId={}, managerId={}", departmentId, request.getManagerId());
 
-        DepartmentContext context = new DepartmentContext(departmentId, request);
+                DepartmentContext context = new DepartmentContext(departmentId, request);
 
-        BusinessPipeline.start(context)
-                .next(loadDeptTask)
-                .next(assignManagerTask)
-                .next(saveDeptTask)
-                .next(loadDeptStatsTask)
-                .execute();
+                BusinessPipeline.start(context)
+                                .next(loadDeptTask)
+                                .next(assignManagerTask)
+                                .next(saveDeptTask)
+                                .next(loadDeptStatsTask)
+                                .next(publishDepartmentManagerChangedEventTask)
+                                .execute();
 
-        log.info("部門主管指派成功: departmentId={}", departmentId);
-        return buildResponse(context);
-    }
+                log.info("部門主管指派成功: departmentId={}", departmentId);
+                return buildResponse(context);
+        }
 
-    private DepartmentDetailResponse buildResponse(DepartmentContext context) {
-        var dept = context.getDepartment();
+        private DepartmentDetailResponse buildResponse(DepartmentContext context) {
+                var dept = context.getDepartment();
 
-        return DepartmentDetailResponse.builder()
-                .departmentId(dept.getId().getValue().toString())
-                .code(dept.getCode())
-                .name(dept.getName())
-                .nameEn(dept.getNameEn())
-                .organizationId(
-                        dept.getOrganizationId() != null ? dept.getOrganizationId().getValue().toString() : null)
-                .organizationName(context.getOrganizationName())
-                .parentId(dept.getParentId() != null ? dept.getParentId().getValue().toString() : null)
-                .parentName(context.getParentName())
-                .level(dept.getLevel())
-                .path(dept.getPath())
-                .managerId(dept.getManagerId() != null ? dept.getManagerId().getValue().toString() : null)
-                .managerName(context.getManagerName())
-                .status(dept.getStatus().name())
-                .statusDisplay(dept.getStatus().getDisplayName())
-                .sortOrder(dept.getSortOrder())
-                .description(dept.getDescription())
-                .employeeCount(context.getEmployeeCount())
-                .childDepartmentCount(context.getChildDepartmentCount())
-                .build();
-    }
+                return DepartmentDetailResponse.builder()
+                                .departmentId(dept.getId().getValue().toString())
+                                .code(dept.getCode())
+                                .name(dept.getName())
+                                .nameEn(dept.getNameEn())
+                                .organizationId(
+                                                dept.getOrganizationId() != null
+                                                                ? dept.getOrganizationId().getValue().toString()
+                                                                : null)
+                                .organizationName(context.getOrganizationName())
+                                .parentId(dept.getParentId() != null ? dept.getParentId().getValue().toString() : null)
+                                .parentName(context.getParentName())
+                                .level(dept.getLevel())
+                                .path(dept.getPath())
+                                .managerId(dept.getManagerId() != null ? dept.getManagerId().getValue().toString()
+                                                : null)
+                                .managerName(context.getManagerName())
+                                .status(dept.getStatus().name())
+                                .statusDisplay(dept.getStatus().getDisplayName())
+                                .sortOrder(dept.getSortOrder())
+                                .description(dept.getDescription())
+                                .employeeCount(context.getEmployeeCount())
+                                .childDepartmentCount(context.getChildDepartmentCount())
+                                .build();
+        }
 }

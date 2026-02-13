@@ -67,6 +67,11 @@ public class UpdateEmployeeTask implements PipelineTask<EmployeeContext> {
                 address != null ? address : employee.getAddress(),
                 emergencyContact != null ? emergencyContact : employee.getEmergencyContact());
 
+        // 更新公司 Email (如果有提供)
+        if (request.getCompanyEmail() != null) {
+            employee.updateCompanyEmail(request.getCompanyEmail());
+        }
+
         // 更新銀行帳戶
         if (request.getBankAccount() != null) {
             employee.updateBankAccount(new BankAccount(

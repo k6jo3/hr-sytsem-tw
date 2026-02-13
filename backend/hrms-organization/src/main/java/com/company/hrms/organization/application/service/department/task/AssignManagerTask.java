@@ -32,6 +32,11 @@ public class AssignManagerTask implements PipelineTask<DepartmentContext> {
                 .orElseThrow(() -> new ResourceNotFoundException("MANAGER_NOT_FOUND",
                         "主管不存在: " + request.getManagerId()));
 
+        // 記錄舊主管 ID (用於事件發布)
+        if (department.getManagerId() != null) {
+            context.setAttribute("oldManagerId", department.getManagerId().getValue().toString());
+        }
+
         // 指派主管
         department.assignManager(UUID.fromString(request.getManagerId()));
 

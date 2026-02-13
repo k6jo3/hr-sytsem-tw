@@ -10,6 +10,7 @@ import com.company.hrms.organization.api.request.employee.UpdateEmployeeRequest;
 import com.company.hrms.organization.api.response.employee.EmployeeDetailResponse;
 import com.company.hrms.organization.application.service.employee.context.EmployeeContext;
 import com.company.hrms.organization.application.service.employee.task.LoadEmployeeTask;
+import com.company.hrms.organization.application.service.employee.task.PublishEmployeeEmailChangedEventTask;
 import com.company.hrms.organization.application.service.employee.task.SaveEmployeeTask;
 import com.company.hrms.organization.application.service.employee.task.UpdateEmployeeTask;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
@@ -39,6 +40,7 @@ public class UpdateEmployeeServiceImpl
     private final LoadEmployeeTask loadEmployeeTask;
     private final UpdateEmployeeTask updateEmployeeTask;
     private final SaveEmployeeTask saveEmployeeTask;
+    private final PublishEmployeeEmailChangedEventTask publishEmployeeEmailChangedEventTask;
 
     @Override
     public EmployeeDetailResponse execCommand(UpdateEmployeeRequest request,
@@ -55,6 +57,7 @@ public class UpdateEmployeeServiceImpl
                 .next(loadEmployeeTask) // 載入員工
                 .next(updateEmployeeTask) // 更新資料
                 .next(saveEmployeeTask) // 儲存員工
+                .next(publishEmployeeEmailChangedEventTask) // 發布事件
                 .execute();
 
         log.info("更新員工流程完成: employeeId={}", employeeId);
