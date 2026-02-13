@@ -2,6 +2,20 @@
 -- 用於 Repository 整合測試
 
 -- 清除舊資料
+CREATE TABLE IF NOT EXISTS leave_balances (
+    id VARCHAR(50) NOT NULL PRIMARY KEY,
+    employee_id VARCHAR(50) NOT NULL,
+    leave_type_id VARCHAR(50) NOT NULL,
+    "year" INT NOT NULL,
+    total_days DECIMAL(5,2),
+    used_days DECIMAL(5,2),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    created_by VARCHAR(50),
+    updated_by VARCHAR(50)
+);
+
+DELETE FROM leave_balances;
 DELETE FROM leave_applications;
 DELETE FROM overtime_applications;
 DELETE FROM attendance_corrections;
@@ -53,18 +67,8 @@ INSERT INTO overtime_applications (id, employee_id, department_id, overtime_type
 -- 已駁回
 ('OT006', 'E003', 'D002', 'WORKDAY', '2025-01-18', '18:00:00', '22:00:00', 4, '加班', 'REJECTED', 'M002', '2025-01-17 17:00:00', '2025-01-17 18:00:00', 0);
 
--- 測試場景說明:
--- ATT_A001: 查詢員工 E001 在 2025-01-15 的出勤 → 預期 1 筆
--- ATT_A002: 查詢部門 D001 的 2025-01 月出勤 → 預期 6 筆
--- ATT_A003: 查詢異常出勤 → 預期 2 筆
--- ATT_A004: 查詢遲到紀錄 → 預期 2 筆 (AR007, AR009)
--- ATT_A005: 查詢早退紀錄 → 預期 1 筆
--- ATT_L001: 查詢待審核請假 → 預期 3 筆
--- ATT_L002: 查詢已核准請假 → 預期 3 筆
--- ATT_L003: 查詢已駁回請假 → 預期 2 筆
--- ATT_L004: 查詢特休假 → 預期 4 筆
--- ATT_L009: 查詢病假 → 預期 2 筆
--- ATT_O001: 查詢待審核加班 → 預期 2 筆
--- ATT_O002: 查詢已核准加班 → 預期 3 筆
--- ATT_O004: 查詢平日加班 → 預期 4 筆
--- ATT_O005: 查詢假日加班 → 預期 2 筆
+-- 假別餘額測試資料
+INSERT INTO leave_balances (id, employee_id, leave_type_id, "year", total_days, used_days, created_at, updated_at) VALUES
+('LB001', 'E001', 'ANNUAL', 2025, 14.00, 5.00, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('LB002', 'E001', 'SICK', 2025, 30.00, 2.00, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('LB003', 'E001', 'PERSONAL', 2025, 14.00, 0.00, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

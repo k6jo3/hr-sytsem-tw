@@ -40,6 +40,9 @@ public class ProjectCostQueryAssembler {
             query.gt("actual_amount", "budget_amount");
         }
 
+        // 軟刪除過濾
+        query.eq("is_deleted", 0);
+
         return query;
     }
 }

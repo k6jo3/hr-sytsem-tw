@@ -84,6 +84,7 @@ public class ProjectRepositoryImpl extends CommandBatchBaseRepository<ProjectEnt
                         .employeeId(m.getEmployeeId())
                         .role(m.getRole())
                         .allocatedHours(m.getAllocatedHours())
+                        .hourlyRate(m.getHourlyRate())
                         .joinDate(m.getJoinDate())
                         .leaveDate(m.getLeaveDate())
                         .build())
@@ -121,6 +122,7 @@ public class ProjectRepositoryImpl extends CommandBatchBaseRepository<ProjectEnt
                         e.getEmployeeId(),
                         e.getRole(),
                         e.getAllocatedHours(),
+                        e.getHourlyRate(),
                         e.getJoinDate(),
                         e.getLeaveDate()))
                 .collect(Collectors.toList());

@@ -63,6 +63,16 @@
         ORDER BY resource, action
     </select>
 
+    <select id="selectByUserId" resultMap="PermissionResultMap">
+        SELECT DISTINCT p.permission_id, p.permission_code, p.permission_name, p.description,
+               p.resource, p.action, p.created_at
+        FROM permissions p
+        INNER JOIN role_permissions rp ON p.permission_id = rp.permission_id
+        INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+        ORDER BY p.resource, p.action
+    </select>
+
     <insert id="insert">
         INSERT INTO permissions (permission_id, permission_code, permission_name,
                                  description, resource, action, created_at)

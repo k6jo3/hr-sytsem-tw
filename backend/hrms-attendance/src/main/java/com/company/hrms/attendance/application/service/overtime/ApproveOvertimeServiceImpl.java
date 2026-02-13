@@ -9,7 +9,9 @@ import com.company.hrms.attendance.application.service.overtime.context.ApproveO
 import com.company.hrms.attendance.application.service.overtime.task.LoadOvertimeForApprovalTask;
 import com.company.hrms.attendance.application.service.overtime.task.PerformApproveOvertimeTask;
 import com.company.hrms.attendance.application.service.overtime.task.SaveOvertimeForApprovalTask;
+import com.company.hrms.attendance.domain.event.OvertimeApprovedEvent;
 import com.company.hrms.common.application.pipeline.BusinessPipeline;
+import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 
@@ -28,6 +30,7 @@ public class ApproveOvertimeServiceImpl implements CommandApiService<ApproveOver
     private final LoadOvertimeForApprovalTask loadOvertimeForApprovalTask;
     private final PerformApproveOvertimeTask performApproveOvertimeTask;
     private final SaveOvertimeForApprovalTask saveOvertimeForApprovalTask;
+    private final EventPublisher eventPublisher;
 
     @Override
     public ApproveOvertimeResponse execCommand(ApproveOvertimeRequest request, JWTModel currentUser, String... args)
@@ -51,6 +54,11 @@ public class ApproveOvertimeServiceImpl implements CommandApiService<ApproveOver
         log.info("加班核准流程完成: overtimeId={}, status={}",
                 context.getApplication().getId().getValue(),
                 context.getApplication().getStatus());
+
+        // 發布領域事件
+        eventPublisher.publish(new OvertimeApprovedEvent(
+                context.getApplication().getId().getValue(),
+                currentUser.getUserId()));
 
         return ApproveOvertimeResponse.success(context.getApplication().getId().getValue());
     }

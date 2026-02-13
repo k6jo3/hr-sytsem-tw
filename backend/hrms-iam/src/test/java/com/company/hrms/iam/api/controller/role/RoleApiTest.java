@@ -332,7 +332,7 @@ class RoleApiTest extends BaseApiContractTest {
                                         .andExpect(jsonPath("$.data.roleId").value(roleId))
                                         .andExpect(jsonPath("$.data.roleName").value("管理員"))
                                         .andExpect(jsonPath("$.data.roleCode").value("ADMIN"))
-                                        .andExpect(jsonPath("$.data.systemRole").value(true))
+                                        .andExpect(jsonPath("$.data.isSystemRole").value(true))
                                         .andExpect(jsonPath("$.data.permissions").isArray());
                 }
 
@@ -369,8 +369,8 @@ class RoleApiTest extends BaseApiContractTest {
                                         .andExpect(status().isOk())
                                         .andExpect(jsonPath("$").isArray())
                                         .andExpect(jsonPath("$.length()").value(2))
-                                        .andExpect(jsonPath("$[0].systemRole").value(true))
-                                        .andExpect(jsonPath("$[1].systemRole").value(true));
+                                        .andExpect(jsonPath("$[0].isSystemRole").value(true))
+                                        .andExpect(jsonPath("$[1].isSystemRole").value(true));
                 }
 
                 @Test

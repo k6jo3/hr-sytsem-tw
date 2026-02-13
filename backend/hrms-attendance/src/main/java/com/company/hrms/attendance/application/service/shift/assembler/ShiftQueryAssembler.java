@@ -18,20 +18,20 @@ public class ShiftQueryAssembler {
 
         // 班別狀態
         if (request.getIsActive() != null) {
-            builder.and("is_active", Operator.EQ, request.getIsActive());
+            builder.and("isActive", Operator.EQ, request.getIsActive());
         } else {
             // 預設查詢啟用的班別 (依合約 ATT_QRY_S001)
-            builder.and("is_active", Operator.EQ, true);
+            builder.and("isActive", Operator.EQ, true);
         }
 
         // 組織 ID
         if (request.getOrganizationId() != null && !request.getOrganizationId().isBlank()) {
-            builder.and("organization_id", Operator.EQ, request.getOrganizationId());
+            builder.and("organizationId", Operator.EQ, request.getOrganizationId());
         }
 
         // 班別類型
         if (request.getShiftType() != null && !request.getShiftType().isBlank()) {
-            builder.and("shift_type", Operator.EQ, request.getShiftType());
+            builder.and("type", Operator.EQ, request.getShiftType());
         }
 
         return builder.build();

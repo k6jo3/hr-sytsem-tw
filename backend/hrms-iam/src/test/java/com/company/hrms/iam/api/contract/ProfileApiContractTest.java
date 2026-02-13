@@ -100,9 +100,8 @@ public class ProfileApiContractTest extends BaseContractTest {
 
             String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
 
-            // 驗證合約（查詢合約測試需要捕獲 QueryGroup，但這裡是個人資料查詢，直接驗證回應即可）
-            // TODO: 如果需要驗證 QueryGroup，可以使用 AOP 或其他方式攔截
-            // verifyQueryContract(queryCaptor.getValue(), responseJson, contract);
+            // 驗證合約
+            verifyQueryContract(null, responseJson, contract);
         }
     }
 

@@ -33,5 +33,6 @@ public class CreateProjectCommand {
         private UUID employeeId;
         private String role;
         private BigDecimal allocatedHours;
+        private BigDecimal hourlyRate;
     }
 }

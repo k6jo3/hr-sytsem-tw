@@ -39,9 +39,9 @@ public class LoadEmployeeRosterDataTask implements PipelineTask<ExportExcelConte
 
         // 1. 解析查詢條件
         GetEmployeeRosterRequest searchReq = new GetEmployeeRosterRequest();
-        String json = ctx.getRequest().getQueryConditions();
-        if (json != null && !json.isBlank()) {
-            searchReq = objectMapper.readValue(json, GetEmployeeRosterRequest.class);
+        java.util.Map<String, Object> filters = ctx.getRequest().getFilters();
+        if (filters != null && !filters.isEmpty()) {
+            searchReq = objectMapper.convertValue(filters, GetEmployeeRosterRequest.class);
         }
         searchReq.setTenantId(ctx.getCurrentUser().getTenantId());
 

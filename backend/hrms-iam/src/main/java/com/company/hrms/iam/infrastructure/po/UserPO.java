@@ -89,6 +89,16 @@ public class UserPO {
     private String lastLoginIp;
 
     /**
+     * 偏好語言
+     */
+    private String preferredLanguage;
+
+    /**
+     * 時區
+     */
+    private String timezone;
+
+    /**
      * 密碼變更時間
      */
     private Timestamp passwordChangedAt;

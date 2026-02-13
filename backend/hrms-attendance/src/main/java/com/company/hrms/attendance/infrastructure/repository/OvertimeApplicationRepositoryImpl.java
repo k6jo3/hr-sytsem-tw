@@ -95,6 +95,7 @@ public class OvertimeApplicationRepositoryImpl extends BaseRepository<OvertimeAp
                 .reason(application.getReason())
                 .overtimeType(application.getOvertimeType().name())
                 .rejectionReason(application.getRejectionReason())
+                .isDeleted(0)
                 .build();
     }
 }

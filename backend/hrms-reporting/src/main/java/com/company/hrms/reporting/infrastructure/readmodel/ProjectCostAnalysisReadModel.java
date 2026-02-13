@@ -25,10 +25,10 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Table(name = "rm_project_cost_analysis", indexes = {
-        @Index(name = "idx_tenant_id", columnList = "tenant_id"),
-        @Index(name = "idx_customer_id", columnList = "customer_id"),
-        @Index(name = "idx_status", columnList = "status"),
-        @Index(name = "idx_start_date", columnList = "start_date")
+        @Index(name = "idx_pc_tenant_id", columnList = "tenant_id"),
+        @Index(name = "idx_pc_customer_id", columnList = "customer_id"),
+        @Index(name = "idx_pc_status", columnList = "status"),
+        @Index(name = "idx_pc_start_date", columnList = "start_date")
 })
 @Data
 @Builder

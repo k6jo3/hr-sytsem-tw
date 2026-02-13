@@ -27,4 +27,14 @@ public class UpdateProfileRequest {
      */
     @Size(min = 1, max = 100, message = "顯示名稱長度須為 1-100 字元")
     private String displayName;
+
+    /**
+     * 偏好語言
+     */
+    private String preferredLanguage;
+
+    /**
+     * 時區
+     */
+    private String timezone;
 }

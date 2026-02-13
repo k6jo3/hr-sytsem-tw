@@ -1,24 +1,73 @@
 package com.company.hrms.reporting.application.service.export;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.common.service.QueryApiService;
+import com.company.hrms.common.service.CommandApiService;
 import com.company.hrms.reporting.api.request.ExportPdfRequest;
+import com.company.hrms.reporting.api.response.ExportFileResponse;
+import com.company.hrms.reporting.domain.event.ReportExportRequestedEvent;
+import com.company.hrms.reporting.domain.repository.IReportExportRepository;
+import com.company.hrms.reporting.infrastructure.entity.ReportExportEntity;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * 匯出 PDF 報表 Service - RPT_CMD_004
+ * PDF 匯出 API 服務實作 (Command)
+ * 建立匯出任務並發布事件
  */
 @Service("exportPdfServiceImpl")
-public class ExportPdfServiceImpl 
-        implements QueryApiService<ExportPdfRequest, byte[]> {
+@Slf4j
+@RequiredArgsConstructor
+public class ExportPdfServiceImpl implements CommandApiService<ExportPdfRequest, ExportFileResponse> {
 
-    @Override
-    public byte[] getResponse(ExportPdfRequest req, JWTModel currentUser, String... args)
-            throws Exception {
-        // TODO: 實作 PDF 匯出邏輯
-        // 1. 根據 reportType 查詢報表資料
-        // 2. 使用 PDF 生成工具（如 iText）生成 PDF
-        // 3. 儲存匯出記錄到 ExportRecordRepository
-        throw new UnsupportedOperationException("待實作：需要 PDF 生成工具和相關 Repository");
-    }
+        private final IReportExportRepository reportExportRepository;
+        private final EventPublisher eventPublisher;
+        private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
+        @Override
+        @Transactional
+        public ExportFileResponse execCommand(ExportPdfRequest request, JWTModel currentUser, String... args)
+                        throws Exception {
+                log.info("收到 PDF 匯出請求: {}", request.getReportType());
+
+                String exportId = UUID.randomUUID().toString();
+
+                // 1. 建立並儲存匯出記錄
+                ReportExportEntity entity = ReportExportEntity.builder()
+                                .id(exportId)
+                                .reportType(request.getReportType())
+                                .format("PDF")
+                                .status("PROCESSING")
+                                .fileName(request.getFileName() != null ? request.getFileName() : "report.pdf")
+                                .requesterId(currentUser.getUserId())
+                                .tenantId(currentUser.getTenantId())
+                                .filtersJson(objectMapper.writeValueAsString(request.getFilters()))
+                                .createdAt(LocalDateTime.now())
+                                .build();
+
+                reportExportRepository.save(entity);
+                log.info("匯出記錄已建立: {}", exportId);
+
+                // 2. 發布匯出請求事件
+                ReportExportRequestedEvent event = new ReportExportRequestedEvent(
+                                exportId,
+                                request.getReportType(),
+                                "PDF");
+                eventPublisher.publish(event);
+                log.info("匯出請求事件已發布: {}", exportId);
+
+                // 3. 回傳任務資訊
+                return new ExportFileResponse(
+                                exportId,
+                                entity.getFileName(),
+                                null, // URL 待處理完成後生成
+                                "PROCESSING");
+        }
 }

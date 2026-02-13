@@ -77,7 +77,7 @@ public class ProjectTest {
         UUID employeeId = UUID.randomUUID();
 
         // Act
-        project.addMember(employeeId, "Developer", new BigDecimal("160"));
+        project.addMember(employeeId, "Developer", new BigDecimal("160"), new BigDecimal("800"));
 
         // Assert
         assertEquals(1, project.getMembers().size());

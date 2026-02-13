@@ -8,11 +8,11 @@ import lombok.Data;
 @Data
 public class ExportGovernmentFormatRequest {
     /** 申報類型 (LABOR_INSURANCE, HEALTH_INSURANCE, PENSION) */
-    private String declarationType;
-    
+    private String formatType;
+
     /** 組織 ID */
     private String organizationId;
-    
+
     /** 年月 (YYYY-MM) */
-    private String yearMonth;
+    private String period;
 }

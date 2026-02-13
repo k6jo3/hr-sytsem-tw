@@ -20,12 +20,12 @@ public class Customer extends AggregateRoot<CustomerId> {
     private String phoneNumber;
     private CustomerStatus status;
     private long version;
+    private Integer isDeleted;
+    private Integer projectCount;
 
     // Domain Constructor
     private Customer(CustomerId id) {
-        super(id)
-
-        ;
+        super(id);
     }
 
     public long getVersion() {
@@ -46,7 +46,9 @@ public class Customer extends AggregateRoot<CustomerId> {
             CustomerStatus status,
             java.time.LocalDateTime createdAt,
             java.time.LocalDateTime updatedAt,
-            long version) {
+            long version,
+            Integer isDeleted,
+            Integer projectCount) {
 
         Customer customer = new Customer(id);
         customer.customerCode = customerCode;
@@ -57,6 +59,8 @@ public class Customer extends AggregateRoot<CustomerId> {
         customer.phoneNumber = phoneNumber;
         customer.status = status;
         customer.version = version;
+        customer.isDeleted = isDeleted;
+        customer.projectCount = projectCount;
 
         return customer;
     }

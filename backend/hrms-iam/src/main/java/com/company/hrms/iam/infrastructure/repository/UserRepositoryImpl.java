@@ -169,6 +169,8 @@ public class UserRepositoryImpl implements IUserRepository {
                 .lastLoginAt(toLocalDateTime(po.getLastLoginAt()))
                 .lastLogoutAt(toLocalDateTime(po.getLastLogoutAt()))
                 .lastLoginIp(po.getLastLoginIp())
+                .preferredLanguage(po.getPreferredLanguage())
+                .timezone(po.getTimezone())
                 .passwordChangedAt(toLocalDateTime(po.getPasswordChangedAt()))
                 .mustChangePassword(po.getMustChangePassword() != null
                         ? po.getMustChangePassword()
@@ -198,6 +200,8 @@ public class UserRepositoryImpl implements IUserRepository {
                 .lastLoginAt(toTimestamp(user.getLastLoginAt()))
                 .lastLogoutAt(toTimestamp(user.getLastLogoutAt()))
                 .lastLoginIp(user.getLastLoginIp())
+                .preferredLanguage(user.getPreferredLanguage())
+                .timezone(user.getTimezone())
                 .passwordChangedAt(toTimestamp(user.getPasswordChangedAt()))
                 .mustChangePassword(user.isMustChangePassword())
                 .isDeleted(user.isDeleted())

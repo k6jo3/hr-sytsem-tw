@@ -9,7 +9,9 @@ import com.company.hrms.attendance.application.service.checkin.context.Attendanc
 import com.company.hrms.attendance.application.service.checkin.task.CreateCheckInRecordTask;
 import com.company.hrms.attendance.application.service.checkin.task.SaveRecordTask;
 import com.company.hrms.attendance.application.service.checkin.task.ValidateCheckInTask;
+import com.company.hrms.attendance.domain.event.AttendanceRecordedEvent;
 import com.company.hrms.common.application.pipeline.BusinessPipeline;
+import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 
@@ -33,6 +35,7 @@ public class CheckInServiceImpl implements CommandApiService<CheckInRequest, Che
     private final ValidateCheckInTask validateCheckInTask;
     private final CreateCheckInRecordTask createCheckInRecordTask;
     private final SaveRecordTask saveRecordTask;
+    private final EventPublisher eventPublisher;
 
     @Override
     public CheckInResponse execCommand(CheckInRequest request, JWTModel currentUser, String... args) throws Exception {
@@ -48,6 +51,15 @@ public class CheckInServiceImpl implements CommandApiService<CheckInRequest, Che
 
         var record = context.getRecord();
         var shift = context.getShift();
+
+        eventPublisher.publish(new AttendanceRecordedEvent(
+                record.getId().getValue(),
+                record.getEmployeeId(),
+                record.getDate(),
+                record.getCheckInTime(),
+                record.getCheckOutTime(),
+                record.isLate(),
+                record.isEarlyLeave()));
 
         log.info("上班打卡流程完成: recordId={}", record.getId().getValue());
 

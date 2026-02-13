@@ -18,6 +18,8 @@ spring:
   cloud:
     discovery:
       enabled: false
+  kafka:
+    enabled: false
 
 eureka:
   client:

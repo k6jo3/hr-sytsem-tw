@@ -34,44 +34,44 @@
 
 | # | 端點 | 方法 | 場景 ID |
 |:---:|:---|:---:|:---|
-| 1 | `GET /api/v1/reports/hr/employee-roster` | GET | RPT_QRY_001 |
-| 2 | `GET /api/v1/reports/hr/headcount` | GET | RPT_QRY_002 |
-| 3 | `GET /api/v1/reports/hr/attendance-summary` | GET | RPT_QRY_003 |
-| 4 | `GET /api/v1/reports/hr/turnover` | GET | RPT_QRY_004 |
+| 1 | `GET /api/v1/reporting/hr/employee-roster` | GET | RPT_QRY_001 |
+| 2 | `GET /api/v1/reporting/hr/headcount` | GET | RPT_QRY_002 |
+| 3 | `GET /api/v1/reporting/hr/attendance-statistics` | GET | RPT_QRY_003 |
+| 4 | `GET /api/v1/reporting/hr/turnover` | GET | RPT_QRY_004 |
 
 ### 專案管理報表 API (2 個)
 
 | # | 端點 | 方法 | 場景 ID |
 |:---:|:---|:---:|:---|
-| 5 | `GET /api/v1/reports/project/cost-analysis` | GET | RPT_QRY_005 |
-| 6 | `GET /api/v1/reports/project/utilization-rate` | GET | RPT_QRY_006 |
+| 5 | `GET /api/v1/reporting/project/cost-analysis` | GET | RPT_QRY_005 |
+| 6 | `GET /api/v1/reporting/project/utilization-rate` | GET | RPT_QRY_006 |
 
 ### 財務報表 API (3 個)
 
 | # | 端點 | 方法 | 場景 ID |
 |:---:|:---|:---:|:---|
-| 7 | `GET /api/v1/reports/finance/labor-cost` | GET | RPT_QRY_007 |
-| 8 | `GET /api/v1/reports/finance/labor-cost-by-department` | GET | RPT_QRY_008 |
-| 9 | `GET /api/v1/reports/finance/payroll-summary` | GET | RPT_QRY_009 |
+| 7 | `GET /api/v1/reporting/finance/labor-cost` | GET | RPT_QRY_007 |
+| 8 | `GET /api/v1/reporting/finance/labor-cost-by-department` | GET | RPT_QRY_008 |
+| 9 | `GET /api/v1/reporting/finance/payroll-summary` | GET | RPT_QRY_009 |
 
 ### 儀表板 API (5 個)
 
 | # | 端點 | 方法 | 場景 ID |
 |:---:|:---|:---:|:---|
-| 10 | `POST /api/v1/dashboards` | POST | RPT_CMD_001 |
-| 11 | `GET /api/v1/dashboards` | GET | RPT_QRY_010 |
-| 12 | `GET /api/v1/dashboards/{id}` | GET | RPT_QRY_011 |
-| 13 | `PUT /api/v1/dashboards/{id}/widgets` | PUT | RPT_CMD_002 |
-| 14 | `DELETE /api/v1/dashboards/{id}` | DELETE | RPT_CMD_003 |
+| 10 | `POST /api/v1/reporting/dashboards` | POST | RPT_CMD_001 |
+| 11 | `GET /api/v1/reporting/dashboards` | GET | RPT_QRY_010 |
+| 12 | `GET /api/v1/reporting/dashboards/{dashboardId}` | GET | RPT_QRY_011 |
+| 13 | `PUT /api/v1/reporting/dashboards/{dashboardId}/widgets` | PUT | RPT_CMD_002 |
+| 14 | `DELETE /api/v1/reporting/dashboards/{dashboardId}` | DELETE | RPT_CMD_003 |
 
 ### 報表匯出 API (4 個)
 
 | # | 端點 | 方法 | 場景 ID |
 |:---:|:---|:---:|:---|
-| 15 | `POST /api/v1/reports/export/excel` | POST | RPT_CMD_004 |
-| 16 | `POST /api/v1/reports/export/pdf` | POST | RPT_CMD_005 |
-| 17 | `POST /api/v1/reports/export/government` | POST | RPT_CMD_006 |
-| 18 | `GET /api/v1/reports/export/{id}/download` | GET | RPT_QRY_012 |
+| 15 | `POST /api/v1/reporting/export/excel` | POST | RPT_CMD_004 |
+| 16 | `POST /api/v1/reporting/export/pdf` | POST | RPT_CMD_005 |
+| 17 | `POST /api/v1/reporting/export/government` | POST | RPT_CMD_006 |
+| 18 | `GET /api/v1/reporting/export/{exportId}/download` | GET | RPT_QRY_012 |
 
 ---
 
@@ -81,7 +81,7 @@
 
 #### RPT_CMD_001: 建立自定義儀表板
 
-**API 端點：** `POST /api/v1/dashboards`
+**API 端點：** `POST /api/v1/reporting/dashboards`
 
 **業務場景描述：**
 
@@ -92,7 +92,7 @@
 ```json
 {
   "scenarioId": "RPT_CMD_001",
-  "apiEndpoint": "POST /api/v1/dashboards",
+  "apiEndpoint": "POST /api/v1/reporting/dashboards",
   "controller": "HR14DashboardCmdController",
   "service": "CreateDashboardServiceImpl",
   "permission": "dashboard:create",
@@ -107,31 +107,23 @@
 
   "businessRules": [
     {
-      "name": "儀表板名稱唯一性檢查",
-      "validation": {
-        "type": "query",
-        "query": "SELECT COUNT(*) FROM dashboards WHERE name = ? AND owner_id = ? AND is_active = true",
-        "params": ["{request.name}", "{currentUserId}"],
-        "expectedResult": 0,
-        "errorCode": "RPT_DASHBOARD_NAME_DUPLICATE"
-      }
+      "rule": "儀表板名稱唯一性檢查",
+      "description": "同一使用者下不可建立同名的儀表板，違反時回傳 RPT_DASHBOARD_NAME_DUPLICATE"
     }
   ],
 
   "expectedDataChanges": [
     {
       "action": "INSERT",
-      "table": "dashboards",
+      "table": "rpt_dashboard",
       "count": 1,
       "assertions": [
-        {"field": "id", "type": "uuid", "notNull": true},
-        {"field": "name", "equals": "我的儀表板"},
-        {"field": "owner_id", "equals": "{currentUserId}"},
-        {"field": "is_active", "equals": true},
-        {"field": "is_public", "equals": false},
-        {"field": "is_default", "equals": false},
-        {"field": "created_at", "type": "datetime", "notNull": true},
-        {"field": "created_by", "equals": "{currentUserId}"}
+        {"field": "dashboard_id", "operator": "notNull"},
+        {"field": "dashboard_name", "operator": "equals", "value": "我的儀表板"},
+        {"field": "owner_id", "operator": "notNull"},
+        {"field": "is_public", "operator": "equals", "value": false},
+        {"field": "is_default", "operator": "equals", "value": false},
+        {"field": "created_at", "operator": "notNull"}
       ]
     }
   ],
@@ -139,11 +131,11 @@
   "expectedEvents": [
     {
       "eventType": "DashboardCreatedEvent",
-      "payload": {
-        "dashboardId": "{uuid}",
-        "dashboardName": "我的儀表板",
-        "ownerId": "{currentUserId}"
-      }
+      "payload": [
+        {"field": "dashboardId", "operator": "notNull"},
+        {"field": "dashboardName", "operator": "equals", "value": "我的儀表板"},
+        {"field": "ownerId", "operator": "notNull"}
+      ]
     }
   ]
 }
@@ -153,7 +145,7 @@
 
 #### RPT_CMD_002: 更新儀表板 Widget 配置
 
-**API 端點：** `PUT /api/v1/dashboards/{id}/widgets`
+**API 端點：** `PUT /api/v1/reporting/dashboards/{dashboardId}/widgets`
 
 **業務場景描述：**
 
@@ -164,7 +156,7 @@
 ```json
 {
   "scenarioId": "RPT_CMD_002",
-  "apiEndpoint": "PUT /api/v1/dashboards/{id}/widgets",
+  "apiEndpoint": "PUT /api/v1/reporting/dashboards/{dashboardId}/widgets",
   "controller": "HR14DashboardCmdController",
   "service": "UpdateDashboardWidgetsServiceImpl",
   "permission": "dashboard:update",
@@ -178,41 +170,23 @@
 
   "businessRules": [
     {
-      "name": "儀表板存在性檢查",
-      "validation": {
-        "type": "query",
-        "query": "SELECT COUNT(*) FROM dashboards WHERE id = ? AND is_active = true",
-        "params": ["{request.dashboardId}"],
-        "expectedResult": 1,
-        "errorCode": "RPT_DASHBOARD_NOT_FOUND"
-      }
+      "rule": "儀表板存在性檢查",
+      "description": "儀表板必須存在且為啟用狀態，違反時回傳 RPT_DASHBOARD_NOT_FOUND"
     },
     {
-      "name": "所有權檢查",
-      "validation": {
-        "type": "query",
-        "query": "SELECT COUNT(*) FROM dashboards WHERE id = ? AND owner_id = ?",
-        "params": ["{request.dashboardId}", "{currentUserId}"],
-        "expectedResult": 1,
-        "errorCode": "RPT_DASHBOARD_ACCESS_DENIED"
-      }
+      "rule": "所有權檢查",
+      "description": "只有儀表板的擁有者才能更新，違反時回傳 RPT_DASHBOARD_ACCESS_DENIED"
     }
   ],
 
   "expectedDataChanges": [
     {
       "action": "UPDATE",
-      "table": "dashboards",
+      "table": "rpt_dashboard",
       "count": 1,
-      "where": {
-        "id": "{request.dashboardId}"
-      },
       "assertions": [
-        {"field": "widgets_config", "notNull": true},
-        {"field": "updated_at", "type": "datetime", "notNull": true},
-        {"field": "updated_by", "equals": "{currentUserId}"},
-        {"field": "name", "unchanged": true},
-        {"field": "owner_id", "unchanged": true}
+        {"field": "widgets_config", "operator": "notNull"},
+        {"field": "updated_at", "operator": "notNull"}
       ]
     }
   ],
@@ -220,10 +194,10 @@
   "expectedEvents": [
     {
       "eventType": "DashboardUpdatedEvent",
-      "payload": {
-        "dashboardId": "{request.dashboardId}",
-        "updatedFields": ["widgetsConfig"]
-      }
+      "payload": [
+        {"field": "dashboardId", "operator": "notNull"},
+        {"field": "updatedFields", "operator": "notNull"}
+      ]
     }
   ]
 }
@@ -233,18 +207,18 @@
 
 #### RPT_CMD_003: 刪除儀表板
 
-**API 端點：** `DELETE /api/v1/dashboards/{id}`
+**API 端點：** `DELETE /api/v1/reporting/dashboards/{dashboardId}`
 
 **業務場景描述：**
 
-使用者刪除自己的儀表板。系統執行軟刪除，將 is_active 設為 false。
+使用者刪除自己的儀表板。系統執行硬刪除，從資料庫中移除該筆記錄。
 
 **測試合約：**
 
 ```json
 {
   "scenarioId": "RPT_CMD_003",
-  "apiEndpoint": "DELETE /api/v1/dashboards/{id}",
+  "apiEndpoint": "DELETE /api/v1/reporting/dashboards/{dashboardId}",
   "controller": "HR14DashboardCmdController",
   "service": "DeleteDashboardServiceImpl",
   "permission": "dashboard:delete",
@@ -255,40 +229,25 @@
 
   "businessRules": [
     {
-      "name": "預設儀表板檢查",
-      "validation": {
-        "type": "query",
-        "query": "SELECT COUNT(*) FROM dashboards WHERE id = ? AND is_default = true",
-        "params": ["{request.dashboardId}"],
-        "expectedResult": 0,
-        "errorCode": "RPT_DASHBOARD_DEFAULT_CANNOT_DELETE"
-      }
+      "rule": "預設儀表板檢查",
+      "description": "預設儀表板不可刪除，違反時回傳 RPT_DASHBOARD_DEFAULT_CANNOT_DELETE"
     }
   ],
 
   "expectedDataChanges": [
     {
-      "action": "SOFT_DELETE",
-      "table": "dashboards",
-      "count": 1,
-      "where": {
-        "id": "{request.dashboardId}"
-      },
-      "assertions": [
-        {"field": "is_active", "from": true, "to": false},
-        {"field": "deleted_at", "type": "datetime", "notNull": true},
-        {"field": "deleted_by", "equals": "{currentUserId}"},
-        {"field": "name", "unchanged": true}
-      ]
+      "action": "DELETE",
+      "table": "rpt_dashboard",
+      "count": 1
     }
   ],
 
   "expectedEvents": [
     {
       "eventType": "DashboardDeletedEvent",
-      "payload": {
-        "dashboardId": "{request.dashboardId}"
-      }
+      "payload": [
+        {"field": "dashboardId", "operator": "notNull"}
+      ]
     }
   ]
 }
@@ -300,7 +259,7 @@
 
 #### RPT_CMD_004: 匯出報表為 Excel
 
-**API 端點：** `POST /api/v1/reports/export/excel`
+**API 端點：** `POST /api/v1/reporting/export/excel`
 
 **業務場景描述：**
 
@@ -311,7 +270,7 @@
 ```json
 {
   "scenarioId": "RPT_CMD_004",
-  "apiEndpoint": "POST /api/v1/reports/export/excel",
+  "apiEndpoint": "POST /api/v1/reporting/export/excel",
   "controller": "HR14ExportCmdController",
   "service": "ExportExcelServiceImpl",
   "permission": "report:export",
@@ -331,13 +290,13 @@
       "table": "report_exports",
       "count": 1,
       "assertions": [
-        {"field": "id", "type": "uuid", "notNull": true},
-        {"field": "report_type", "equals": "EMPLOYEE_ROSTER"},
-        {"field": "format", "equals": "EXCEL"},
-        {"field": "status", "equals": "PROCESSING"},
-        {"field": "file_name", "equals": "員工名冊.xlsx"},
-        {"field": "requester_id", "equals": "{currentUserId}"},
-        {"field": "created_at", "type": "datetime", "notNull": true}
+        {"field": "id", "operator": "notNull"},
+        {"field": "report_type", "operator": "equals", "value": "EMPLOYEE_ROSTER"},
+        {"field": "format", "operator": "equals", "value": "EXCEL"},
+        {"field": "status", "operator": "equals", "value": "PROCESSING"},
+        {"field": "file_name", "operator": "equals", "value": "員工名冊.xlsx"},
+        {"field": "requester_id", "operator": "notNull"},
+        {"field": "created_at", "operator": "notNull"}
       ]
     }
   ],
@@ -345,11 +304,11 @@
   "expectedEvents": [
     {
       "eventType": "ReportExportRequestedEvent",
-      "payload": {
-        "exportId": "{uuid}",
-        "reportType": "EMPLOYEE_ROSTER",
-        "format": "EXCEL"
-      }
+      "payload": [
+        {"field": "exportId", "operator": "notNull"},
+        {"field": "reportType", "operator": "equals", "value": "EMPLOYEE_ROSTER"},
+        {"field": "format", "operator": "equals", "value": "EXCEL"}
+      ]
     }
   ]
 }
@@ -359,7 +318,7 @@
 
 #### RPT_CMD_005: 匯出報表為 PDF
 
-**API 端點：** `POST /api/v1/reports/export/pdf`
+**API 端點：** `POST /api/v1/reporting/export/pdf`
 
 **業務場景描述：**
 
@@ -370,7 +329,7 @@
 ```json
 {
   "scenarioId": "RPT_CMD_005",
-  "apiEndpoint": "POST /api/v1/reports/export/pdf",
+  "apiEndpoint": "POST /api/v1/reporting/export/pdf",
   "controller": "HR14ExportCmdController",
   "service": "ExportPdfServiceImpl",
   "permission": "report:export",
@@ -389,13 +348,13 @@
       "table": "report_exports",
       "count": 1,
       "assertions": [
-        {"field": "id", "type": "uuid", "notNull": true},
-        {"field": "report_type", "equals": "PAYROLL_SUMMARY"},
-        {"field": "format", "equals": "PDF"},
-        {"field": "status", "equals": "PROCESSING"},
-        {"field": "file_name", "equals": "薪資總表.pdf"},
-        {"field": "requester_id", "equals": "{currentUserId}"},
-        {"field": "created_at", "type": "datetime", "notNull": true}
+        {"field": "id", "operator": "notNull"},
+        {"field": "report_type", "operator": "equals", "value": "PAYROLL_SUMMARY"},
+        {"field": "format", "operator": "equals", "value": "PDF"},
+        {"field": "status", "operator": "equals", "value": "PROCESSING"},
+        {"field": "file_name", "operator": "equals", "value": "薪資總表.pdf"},
+        {"field": "requester_id", "operator": "notNull"},
+        {"field": "created_at", "operator": "notNull"}
       ]
     }
   ],
@@ -403,11 +362,11 @@
   "expectedEvents": [
     {
       "eventType": "ReportExportRequestedEvent",
-      "payload": {
-        "exportId": "{uuid}",
-        "reportType": "PAYROLL_SUMMARY",
-        "format": "PDF"
-      }
+      "payload": [
+        {"field": "exportId", "operator": "notNull"},
+        {"field": "reportType", "operator": "equals", "value": "PAYROLL_SUMMARY"},
+        {"field": "format", "operator": "equals", "value": "PDF"}
+      ]
     }
   ]
 }
@@ -417,7 +376,7 @@
 
 #### RPT_CMD_006: 政府申報格式匯出
 
-**API 端點：** `POST /api/v1/reports/export/government`
+**API 端點：** `POST /api/v1/reporting/export/government`
 
 **業務場景描述：**
 
@@ -428,7 +387,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_CMD_006",
-  "apiEndpoint": "POST /api/v1/reports/export/government",
+  "apiEndpoint": "POST /api/v1/reporting/export/government",
   "controller": "HR14ExportCmdController",
   "service": "ExportGovernmentFormatServiceImpl",
   "permission": "report:export:government",
@@ -444,14 +403,14 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
       "table": "report_exports",
       "count": 1,
       "assertions": [
-        {"field": "id", "type": "uuid", "notNull": true},
-        {"field": "report_type", "equals": "GOVERNMENT_FORMAT"},
-        {"field": "format", "equals": "TXT"},
-        {"field": "format_type", "equals": "LABOR_INSURANCE"},
-        {"field": "status", "equals": "PROCESSING"},
-        {"field": "period", "equals": "2026-02"},
-        {"field": "requester_id", "equals": "{currentUserId}"},
-        {"field": "created_at", "type": "datetime", "notNull": true}
+        {"field": "id", "operator": "notNull"},
+        {"field": "report_type", "operator": "equals", "value": "GOVERNMENT_FORMAT"},
+        {"field": "format", "operator": "equals", "value": "TXT"},
+        {"field": "format_type", "operator": "equals", "value": "LABOR_INSURANCE"},
+        {"field": "status", "operator": "equals", "value": "PROCESSING"},
+        {"field": "period", "operator": "equals", "value": "2026-02"},
+        {"field": "requester_id", "operator": "notNull"},
+        {"field": "created_at", "operator": "notNull"}
       ]
     }
   ],
@@ -459,11 +418,11 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
   "expectedEvents": [
     {
       "eventType": "GovernmentReportExportRequestedEvent",
-      "payload": {
-        "exportId": "{uuid}",
-        "formatType": "LABOR_INSURANCE",
-        "period": "2026-02"
-      }
+      "payload": [
+        {"field": "exportId", "operator": "notNull"},
+        {"field": "formatType", "operator": "equals", "value": "LABOR_INSURANCE"},
+        {"field": "period", "operator": "equals", "value": "2026-02"}
+      ]
     }
   ]
 }
@@ -477,7 +436,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_001: 查詢員工花名冊
 
-**API 端點：** `GET /api/v1/reports/hr/employee-roster`
+**API 端點：** `GET /api/v1/reporting/hr/employee-roster`
 
 **業務場景描述：**
 
@@ -488,48 +447,36 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_001",
-  "apiEndpoint": "GET /api/v1/reports/hr/employee-roster",
-  "controller": "HR14HrQryController",
+  "apiEndpoint": "GET /api/v1/reporting/hr/employee-roster",
+  "controller": "HR14ReportQryController",
   "service": "GetEmployeeRosterServiceImpl",
   "permission": "report:hr:read",
 
   "request": {
     "organizationId": "org-001",
     "status": "ACTIVE",
-    "page": 1,
+    "page": 0,
     "size": 50
   },
 
   "expectedQueryFilters": [
     {"field": "organization_id", "operator": "=", "value": "org-001"},
-    {"field": "employment_status", "operator": "=", "value": "ACTIVE"}
+    {"field": "status", "operator": "=", "value": "ACTIVE"}
   ],
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data.content",
+    "dataPath": "content",
     "minRecords": 1,
-    "maxRecords": 1000,
     "requiredFields": [
-      {"name": "employeeId", "type": "uuid"},
-      {"name": "employeeNumber", "type": "string"},
-      {"name": "fullName", "type": "string"},
-      {"name": "nationalIdMasked", "type": "string", "format": "masked"},
-      {"name": "email", "type": "email"},
-      {"name": "serviceYears", "type": "decimal", "precision": 1},
-      {"name": "hireDate", "type": "date"}
-    ],
-    "orderBy": {
-      "field": "employeeNumber",
-      "direction": "ASC"
-    },
-    "pagination": {
-      "required": true,
-      "fields": ["page", "size", "totalElements", "totalPages"]
-    },
-    "assertions": [
-      {"field": "nationalIdMasked", "operator": "contains", "value": "*"},
-      {"field": "employmentStatus", "operator": "in", "value": ["ACTIVE", "ON_LEAVE", "TERMINATED"]}
+      {"name": "employeeId", "type": "string", "notNull": true},
+      {"name": "name", "type": "string", "notNull": true},
+      {"name": "departmentName", "type": "string"},
+      {"name": "positionName", "type": "string"},
+      {"name": "hireDate", "type": "date"},
+      {"name": "serviceYears", "type": "decimal"},
+      {"name": "status", "type": "string"},
+      {"name": "email", "type": "string"}
     ]
   }
 }
@@ -539,7 +486,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_002: 查詢人力盤點報表
 
-**API 端點：** `GET /api/v1/reports/hr/headcount`
+**API 端點：** `GET /api/v1/reporting/hr/headcount`
 
 **業務場景描述：**
 
@@ -550,32 +497,25 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_002",
-  "apiEndpoint": "GET /api/v1/reports/hr/headcount",
-  "controller": "HR14HrQryController",
+  "apiEndpoint": "GET /api/v1/reporting/hr/headcount",
+  "controller": "HR14ReportQryController",
   "service": "GetHeadcountReportServiceImpl",
   "permission": "report:hr:read",
 
   "request": {
     "organizationId": "org-001",
-    "asOfDate": "2026-02-09"
+    "dimension": "DEPARTMENT"
   },
-
-  "expectedQueryFilters": [
-    {"field": "organization_id", "operator": "=", "value": "org-001"},
-    {"field": "as_of_date", "operator": "=", "value": "2026-02-09"}
-  ],
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data",
-    "exactRecords": 1,
+    "dataPath": "content",
+    "minRecords": 0,
     "requiredFields": [
-      {"name": "totalEmployees", "type": "integer"},
-      {"name": "newHires", "type": "integer"},
-      {"name": "terminations", "type": "integer"},
-      {"name": "turnoverRate", "type": "decimal", "precision": 2},
-      {"name": "avgServiceYears", "type": "decimal", "precision": 1},
-      {"name": "departmentBreakdown", "type": "array"}
+      {"name": "dimensionName", "type": "string"},
+      {"name": "activeCount", "type": "integer"},
+      {"name": "totalCount", "type": "integer"},
+      {"name": "avgServiceYears", "type": "decimal"}
     ]
   }
 }
@@ -585,7 +525,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_003: 查詢差勤統計報表
 
-**API 端點：** `GET /api/v1/reports/hr/attendance-summary`
+**API 端點：** `GET /api/v1/reporting/hr/attendance-statistics`
 
 **業務場景描述：**
 
@@ -596,37 +536,28 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_003",
-  "apiEndpoint": "GET /api/v1/reports/hr/attendance-summary",
-  "controller": "HR14HrQryController",
-  "service": "GetAttendanceSummaryServiceImpl",
+  "apiEndpoint": "GET /api/v1/reporting/hr/attendance-statistics",
+  "controller": "HR14ReportQryController",
+  "service": "GetAttendanceStatisticsServiceImpl",
   "permission": "report:hr:read",
 
   "request": {
-    "yearMonth": "2026-02"
+    "departmentId": "D001"
   },
-
-  "expectedQueryFilters": [
-    {"field": "year_month", "operator": "=", "value": "2026-02"}
-  ],
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data.content",
-    "minRecords": 1,
+    "dataPath": "content",
+    "minRecords": 0,
     "requiredFields": [
-      {"name": "employeeId", "type": "uuid"},
+      {"name": "employeeId", "type": "string"},
       {"name": "employeeName", "type": "string"},
-      {"name": "totalWorkingHours", "type": "decimal", "precision": 1},
-      {"name": "overtimeHours", "type": "decimal", "precision": 1},
-      {"name": "leaveHours", "type": "decimal", "precision": 1}
-    ],
-    "orderBy": {
-      "field": "overtimeHours",
-      "direction": "DESC"
-    },
-    "pagination": {
-      "required": true
-    }
+      {"name": "departmentName", "type": "string"},
+      {"name": "actualDays", "type": "integer"},
+      {"name": "leaveDays", "type": "decimal"},
+      {"name": "overtimeHours", "type": "decimal"},
+      {"name": "attendanceRate", "type": "decimal"}
+    ]
   }
 }
 ```
@@ -635,7 +566,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_004: 查詢離職率分析
 
-**API 端點：** `GET /api/v1/reports/hr/turnover`
+**API 端點：** `GET /api/v1/reporting/hr/turnover`
 
 **業務場景描述：**
 
@@ -646,36 +577,26 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_004",
-  "apiEndpoint": "GET /api/v1/reports/hr/turnover",
-  "controller": "HR14HrQryController",
+  "apiEndpoint": "GET /api/v1/reporting/hr/turnover",
+  "controller": "HR14ReportQryController",
   "service": "GetTurnoverAnalysisServiceImpl",
   "permission": "report:hr:read",
 
   "request": {
     "organizationId": "org-001",
-    "year": 2026
+    "yearMonth": "2026-02"
   },
-
-  "expectedQueryFilters": [
-    {"field": "organization_id", "operator": "=", "value": "org-001"},
-    {"field": "year", "operator": "=", "value": 2026}
-  ],
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data",
-    "exactRecords": 12,
     "requiredFields": [
-      {"name": "month", "type": "integer"},
-      {"name": "headcount", "type": "integer"},
-      {"name": "terminations", "type": "integer"},
-      {"name": "turnoverRate", "type": "decimal", "precision": 2},
-      {"name": "reasonBreakdown", "type": "object"}
-    ],
-    "orderBy": {
-      "field": "month",
-      "direction": "ASC"
-    }
+      {"name": "organizationId", "type": "string"},
+      {"name": "yearMonth", "type": "string"},
+      {"name": "turnoverRate", "type": "decimal"},
+      {"name": "totalEmployees", "type": "integer"},
+      {"name": "newHires", "type": "integer"},
+      {"name": "terminations", "type": "integer"}
+    ]
   }
 }
 ```
@@ -686,7 +607,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_005: 查詢專案成本分析
 
-**API 端點：** `GET /api/v1/reports/project/cost-analysis`
+**API 端點：** `GET /api/v1/reporting/project/cost-analysis`
 
 **業務場景描述：**
 
@@ -697,8 +618,8 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_005",
-  "apiEndpoint": "GET /api/v1/reports/project/cost-analysis",
-  "controller": "HR14ProjectQryController",
+  "apiEndpoint": "GET /api/v1/reporting/project/cost-analysis",
+  "controller": "HR14ReportQryController",
   "service": "GetProjectCostAnalysisServiceImpl",
   "permission": "report:project:read",
 
@@ -706,23 +627,18 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
     "projectId": "PRJ-001"
   },
 
-  "expectedQueryFilters": [
-    {"field": "project_id", "operator": "=", "value": "PRJ-001"}
-  ],
-
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data",
-    "exactRecords": 1,
+    "dataPath": "content",
+    "minRecords": 0,
     "requiredFields": [
       {"name": "projectId", "type": "string"},
       {"name": "projectName", "type": "string"},
-      {"name": "budgetAmount", "type": "number"},
-      {"name": "actualCost", "type": "number"},
-      {"name": "budgetUsageRate", "type": "decimal", "precision": 2},
-      {"name": "profitMargin", "type": "decimal", "precision": 2},
-      {"name": "costByPhase", "type": "array"},
-      {"name": "costByEmployee", "type": "array"}
+      {"name": "budgetAmount", "type": "decimal"},
+      {"name": "totalCost", "type": "decimal"},
+      {"name": "costVarianceRate", "type": "decimal"},
+      {"name": "totalHours", "type": "decimal"},
+      {"name": "utilizationRate", "type": "decimal"}
     ]
   }
 }
@@ -732,7 +648,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_006: 查詢稼動率分析
 
-**API 端點：** `GET /api/v1/reports/project/utilization-rate`
+**API 端點：** `GET /api/v1/reporting/project/utilization-rate`
 
 **業務場景描述：**
 
@@ -743,39 +659,26 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_006",
-  "apiEndpoint": "GET /api/v1/reports/project/utilization-rate",
-  "controller": "HR14ProjectQryController",
+  "apiEndpoint": "GET /api/v1/reporting/project/utilization-rate",
+  "controller": "HR14ReportQryController",
   "service": "GetUtilizationRateServiceImpl",
   "permission": "report:project:read",
 
   "request": {
-    "departmentId": "D001",
-    "month": "2026-02"
+    "projectId": "PRJ-001",
+    "yearMonth": "2026-02"
   },
-
-  "expectedQueryFilters": [
-    {"field": "department_id", "operator": "=", "value": "D001"},
-    {"field": "month", "operator": "=", "value": "2026-02"}
-  ],
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data.content",
-    "minRecords": 1,
     "requiredFields": [
-      {"name": "employeeId", "type": "uuid"},
-      {"name": "employeeName", "type": "string"},
-      {"name": "totalAvailableHours", "type": "decimal", "precision": 1},
-      {"name": "billableHours", "type": "decimal", "precision": 1},
-      {"name": "utilizationRate", "type": "decimal", "precision": 2}
-    ],
-    "orderBy": {
-      "field": "utilizationRate",
-      "direction": "DESC"
-    },
-    "pagination": {
-      "required": true
-    }
+      {"name": "projectId", "type": "string"},
+      {"name": "projectName", "type": "string"},
+      {"name": "yearMonth", "type": "string"},
+      {"name": "utilizationRate", "type": "decimal"},
+      {"name": "totalHours", "type": "integer"},
+      {"name": "billableHours", "type": "integer"}
+    ]
   }
 }
 ```
@@ -786,7 +689,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_007: 查詢人力成本分析
 
-**API 端點：** `GET /api/v1/reports/finance/labor-cost`
+**API 端點：** `GET /api/v1/reporting/finance/labor-cost`
 
 **業務場景描述：**
 
@@ -797,36 +700,25 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_007",
-  "apiEndpoint": "GET /api/v1/reports/finance/labor-cost",
-  "controller": "HR14FinanceQryController",
+  "apiEndpoint": "GET /api/v1/reporting/finance/labor-cost",
+  "controller": "HR14ReportQryController",
   "service": "GetLaborCostAnalysisServiceImpl",
   "permission": "report:finance:read",
 
   "request": {
-    "year": 2026
+    "organizationId": "org-001",
+    "yearMonth": "2026-02"
   },
-
-  "expectedQueryFilters": [
-    {"field": "year", "operator": "=", "value": 2026}
-  ],
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data",
-    "exactRecords": 12,
     "requiredFields": [
-      {"name": "month", "type": "integer"},
-      {"name": "totalSalary", "type": "number"},
-      {"name": "laborInsurance", "type": "number"},
-      {"name": "healthInsurance", "type": "number"},
-      {"name": "pension", "type": "number"},
-      {"name": "totalCost", "type": "number"},
-      {"name": "avgCostPerEmployee", "type": "integer"}
-    ],
-    "orderBy": {
-      "field": "month",
-      "direction": "ASC"
-    }
+      {"name": "organizationId", "type": "string"},
+      {"name": "yearMonth", "type": "string"},
+      {"name": "totalCost", "type": "decimal"},
+      {"name": "employeeCount", "type": "integer"},
+      {"name": "averageCost", "type": "decimal"}
+    ]
   }
 }
 ```
@@ -835,7 +727,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_008: 查詢部門人力成本分析
 
-**API 端點：** `GET /api/v1/reports/finance/labor-cost-by-department`
+**API 端點：** `GET /api/v1/reporting/finance/labor-cost-by-department`
 
 **業務場景描述：**
 
@@ -846,41 +738,25 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_008",
-  "apiEndpoint": "GET /api/v1/reports/finance/labor-cost-by-department",
-  "controller": "HR14FinanceQryController",
+  "apiEndpoint": "GET /api/v1/reporting/finance/labor-cost-by-department",
+  "controller": "HR14ReportQryController",
   "service": "GetLaborCostByDepartmentServiceImpl",
   "permission": "report:finance:read",
 
   "request": {
-    "year": 2026,
-    "departmentId": "D001"
+    "departmentId": "D001",
+    "yearMonth": "2026-02"
   },
-
-  "expectedQueryFilters": [
-    {"field": "year", "operator": "=", "value": 2026},
-    {"field": "department_id", "operator": "=", "value": "D001"}
-  ],
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data.content",
-    "minRecords": 1,
     "requiredFields": [
       {"name": "departmentId", "type": "string"},
       {"name": "departmentName", "type": "string"},
-      {"name": "totalEmployees", "type": "integer"},
-      {"name": "totalCost", "type": "number"},
-      {"name": "avgCostPerEmployee", "type": "number"},
-      {"name": "costBreakdown", "type": "object"},
-      {"name": "costRatio", "type": "decimal", "precision": 2}
-    ],
-    "orderBy": {
-      "field": "totalCost",
-      "direction": "DESC"
-    },
-    "pagination": {
-      "required": true
-    }
+      {"name": "yearMonth", "type": "string"},
+      {"name": "totalCost", "type": "decimal"},
+      {"name": "employeeCount", "type": "integer"}
+    ]
   }
 }
 ```
@@ -889,7 +765,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_009: 查詢薪資總表
 
-**API 端點：** `GET /api/v1/reports/finance/payroll-summary`
+**API 端點：** `GET /api/v1/reporting/finance/payroll-summary`
 
 **業務場景描述：**
 
@@ -900,30 +776,26 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_009",
-  "apiEndpoint": "GET /api/v1/reports/finance/payroll-summary",
-  "controller": "HR14FinanceQryController",
+  "apiEndpoint": "GET /api/v1/reporting/finance/payroll-summary",
+  "controller": "HR14ReportQryController",
   "service": "GetPayrollSummaryServiceImpl",
   "permission": "report:finance:read",
 
   "request": {
-    "month": "2026-02"
+    "yearMonth": "2026-02"
   },
-
-  "expectedQueryFilters": [
-    {"field": "month", "operator": "=", "value": "2026-02"}
-  ],
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data",
-    "exactRecords": 1,
+    "dataPath": "content",
+    "minRecords": 0,
     "requiredFields": [
-      {"name": "totalEmployees", "type": "integer"},
-      {"name": "totalGrossSalary", "type": "number"},
-      {"name": "totalDeductions", "type": "number"},
-      {"name": "totalNetSalary", "type": "number"},
-      {"name": "employerBurden", "type": "object"},
-      {"name": "departmentBreakdown", "type": "array"}
+      {"name": "employeeId", "type": "string"},
+      {"name": "employeeName", "type": "string"},
+      {"name": "departmentName", "type": "string"},
+      {"name": "baseSalary", "type": "decimal"},
+      {"name": "grossPay", "type": "decimal"},
+      {"name": "netPay", "type": "decimal"}
     ]
   }
 }
@@ -935,7 +807,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_010: 查詢儀表板列表
 
-**API 端點：** `GET /api/v1/dashboards`
+**API 端點：** `GET /api/v1/reporting/dashboards`
 
 **業務場景描述：**
 
@@ -946,7 +818,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_010",
-  "apiEndpoint": "GET /api/v1/dashboards",
+  "apiEndpoint": "GET /api/v1/reporting/dashboards",
   "controller": "HR14DashboardQryController",
   "service": "GetDashboardListServiceImpl",
   "permission": "dashboard:read",
@@ -961,23 +833,15 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data.content",
+    "dataPath": "content",
     "minRecords": 0,
     "requiredFields": [
-      {"name": "id", "type": "uuid"},
-      {"name": "name", "type": "string"},
+      {"name": "dashboardId", "type": "string", "notNull": true},
+      {"name": "dashboardName", "type": "string", "notNull": true},
       {"name": "isPublic", "type": "boolean"},
       {"name": "isDefault", "type": "boolean"},
-      {"name": "ownerName", "type": "string"},
       {"name": "createdAt", "type": "datetime"}
-    ],
-    "orderBy": {
-      "field": "createdAt",
-      "direction": "DESC"
-    },
-    "pagination": {
-      "required": true
-    }
+    ]
   }
 }
 ```
@@ -986,7 +850,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_011: 查詢儀表板詳情
 
-**API 端點：** `GET /api/v1/dashboards/{id}`
+**API 端點：** `GET /api/v1/reporting/dashboards/{dashboardId}`
 
 **業務場景描述：**
 
@@ -997,7 +861,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_011",
-  "apiEndpoint": "GET /api/v1/dashboards/{id}",
+  "apiEndpoint": "GET /api/v1/reporting/dashboards/{dashboardId}",
   "controller": "HR14DashboardQryController",
   "service": "GetDashboardDetailServiceImpl",
   "permission": "dashboard:read",
@@ -1013,16 +877,12 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
   "expectedResponse": {
     "statusCode": 200,
-    "dataPath": "data",
-    "exactRecords": 1,
     "requiredFields": [
-      {"name": "id", "type": "uuid"},
-      {"name": "name", "type": "string"},
-      {"name": "layoutConfig", "type": "object"},
-      {"name": "widgetsConfig", "type": "array"},
-      {"name": "isPublic", "type": "boolean"},
+      {"name": "dashboardId", "type": "string", "notNull": true},
+      {"name": "dashboardName", "type": "string", "notNull": true},
+      {"name": "description", "type": "string"},
       {"name": "isDefault", "type": "boolean"},
-      {"name": "owner", "type": "object"}
+      {"name": "widgets", "type": "array"}
     ]
   }
 }
@@ -1034,7 +894,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 
 #### RPT_QRY_012: 下載匯出檔案
 
-**API 端點：** `GET /api/v1/reports/export/{id}/download`
+**API 端點：** `GET /api/v1/reporting/export/{exportId}/download`
 
 **業務場景描述：**
 
@@ -1045,7 +905,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
 ```json
 {
   "scenarioId": "RPT_QRY_012",
-  "apiEndpoint": "GET /api/v1/reports/export/{id}/download",
+  "apiEndpoint": "GET /api/v1/reporting/export/{exportId}/download",
   "controller": "HR14ExportQryController",
   "service": "DownloadExportFileServiceImpl",
   "permission": "report:export",

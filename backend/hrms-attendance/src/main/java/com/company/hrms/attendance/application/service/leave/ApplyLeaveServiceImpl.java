@@ -1,5 +1,7 @@
 package com.company.hrms.attendance.application.service.leave;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -8,7 +10,10 @@ import com.company.hrms.attendance.api.response.leave.ApplyLeaveResponse;
 import com.company.hrms.attendance.application.service.leave.context.LeaveContext;
 import com.company.hrms.attendance.application.service.leave.task.CreateLeaveApplicationTask;
 import com.company.hrms.attendance.application.service.leave.task.SaveLeaveApplicationTask;
+import com.company.hrms.attendance.domain.event.LeaveAppliedEvent;
+import com.company.hrms.attendance.domain.service.LeaveCalculationDomainService;
 import com.company.hrms.common.application.pipeline.BusinessPipeline;
+import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 
@@ -38,6 +43,8 @@ public class ApplyLeaveServiceImpl implements CommandApiService<ApplyLeaveReques
 
         private final CreateLeaveApplicationTask createLeaveApplicationTask;
         private final SaveLeaveApplicationTask saveLeaveApplicationTask;
+        private final EventPublisher eventPublisher;
+        private final LeaveCalculationDomainService leaveCalculationDomainService;
 
         @Override
         public ApplyLeaveResponse execCommand(ApplyLeaveRequest request, JWTModel currentUser, String... args)
@@ -51,6 +58,16 @@ public class ApplyLeaveServiceImpl implements CommandApiService<ApplyLeaveReques
                                 .next(createLeaveApplicationTask)
                                 .next(saveLeaveApplicationTask)
                                 .execute();
+
+                // 計算天數並發布領域事件
+                BigDecimal totalDays = leaveCalculationDomainService.calculateTotalDays(
+                                request.getStartDate(), request.getEndDate());
+
+                eventPublisher.publish(new LeaveAppliedEvent(
+                                context.getApplication().getId().getValue(),
+                                request.getEmployeeId(),
+                                request.getLeaveTypeId(),
+                                totalDays));
 
                 log.info("請假申請流程完成: applicationId={}", context.getApplication().getId().getValue());
 

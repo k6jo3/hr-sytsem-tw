@@ -17,7 +17,7 @@ public class AddMemberToProjectTask implements PipelineTask<AddProjectMemberCont
         Project project = context.getProject();
         var req = context.getRequest();
 
-        project.addMember(req.getEmployeeId(), req.getRole(), req.getAllocatedHours());
+        project.addMember(req.getEmployeeId(), req.getRole(), req.getAllocatedHours(), req.getHourlyRate());
     }
 
     @Override

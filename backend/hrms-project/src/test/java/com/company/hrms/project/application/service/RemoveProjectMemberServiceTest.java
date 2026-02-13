@@ -75,6 +75,7 @@ class RemoveProjectMemberServiceTest {
                     employeeId,
                     "DEVELOPER",
                     BigDecimal.valueOf(40),
+                    BigDecimal.valueOf(800),
                     LocalDate.now().minusDays(30),
                     null);
 

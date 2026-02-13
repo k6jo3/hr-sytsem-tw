@@ -14,6 +14,7 @@ import com.company.hrms.insurance.application.service.enrollment.task.CreateEnro
 import com.company.hrms.insurance.application.service.enrollment.task.FindInsuranceLevelTask;
 import com.company.hrms.insurance.application.service.enrollment.task.LoadInsuranceUnitTask;
 import com.company.hrms.insurance.application.service.enrollment.task.SaveEnrollmentTask;
+import com.company.hrms.insurance.application.service.enrollment.task.ValidateEnrollmentTask;
 import com.company.hrms.insurance.domain.model.aggregate.InsuranceEnrollment;
 
 import lombok.RequiredArgsConstructor;
@@ -25,42 +26,44 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EnrollEmployeeServiceImpl implements CommandApiService<EnrollEmployeeRequest, EnrollmentDetailResponse> {
 
-    private final LoadInsuranceUnitTask loadInsuranceUnitTask;
-    private final FindInsuranceLevelTask findInsuranceLevelTask;
-    private final CreateEnrollmentRecordsTask createEnrollmentRecordsTask;
-    private final CalculateEnrollmentFeesTask calculateEnrollmentFeesTask;
-    private final SaveEnrollmentTask saveEnrollmentTask;
+        private final LoadInsuranceUnitTask loadInsuranceUnitTask;
+        private final ValidateEnrollmentTask validateEnrollmentTask;
+        private final FindInsuranceLevelTask findInsuranceLevelTask;
+        private final CreateEnrollmentRecordsTask createEnrollmentRecordsTask;
+        private final CalculateEnrollmentFeesTask calculateEnrollmentFeesTask;
+        private final SaveEnrollmentTask saveEnrollmentTask;
 
-    @Override
-    public EnrollmentDetailResponse execCommand(EnrollEmployeeRequest request, JWTModel currentUser, String... args)
-            throws Exception {
+        @Override
+        public EnrollmentDetailResponse execCommand(EnrollEmployeeRequest request, JWTModel currentUser, String... args)
+                        throws Exception {
 
-        log.info("執行員工加保: employeeId={}, date={}", request.getEmployeeId(), request.getEnrollDate());
+                log.info("執行員工加保: employeeId={}, date={}", request.getEmployeeId(), request.getEnrollDate());
 
-        // 建立 Context
-        EnrollmentContext context = new EnrollmentContext(request, currentUser.getTenantId());
+                // 建立 Context
+                EnrollmentContext context = new EnrollmentContext(request, currentUser.getTenantId());
 
-        // 執行 Pipeline
-        BusinessPipeline.start(context)
-                .next(loadInsuranceUnitTask)
-                .next(findInsuranceLevelTask)
-                .next(createEnrollmentRecordsTask)
-                .next(calculateEnrollmentFeesTask)
-                .next(saveEnrollmentTask)
-                .execute();
+                // 執行 Pipeline
+                BusinessPipeline.start(context)
+                                .next(loadInsuranceUnitTask)
+                                .next(validateEnrollmentTask)
+                                .next(findInsuranceLevelTask)
+                                .next(createEnrollmentRecordsTask)
+                                .next(calculateEnrollmentFeesTask)
+                                .next(saveEnrollmentTask)
+                                .execute();
 
-        // 建構回應 (取第一筆記錄代表，實際可能有多筆)
-        InsuranceEnrollment primaryEnrollment = context.getEnrollments().get(0);
+                // 建構回應 (取第一筆記錄代表，實際可能有多筆)
+                InsuranceEnrollment primaryEnrollment = context.getEnrollments().get(0);
 
-        return EnrollmentDetailResponse.builder()
-                .enrollmentId(primaryEnrollment.getId().getValue())
-                .employeeId(primaryEnrollment.getEmployeeId())
-                .insuranceType(primaryEnrollment.getInsuranceType().name())
-                .insuranceTypeDisplay(primaryEnrollment.getInsuranceType().getDisplayName())
-                .status(primaryEnrollment.getStatus().name())
-                .statusDisplay(primaryEnrollment.getStatus().getDisplayName())
-                .enrollDate(primaryEnrollment.getEnrollDate().toString())
-                .monthlySalary(primaryEnrollment.getMonthlySalary())
-                .build();
-    }
+                return EnrollmentDetailResponse.builder()
+                                .enrollmentId(primaryEnrollment.getId().getValue())
+                                .employeeId(primaryEnrollment.getEmployeeId())
+                                .insuranceType(primaryEnrollment.getInsuranceType().name())
+                                .insuranceTypeDisplay(primaryEnrollment.getInsuranceType().getDisplayName())
+                                .status(primaryEnrollment.getStatus().name())
+                                .statusDisplay(primaryEnrollment.getStatus().getDisplayName())
+                                .enrollDate(primaryEnrollment.getEnrollDate().toString())
+                                .monthlySalary(primaryEnrollment.getMonthlySalary())
+                                .build();
+        }
 }

@@ -25,6 +25,7 @@ public class ProfileContext extends PipelineContext {
     // === 中間數據 ===
     private User user;
     private String newPasswordHash;
+    private java.util.List<String> permissions;
 
     // === 建構子 ===
 

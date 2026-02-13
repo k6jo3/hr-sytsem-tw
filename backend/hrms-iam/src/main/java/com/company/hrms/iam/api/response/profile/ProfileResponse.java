@@ -53,9 +53,34 @@ public class ProfileResponse {
     private List<String> roles;
 
     /**
+     * 權限列表
+     */
+    private List<String> permissions;
+
+    /**
+     * 偏好語言
+     */
+    private String preferredLanguage;
+
+    /**
+     * 時區
+     */
+    private String timezone;
+
+    /**
      * 最後登入時間
      */
     private LocalDateTime lastLoginAt;
+
+    /**
+     * 密碼變更時間
+     */
+    private LocalDateTime passwordChangedAt;
+
+    /**
+     * 建立時間
+     */
+    private LocalDateTime createdAt;
 
     /**
      * 是否需要變更密碼

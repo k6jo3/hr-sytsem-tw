@@ -39,6 +39,15 @@ public class HR05EnrollmentQryController extends QueryBaseController {
         return ResponseEntity.ok(getResponse(request, currentUser));
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "查詢加退保記錄詳情", operationId = "getEnrollmentDetail")
+    public ResponseEntity<EnrollmentDetailResponse> getEnrollmentDetail(
+            @PathVariable String id,
+            @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+
+        return ResponseEntity.ok(getResponse(id, currentUser));
+    }
+
     @GetMapping("/{id}/history")
     @Operation(summary = "查詢投保歷程", operationId = "getEnrollmentHistory")
     public ResponseEntity<PageResponse<EnrollmentDetailResponse>> getEnrollmentHistory(

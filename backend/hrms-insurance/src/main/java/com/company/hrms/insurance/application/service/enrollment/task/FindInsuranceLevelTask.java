@@ -30,7 +30,7 @@ public class FindInsuranceLevelTask implements PipelineTask<EnrollmentContext> {
 
         // 勞保級距
         InsuranceLevel laborLevel = levelMatchingService.findAppropriateLevel(salary, InsuranceType.LABOR, date)
-                .orElseThrow(() -> new IllegalStateException("找不到適用的勞保級距"));
+                .orElseThrow(() -> new IllegalArgumentException("找不到適用的勞保級距，請確認薪資是否符合法規範圍"));
         context.setLaborLevel(laborLevel);
 
         // 健保級距 (通常與勞保相同)

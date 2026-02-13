@@ -13,7 +13,7 @@ DELETE FROM shifts;
 -- ==================== 班別基礎資料 ====================
 INSERT INTO shifts (id, organization_id, code, name, type, start_time, end_time, late_tolerance_minutes, early_leave_tolerance_minutes, is_active, is_deleted, created_at, updated_at)
 VALUES
-('SHIFT-STD-001', 'ORG001', 'STD-01', 'Standard Shift', 'STANDARD', '09:00:00', '18:00:00', 5, 0, 1, 0, '2025-01-01 00:00:00', '2025-01-01 00:00:00'),
+('SHIFT-STD-001', 'ORG001', 'STD-01', 'Standard Shift', 'REGULAR', '09:00:00', '18:00:00', 5, 0, 1, 0, '2025-01-01 00:00:00', '2025-01-01 00:00:00'),
 ('test-shift-001', 'ORG001', 'SHIFT01', 'Standard Test', 'REGULAR', '09:00:00', '18:00:00', 5, 0, 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ==================== 假別基礎資料 ====================

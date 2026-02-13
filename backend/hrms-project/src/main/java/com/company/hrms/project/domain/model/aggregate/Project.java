@@ -124,7 +124,7 @@ public class Project extends AggregateRoot<ProjectId> {
         // Add initial members
         if (cmd.getMembers() != null) {
             for (CreateProjectCommand.MemberInfo info : cmd.getMembers()) {
-                project.addMember(info.getEmployeeId(), info.getRole(), info.getAllocatedHours());
+                project.addMember(info.getEmployeeId(), info.getRole(), info.getAllocatedHours(), info.getHourlyRate());
             }
         }
 
@@ -136,7 +136,7 @@ public class Project extends AggregateRoot<ProjectId> {
         return project;
     }
 
-    public void addMember(UUID employeeId, String role, BigDecimal allocatedHours) {
+    public void addMember(UUID employeeId, String role, BigDecimal allocatedHours, BigDecimal hourlyRate) {
         // Business Rule: Check if member already exists
         boolean exists = members.stream()
                 .anyMatch(m -> m.getEmployeeId().equals(employeeId));
@@ -150,6 +150,7 @@ public class Project extends AggregateRoot<ProjectId> {
                 employeeId,
                 role,
                 allocatedHours,
+                hourlyRate != null ? hourlyRate : BigDecimal.ZERO,
                 this.startDate != null ? this.startDate : LocalDate.now());
         this.members.add(member);
 

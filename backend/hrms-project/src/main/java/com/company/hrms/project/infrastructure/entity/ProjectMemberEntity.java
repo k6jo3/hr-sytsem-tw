@@ -39,6 +39,9 @@ public class ProjectMemberEntity {
     @Column(name = "allocated_hours")
     private BigDecimal allocatedHours;
 
+    @Column(name = "hourly_rate")
+    private BigDecimal hourlyRate;
+
     @Column(name = "join_date", nullable = false)
     private LocalDate joinDate;
 
