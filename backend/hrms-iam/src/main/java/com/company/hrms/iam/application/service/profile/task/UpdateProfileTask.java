@@ -25,7 +25,11 @@ public class UpdateProfileTask implements PipelineTask<ProfileContext> {
         var request = context.getUpdateProfileRequest();
 
         // 更新個人資料
-        user.updateProfile(request.getEmail(), request.getDisplayName());
+        user.updateProfile(
+                request.getEmail(),
+                request.getDisplayName(),
+                request.getPreferredLanguage(),
+                request.getTimezone());
 
         // 儲存
         userRepository.update(user);

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
@@ -16,12 +18,20 @@ import com.company.hrms.project.api.response.GetProjectCostResponse.MonthlyCost;
 import com.company.hrms.project.application.service.context.ProjectCostContext;
 import com.company.hrms.project.domain.model.aggregate.Project;
 import com.company.hrms.project.domain.model.aggregate.ProjectMember;
+import com.company.hrms.project.domain.service.external.IExternalEmployeeService;
+import com.company.hrms.project.domain.service.external.IExternalTimesheetService;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * 計算專案成本 Task
  */
 @Component
+@RequiredArgsConstructor
 public class CalculateProjectCostTask implements PipelineTask<ProjectCostContext> {
+
+        private final IExternalEmployeeService employeeService;
+        private final IExternalTimesheetService timesheetService;
 
         @Override
         public void execute(ProjectCostContext context) throws Exception {
@@ -75,11 +85,21 @@ public class CalculateProjectCostTask implements PipelineTask<ProjectCostContext
 
                 // 3. 計算成員成本
                 List<MemberCost> memberCosts = new ArrayList<>();
+                List<UUID> employeeIds = project.getMembers().stream()
+                                .map(ProjectMember::getEmployeeId)
+                                .collect(java.util.stream.Collectors.toList());
+                Map<UUID, String> employeeNames = employeeService
+                                .getEmployeeNames(new java.util.HashSet<>(employeeIds));
+
                 for (ProjectMember member : project.getMembers()) {
                         BigDecimal memberHours = member.getAllocatedHours() != null ? member.getAllocatedHours()
                                         : BigDecimal.ZERO;
-                        // TODO: 預設時薪，未來應從 Employee Service 查詢
-                        BigDecimal hourlyRate = BigDecimal.valueOf(800);
+                        // 優先使用成員設定的最佳時薪，若無則從員工服務查詢
+                        BigDecimal hourlyRate = member.getHourlyRate();
+                        if (hourlyRate == null || hourlyRate.compareTo(BigDecimal.ZERO) == 0) {
+                                hourlyRate = employeeService.getEmployeeHourlyRate(member.getEmployeeId());
+                        }
+
                         BigDecimal memberCost = memberHours.multiply(hourlyRate);
                         BigDecimal costPercentage = BigDecimal.ZERO;
                         if (totalCost.compareTo(BigDecimal.ZERO) > 0) {
@@ -89,7 +109,7 @@ public class CalculateProjectCostTask implements PipelineTask<ProjectCostContext
 
                         memberCosts.add(MemberCost.builder()
                                         .employeeId(member.getEmployeeId().toString())
-                                        .employeeName("員工") // TODO: 需要從員工服務取得實際姓名
+                                        .employeeName(employeeNames.getOrDefault(member.getEmployeeId(), "未知員工"))
                                         .role(member.getRole())
                                         .hours(memberHours)
                                         .hourlyRate(hourlyRate)
@@ -98,9 +118,18 @@ public class CalculateProjectCostTask implements PipelineTask<ProjectCostContext
                                         .build());
                 }
 
-                // 4. 模擬月份成本 (目前無資料，留空)
-                // TODO: 需實作按月彙總邏輯
+                // 4. 按月彙總邏輯
                 List<MonthlyCost> monthlyCosts = new ArrayList<>();
+                List<IExternalTimesheetService.MonthlyCostData> monthlyData = timesheetService
+                                .getMonthlyCosts(UUID.fromString(project.getId().getValue()));
+
+                for (IExternalTimesheetService.MonthlyCostData data : monthlyData) {
+                        monthlyCosts.add(MonthlyCost.builder()
+                                        .yearMonth(data.getYearMonth())
+                                        .hours(data.getHours())
+                                        .cost(data.getCost())
+                                        .build());
+                }
 
                 // 5. Build Response
                 GetProjectCostResponse response = GetProjectCostResponse.builder()

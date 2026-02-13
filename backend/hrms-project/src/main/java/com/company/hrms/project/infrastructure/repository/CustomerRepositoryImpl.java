@@ -78,6 +78,7 @@ public class CustomerRepositoryImpl extends CommandBatchBaseRepository<CustomerE
                 .phoneNumber(domain.getPhoneNumber())
                 .status(domain.getStatus())
                 .version(domain.getVersion())
+                .isDeleted(domain.getIsDeleted() != null ? domain.getIsDeleted() : 0)
                 .build();
     }
 
@@ -93,6 +94,8 @@ public class CustomerRepositoryImpl extends CommandBatchBaseRepository<CustomerE
                 entity.getStatus(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
-                entity.getVersion());
+                entity.getVersion(),
+                entity.getIsDeleted(),
+                entity.getProjectCount());
     }
 }

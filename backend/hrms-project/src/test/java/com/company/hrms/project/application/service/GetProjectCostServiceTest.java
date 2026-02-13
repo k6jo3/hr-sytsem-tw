@@ -43,6 +43,12 @@ class GetProjectCostServiceTest {
         @Mock
         private IProjectRepository projectRepository;
 
+        @Mock
+        private com.company.hrms.project.domain.service.external.IExternalEmployeeService employeeService;
+
+        @Mock
+        private com.company.hrms.project.domain.service.external.IExternalTimesheetService timesheetService;
+
         private GetProjectCostServiceImpl getProjectCostService;
 
         private JWTModel currentUser;
@@ -56,7 +62,8 @@ class GetProjectCostServiceTest {
                 // 手動注入實例，確保 Pipeline 中的 Task 不是 null
                 var loadTask = new com.company.hrms.project.application.service.task.LoadProjectForCostTask(
                                 projectRepository);
-                var calculateTask = new com.company.hrms.project.application.service.task.CalculateProjectCostTask();
+                var calculateTask = new com.company.hrms.project.application.service.task.CalculateProjectCostTask(
+                                employeeService, timesheetService);
                 getProjectCostService = new GetProjectCostServiceImpl(loadTask, calculateTask);
         }
 
@@ -78,6 +85,7 @@ class GetProjectCostServiceTest {
                                         employeeId,
                                         "DEVELOPER",
                                         BigDecimal.valueOf(40),
+                                        BigDecimal.valueOf(800),
                                         LocalDate.now().minusDays(30),
                                         null);
 
@@ -91,6 +99,10 @@ class GetProjectCostServiceTest {
                         request.setProjectId(projectId.getValue().toString());
 
                         when(projectRepository.findById(any(ProjectId.class))).thenReturn(Optional.of(project));
+                        when(employeeService.getEmployeeNames(any()))
+                                        .thenReturn(java.util.Map.of(employeeId, "Test Employee"));
+
+                        when(timesheetService.getMonthlyCosts(any())).thenReturn(new java.util.ArrayList<>());
 
                         // Act
                         GetProjectCostResponse response = getProjectCostService.getResponse(request, currentUser);
@@ -132,6 +144,8 @@ class GetProjectCostServiceTest {
                         request.setProjectId(projectId.getValue().toString());
 
                         when(projectRepository.findById(any(ProjectId.class))).thenReturn(Optional.of(project));
+                        when(employeeService.getEmployeeNames(any())).thenReturn(new java.util.HashMap<>());
+                        when(timesheetService.getMonthlyCosts(any())).thenReturn(new java.util.ArrayList<>());
 
                         // Act
                         GetProjectCostResponse response = getProjectCostService.getResponse(request, currentUser);

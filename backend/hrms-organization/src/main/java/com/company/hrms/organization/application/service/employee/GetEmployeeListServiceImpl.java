@@ -16,6 +16,8 @@ import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.organization.api.request.employee.GetEmployeeListRequest;
 import com.company.hrms.organization.api.response.employee.EmployeeListItemResponse;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
+import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
+import com.company.hrms.organization.domain.repository.IDepartmentRepository;
 import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class GetEmployeeListServiceImpl
         extends AbstractQueryService<GetEmployeeListRequest, PageResponse<EmployeeListItemResponse>> {
 
     private final IEmployeeRepository employeeRepository;
+    private final IDepartmentRepository departmentRepository;
 
     @Override
     protected QueryGroup buildQuery(GetEmployeeListRequest request, JWTModel currentUser) {
@@ -117,15 +120,25 @@ public class GetEmployeeListServiceImpl
     }
 
     private EmployeeListItemResponse toResponse(Employee employee) {
+        String departmentName = null;
+        if (employee.getDepartmentId() != null) {
+            departmentName = departmentRepository.findById(new DepartmentId(employee.getDepartmentId()))
+                    .map(com.company.hrms.organization.domain.model.aggregate.Department::getName)
+                    .orElse(null);
+        }
+
         return EmployeeListItemResponse.builder()
                 .employeeId(employee.getId().getValue().toString())
                 .employeeNumber(employee.getEmployeeNumber())
                 .fullName(employee.getFullName())
                 .departmentId(employee.getDepartmentId() != null ? employee.getDepartmentId().toString() : null)
+                .departmentName(departmentName)
                 .positionId(null) // Position 聚合根不存在，佔位
                 .email(employee.getEmail() != null ? employee.getEmail().getValue() : null)
                 .status(employee.getEmploymentStatus().name())
                 .statusDisplay(employee.getEmploymentStatus().getDisplayName())
+                .employmentStatus(employee.getEmploymentStatus().name())
+                .employmentStatusDisplayName(employee.getEmploymentStatus().getDisplayName())
                 .hireDate(employee.getHireDate())
                 .build();
     }

@@ -216,7 +216,7 @@ class UserTest {
                     "hashedPassword123", "John Doe");
 
             // When
-            user.updateProfile("newemail@example.com", "Johnny Doe");
+            user.updateProfile("newemail@example.com", "Johnny Doe", null, null);
 
             // Then
             assertEquals("newemail@example.com", user.getEmail().getValue());
@@ -231,7 +231,7 @@ class UserTest {
                     "hashedPassword123", "John Doe");
 
             // When
-            user.updateProfile(null, "Johnny Doe");
+            user.updateProfile(null, "Johnny Doe", null, null);
 
             // Then
             assertEquals("john@example.com", user.getEmail().getValue());
@@ -246,7 +246,7 @@ class UserTest {
                     "hashedPassword123", "John Doe");
 
             // When
-            user.updateProfile("newemail@example.com", "  ");
+            user.updateProfile("newemail@example.com", "  ", null, null);
 
             // Then
             assertEquals("newemail@example.com", user.getEmail().getValue());

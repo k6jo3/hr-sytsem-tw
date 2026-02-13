@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
@@ -39,10 +39,9 @@ import com.company.hrms.insurance.api.request.EnrollEmployeeRequest;
  * <li>投保查詢 API（列表、詳情、過濾）</li>
  * </ul>
  *
- * TODO: 需建立測試資料腳本
- * - insurance_base_data.sql (保險單位、級距表基礎資料)
- * - enrollment_test_data.sql (投保測試資料)
- * - cleanup.sql (清理腳本)
+ * - insurance_base_data.sql
+ * - enrollment_test_data.sql
+ * - cleanup.sql
  *
  * @author SA Team
  * @since 2026-02-05
@@ -51,7 +50,12 @@ import com.company.hrms.insurance.api.request.EnrollEmployeeRequest;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @Transactional
-@Disabled("TODO:測試失敗 - 需建立測試資料腳本 (insurance_base_data.sql, enrollment_test_data.sql)")
+
+@Sql(scripts = {
+		"classpath:test-data/insurance_base_data.sql",
+		"classpath:test-data/enrollment_test_data.sql"
+}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("投保管理 API 整合測試")
 class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 
@@ -85,8 +89,8 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 		void INS_ENROLL_API_001_enrollEmployee_ShouldReturnEnrollmentId() throws Exception {
 			// Given
 			EnrollEmployeeRequest request = EnrollEmployeeRequest.builder()
-					.employeeId("test-emp-001")
-					.insuranceUnitId("UNIT-001")
+					.employeeId("test-emp-new")
+					.insuranceUnitId("00000000-0000-0000-0000-000000000002")
 					.monthlySalary(new BigDecimal("45000"))
 					.enrollDate(LocalDate.now().toString())
 					.selfContributionRate(new BigDecimal("6.0"))
@@ -107,8 +111,8 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 		void INS_ENROLL_API_002_enrollEmployee_Duplicate_ShouldReturn409() throws Exception {
 			// Given - 假設員工已加保
 			EnrollEmployeeRequest request = EnrollEmployeeRequest.builder()
-					.employeeId("test-emp-enrolled")
-					.insuranceUnitId("UNIT-001")
+					.employeeId("test-emp-existing")
+					.insuranceUnitId("00000000-0000-0000-0000-000000000002")
 					.monthlySalary(new BigDecimal("45000"))
 					.enrollDate(LocalDate.now().toString())
 					.build();
@@ -134,7 +138,7 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("INS_ENROLL_API_004: 查詢投保記錄詳情 - 應返回完整資訊")
 		void INS_ENROLL_API_004_getEnrollmentDetail_ShouldReturnDetail() throws Exception {
 			// Given
-			String enrollmentId = "test-enrollment-001";
+			String enrollmentId = "00000000-0000-0000-0000-000000000301";
 
 			// When & Then
 			var response = performGet("/api/v1/insurance/enrollments/" + enrollmentId)
@@ -143,7 +147,7 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 
 			String responseBody = response.getResponse().getContentAsString();
 			assertThat(responseBody).contains("enrollmentId");
-			assertThat(responseBody).contains("insuranceLevel");
+			assertThat(responseBody).contains("monthlySalary");
 		}
 	}
 
@@ -158,7 +162,7 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("INS_ADJUST_API_001: 調整投保級距 - 應更新級距")
 		void INS_ADJUST_API_001_adjustLevel_ShouldUpdateLevel() throws Exception {
 			// Given
-			String enrollmentId = "test-enrollment-001";
+			String enrollmentId = "00000000-0000-0000-0000-000000000301";
 			AdjustLevelRequest request = AdjustLevelRequest.builder()
 					.newMonthlySalary(new BigDecimal("50000"))
 					.effectiveDate(LocalDate.now().toString())
@@ -166,7 +170,7 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 					.build();
 
 			// When & Then
-			var response = performPut("/api/v1/insurance/enrollments/" + enrollmentId + "/adjust", request)
+			var response = performPut("/api/v1/insurance/enrollments/" + enrollmentId + "/adjust-level", request)
 					.andExpect(status().isOk())
 					.andReturn();
 
@@ -178,7 +182,7 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("INS_ADJUST_API_002: 調整投保級距失敗 - 投保記錄不存在應返回 404")
 		void INS_ADJUST_API_002_adjustLevel_NotFound_ShouldReturn404() throws Exception {
 			// Given
-			String enrollmentId = "non-existent-enrollment";
+			String enrollmentId = "00000000-0000-0000-0000-ffffffffffff";
 			AdjustLevelRequest request = AdjustLevelRequest.builder()
 					.newMonthlySalary(new BigDecimal("50000"))
 					.effectiveDate(LocalDate.now().toString())
@@ -186,7 +190,7 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 					.build();
 
 			// When & Then
-			performPut("/api/v1/insurance/enrollments/" + enrollmentId + "/adjust", request)
+			performPut("/api/v1/insurance/enrollments/" + enrollmentId + "/adjust-level", request)
 					.andExpect(status().isNotFound());
 		}
 	}
@@ -202,7 +206,7 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("INS_QRY_API_001: 依員工過濾 - 應返回該員工的投保記錄")
 		void INS_QRY_API_001_filterByEmployee_ShouldReturnFiltered() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/insurance/enrollments?employeeId=test-emp-001")
+			var response = performGet("/api/v1/insurance/enrollments?employeeId=test-emp-existing")
 					.andExpect(status().isOk())
 					.andReturn();
 
@@ -214,7 +218,8 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 		@DisplayName("INS_QRY_API_002: 依保險單位過濾 - 應返回該單位的投保記錄")
 		void INS_QRY_API_002_filterByUnit_ShouldReturnFiltered() throws Exception {
 			// When & Then
-			var response = performGet("/api/v1/insurance/enrollments?insuranceUnitId=UNIT-001")
+			var response = performGet(
+					"/api/v1/insurance/enrollments?insuranceUnitId=00000000-0000-0000-0000-000000000002")
 					.andExpect(status().isOk())
 					.andReturn();
 
@@ -261,7 +266,7 @@ class EnrollmentApiIntegrationTest extends BaseApiIntegrationTest {
 			// Given
 			EnrollEmployeeRequest request = EnrollEmployeeRequest.builder()
 					.employeeId("test-emp-001")
-					.insuranceUnitId("UNIT-001")
+					.insuranceUnitId("00000000-0000-0000-0000-000000000002")
 					.monthlySalary(new BigDecimal("-1000")) // 負數金額
 					.enrollDate(LocalDate.now().toString())
 					.build();

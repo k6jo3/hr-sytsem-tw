@@ -24,10 +24,10 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Table(name = "rm_employee_roster", indexes = {
-        @Index(name = "idx_tenant_id", columnList = "tenant_id"),
-        @Index(name = "idx_department_id", columnList = "department_id"),
-        @Index(name = "idx_status", columnList = "status"),
-        @Index(name = "idx_hire_date", columnList = "hire_date")
+        @Index(name = "idx_er_tenant_id", columnList = "tenant_id"),
+        @Index(name = "idx_er_department_id", columnList = "department_id"),
+        @Index(name = "idx_er_status", columnList = "status"),
+        @Index(name = "idx_er_hire_date", columnList = "hire_date")
 })
 @Data
 @Builder
@@ -59,6 +59,9 @@ public class EmployeeRosterReadModel {
 
     @Column(name = "hire_date")
     private LocalDate hireDate;
+
+    @Column(name = "resignation_date")
+    private LocalDate resignationDate;
 
     @Column(name = "service_years")
     private Double serviceYears;

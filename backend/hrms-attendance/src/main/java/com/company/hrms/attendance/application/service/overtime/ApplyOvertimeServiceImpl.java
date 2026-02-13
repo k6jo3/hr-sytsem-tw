@@ -8,7 +8,9 @@ import com.company.hrms.attendance.api.response.overtime.ApplyOvertimeResponse;
 import com.company.hrms.attendance.application.service.overtime.context.OvertimeContext;
 import com.company.hrms.attendance.application.service.overtime.task.CreateOvertimeApplicationTask;
 import com.company.hrms.attendance.application.service.overtime.task.SaveOvertimeApplicationTask;
+import com.company.hrms.attendance.domain.event.OvertimeAppliedEvent;
 import com.company.hrms.common.application.pipeline.BusinessPipeline;
+import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
 
@@ -38,6 +40,7 @@ public class ApplyOvertimeServiceImpl implements CommandApiService<ApplyOvertime
 
         private final CreateOvertimeApplicationTask createOvertimeApplicationTask;
         private final SaveOvertimeApplicationTask saveOvertimeApplicationTask;
+        private final EventPublisher eventPublisher;
 
         @Override
         public ApplyOvertimeResponse execCommand(ApplyOvertimeRequest request, JWTModel currentUser, String... args)
@@ -51,6 +54,12 @@ public class ApplyOvertimeServiceImpl implements CommandApiService<ApplyOvertime
                                 .next(createOvertimeApplicationTask)
                                 .next(saveOvertimeApplicationTask)
                                 .execute();
+
+                // 發布領域事件
+                eventPublisher.publish(new OvertimeAppliedEvent(
+                                context.getApplication().getId().getValue(),
+                                request.getEmployeeId(),
+                                request.getHours()));
 
                 log.info("加班申請流程完成: applicationId={}", context.getApplication().getId().getValue());
 

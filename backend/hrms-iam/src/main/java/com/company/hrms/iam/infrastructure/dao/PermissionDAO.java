@@ -1,10 +1,11 @@
 package com.company.hrms.iam.infrastructure.dao;
 
-import com.company.hrms.iam.infrastructure.po.PermissionPO;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.company.hrms.iam.infrastructure.po.PermissionPO;
 
 /**
  * Permission DAO
@@ -42,6 +43,11 @@ public interface PermissionDAO {
      * 根據權限 ID 列表查詢權限
      */
     List<PermissionPO> selectByIds(@Param("ids") List<String> ids);
+
+    /**
+     * 根據使用者 ID 查詢權限列表
+     */
+    List<PermissionPO> selectByUserId(@Param("userId") String userId);
 
     /**
      * 新增權限

@@ -9,13 +9,10 @@ import lombok.Data;
 public class ExportPdfRequest {
     /** 報表類型 */
     private String reportType;
-    
-    /** 組織 ID */
-    private String organizationId;
-    
-    /** 年月 (YYYY-MM) */
-    private String yearMonth;
-    
+
+    /** 查詢條件 */
+    private java.util.Map<String, Object> filters;
+
     /** 檔案名稱 */
     private String fileName;
 }

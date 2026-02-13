@@ -62,4 +62,7 @@ public class AttendanceCorrectionPO {
 
     @Column(name = "updated_by", length = 50)
     private String updatedBy;
+
+    @Column(name = "approver_id", length = 50)
+    private String approverId;
 }

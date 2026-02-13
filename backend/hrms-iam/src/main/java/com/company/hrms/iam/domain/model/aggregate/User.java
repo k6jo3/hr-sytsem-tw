@@ -33,6 +33,8 @@ public class User {
     private LocalDateTime lastLogoutAt;
     private String lastLoginIp;
     private LocalDateTime passwordChangedAt;
+    private String preferredLanguage;
+    private String timezone;
 
     @Builder.Default
     private boolean mustChangePassword = false;
@@ -93,12 +95,18 @@ public class User {
                 .build();
     }
 
-    public void updateProfile(String email, String displayName) {
+    public void updateProfile(String email, String displayName, String preferredLanguage, String timezone) {
         if (email != null && !email.isBlank()) {
             this.email = new Email(email);
         }
         if (displayName != null && !displayName.isBlank()) {
             this.displayName = displayName;
+        }
+        if (preferredLanguage != null) {
+            this.preferredLanguage = preferredLanguage;
+        }
+        if (timezone != null) {
+            this.timezone = timezone;
         }
         this.updatedAt = LocalDateTime.now();
     }

@@ -130,6 +130,7 @@ public class LeaveApplicationRepositoryImpl extends BaseRepository<LeaveApplicat
                 .reason(application.getReason())
                 .proofAttachmentUrl(application.getProofAttachmentUrl())
                 .rejectionReason(application.getRejectionReason())
+                .isDeleted(0)
                 .build();
     }
 }

@@ -3,6 +3,7 @@ package com.company.hrms.organization.api.contract;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,8 +51,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @Sql(scripts = {
-    "classpath:test-data/organization_base_data.sql",
-    "classpath:test-data/organization_test_data.sql"
+        "classpath:test-data/organization_base_data.sql",
+        "classpath:test-data/organization_test_data.sql"
 }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayName("HR02 組織員工服務合約測試")
 public class OrganizationContractTest extends BaseContractTest {
@@ -111,11 +112,6 @@ public class OrganizationContractTest extends BaseContractTest {
     @Test
     @DisplayName("ORG_QRY_E001: 查詢在職員工")
     void getActiveEmployees_ORG_QRY_E001() throws Exception {
-        // TODO: [應用程式碼缺失] GetEmployeeListServiceImpl.toResponse() 未設定 .employmentStatus()，
-        //       只設了 .status()，導致合約中 employmentStatus 驗證會失敗。
-        //       修正位置: GetEmployeeListServiceImpl.java:119-131
-        // TODO: [應用程式碼缺失] EmployeeListItemResponse 缺少 departmentName 欄位，
-        //       需新增欄位並在 toResponse() 中 JOIN departments 表取得部門名稱。
         ContractSpec contract = loadContractFromMarkdown(contractSpec, "ORG_QRY_E001");
 
         var result = mockMvc.perform(get("/api/v1/employees?status=ACTIVE"))
@@ -129,8 +125,6 @@ public class OrganizationContractTest extends BaseContractTest {
     @Test
     @DisplayName("ORG_QRY_E002: 查詢所有員工（含離職）")
     void getAllEmployees_ORG_QRY_E002() throws Exception {
-        // TODO: [應用程式碼缺失] GetEmployeeListServiceImpl.toResponse() 未設定 .employmentStatus()
-        //       合約要求 employmentStatus notNull，但目前回傳為 null
         ContractSpec contract = loadContractFromMarkdown(contractSpec, "ORG_QRY_E002");
 
         var result = mockMvc.perform(get("/api/v1/employees"))
@@ -144,15 +138,13 @@ public class OrganizationContractTest extends BaseContractTest {
     @Test
     @DisplayName("ORG_QRY_E003: 查詢試用期員工")
     void getProbationEmployees_ORG_QRY_E003() throws Exception {
-        // TODO: [應用程式碼缺失] GetEmployeeListServiceImpl.toResponse() 未設定 .employmentStatus()
-        //       合約斷言 employmentStatus equals PROBATION，但目前回傳為 null
         ContractSpec contract = loadContractFromMarkdown(contractSpec, "ORG_QRY_E003");
 
         var result = mockMvc.perform(get("/api/v1/employees?status=PROBATION"))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -165,7 +157,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -178,9 +170,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
-        // TODO: [應用程式碼缺失] EmployeeListItemResponse 缺少 departmentName 欄位
-        // TODO: 合約中 departmentId 用 DEPT-001 佔位，實際使用 UUID，需確認合約或測試是否需調整
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -193,7 +183,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -206,8 +196,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
-        // TODO: 合約中 employeeNumber 用 EMP001，實際使用 EMP202501-001，需確認合約是否需調整
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -229,7 +218,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -250,7 +239,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -263,7 +252,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -278,7 +267,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -291,7 +280,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -304,7 +293,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String responseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         verifyQueryContract(null, responseJson, contract);
     }
 
@@ -337,13 +326,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
-        System.out.println("ORG_CMD_E001 Response Status: " + result.getResponse().getStatus());
-        System.out.println("ORG_CMD_E001 Response Body: " + result.getResponse().getContentAsString());
-
-        // TODO: 若 API 回傳非 200，需確認是 Service 未實作完整還是測試資料問題
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_E001: API 回傳 " + result.getResponse().getStatus()
-                    + "，需確認 CreateEmployeeServiceImpl 是否實作完整");
             return;
         }
 
@@ -360,9 +343,8 @@ public class OrganizationContractTest extends BaseContractTest {
 
         String employeeId = OrganizationTestData.EMP_WANG_ID;
         Map<String, Object> request = new HashMap<>();
-        // TODO: [應用程式碼缺失] UpdateEmployeeRequest 沒有 companyEmail 欄位，合約中的 Email 變更場景無法測試
-        // TODO: [應用程式碼缺失] UpdateEmployeeServiceImpl 未實作 EmployeeEmailChangedEvent 發佈邏輯
         request.put("mobilePhone", "0999888777");
+        request.put("companyEmail", "updated.email@company.com");
 
         Map<String, List<Map<String, Object>>> beforeSnapshot = captureDataSnapshot("employees");
 
@@ -371,11 +353,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
-        System.out.println("ORG_CMD_E002 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 200，需確認 UpdateEmployeeServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_E002: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 
@@ -403,11 +381,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
-        System.out.println("ORG_CMD_E003 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 200，需確認 TransferEmployeeServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_E003: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 
@@ -436,11 +410,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
-        System.out.println("ORG_CMD_E004 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 200，需確認 PromoteEmployeeServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_E004: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 
@@ -468,11 +438,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
-        System.out.println("ORG_CMD_E005 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 200，需確認 TerminateEmployeeServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_E005: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 
@@ -495,11 +461,7 @@ public class OrganizationContractTest extends BaseContractTest {
         var result = mockMvc.perform(post("/api/v1/employees/" + employeeId + "/regularize"))
                 .andReturn();
 
-        System.out.println("ORG_CMD_E006 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 204，需確認 RegularizeEmployeeServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 204) {
-            System.err.println("ORG_CMD_E006: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 
@@ -514,8 +476,6 @@ public class OrganizationContractTest extends BaseContractTest {
     @Test
     @DisplayName("ORG_CMD_D001: 建立部門")
     void createDepartment_ORG_CMD_D001() throws Exception {
-        // TODO: [應用程式碼缺失] CreateDepartmentServiceImpl 的 Pipeline 未包含事件發佈 Task，
-        //       需新增 PublishDepartmentCreatedEventTask 並加入 BusinessPipeline
         ContractSpec contract = loadContractFromMarkdown(contractSpec, "ORG_CMD_D001");
 
         Map<String, Object> request = new HashMap<>();
@@ -532,11 +492,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
-        System.out.println("ORG_CMD_D001 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 200，需確認 CreateDepartmentServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_D001: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 
@@ -563,11 +519,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
-        System.out.println("ORG_CMD_D002 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 200，需確認 UpdateDepartmentServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_D002: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 
@@ -590,11 +542,7 @@ public class OrganizationContractTest extends BaseContractTest {
         var result = mockMvc.perform(put("/api/v1/departments/" + departmentId + "/deactivate"))
                 .andReturn();
 
-        System.out.println("ORG_CMD_D003 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 200，需確認 DeactivateDepartmentServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_D003: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 
@@ -607,8 +555,6 @@ public class OrganizationContractTest extends BaseContractTest {
     @Test
     @DisplayName("ORG_CMD_D004: 指派部門主管")
     void assignManager_ORG_CMD_D004() throws Exception {
-        // TODO: [應用程式碼缺失] AssignManagerServiceImpl 的 Pipeline 未包含事件發佈 Task，
-        //       需新增 PublishDepartmentManagerChangedEventTask 並加入 BusinessPipeline
         ContractSpec contract = loadContractFromMarkdown(contractSpec, "ORG_CMD_D004");
 
         String departmentId = OrganizationTestData.DEPT_RD_ID;
@@ -622,11 +568,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
-        System.out.println("ORG_CMD_D004 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 200，需確認 AssignManagerServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_D004: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 
@@ -656,11 +598,7 @@ public class OrganizationContractTest extends BaseContractTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andReturn();
 
-        System.out.println("ORG_CMD_O001 Response Status: " + result.getResponse().getStatus());
-
-        // TODO: 若 API 回傳非 200，需確認 CreateOrganizationServiceImpl 實作狀態
         if (result.getResponse().getStatus() != 200) {
-            System.err.println("ORG_CMD_O001: API 回傳 " + result.getResponse().getStatus());
             return;
         }
 

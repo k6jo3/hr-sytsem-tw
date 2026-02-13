@@ -52,7 +52,6 @@ public class DashboardMapper {
                 dashboard.updateWidgets(widgets);
             } catch (JsonProcessingException e) {
                 // Log error or ignore if config is invalid
-                // System.err.println("Failed to parse widgets config: " + e.getMessage());
             }
         }
 

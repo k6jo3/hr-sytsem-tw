@@ -11,6 +11,7 @@ import com.company.hrms.organization.api.response.department.CreateDepartmentRes
 import com.company.hrms.organization.application.service.department.context.DepartmentContext;
 import com.company.hrms.organization.application.service.department.task.CheckDeptCodeExistenceTask;
 import com.company.hrms.organization.application.service.department.task.CreateDeptAggregateTask;
+import com.company.hrms.organization.application.service.department.task.PublishDepartmentCreatedEventTask;
 import com.company.hrms.organization.application.service.department.task.SaveDeptTask;
 import com.company.hrms.organization.application.service.department.task.ValidateOrgAndManagerTask;
 import com.company.hrms.organization.application.service.department.task.ValidateParentDeptTask;
@@ -41,43 +42,45 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional
 public class CreateDepartmentServiceImpl
-        implements CommandApiService<CreateDepartmentRequest, CreateDepartmentResponse> {
+                implements CommandApiService<CreateDepartmentRequest, CreateDepartmentResponse> {
 
-    private final ValidateOrgAndManagerTask validateOrgAndManagerTask;
-    private final CheckDeptCodeExistenceTask checkDeptCodeExistenceTask;
-    private final ValidateParentDeptTask validateParentDeptTask;
-    private final CreateDeptAggregateTask createDeptAggregateTask;
-    private final SaveDeptTask saveDeptTask;
+        private final ValidateOrgAndManagerTask validateOrgAndManagerTask;
+        private final CheckDeptCodeExistenceTask checkDeptCodeExistenceTask;
+        private final ValidateParentDeptTask validateParentDeptTask;
+        private final CreateDeptAggregateTask createDeptAggregateTask;
+        private final SaveDeptTask saveDeptTask;
+        private final PublishDepartmentCreatedEventTask publishDepartmentCreatedEventTask;
 
-    @Override
-    public CreateDepartmentResponse execCommand(CreateDepartmentRequest request,
-            JWTModel currentUser, String... args) throws Exception {
+        @Override
+        public CreateDepartmentResponse execCommand(CreateDepartmentRequest request,
+                        JWTModel currentUser, String... args) throws Exception {
 
-        log.info("建立部門: code={}, name={}", request.getCode(), request.getName());
+                log.info("建立部門: code={}, name={}", request.getCode(), request.getName());
 
-        // 1. 建立 Context
-        DepartmentContext context = new DepartmentContext(request);
+                // 1. 建立 Context
+                DepartmentContext context = new DepartmentContext(request);
 
-        // 2. 執行 Pipeline
-        BusinessPipeline.start(context)
-                .next(validateOrgAndManagerTask)
-                .next(checkDeptCodeExistenceTask)
-                .next(validateParentDeptTask)
-                .next(createDeptAggregateTask)
-                .next(saveDeptTask)
-                .execute();
+                // 2. 執行 Pipeline
+                BusinessPipeline.start(context)
+                                .next(validateOrgAndManagerTask)
+                                .next(checkDeptCodeExistenceTask)
+                                .next(validateParentDeptTask)
+                                .next(createDeptAggregateTask)
+                                .next(saveDeptTask)
+                                .next(publishDepartmentCreatedEventTask)
+                                .execute();
 
-        // 3. 建立回應
-        var department = context.getDepartment();
+                // 3. 建立回應
+                var department = context.getDepartment();
 
-        log.info("部門建立成功: id={}, code={}",
-                department.getId().getValue(),
-                department.getCode());
+                log.info("部門建立成功: id={}, code={}",
+                                department.getId().getValue(),
+                                department.getCode());
 
-        return CreateDepartmentResponse.success(
-                department.getId().getValue().toString(),
-                department.getCode(),
-                department.getName(),
-                department.getLevel());
-    }
+                return CreateDepartmentResponse.success(
+                                department.getId().getValue().toString(),
+                                department.getCode(),
+                                department.getName(),
+                                department.getLevel());
+        }
 }

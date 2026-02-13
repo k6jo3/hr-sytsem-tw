@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS users (
     last_logout_at TIMESTAMP,
     last_login_ip VARCHAR(50),
     password_changed_at TIMESTAMP,
+    preferred_language VARCHAR(10) DEFAULT 'zh-TW',
+    timezone VARCHAR(50) DEFAULT 'Asia/Taipei',
     must_change_password BOOLEAN DEFAULT FALSE,
     is_deleted BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -196,12 +198,12 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 -- 密碼都是 'password123' (BCrypt 加密, strength=12)
 -- 明確指定 created_at 和 updated_at 為固定值，避免快照比對問題
 INSERT INTO users (user_id, username, email, password_hash, display_name, employee_id, tenant_id, status, last_login_ip, created_at, updated_at) VALUES
-('00000000-0000-0000-0000-000000000999', 'admin@company.com', 'admin@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Admin User', 'E000', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
-('00000000-0000-0000-0000-000000000001', 'system.admin@company.com', 'system.admin@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'System Admin', 'E001', '00000000-0000-0000-0000-000000000001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
-('00000000-0000-0000-0000-000000000111', 'test.user@company.com', 'test.user@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Test User', 'E111', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
-('00000000-0000-0000-0000-000000000222', 'inactive.user@company.com', 'inactive.user@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Inactive User', 'E222', 'T001', 'INACTIVE', NULL, '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
-('00000000-0000-0000-0000-000000000333', 'batch1@company.com', 'batch1@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Batch User 1', 'E333', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
-('00000000-0000-0000-0000-000000000444', 'batch2@company.com', 'batch2@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Batch User 2', 'E444', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00');
+('00000000-0000-0000-0000-000000000999', 'admin@company.com', 'admin@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Admin User', '00000000-0000-0000-0000-000000000E00', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000001', 'system.admin@company.com', 'system.admin@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'System Admin', '00000000-0000-0000-0000-000000000E01', '00000000-0000-0000-0000-000000000001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000111', 'test.user@company.com', 'test.user@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Test User', '00000000-0000-0000-0000-000000000E11', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000222', 'inactive.user@company.com', 'inactive.user@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Inactive User', '00000000-0000-0000-0000-000000000E22', 'T001', 'INACTIVE', NULL, '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000333', 'batch1@company.com', 'batch1@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Batch User 1', '00000000-0000-0000-0000-000000000E33', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00'),
+('00000000-0000-0000-0000-000000000444', 'batch2@company.com', 'batch2@company.com', '$2a$12$FeuZsVoN4ljUZu.Z8.Q5wOsCr7fqKfXpl3fKgUXP4653RSf8aVaZ2', 'Batch User 2', '00000000-0000-0000-0000-000000000E44', 'T001', 'ACTIVE', '127.0.0.1', '2026-01-01 00:00:00', '2026-01-01 00:00:00');
 
 -- 指派角色給使用者
 INSERT INTO user_roles (user_role_id, user_id, role_id) VALUES

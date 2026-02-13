@@ -50,6 +50,7 @@ public class AddProjectMemberServiceTest {
         request.setEmployeeId(UUID.randomUUID());
         request.setRole("Developer");
         request.setAllocatedHours(new BigDecimal("100"));
+        request.setHourlyRate(new BigDecimal("800"));
 
         // 手動注入實例，確保 Pipeline 中的 Task 不是 null
         var loadTask = new com.company.hrms.project.application.service.task.LoadProjectTask(projectRepository);
@@ -70,7 +71,8 @@ public class AddProjectMemberServiceTest {
 
         // Assert
         assertTrue(response.isSuccess());
-        verify(project).addMember(request.getEmployeeId(), request.getRole(), request.getAllocatedHours());
+        verify(project).addMember(request.getEmployeeId(), request.getRole(), request.getAllocatedHours(),
+                request.getHourlyRate());
         verify(projectRepository).save(project);
     }
 }

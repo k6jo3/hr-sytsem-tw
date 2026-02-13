@@ -75,10 +75,10 @@ class CheckInApiIntegrationTest extends BaseApiIntegrationTest {
 	/**
 	 * 打卡 API 測試
 	 */
+
 	@Nested
 	@DisplayName("打卡 API")
 	class CheckInApiTests {
-
 		@Test
 		@DisplayName("ATT_CHECKIN_API_001: 上班打卡 - 應返回打卡記錄")
 		void ATT_CHECKIN_API_001_checkIn_ShouldReturnRecord() throws Exception {

@@ -22,7 +22,7 @@ public interface UserMapper {
          * 根據 ID 查詢使用者
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, password_changed_at, "
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
                         "FROM users WHERE user_id = #{userId}")
@@ -32,7 +32,7 @@ public interface UserMapper {
          * 根據使用者名稱查詢
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, password_changed_at, "
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
                         "FROM users WHERE username = #{username}")
@@ -42,7 +42,7 @@ public interface UserMapper {
          * 根據 Email 查詢
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, password_changed_at, "
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
                         "FROM users WHERE email = #{email}")
@@ -52,7 +52,7 @@ public interface UserMapper {
          * 根據狀態查詢
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, password_changed_at, "
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
                         "FROM users WHERE status = #{status} AND is_deleted = FALSE")
@@ -62,7 +62,7 @@ public interface UserMapper {
          * 查詢所有使用者
          */
         @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, password_changed_at, "
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
                         "FROM users WHERE is_deleted = FALSE ORDER BY created_at DESC")
@@ -72,12 +72,12 @@ public interface UserMapper {
          * 新增使用者
          */
         @Insert("INSERT INTO users (user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
-                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, password_changed_at, "
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at) " +
                         "VALUES (#{userId}, #{username}, #{email}, #{passwordHash}, #{displayName}, #{employeeId}, #{tenantId}, "
                         +
-                        "#{status}, #{failedLoginAttempts}, #{lockedUntil}, #{lastLoginAt}, #{lastLogoutAt}, #{lastLoginIp}, #{passwordChangedAt}, "
+                        "#{status}, #{failedLoginAttempts}, #{lockedUntil}, #{lastLoginAt}, #{lastLogoutAt}, #{lastLoginIp}, #{preferredLanguage}, #{timezone}, #{passwordChangedAt}, "
                         +
                         "#{mustChangePassword}, #{isDeleted}, #{createdAt}, #{updatedAt})")
         void insert(UserPO userPO);
@@ -92,7 +92,8 @@ public interface UserMapper {
                         +
                         "locked_until = #{lockedUntil}, last_login_at = #{lastLoginAt}, last_logout_at = #{lastLogoutAt}, "
                         +
-                        "last_login_ip = #{lastLoginIp}, password_changed_at = #{passwordChangedAt}, " +
+                        "last_login_ip = #{lastLoginIp}, preferred_language = #{preferredLanguage}, timezone = #{timezone}, password_changed_at = #{passwordChangedAt}, "
+                        +
                         "must_change_password = #{mustChangePassword}, is_deleted = #{isDeleted}, updated_at = #{updatedAt} "
                         +
                         "WHERE user_id = #{userId}")

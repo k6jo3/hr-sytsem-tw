@@ -775,6 +775,16 @@ public class MarkdownContractEngine {
         if (singular.endsWith("s")) {
             singular = singular.substring(0, singular.length() - 1);
         }
+
+        // 去掉常見表名前綴 (例如 rpt_dashboard → dashboard, rm_employee_roster → employee_roster)
+        String[] commonPrefixes = {"rpt_", "rm_", "hrs_", "att_", "pay_", "ins_", "prj_", "tms_", "pfm_", "rct_", "trn_", "wfl_", "ntf_", "doc_"};
+        for (String prefix : commonPrefixes) {
+            if (singular.startsWith(prefix)) {
+                singular = singular.substring(prefix.length());
+                break;
+            }
+        }
+
         String tableSpecificId = singular + "_id";
 
         // 如果表中包含其名稱推導出的 ID，則以此為唯一比對標準
@@ -827,47 +837,53 @@ public class MarkdownContractEngine {
      * 判斷記錄是否被更新（排除時間戳欄位）
      */
     private boolean isRecordUpdated(Map<String, Object> beforeRecord, Map<String, Object> afterRecord) {
-        // 排除時間戳欄位的比對
-        String[] timestampFields = { "created_at", "updated_at", "deleted_at", "assigned_at", "granted_at",
+        // 排除時間戳與稽核欄位的比對
+        java.util.Set<String> excludeFields = java.util.Set.of(
+                "created_at", "updated_at", "deleted_at", "assigned_at", "granted_at",
                 "revoked_at", "expires_at", "used_at", "linked_at", "last_used_at", "last_login_at",
-                "last_logout_at", "password_changed_at", "locked_until", "login_at" };
+                "last_logout_at", "password_changed_at", "locked_until", "login_at",
+                "created_by", "updated_by", "deleted_by");
 
-        Map<String, Object> beforeFiltered = new java.util.HashMap<>(beforeRecord);
-        Map<String, Object> afterFiltered = new java.util.HashMap<>(afterRecord);
+        // 正規化欄位名為小寫，並排除時間戳/稽核欄位
+        Map<String, Object> beforeFiltered = new java.util.HashMap<>();
+        beforeRecord.forEach((k, v) -> {
+            String key = k.toLowerCase();
+            if (!excludeFields.contains(key)) {
+                beforeFiltered.put(key, v);
+            }
+        });
+        Map<String, Object> afterFiltered = new java.util.HashMap<>();
+        afterRecord.forEach((k, v) -> {
+            String key = k.toLowerCase();
+            if (!excludeFields.contains(key)) {
+                afterFiltered.put(key, v);
+            }
+        });
 
-        // 移除時間戳欄位
-        for (String field : timestampFields) {
-            beforeFiltered.remove(field);
-            afterFiltered.remove(field);
-        }
-
-        boolean isUpdated = !beforeFiltered.equals(afterFiltered);
-
-        // 獲取記錄 ID 用於調試
-        String recordId = null;
-        String[] possibleIdFields = { "id", "user_id", "role_id", "permission_id" };
-        for (String idField : possibleIdFields) {
-            if (afterRecord.containsKey(idField)) {
-                recordId = String.valueOf(afterRecord.get(idField));
+        // 逐欄位比對（處理 byte[] 等特殊型別）
+        boolean isUpdated = false;
+        for (String key : beforeFiltered.keySet()) {
+            Object beforeVal = beforeFiltered.get(key);
+            Object afterVal = afterFiltered.get(key);
+            if (!isValueDeepEqual(beforeVal, afterVal)) {
+                isUpdated = true;
                 break;
             }
         }
 
-        System.out.println(">>> Checking record: " + recordId + ", isUpdated: " + isUpdated);
-
-        if (isUpdated) {
-            System.out.println("DEBUG: Record updated - " + recordId);
-            // 找出哪些欄位改變了
-            for (String key : beforeFiltered.keySet()) {
-                Object beforeVal = beforeFiltered.get(key);
-                Object afterVal = afterFiltered.get(key);
-                if ((beforeVal == null && afterVal != null) ||
-                        (beforeVal != null && !beforeVal.equals(afterVal))) {
-                    System.out.println("  Changed field: " + key + " from [" + beforeVal + "] to [" + afterVal + "]");
-                }
-            }
-        }
         return isUpdated;
+    }
+
+    /**
+     * 深度比較兩個值，支援 byte[] 等特殊型別
+     */
+    private boolean isValueDeepEqual(Object a, Object b) {
+        if (a == b) return true;
+        if (a == null || b == null) return false;
+        if (a instanceof byte[] && b instanceof byte[]) {
+            return java.util.Arrays.equals((byte[]) a, (byte[]) b);
+        }
+        return a.equals(b);
     }
 
     private void assertDataFieldAssertion(Map<String, Object> record, FieldAssertion assertion,

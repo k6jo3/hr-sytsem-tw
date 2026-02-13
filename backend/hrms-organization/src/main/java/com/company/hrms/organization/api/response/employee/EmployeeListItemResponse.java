@@ -16,6 +16,7 @@ public class EmployeeListItemResponse {
     private String employeeNumber;
     private String fullName;
     private String departmentId; // New
+    private String departmentName; // New
     private String departmentPath;
     private String positionId; // New
     private String email; // New

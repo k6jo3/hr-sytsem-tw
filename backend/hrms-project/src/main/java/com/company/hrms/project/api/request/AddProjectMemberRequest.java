@@ -23,4 +23,7 @@ public class AddProjectMemberRequest {
 
     @Schema(description = "分配工時")
     private BigDecimal allocatedHours;
+
+    @Schema(description = "時薪費率")
+    private BigDecimal hourlyRate;
 }

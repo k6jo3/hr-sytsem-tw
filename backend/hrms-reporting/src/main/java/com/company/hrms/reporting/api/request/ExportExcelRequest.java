@@ -18,8 +18,8 @@ public class ExportExcelRequest {
     @Schema(description = "報表類型", example = "EMPLOYEE_ROSTER", requiredMode = Schema.RequiredMode.REQUIRED)
     private String reportType;
 
-    @Schema(description = "查詢條件 (JSON 格式)")
-    private String queryConditions;
+    @Schema(description = "查詢條件")
+    private java.util.Map<String, Object> filters;
 
     @Schema(description = "匯出欄位列表")
     private List<String> columns;

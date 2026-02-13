@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.model.JWTModel;
-import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.project.api.request.GetCustomerListRequest;
 import com.company.hrms.project.api.response.CustomerListItemResponse;
 import com.company.hrms.project.api.response.GetCustomerListResponse;
+import com.company.hrms.project.application.service.assembler.CustomerQueryAssembler;
 import com.company.hrms.project.domain.model.aggregate.Customer;
 import com.company.hrms.project.domain.repository.ICustomerRepository;
 
@@ -28,22 +28,13 @@ import lombok.RequiredArgsConstructor;
 public class GetCustomerListServiceImpl implements QueryApiService<GetCustomerListRequest, GetCustomerListResponse> {
 
         private final ICustomerRepository customerRepository;
+        private final CustomerQueryAssembler customerQueryAssembler = new CustomerQueryAssembler();
 
         @Override
         public GetCustomerListResponse getResponse(GetCustomerListRequest req, JWTModel currentUser, String... args)
                         throws Exception {
-                // 使用 Fluent-Query-Engine API
-                var builder = QueryBuilder.where();
-
-                if (req.getKeyword() != null && !req.getKeyword().isEmpty()) {
-                        String k = req.getKeyword();
-                        builder.orGroup(or -> or
-                                        .like("customerName", k)
-                                        .like("customerCode", k)
-                                        .like("taxId", k));
-                }
-
-                QueryGroup query = builder.build();
+                // 使用 Assembler 統一查詢條件 (包含與合約測試一致的邏輯)
+                QueryGroup query = customerQueryAssembler.toQueryGroup(req);
 
                 // Build Pageable (Default sort by CustomerCode ASC)
                 Pageable pageable = PageRequest.of(req.getPage(), req.getSize(),
@@ -76,6 +67,7 @@ public class GetCustomerListServiceImpl implements QueryApiService<GetCustomerLi
                                 .email(customer.getEmail())
                                 .phoneNumber(customer.getPhoneNumber())
                                 .status(customer.getStatus().name())
+                                .projectCount(customer.getProjectCount())
                                 .build();
         }
 }

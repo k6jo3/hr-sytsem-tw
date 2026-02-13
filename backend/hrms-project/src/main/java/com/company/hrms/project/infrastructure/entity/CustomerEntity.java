@@ -2,6 +2,8 @@ package com.company.hrms.project.infrastructure.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.Formula;
+
 import com.company.hrms.project.domain.model.valueobject.CustomerStatus;
 
 import jakarta.persistence.Column;
@@ -59,6 +61,13 @@ public class CustomerEntity {
 
     @Column(name = "version")
     private long version;
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private Integer isDeleted = 0;
+
+    @Formula("(SELECT COUNT(*) FROM projects p WHERE p.customer_id = customer_id)")
+    private Integer projectCount;
 
     @PrePersist
     protected void onCreate() {
