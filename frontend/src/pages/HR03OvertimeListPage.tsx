@@ -1,5 +1,4 @@
 import { RootState } from '@/store';
-import { PageLayout } from '@shared/components';
 import { Button, Card, message, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -105,7 +104,7 @@ export const HR03OvertimeListPage: React.FC = () => {
   ];
 
   return (
-    <PageLayout>
+    <>
       <div style={{ padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <Title level={3}>我的加班紀錄</Title>
@@ -133,7 +132,7 @@ export const HR03OvertimeListPage: React.FC = () => {
           onSuccess={handleApplySuccess}
         />
       </div>
-    </PageLayout>
+    </>
   );
 };
 

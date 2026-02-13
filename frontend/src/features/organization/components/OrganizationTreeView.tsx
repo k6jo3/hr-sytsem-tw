@@ -5,7 +5,7 @@
  * Displays organization structure in a tree format
  */
 
-import { BankOutlined, DeleteOutlined, DownOutlined, EditOutlined, PlusOutlined, RefreshOutlined, TeamOutlined } from '@ant-design/icons';
+import { BankOutlined, DeleteOutlined, DownOutlined, EditOutlined, PlusOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Dropdown, Empty, message, Modal, Row, Spin, Statistic, Tree } from 'antd';
 import { DataNode } from 'antd/es/tree';
 import React, { useEffect, useState } from 'react';
@@ -41,7 +41,8 @@ export const OrganizationTreeView: React.FC = () => {
             }
 
             // 2. Default to first organization (usually HEADQUARTERS)
-            const targetOrgId = orgs[0].organizationId;
+            const targetOrgId = orgs[0]?.organizationId;
+            if (!targetOrgId) return;
             
             // 3. Fetch Tree Structure
             const treeRes = await OrganizationApi.getOrganizationTree(targetOrgId);
@@ -170,7 +171,7 @@ export const OrganizationTreeView: React.FC = () => {
             >
                 <div style={{ display: 'inline-block', width: '100%' }}>
                      <span style={{ fontSize: 16, padding: '4px 0' }}>
-                        {node.title} 
+                        {typeof node.title === 'function' ? node.title(node) : node.title} 
                     </span>
                 </div>
             </Dropdown>
@@ -192,7 +193,7 @@ export const OrganizationTreeView: React.FC = () => {
                         新增部門
                     </Button>
                     <Button 
-                        icon={<RefreshOutlined />} 
+                        icon={<ReloadOutlined />} 
                         onClick={loadOrganizationData} 
                         loading={loading}
                     >

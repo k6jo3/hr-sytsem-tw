@@ -74,7 +74,7 @@ export class PayrollApi {
    * 查詢薪資結構列表
    */
   static async getSalaryStructures(params?: any): Promise<any> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PAYROLL')) return { items: [], total: 0 };
     return apiClient.get('/salary-structures', { params });
   }
 
@@ -98,7 +98,7 @@ export class PayrollApi {
    * 更新薪資結構
    */
   static async updateSalaryStructure(id: string, request: UpdateSalaryStructureRequest): Promise<SalaryStructureDto> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PAYROLL')) return { id, ...request } as any;
     return apiClient.put(`/salary-structures/${id}`, request);
   }
 
@@ -190,7 +190,7 @@ export class PayrollApi {
    * 取得薪資項目定義列表
    */
   static async getPayrollItemDefinitions(): Promise<PayrollItemDefinitionDto[]> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PAYROLL')) return [] as any;
     return apiClient.get('/payroll-item-definitions');
   }
 
@@ -198,7 +198,7 @@ export class PayrollApi {
    * 建立薪資項目定義
    */
   static async createPayrollItemDefinition(data: Partial<PayrollItemDefinitionDto>): Promise<PayrollItemDefinitionDto> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PAYROLL')) return { ...data, id: 'mock-id' } as any;
     return apiClient.post('/payroll-item-definitions', data);
   }
 
@@ -206,7 +206,7 @@ export class PayrollApi {
    * 更新薪資項目定義
    */
   static async updatePayrollItemDefinition(id: string, data: Partial<PayrollItemDefinitionDto>): Promise<PayrollItemDefinitionDto> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PAYROLL')) return { ...data, id } as any;
     return apiClient.put(`/payroll-item-definitions/${id}`, data);
   }
 
@@ -214,7 +214,7 @@ export class PayrollApi {
    * 刪除薪資項目定義
    */
   static async deletePayrollItemDefinition(id: string): Promise<void> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PAYROLL')) return;
     return apiClient.delete(`/payroll-item-definitions/${id}`);
   }
 
@@ -224,7 +224,7 @@ export class PayrollApi {
    * 產生銀行薪轉檔案
    */
   static async generateBankTransferFile(runId: string): Promise<PayrollRunDto> {
-    // Mock not implemented yet
+    if (MockConfig.isEnabled('PAYROLL')) return { id: runId, status: 'BANK_TRANSFERRED' } as any;
     return apiClient.post(`/payroll-runs/${runId}/bank-transfer`, {});
   }
 

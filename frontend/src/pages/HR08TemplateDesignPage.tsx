@@ -76,8 +76,14 @@ export const HR08TemplateDesignPage: React.FC = () => {
     
     const newItems = [...items];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    [newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]];
-    setItems(newItems);
+    const currentItem = newItems[index];
+    const targetItem = newItems[targetIndex];
+    
+    if (currentItem && targetItem) {
+      newItems[index] = targetItem;
+      newItems[targetIndex] = currentItem;
+      setItems(newItems);
+    }
   };
 
   const handleItemChange = (index: number, field: keyof EvaluationItemDto, value: any) => {

@@ -31,8 +31,14 @@
             "@features/*": [
                 "src/features/*"
             ],
+            "@shared": [
+                "src/shared/index.ts"
+            ],
             "@shared/*": [
                 "src/shared/*"
+            ],
+            "@pages": [
+                "src/pages/index.ts"
             ],
             "@pages/*": [
                 "src/pages/*"

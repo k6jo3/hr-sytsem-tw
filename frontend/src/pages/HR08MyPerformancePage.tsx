@@ -1,6 +1,6 @@
-import React from 'react';
-import { Card, Alert, Descriptions, Spin, Table, Tag, Space, Statistic, Row, Col } from 'antd';
+import { Alert, Card, Col, Descriptions, Row, Spin, Statistic, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import React from 'react';
 import { SelfEvaluationForm } from '../features/performance/components/SelfEvaluationForm';
 import { useMyPerformance } from '../features/performance/hooks/useMyPerformance';
 import type { PerformanceReviewViewModel } from '../features/performance/model/PerformanceViewModel';
@@ -9,7 +9,7 @@ import type { PerformanceReviewViewModel } from '../features/performance/model/P
  * HR08-P01 我的考核（員工自助服務）
  */
 export const HR08MyPerformancePage: React.FC = () => {
-  const { performance, loading, error, submitting, refresh, saveReview, submitReview } =
+  const { performance, loading, error, submitting, saveReview, submitReview } =
     useMyPerformance();
 
   if (loading) {
@@ -147,8 +147,14 @@ export const HR08MyPerformancePage: React.FC = () => {
           <SelfEvaluationForm
             evaluationItems={performance.selfReview.evaluationItems}
             comments={performance.selfReview.comments}
-            onSave={saveReview}
-            onSubmit={submitReview}
+            onSave={async (items, comments) => {
+              await saveReview(items, comments);
+            }}
+            onSubmit={async () => {
+              if (performance.selfReview?.reviewId) {
+                await submitReview(performance.selfReview.reviewId);
+              }
+            }}
             canEdit={performance.selfReview.canEdit}
             canSubmit={performance.selfReview.canSubmit}
             loading={submitting}

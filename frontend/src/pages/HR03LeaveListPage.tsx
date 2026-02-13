@@ -1,5 +1,4 @@
 import { RootState } from '@/store';
-import { PageLayout } from '@shared/components';
 import { Button, Card, message, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -14,7 +13,7 @@ import { ApplyLeaveModal } from '../features/attendance/components/ApplyLeaveMod
 
 /**
  * HR03 請假申請列表頁面
- * 頁面代碼：HR03-P03
+ * 頁面代碼：HR03-P02
  */
 export const HR03LeaveListPage: React.FC = () => {
   const [data, setData] = useState<LeaveApplicationDto[]>([]);
@@ -127,10 +126,10 @@ export const HR03LeaveListPage: React.FC = () => {
   ];
 
   return (
-    <PageLayout>
+    <>
       <div style={{ padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <Title level={3}>我的請假紀錄</Title>
+          <Title level={3}>請假與加班申請列表</Title>
           <Button type="primary" onClick={() => setModalVisible(true)}>申請請假</Button>
         </div>
 
@@ -155,7 +154,7 @@ export const HR03LeaveListPage: React.FC = () => {
           onSuccess={handleApplySuccess}
         />
       </div>
-    </PageLayout>
+    </>
   );
 };
 

@@ -8,8 +8,8 @@ import type { PayrollItemDto, PayslipDto, PayslipSummaryDto } from '../features/
 const { Title, Text } = Typography;
 
 /**
- * HR04 我的薪資單頁面 (ESS)
- * 頁面代碼：HR04-P06
+ * HR04 電子薪資單發布與查詢 (ESS)
+ * 頁面代碼：HR04-P02
  */
 export const HR04PayslipPage: React.FC = () => {
   const [payslips, setPayslips] = useState<PayslipSummaryDto[]>([]);
@@ -119,7 +119,7 @@ export const HR04PayslipPage: React.FC = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      <Title level={2}>我的薪資單</Title>
+      <Title level={2}>電子薪資單發布與查詢</Title>
       <Card>
         <Table 
           columns={columns} 

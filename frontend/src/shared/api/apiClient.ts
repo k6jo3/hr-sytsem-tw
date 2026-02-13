@@ -98,6 +98,14 @@ class ApiClient {
     const response = await this.instance.delete<T>(url, config);
     return response.data;
   }
+
+  /**
+   * PATCH 請求
+   */
+  async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.instance.patch<T>(url, data, config);
+    return response.data;
+  }
 }
 
 // 預設 API Client 實例

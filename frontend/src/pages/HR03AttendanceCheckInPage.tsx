@@ -1,7 +1,6 @@
 import { CheckInButton } from '@features/attendance/components/CheckInButton';
 import { TodayAttendanceCard } from '@features/attendance/components/TodayAttendanceCard';
 import { useAttendance } from '@features/attendance/hooks/useAttendance';
-import { PageLayout } from '@shared/components';
 import { Card, Col, Row, Space, Typography, message } from 'antd';
 import React from 'react';
 
@@ -42,10 +41,10 @@ const HR03AttendanceCheckInPage: React.FC = () => {
   };
 
   return (
-    <PageLayout>
+    <>
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 0' }}>
         <Title level={3} style={{ marginBottom: 24 }}>
-          考勤打卡
+          員工自助打卡
         </Title>
 
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -75,7 +74,7 @@ const HR03AttendanceCheckInPage: React.FC = () => {
           <TodayAttendanceCard summary={summary} loading={loading} />
         </Space>
       </div>
-    </PageLayout>
+    </>
   );
 };
 

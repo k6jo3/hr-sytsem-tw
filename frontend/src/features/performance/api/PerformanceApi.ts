@@ -42,7 +42,7 @@ export class PerformanceApi {
    * POST /api/v1/performance/reviews - 新增/更新考核
    */
   static async saveReview(request: SaveReviewRequest): Promise<SaveReviewResponse> {
-    // Mock impl not fully complete for write ops, can extend MockPerformanceApi if needed
+    if (MockConfig.isEnabled('PERFORMANCE')) return { review_id: 'mock-review-id', message: '考核已儲存 (Mock)' };
     return apiClient.post<SaveReviewResponse>(`${this.BASE_PATH}/reviews`, request);
   }
 
@@ -53,6 +53,7 @@ export class PerformanceApi {
     reviewId: string,
     request: SubmitReviewRequest
   ): Promise<SubmitReviewResponse> {
+    if (MockConfig.isEnabled('PERFORMANCE')) return { review_id: reviewId, overall_score: 4.5, overall_rating: 'A', message: '考核已提交 (Mock)' };
     return apiClient.put<SubmitReviewResponse>(
       `${this.BASE_PATH}/reviews/${reviewId}/submit`,
       request

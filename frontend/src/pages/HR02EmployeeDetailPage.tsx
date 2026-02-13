@@ -1,7 +1,7 @@
 /**
  * Employee Detail Page
  * Domain Code: HR02
- * Page Code: HR02-P04
+ * Page Code: HR02-P03
  * Displays employee details by ID
  */
 
@@ -13,7 +13,6 @@ import { Alert, Breadcrumb, Button, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { PageLayout } from '@shared/components';
 
 export const HR02EmployeeDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -49,13 +48,13 @@ export const HR02EmployeeDetailPage: React.FC = () => {
     };
 
     return (
-        <PageLayout>
+        <>
             <div style={{ padding: '0 24px' }}>
                 <Breadcrumb style={{ margin: '16px 0' }}>
                     <Breadcrumb.Item>
-                        <span onClick={handleBack} style={{ cursor: 'pointer' }}>員工管理</span>
+                        <span onClick={handleBack} style={{ cursor: 'pointer' }}>員工清單</span>
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item>員工詳情</Breadcrumb.Item>
+                    <Breadcrumb.Item>員工詳細資料</Breadcrumb.Item>
                 </Breadcrumb>
                 
                 <div style={{ marginBottom: 16 }}>
@@ -74,6 +73,6 @@ export const HR02EmployeeDetailPage: React.FC = () => {
                     <EmployeeDetailView employee={employee} />
                 ) : null}
             </div>
-        </PageLayout>
+        </>
     );
 };

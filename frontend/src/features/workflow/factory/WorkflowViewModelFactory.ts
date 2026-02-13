@@ -4,26 +4,26 @@
  */
 
 import type {
-  ApprovalTaskDto,
-  BusinessType,
-  DelegationDto,
-  InstanceStatus,
-  NodeType,
-  TaskStatus,
-  WorkflowDefinitionDto,
-  WorkflowEdgeDto,
-  WorkflowInstanceDto,
-  WorkflowNodeDto,
+    ApprovalTaskDto,
+    BusinessType,
+    DelegationDto,
+    InstanceStatus,
+    NodeType,
+    TaskStatus,
+    WorkflowDefinitionDto,
+    WorkflowEdgeDto,
+    WorkflowInstanceDto,
+    WorkflowNodeDto,
 } from '../api/WorkflowTypes';
 import type {
-  ApplicationSummaryViewModel,
-  ApprovalTaskViewModel,
-  DelegationViewModel,
-  TaskSummaryViewModel,
-  WorkflowDefinitionViewModel,
-  WorkflowEdgeViewModel,
-  WorkflowInstanceViewModel,
-  WorkflowNodeViewModel,
+    ApplicationSummaryViewModel,
+    ApprovalTaskViewModel,
+    DelegationViewModel,
+    TaskSummaryViewModel,
+    WorkflowDefinitionViewModel,
+    WorkflowEdgeViewModel,
+    WorkflowInstanceViewModel,
+    WorkflowNodeViewModel,
 } from '../model/WorkflowViewModel';
 
 export class WorkflowViewModelFactory {
@@ -238,7 +238,7 @@ export class WorkflowViewModelFactory {
   }
 
   static createTaskSummary(tasks: ApprovalTaskDto[]): TaskSummaryViewModel {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0] || '';
     let overdueCount = 0;
     let dueTodayCount = 0;
     let normalCount = 0;

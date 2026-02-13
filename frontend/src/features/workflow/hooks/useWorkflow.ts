@@ -8,11 +8,11 @@ import { WorkflowApi } from '../api';
 import type { ApproveTaskRequest, RejectTaskRequest } from '../api/WorkflowTypes';
 import { WorkflowViewModelFactory } from '../factory/WorkflowViewModelFactory';
 import type {
-  ApprovalTaskViewModel,
-  DelegationViewModel,
-  TaskSummaryViewModel,
-  WorkflowDefinitionViewModel,
-  WorkflowInstanceViewModel,
+    ApprovalTaskViewModel,
+    DelegationViewModel,
+    TaskSummaryViewModel,
+    WorkflowDefinitionViewModel,
+    WorkflowInstanceViewModel,
 } from '../model/WorkflowViewModel';
 
 /**
@@ -43,7 +43,7 @@ export const usePendingTasks = () => {
   }, []);
 
   const approveTask = useCallback(
-    async (taskId: string, request?: ApproveTaskRequest) => {
+    async (taskId: string, request?: Partial<ApproveTaskRequest>) => {
       try {
         await WorkflowApi.approveTask(taskId, request);
         await fetchTasks();
@@ -57,7 +57,7 @@ export const usePendingTasks = () => {
   );
 
   const rejectTask = useCallback(
-    async (taskId: string, request: RejectTaskRequest) => {
+    async (taskId: string, request: Partial<RejectTaskRequest>) => {
       try {
         await WorkflowApi.rejectTask(taskId, request);
         await fetchTasks();

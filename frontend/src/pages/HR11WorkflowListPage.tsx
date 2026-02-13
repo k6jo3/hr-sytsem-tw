@@ -1,41 +1,40 @@
-import React, { useState } from 'react';
 import {
-  Card,
-  Typography,
-  Table,
-  Tag,
-  Space,
-  Button,
-  Spin,
-  Alert,
-  Row,
-  Col,
-  Statistic,
-  Modal,
-  Input,
-  message,
-  Tabs,
-  Empty,
-} from 'antd';
-import {
-  CheckOutlined,
-  CloseOutlined,
-  ReloadOutlined,
-  ClockCircleOutlined,
-  ExclamationCircleOutlined,
-  FileTextOutlined,
+    CheckOutlined,
+    ClockCircleOutlined,
+    CloseOutlined,
+    ExclamationCircleOutlined,
+    FileTextOutlined,
+    ReloadOutlined,
 } from '@ant-design/icons';
-import { usePendingTasks, useMyApplications } from '../features/workflow/hooks';
-import type { ApprovalTaskViewModel, WorkflowInstanceViewModel } from '../features/workflow/model/WorkflowViewModel';
+import {
+    Alert,
+    Button,
+    Card,
+    Col,
+    Empty,
+    Input,
+    message,
+    Modal,
+    Row,
+    Space,
+    Spin,
+    Statistic,
+    Table,
+    Tabs,
+    Tag,
+    Typography,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import React, { useState } from 'react';
+import { useMyApplications, usePendingTasks } from '../features/workflow/hooks';
+import type { ApprovalTaskViewModel, WorkflowInstanceViewModel } from '../features/workflow/model/WorkflowViewModel';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 /**
- * HR11WorkflowListPage - 我的待辦/我的申請頁面
+ * HR11-P02: 我的待辦與申請清單
  * Feature: workflow
- * Page Codes: HR11-P03, HR11-P04
  */
 export const HR11WorkflowListPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('pending');
@@ -346,7 +345,7 @@ export const HR11WorkflowListPage: React.FC = () => {
         <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
           <div>
             <Title level={2} style={{ margin: 0 }}>
-              簽核管理
+              我的待辦與申請清單
             </Title>
             <Text type="secondary">管理您的待辦任務和申請記錄</Text>
           </div>

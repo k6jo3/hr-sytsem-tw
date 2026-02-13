@@ -4,32 +4,33 @@
  * 路由：/admin/users
  */
 
-import React, { useState, useCallback } from 'react';
 import {
-  Layout,
-  Card,
-  Space,
-  Input,
-  Select,
-  Button,
-  Pagination,
-  message,
-  Modal,
-  Typography,
-  Divider,
-} from 'antd';
-import {
-  SearchOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  StopOutlined,
-  ExportOutlined,
+    ExportOutlined,
+    PlusOutlined,
+    ReloadOutlined,
+    SearchOutlined,
+    StopOutlined,
 } from '@ant-design/icons';
-import { UserTable } from '@features/auth/components/UserTable';
-import { UserFormModal } from '@features/auth/components/UserFormModal';
-import { ResetPasswordModal } from '@features/auth/components/ResetPasswordModal';
-import { useUsers, type UserViewModel } from '@features/auth/hooks/useUsers';
 import type { CreateUserRequest, UpdateUserRequest } from '@features/auth/api/AuthTypes';
+import { ResetPasswordModal } from '@features/auth/components/ResetPasswordModal';
+import { UserFormModal } from '@features/auth/components/UserFormModal';
+import { UserTable } from '@features/auth/components/UserTable';
+import { useUsers } from '@features/auth/hooks/useUsers';
+import type { UserListViewModel as UserViewModel } from '@features/auth/model/UserProfile';
+import {
+    Button,
+    Card,
+    Divider,
+    Input,
+    Layout,
+    message,
+    Modal,
+    Pagination,
+    Select,
+    Space,
+    Typography,
+} from 'antd';
+import React, { useCallback, useState } from 'react';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
