@@ -29,7 +29,11 @@ public class ValidateEntryTask implements PipelineTask<TimesheetEntryContext> {
         java.util.UUID projectId = context.getRequest().getProjectId();
         try {
             var response = projectServiceClient.getProjectDetail(projectId.toString());
-            if (!response.getBody().getStatus().equals("IN_PROGRESS")) {
+            var body = response.getBody();
+            if (body == null) {
+                throw new DomainException("專案不存在或無權限存取");
+            }
+            if (!body.getStatus().equals("IN_PROGRESS")) {
                 // Warning or Error? HR usually allows tracking on non-closed projects.
                 // But strictly only IN_PROGRESS.
                 // Let's assume PLANNING is also allowed? No, usually not.

@@ -1,6 +1,8 @@
 package com.company.hrms.common.infrastructure.web;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -19,16 +21,16 @@ import com.company.hrms.common.model.JWTModel;
 public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
-    public boolean supportsParameter(MethodParameter parameter) {
+    public boolean supportsParameter(@NonNull MethodParameter parameter) {
         return parameter.hasParameterAnnotation(CurrentUser.class) &&
                 parameter.getParameterType().equals(JWTModel.class);
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter,
-            ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest,
-            WebDataBinderFactory binderFactory) {
+    public Object resolveArgument(@NonNull MethodParameter parameter,
+            @Nullable ModelAndViewContainer mavContainer,
+            @NonNull NativeWebRequest webRequest,
+            @Nullable WebDataBinderFactory binderFactory) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof JWTModel) {
             return authentication.getPrincipal();
