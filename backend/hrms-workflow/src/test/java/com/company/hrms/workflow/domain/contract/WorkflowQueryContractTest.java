@@ -13,6 +13,7 @@ import com.company.hrms.workflow.api.request.GetPendingTasksRequest;
 import com.company.hrms.workflow.application.service.GetPendingTasksServiceImpl;
 import com.company.hrms.workflow.domain.repository.IApprovalTaskRepository;
 
+// TODO: 需建立 contracts/workflow_contracts.md 合約規格檔
 public class WorkflowQueryContractTest extends BaseContractTest {
 
     private GetPendingTasksServiceImpl getPendingTasksService;
@@ -27,8 +28,8 @@ public class WorkflowQueryContractTest extends BaseContractTest {
     @Test
     void searchPendingTasks_ShouldMatchContract() throws Exception {
         // 1. 載入合約 (WFL_T001: 查詢個人待辦)
-        String contract = loadContractSpecFromPath(
-                "d:/git/hr-system2/hr-sytsem-2/contracts/workflow_contracts.md");
+        // 修正：使用標準 loadContractSpec 方法，不使用硬編碼路徑
+        String contract = loadContractSpec("workflow");
 
         // 2. 準備請求
         GetPendingTasksRequest req = new GetPendingTasksRequest();

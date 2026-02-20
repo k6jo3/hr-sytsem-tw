@@ -10,6 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.common.exception.ValidationException;
 import com.company.hrms.insurance.api.request.WithdrawEnrollmentRequest;
 import com.company.hrms.insurance.application.service.withdrawal.context.WithdrawalContext;
 import com.company.hrms.insurance.domain.model.aggregate.InsuranceEnrollment;
@@ -47,29 +49,29 @@ class ValidateWithdrawalTaskTest {
         }
 
         @Test
-        @DisplayName("非 ACTIVE 狀態時，應拋出 IllegalStateException")
+        @DisplayName("已退保狀態時，應拋出 DomainException")
         void execute_NonActiveStatus_ShouldThrowException() {
             // Given
             WithdrawalContext context = createContext("2025-12-31");
             InsuranceEnrollment enrollment = createActiveEnrollment();
-            enrollment.withdraw(LocalDate.of(2025, 6, 30)); // 已退保
+            enrollment.withdraw(LocalDate.of(2025, 6, 30)); // 已退保，狀態為 WITHDRAWN
             context.setEnrollment(enrollment);
 
-            // When & Then
-            IllegalStateException ex = assertThrows(IllegalStateException.class,
+            // When & Then - Task 先檢查 WITHDRAWN 狀態，拋出「已經辦理退保」
+            DomainException ex = assertThrows(DomainException.class,
                     () -> task.execute(context));
-            assertTrue(ex.getMessage().contains("只有已加保狀態可以退保"));
+            assertTrue(ex.getMessage().contains("已經辦理退保"));
         }
 
         @Test
-        @DisplayName("退保日期早於加保日期時，應拋出 IllegalArgumentException")
+        @DisplayName("退保日期早於加保日期時，應拋出 ValidationException")
         void execute_WithdrawDateBeforeEnrollDate_ShouldThrowException() {
             // Given
             WithdrawalContext context = createContext("2024-12-01"); // 早於加保日期 2025-01-01
             context.setEnrollment(createActiveEnrollment());
 
             // When & Then
-            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            ValidationException ex = assertThrows(ValidationException.class,
                     () -> task.execute(context));
             assertTrue(ex.getMessage().contains("退保日期不可早於加保日期"));
         }

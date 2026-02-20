@@ -54,7 +54,8 @@ class InsuranceEnrollmentTest {
         void testEnroll_WithNullEmployeeId_ShouldThrow() {
             InsuranceLevel level = createTestLevel();
 
-            assertThrows(IllegalArgumentException.class,
+            // Objects.requireNonNull 拋出 NullPointerException
+            assertThrows(NullPointerException.class,
                     () -> InsuranceEnrollment.enroll(null, UNIT_ID, InsuranceType.LABOR, level, ENROLL_DATE));
         }
 

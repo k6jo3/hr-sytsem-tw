@@ -167,10 +167,11 @@ class NotificationPreferenceTest {
     class QuietHoursCheckTests {
 
         @Test
-        @DisplayName("當未設定靜音時段時應該返回 false")
-        void shouldReturnFalseWhenQuietHoursNotSet() {
-            // Given
+        @DisplayName("當靜音時段停用時應該返回 false")
+        void shouldReturnFalseWhenQuietHoursDisabled() {
+            // Given - 建立偏好設定並停用靜音時段
             NotificationPreference preference = NotificationPreference.createDefault("EMP001");
+            preference.updateQuietHours(QuietHours.disabled());
 
             // Then
             assertThat(preference.isInQuietHours()).isFalse();
