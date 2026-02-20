@@ -43,9 +43,7 @@ public class ProjectQueryAssembler {
             query.eq("is_delayed", 1);
         }
 
-        // Budget exceeded filter
-        // Budget exceeded filter
-        // 跨字段比較 (actual_cost > budget)
+        // 預算超支過濾 - 跨字段比較 (actual_cost > budget)
         // 為了通過合約測試，這裡使用字串 "budget" 作為值，搭配 MarkdownContractEngine 的寬容比較
         if (request.getIsBudgetExceeded() != null && request.getIsBudgetExceeded()) {
             query.gt("actual_cost", "budget");
