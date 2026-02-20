@@ -31,6 +31,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  * </p>
  */
 @Component
+@SuppressWarnings("null")
 public class UserRepositoryImpl implements IUserRepository {
 
     private final UserDAO userDAO;

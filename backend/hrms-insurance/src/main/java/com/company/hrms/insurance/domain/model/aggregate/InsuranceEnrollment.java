@@ -2,6 +2,7 @@ package com.company.hrms.insurance.domain.model.aggregate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 import com.company.hrms.insurance.domain.model.valueobject.EnrollmentId;
 import com.company.hrms.insurance.domain.model.valueobject.EnrollmentStatus;
@@ -77,6 +78,12 @@ public class InsuranceEnrollment {
             InsuranceType type,
             InsuranceLevel level,
             LocalDate enrollDate) {
+
+        Objects.requireNonNull(employeeId, "員工ID不可為空");
+        Objects.requireNonNull(unitId, "投保單位不可為空");
+        Objects.requireNonNull(type, "保險類型不可為空");
+        Objects.requireNonNull(level, "投保級距不可為空");
+        Objects.requireNonNull(enrollDate, "加保日期不可為空");
 
         return new InsuranceEnrollment(
                 EnrollmentId.generate(),

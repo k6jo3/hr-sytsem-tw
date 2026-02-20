@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Service("getUtilizationRateServiceImpl")
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class GetUtilizationRateServiceImpl
         implements QueryApiService<GetUtilizationRateRequest, UtilizationRateResponse> {
 

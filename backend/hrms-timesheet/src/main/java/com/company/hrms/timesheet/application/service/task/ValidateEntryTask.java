@@ -3,16 +3,17 @@ package com.company.hrms.timesheet.application.service.task;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
+import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.timesheet.application.service.context.TimesheetEntryContext;
+import com.company.hrms.timesheet.infrastructure.client.ProjectServiceClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.company.hrms.common.exception.DomainException;
-import com.company.hrms.timesheet.infrastructure.client.ProjectServiceClient;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("null")
 public class ValidateEntryTask implements PipelineTask<TimesheetEntryContext> {
 
     private final ProjectServiceClient projectServiceClient;

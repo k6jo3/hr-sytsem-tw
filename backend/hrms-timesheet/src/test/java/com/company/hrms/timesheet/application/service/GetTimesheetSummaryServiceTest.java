@@ -26,6 +26,7 @@ import com.company.hrms.timesheet.domain.model.entity.TimesheetEntry;
 import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 class GetTimesheetSummaryServiceTest {
 
     @Mock

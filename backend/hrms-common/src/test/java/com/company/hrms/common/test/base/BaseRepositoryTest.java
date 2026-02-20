@@ -103,6 +103,7 @@ import com.company.hrms.common.test.assertion.QueryGroupAssert;
  */
 @DataJpaTest
 @ActiveProfiles("test")
+@SuppressWarnings("null")
 public abstract class BaseRepositoryTest extends BaseTest {
 
     @Autowired

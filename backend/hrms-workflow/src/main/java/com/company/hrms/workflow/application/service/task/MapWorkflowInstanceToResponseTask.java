@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class MapWorkflowInstanceToResponseTask implements PipelineTask<GetWorkflowInstanceListContext> {
 
     @Override

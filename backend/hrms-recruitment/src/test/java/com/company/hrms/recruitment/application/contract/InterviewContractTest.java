@@ -28,6 +28,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DisplayName("面試管理 API 合約測試")
+@SuppressWarnings("null")
 public class InterviewContractTest {
 
     @Autowired

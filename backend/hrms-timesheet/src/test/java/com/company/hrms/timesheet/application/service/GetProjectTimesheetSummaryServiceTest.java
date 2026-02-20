@@ -26,90 +26,98 @@ import com.company.hrms.timesheet.domain.model.entity.TimesheetEntry;
 import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 class GetProjectTimesheetSummaryServiceTest {
 
-    @Mock
-    private ITimesheetRepository timesheetRepository;
+        @Mock
+        private ITimesheetRepository timesheetRepository;
 
-    private GetProjectTimesheetSummaryServiceImpl service;
+        private GetProjectTimesheetSummaryServiceImpl service;
 
-    @BeforeEach
-    void setUp() {
-        service = new GetProjectTimesheetSummaryServiceImpl(timesheetRepository);
-    }
+        @BeforeEach
+        void setUp() {
+                service = new GetProjectTimesheetSummaryServiceImpl(timesheetRepository);
+        }
 
-    @Test
-    @DisplayName("Should aggregate hours by project correctly")
-    void shouldAggregateHoursByProject() throws Exception {
-        // Given
-        UUID project1Id = UUID.randomUUID();
-        UUID project2Id = UUID.randomUUID();
-        UUID employee1Id = UUID.randomUUID();
+        @Test
+        @DisplayName("Should aggregate hours by project correctly")
+        void shouldAggregateHoursByProject() throws Exception {
+                // Given
+                UUID project1Id = UUID.randomUUID();
+                UUID project2Id = UUID.randomUUID();
+                UUID employee1Id = UUID.randomUUID();
 
-        // Create Timesheet 1
-        Timesheet ts1 = Timesheet.create(employee1Id, LocalDate.of(2025, 1, 1));
-        ts1.addEntry(TimesheetEntry.create(project1Id, UUID.randomUUID(), LocalDate.of(2025, 1, 1), new BigDecimal("4"),
-                "Work P1"));
-        ts1.addEntry(TimesheetEntry.create(project2Id, UUID.randomUUID(), LocalDate.of(2025, 1, 1), new BigDecimal("4"),
-                "Work P2"));
+                // Create Timesheet 1
+                Timesheet ts1 = Timesheet.create(employee1Id, LocalDate.of(2025, 1, 1));
+                ts1.addEntry(TimesheetEntry.create(project1Id, UUID.randomUUID(), LocalDate.of(2025, 1, 1),
+                                new BigDecimal("4"),
+                                "Work P1"));
+                ts1.addEntry(TimesheetEntry.create(project2Id, UUID.randomUUID(), LocalDate.of(2025, 1, 1),
+                                new BigDecimal("4"),
+                                "Work P2"));
 
-        // Create Timesheet 2 (same employee, next day - simplified for test, usually
-        // strict weekly)
-        // Just adding entry to same TS logic simulation or new TS
-        Timesheet ts2 = Timesheet.create(employee1Id, LocalDate.of(2025, 1, 8)); // different week
-        ts2.addEntry(TimesheetEntry.create(project1Id, UUID.randomUUID(), LocalDate.of(2025, 1, 8), new BigDecimal("2"),
-                "More Work P1"));
+                // Create Timesheet 2 (same employee, next day - simplified for test, usually
+                // strict weekly)
+                // Just adding entry to same TS logic simulation or new TS
+                Timesheet ts2 = Timesheet.create(employee1Id, LocalDate.of(2025, 1, 8)); // different week
+                ts2.addEntry(TimesheetEntry.create(project1Id, UUID.randomUUID(), LocalDate.of(2025, 1, 8),
+                                new BigDecimal("2"),
+                                "More Work P1"));
 
-        when(timesheetRepository.findAll(any(QueryGroup.class), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(ts1, ts2)));
+                when(timesheetRepository.findAll(any(QueryGroup.class), any(Pageable.class)))
+                                .thenReturn(new PageImpl<>(List.of(ts1, ts2)));
 
-        GetProjectTimesheetSummaryRequest request = new GetProjectTimesheetSummaryRequest();
-        request.setStartDate(LocalDate.of(2025, 1, 1));
-        request.setEndDate(LocalDate.of(2025, 1, 31));
+                GetProjectTimesheetSummaryRequest request = new GetProjectTimesheetSummaryRequest();
+                request.setStartDate(LocalDate.of(2025, 1, 1));
+                request.setEndDate(LocalDate.of(2025, 1, 31));
 
-        // When
-        GetProjectTimesheetSummaryResponse response = service.getResponse(request, null);
+                // When
+                GetProjectTimesheetSummaryResponse response = service.getResponse(request, null);
 
-        // Then
-        assertThat(response.getProjects()).hasSize(2);
+                // Then
+                assertThat(response.getProjects()).hasSize(2);
 
-        var p1Summary = response.getProjects().stream().filter(p -> p.getProjectId().equals(project1Id)).findFirst()
-                .get();
-        assertThat(p1Summary.getTotalHours()).isEqualByComparingTo(new BigDecimal("6"));
+                var p1Summary = response.getProjects().stream().filter(p -> p.getProjectId().equals(project1Id))
+                                .findFirst()
+                                .get();
+                assertThat(p1Summary.getTotalHours()).isEqualByComparingTo(new BigDecimal("6"));
 
-        var p2Summary = response.getProjects().stream().filter(p -> p.getProjectId().equals(project2Id)).findFirst()
-                .get();
-        assertThat(p2Summary.getTotalHours()).isEqualByComparingTo(new BigDecimal("4"));
-    }
+                var p2Summary = response.getProjects().stream().filter(p -> p.getProjectId().equals(project2Id))
+                                .findFirst()
+                                .get();
+                assertThat(p2Summary.getTotalHours()).isEqualByComparingTo(new BigDecimal("4"));
+        }
 
-    @Test
-    @DisplayName("Should filter by projectId if specified")
-    void shouldFilterByProjectId() throws Exception {
-        // Given
-        UUID project1Id = UUID.randomUUID();
-        UUID project2Id = UUID.randomUUID();
-        UUID employee1Id = UUID.randomUUID();
+        @Test
+        @DisplayName("Should filter by projectId if specified")
+        void shouldFilterByProjectId() throws Exception {
+                // Given
+                UUID project1Id = UUID.randomUUID();
+                UUID project2Id = UUID.randomUUID();
+                UUID employee1Id = UUID.randomUUID();
 
-        Timesheet ts1 = Timesheet.create(employee1Id, LocalDate.of(2025, 1, 1));
-        ts1.addEntry(TimesheetEntry.create(project1Id, UUID.randomUUID(), LocalDate.of(2025, 1, 1), new BigDecimal("4"),
-                "Work P1"));
-        ts1.addEntry(TimesheetEntry.create(project2Id, UUID.randomUUID(), LocalDate.of(2025, 1, 1), new BigDecimal("4"),
-                "Work P2"));
+                Timesheet ts1 = Timesheet.create(employee1Id, LocalDate.of(2025, 1, 1));
+                ts1.addEntry(TimesheetEntry.create(project1Id, UUID.randomUUID(), LocalDate.of(2025, 1, 1),
+                                new BigDecimal("4"),
+                                "Work P1"));
+                ts1.addEntry(TimesheetEntry.create(project2Id, UUID.randomUUID(), LocalDate.of(2025, 1, 1),
+                                new BigDecimal("4"),
+                                "Work P2"));
 
-        // When filtering by Project 1, we still get the whole Timesheet from DB (in
-        // mock), but service aggregation should skip P2
-        when(timesheetRepository.findAll(any(QueryGroup.class), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(ts1)));
+                // When filtering by Project 1, we still get the whole Timesheet from DB (in
+                // mock), but service aggregation should skip P2
+                when(timesheetRepository.findAll(any(QueryGroup.class), any(Pageable.class)))
+                                .thenReturn(new PageImpl<>(List.of(ts1)));
 
-        GetProjectTimesheetSummaryRequest request = new GetProjectTimesheetSummaryRequest();
-        request.setProjectId(project1Id);
+                GetProjectTimesheetSummaryRequest request = new GetProjectTimesheetSummaryRequest();
+                request.setProjectId(project1Id);
 
-        // When
-        GetProjectTimesheetSummaryResponse response = service.getResponse(request, null);
+                // When
+                GetProjectTimesheetSummaryResponse response = service.getResponse(request, null);
 
-        // Then
-        assertThat(response.getProjects()).hasSize(1);
-        assertThat(response.getProjects().get(0).getProjectId()).isEqualTo(project1Id);
-        assertThat(response.getProjects().get(0).getTotalHours()).isEqualByComparingTo(new BigDecimal("4"));
-    }
+                // Then
+                assertThat(response.getProjects()).hasSize(1);
+                assertThat(response.getProjects().get(0).getProjectId()).isEqualTo(project1Id);
+                assertThat(response.getProjects().get(0).getTotalHours()).isEqualByComparingTo(new BigDecimal("4"));
+        }
 }

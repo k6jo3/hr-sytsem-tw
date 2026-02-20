@@ -8,7 +8,10 @@ import org.springframework.data.domain.Sort;
  * 查詢條件包裝器
  * 封裝條件物件與分頁資訊
  *
- * <p>使用範例:</p>
+ * <p>
+ * 使用範例:
+ * </p>
+ * 
  * <pre>
  * // 建立條件
  * EmployeeSearchCondition cond = new EmployeeSearchCondition();
@@ -17,9 +20,9 @@ import org.springframework.data.domain.Sort;
  *
  * // 包裝為 Condition (含分頁)
  * Condition&lt;EmployeeSearchCondition&gt; condition = Condition.of(cond)
- *     .page(0)
- *     .size(20)
- *     .sort("createTime", Sort.Direction.DESC);
+ *         .page(0)
+ *         .size(20)
+ *         .sort("createTime", Sort.Direction.DESC);
  *
  * // 查詢
  * Page&lt;Employee&gt; result = repository.findPage(condition);
@@ -27,6 +30,7 @@ import org.springframework.data.domain.Sort;
  *
  * @param <T> 條件 DTO 類型
  */
+@SuppressWarnings("null")
 public class Condition<T> {
 
     private final T conditionDto;

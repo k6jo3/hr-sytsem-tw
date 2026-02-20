@@ -21,6 +21,7 @@ import com.company.hrms.common.query.QueryGroup;
 @Disabled("Example test, requires complex context setup")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
+@SuppressWarnings("null")
 public class QueryContractTestExample extends BaseContractTest {
 
     @org.springframework.boot.autoconfigure.SpringBootApplication(exclude = {
@@ -90,12 +91,7 @@ public class QueryContractTestExample extends BaseContractTest {
                 .andReturn();
 
         // 4. 取得實際回應
-        String actualResponseJson = result.getResponse().getContentAsString();
-        // 處理編碼問題，確保 JSON 正確
-        if (result.getResponse().getCharacterEncoding() == null) {
-            actualResponseJson = new String(result.getResponse().getContentAsByteArray(),
-                    java.nio.charset.StandardCharsets.UTF_8);
-        }
+        String actualResponseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
 
         // 5. 捕獲 QueryGroup（從 Repository 呼叫）
         // verify(reportRepository).findPage(queryCaptor.capture(), any());

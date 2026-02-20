@@ -13,6 +13,7 @@ import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.base.BaseApiContractTest;
 import com.company.hrms.recruitment.domain.repository.IJobOpeningRepository;
 
+@SuppressWarnings("null")
 public class JobOpeningContractTest extends BaseApiContractTest {
 
     @MockBean

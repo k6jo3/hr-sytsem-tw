@@ -25,15 +25,16 @@ import com.company.hrms.project.api.request.GetProjectListRequest;
 import com.company.hrms.project.api.response.GetProjectListResponse;
 import com.company.hrms.project.domain.model.aggregate.Project;
 import com.company.hrms.project.domain.model.valueobject.BudgetType;
+import com.company.hrms.project.domain.model.valueobject.CustomerId;
 import com.company.hrms.project.domain.model.valueobject.ProjectBudget;
 import com.company.hrms.project.domain.model.valueobject.ProjectId;
 import com.company.hrms.project.domain.model.valueobject.ProjectSchedule;
 import com.company.hrms.project.domain.model.valueobject.ProjectStatus;
 import com.company.hrms.project.domain.model.valueobject.ProjectType;
 import com.company.hrms.project.domain.repository.IProjectRepository;
-import com.company.hrms.project.domain.model.valueobject.CustomerId;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 public class GetProjectListServiceTest {
 
     @Mock

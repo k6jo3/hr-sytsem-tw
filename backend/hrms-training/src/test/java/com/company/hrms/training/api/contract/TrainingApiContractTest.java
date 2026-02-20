@@ -35,159 +35,160 @@ import com.company.hrms.training.infrastructure.repository.TrainingEnrollmentQue
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @DisplayName("HR10 訓練管理服務 API 合約測試")
+@SuppressWarnings("null")
 public class TrainingApiContractTest extends BaseApiContractTest {
 
-    private static final String CONTRACT = "training";
-    private String contractSpec;
+        private static final String CONTRACT = "training";
+        private String contractSpec;
 
-    @MockBean
-    private TrainingCourseQueryRepository courseQueryRepository;
+        @MockBean
+        private TrainingCourseQueryRepository courseQueryRepository;
 
-    @MockBean
-    private TrainingEnrollmentQueryRepository enrollmentQueryRepository;
+        @MockBean
+        private TrainingEnrollmentQueryRepository enrollmentQueryRepository;
 
-    @MockBean
-    private CertificateQueryRepository certificateQueryRepository;
+        @MockBean
+        private CertificateQueryRepository certificateQueryRepository;
 
-    private JWTModel mockUser;
+        private JWTModel mockUser;
 
-    @BeforeEach
-    void setUp() throws Exception {
-        contractSpec = loadContractSpec(CONTRACT);
+        @BeforeEach
+        void setUp() throws Exception {
+                contractSpec = loadContractSpec(CONTRACT);
 
-        mockUser = new JWTModel();
-        mockUser.setUserId("E001");
-        mockUser.setUsername("test-user");
-        mockUser.setRoles(Collections.singletonList("EMPLOYEE"));
-    }
-
-    @Nested
-    @DisplayName("課程管理 API 合約")
-    class CourseApiContractTests {
-
-        @Test
-        @DisplayName("TRN_C001: 員工查詢開放報名課程")
-        void searchOpenCourses_AsEmployee_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(courseQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
-
-            // Act
-            mockMvc.perform(get("/api/v1/training/courses?status=OPEN")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Then
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_C001");
+                mockUser = new JWTModel();
+                mockUser.setUserId("E001");
+                mockUser.setUsername("test-user");
+                mockUser.setRoles(Collections.singletonList("EMPLOYEE"));
         }
 
-        @Test
-        @DisplayName("TRN_C005: 依類別查詢技術類課程")
-        void searchTechnicalCourses_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(courseQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
+        @Nested
+        @DisplayName("課程管理 API 合約")
+        class CourseApiContractTests {
 
-            // Act
-            mockMvc.perform(get("/api/v1/training/courses?category=TECHNICAL")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                @Test
+                @DisplayName("TRN_C001: 員工查詢開放報名課程")
+                void searchOpenCourses_AsEmployee_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(courseQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
+                                        .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-            // Then
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_C005");
+                        // Act
+                        mockMvc.perform(get("/api/v1/training/courses?status=OPEN")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Then
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "TRN_C001");
+                }
+
+                @Test
+                @DisplayName("TRN_C005: 依類別查詢技術類課程")
+                void searchTechnicalCourses_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(courseQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
+                                        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/training/courses?category=TECHNICAL")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Then
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "TRN_C005");
+                }
+
+                @Test
+                @DisplayName("TRN_C006: 依名稱模糊查詢課程")
+                void searchByNameKeyword_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(courseQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
+                                        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/training/courses?name=領導")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Then
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "TRN_C006");
+                }
         }
 
-        @Test
-        @DisplayName("TRN_C006: 依名稱模糊查詢課程")
-        void searchByNameKeyword_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(courseQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
+        @Nested
+        @DisplayName("報名管理 API 合約")
+        class EnrollmentApiContractTests {
 
-            // Act
-            mockMvc.perform(get("/api/v1/training/courses?name=領導")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                @Test
+                @DisplayName("TRN_E001: 查詢特定課程的報名紀錄")
+                void searchEnrollmentsByCourse_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(enrollmentQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
+                                        .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-            // Then
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_C006");
+                        // Act
+                        mockMvc.perform(get("/api/v1/training/enrollments?courseId=C001")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Then
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "TRN_E001");
+                }
+
+                @Test
+                @DisplayName("TRN_E005: 員工查詢自己的報名紀錄")
+                void searchMyEnrollments_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(enrollmentQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
+                                        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/training/enrollments/me")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Then
+                        QueryGroup query = queryCaptor.getValue();
+                        String processedSpec = contractSpec.replace("{currentUserId}", mockUser.getUserId());
+                        assertContract(query, processedSpec, "TRN_E005");
+                }
         }
-    }
 
-    @Nested
-    @DisplayName("報名管理 API 合約")
-    class EnrollmentApiContractTests {
+        @Nested
+        @DisplayName("證照管理 API 合約")
+        class CertificateApiContractTests {
 
-        @Test
-        @DisplayName("TRN_E001: 查詢特定課程的報名紀錄")
-        void searchEnrollmentsByCourse_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(enrollmentQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
+                @Test
+                @DisplayName("TRN_CT001: 查詢員工的證照")
+                void searchCertificatesByEmployee_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(certificateQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
+                                        .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-            // Act
-            mockMvc.perform(get("/api/v1/training/enrollments?courseId=C001")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                        // Act
+                        mockMvc.perform(get("/api/v1/training/certificates?employeeId=E001")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
 
-            // Then
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_E001");
+                        // Then
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "TRN_CT001");
+                }
         }
-
-        @Test
-        @DisplayName("TRN_E005: 員工查詢自己的報名紀錄")
-        void searchMyEnrollments_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(enrollmentQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
-
-            // Act
-            mockMvc.perform(get("/api/v1/training/enrollments/me")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Then
-            QueryGroup query = queryCaptor.getValue();
-            String processedSpec = contractSpec.replace("{currentUserId}", mockUser.getUserId());
-            assertContract(query, processedSpec, "TRN_E005");
-        }
-    }
-
-    @Nested
-    @DisplayName("證照管理 API 合約")
-    class CertificateApiContractTests {
-
-        @Test
-        @DisplayName("TRN_CT001: 查詢員工的證照")
-        void searchCertificatesByEmployee_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(certificateQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
-
-            // Act
-            mockMvc.perform(get("/api/v1/training/certificates?employeeId=E001")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Then
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_CT001");
-        }
-    }
 }

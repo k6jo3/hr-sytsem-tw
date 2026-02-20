@@ -16,6 +16,7 @@ import lombok.Data;
 @Data
 @ParameterObject
 @Schema(description = "Offer 查詢條件")
+@SuppressWarnings("null")
 public class OfferSearchDto implements Pageable {
 
     @QueryFilter(property = "candidateId", operator = Operator.EQ)

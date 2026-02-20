@@ -35,6 +35,7 @@ import jakarta.persistence.PersistenceContext;
  * @param <T>  實體類型
  * @param <ID> 主鍵類型
  */
+@SuppressWarnings("null")
 public abstract class QueryBaseRepository<T, ID> implements
         IQueryRepository<T, ID>,
         IAggregateRepository<T> {
