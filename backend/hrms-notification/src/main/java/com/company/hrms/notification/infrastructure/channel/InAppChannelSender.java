@@ -1,10 +1,12 @@
 package com.company.hrms.notification.infrastructure.channel;
 
-import com.company.hrms.notification.domain.model.aggregate.Notification;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+
+import com.company.hrms.notification.domain.model.aggregate.Notification;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 站內通知發送器
@@ -66,8 +68,7 @@ public class InAppChannelSender implements ChannelSender {
                 notification.getRelatedBusinessType(),
                 notification.getRelatedBusinessId(),
                 notification.getRelatedBusinessUrl(),
-                notification.getCreatedAt()
-        );
+                notification.getCreatedAt());
     }
 
     /**
@@ -82,7 +83,6 @@ public class InAppChannelSender implements ChannelSender {
             String businessType,
             String businessId,
             String businessUrl,
-            java.time.LocalDateTime createdAt
-    ) {
+            java.time.LocalDateTime createdAt) {
     }
 }

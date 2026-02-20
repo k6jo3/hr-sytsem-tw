@@ -33,9 +33,7 @@ public class ProjectCostQueryAssembler {
             query.eq("year_month", request.getYearMonth());
         }
 
-        // Over budget filter
-        // Over budget filter
-        // 跨字段比較 (actual_amount > budget_amount)
+        // 超預算過濾 - 跨字段比較 (actual_amount > budget_amount)
         if (request.getIsOverBudget() != null && request.getIsOverBudget()) {
             query.gt("actual_amount", "budget_amount");
         }

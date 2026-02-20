@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service("getUnreportedEmployeesServiceImpl")
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class GetUnreportedEmployeesServiceImpl
                 implements QueryApiService<GetUnreportedEmployeesRequest, GetUnreportedEmployeesResponse> {
 
@@ -36,15 +37,15 @@ public class GetUnreportedEmployeesServiceImpl
 
                 // 1. 取得所有在職員工
                 var orgResponse = organizationServiceClient.getEmployeeList("ACTIVE", 1, 1000);
-                var body = orgResponse.getBody();
-                if (body == null || body.getItems() == null) {
+                if (orgResponse.getBody() == null || orgResponse.getBody().getItems() == null) {
                         return GetUnreportedEmployeesResponse.builder()
                                         .employees(new ArrayList<>())
                                         .totalCount(0)
                                         .build();
                 }
 
-                List<OrganizationEmployeeListResponse.OrganizationEmployeeDto> allEmployees = body.getItems();
+                List<OrganizationEmployeeListResponse.OrganizationEmployeeDto> allEmployees = orgResponse.getBody()
+                                .getItems();
 
                 // 2. 取得該期間已有提交工時的員工 ID 列表
                 // 注意：這裡假設查詢條件與 Timesheet 的週期間隔相符 (例如週一到週日)

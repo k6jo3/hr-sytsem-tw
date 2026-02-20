@@ -21,6 +21,7 @@ import com.company.hrms.common.query.QueryGroup;
 @Disabled("Example test, requires complex context setup")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
+@SuppressWarnings("null")
 public class QueryContractTestExample extends BaseContractTest {
 
     @org.springframework.boot.autoconfigure.SpringBootApplication(exclude = {

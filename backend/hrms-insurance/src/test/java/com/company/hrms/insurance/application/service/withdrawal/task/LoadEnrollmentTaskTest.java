@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.company.hrms.common.exception.EntityNotFoundException;
 import com.company.hrms.insurance.api.request.WithdrawEnrollmentRequest;
 import com.company.hrms.insurance.application.service.withdrawal.context.WithdrawalContext;
 import com.company.hrms.insurance.domain.model.aggregate.InsuranceEnrollment;
@@ -74,14 +75,14 @@ class LoadEnrollmentTaskTest {
         }
 
         @Test
-        @DisplayName("加保記錄不存在時，應拋出 IllegalArgumentException")
+        @DisplayName("加保記錄不存在時，應拋出 EntityNotFoundException")
         void execute_EnrollmentNotFound_ShouldThrowException() {
             // Given
             when(enrollmentRepository.findById(any(EnrollmentId.class)))
                     .thenReturn(Optional.empty());
 
             // When & Then
-            assertThrows(IllegalArgumentException.class, () -> task.execute(context));
+            assertThrows(EntityNotFoundException.class, () -> task.execute(context));
         }
     }
 

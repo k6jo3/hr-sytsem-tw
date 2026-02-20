@@ -81,14 +81,14 @@ class FindInsuranceLevelTaskTest {
         }
 
         @Test
-        @DisplayName("找不到勞保級距時，應拋出 IllegalStateException")
+        @DisplayName("找不到勞保級距時，應拋出 IllegalArgumentException")
         void execute_NoLaborLevel_ShouldThrowException() {
             // Given
             when(levelMatchingService.findAppropriateLevel(MONTHLY_SALARY, InsuranceType.LABOR, ENROLL_DATE))
                     .thenReturn(Optional.empty());
 
             // When & Then
-            assertThrows(IllegalStateException.class, () -> task.execute(context));
+            assertThrows(IllegalArgumentException.class, () -> task.execute(context));
         }
 
         @Test

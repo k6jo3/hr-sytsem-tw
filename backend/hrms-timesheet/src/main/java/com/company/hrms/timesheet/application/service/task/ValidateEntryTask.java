@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("null")
 public class ValidateEntryTask implements PipelineTask<TimesheetEntryContext> {
 
     private final ProjectServiceClient projectServiceClient;

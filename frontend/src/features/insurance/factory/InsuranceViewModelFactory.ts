@@ -17,6 +17,16 @@ import type {
 /**
  * Insurance ViewModel Factory
  * 負責將 DTO 轉換為前端使用的 ViewModel
+ *
+ * TODO: 以下項目需修正以通過合約測試：
+ * 1. mapInsuranceType: 標籤改為簡稱 LABOR='勞保', HEALTH='健保', PENSION='勞退'
+ * 2. enrollDateDisplay/changeDateDisplay: 保留 '-' 分隔格式，移除 replace(/-/g, '/')
+ * 3. levelDisplay: 移除空格，改為 `第${number}級`
+ * 4. mapStatusLabel: ACTIVE='已加保', PENDING='待處理' (WITHDRAWN='已退保' 已正確)
+ * 5. mapStatusColor: PENDING 改為 'warning' (非 'processing')
+ * 6. mapChangeTypeColor: ENROLL='success', WITHDRAW='error', ADJUST_LEVEL='warning'
+ * 7. createMyInsuranceInfoViewModel.statusMessage: 加上 emoji 前綴 '✅ 正常投保中' / '⚠️ 目前無投保記錄'
+ * 8. 新增缺少的方法: createLevelViewModel, createUnitViewModel, createListFromDTOs
  */
 export class InsuranceViewModelFactory {
   /**

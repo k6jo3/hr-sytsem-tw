@@ -17,6 +17,7 @@ import com.company.hrms.common.model.JWTModel;
  * CurrentUser 參數解析器
  * 負責將 SecurityContext 中的 JWTModel 注入到 Controller 方法參數
  */
+@SuppressWarnings("null")
 public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override

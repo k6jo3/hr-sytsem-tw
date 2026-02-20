@@ -26,7 +26,8 @@ import com.company.hrms.payroll.application.service.query.assembler.SalaryStruct
 @DisplayName("HR04 薪資管理服務業務合約測試")
 public class PayrollContractTest extends BaseContractTest {
 
-    private static final String CONTRACT = "payroll_contracts_v2";
+    // TODO: 需建立 contracts/payroll_contracts.md 合約規格檔
+    private static final String CONTRACT = "payroll_contracts";
 
     @Override
     protected String loadContractSpec(String serviceName) throws java.io.IOException {

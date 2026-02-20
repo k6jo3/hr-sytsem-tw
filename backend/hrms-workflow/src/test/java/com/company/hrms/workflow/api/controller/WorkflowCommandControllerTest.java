@@ -30,17 +30,17 @@ public class WorkflowCommandControllerTest {
     }
 
     @Test
-    void approveTask_ShouldMapToPutAndExtractTaskId() throws Exception {
+    void approveTask_ShouldMapToPostAndPassRequestBody() throws Exception {
         // Arrange
         String taskId = "TASK-123";
         ApproveTaskRequest request = new ApproveTaskRequest();
+        request.setTaskId(taskId);
         request.setComment("Approved");
-        // taskId not set in body, should be from path
 
         doReturn(null).when(controller).execCommand(any(), any());
 
-        // Act
-        mockMvc.perform(put("/api/v1/workflows/tasks/{taskId}/approve", taskId)
+        // Act - 控制器使用 POST /api/v1/workflows/approve，taskId 在 request body 中
+        mockMvc.perform(post("/api/v1/workflows/approve")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(request)))
                 .andExpect(status().isOk());
@@ -52,21 +52,22 @@ public class WorkflowCommandControllerTest {
         ApproveTaskRequest actualReq = captor.getValue();
         if (!taskId.equals(actualReq.getTaskId())) {
             throw new AssertionError(
-                    "TaskId not extracted from path. Expected: " + taskId + ", Actual: " + actualReq.getTaskId());
+                    "TaskId not passed correctly. Expected: " + taskId + ", Actual: " + actualReq.getTaskId());
         }
     }
 
     @Test
-    void rejectTask_ShouldMapToPutAndExtractTaskId() throws Exception {
+    void rejectTask_ShouldMapToPostAndPassRequestBody() throws Exception {
         // Arrange
         String taskId = "TASK-456";
         RejectTaskRequest request = new RejectTaskRequest();
+        request.setTaskId(taskId);
         request.setReason("Rejected");
 
         doReturn(null).when(controller).execCommand(any(), any());
 
-        // Act
-        mockMvc.perform(put("/api/v1/workflows/tasks/{taskId}/reject", taskId)
+        // Act - 控制器使用 POST /api/v1/workflows/reject，taskId 在 request body 中
+        mockMvc.perform(post("/api/v1/workflows/reject")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(request)))
                 .andExpect(status().isOk());
@@ -78,7 +79,7 @@ public class WorkflowCommandControllerTest {
         RejectTaskRequest actualReq = captor.getValue();
         if (!taskId.equals(actualReq.getTaskId())) {
             throw new AssertionError(
-                    "TaskId not extracted from path. Expected: " + taskId + ", Actual: " + actualReq.getTaskId());
+                    "TaskId not passed correctly. Expected: " + taskId + ", Actual: " + actualReq.getTaskId());
         }
     }
 

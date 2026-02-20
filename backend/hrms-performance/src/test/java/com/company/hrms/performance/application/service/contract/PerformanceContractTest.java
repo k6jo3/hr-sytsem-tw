@@ -13,6 +13,7 @@ import com.company.hrms.performance.domain.model.valueobject.CycleStatus;
 /**
  * HR08 績效管理服務合約測試
  */
+// TODO: 需建立 contracts/performance_contracts.md 合約規格檔
 @DisplayName("HR08 績效管理服務合約測試")
 public class PerformanceContractTest extends BaseContractTest {
 

@@ -31,27 +31,27 @@ import lombok.RequiredArgsConstructor;
 @SuppressWarnings("null")
 public class HR14ExportQryController extends QueryBaseController {
 
-    @GetMapping("/{exportId}/download")
-    @Operation(summary = "下載匯出檔案", operationId = "downloadExportFile")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "下載成功"),
-            @ApiResponse(responseCode = "404", description = "檔案不存在"),
-            @ApiResponse(responseCode = "401", description = "未授權")
-    })
-    public ResponseEntity<byte[]> downloadExportFile(
-            @PathVariable String exportId,
-            @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
+        @GetMapping("/{exportId}/download")
+        @Operation(summary = "下載匯出檔案", operationId = "downloadExportFile")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "下載成功"),
+                        @ApiResponse(responseCode = "404", description = "檔案不存在"),
+                        @ApiResponse(responseCode = "401", description = "未授權")
+        })
+        public ResponseEntity<byte[]> downloadExportFile(
+                        @PathVariable String exportId,
+                        @Parameter(hidden = true) @CurrentUser JWTModel currentUser) throws Exception {
 
-        DownloadExportFileRequest request = new DownloadExportFileRequest();
-        request.setExportId(exportId);
+                DownloadExportFileRequest request = new DownloadExportFileRequest();
+                request.setExportId(exportId);
 
-        // Controller 只做編排，自動查找 downloadExportFileServiceImpl
-        byte[] fileContent = getResponse(request, currentUser);
+                // Controller 只做編排，自動查找 downloadExportFileServiceImpl
+                byte[] fileContent = getResponse(request, currentUser);
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=" + exportId)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(fileContent);
-    }
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.CONTENT_DISPOSITION,
+                                                "attachment; filename=" + exportId)
+                                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                                .body(fileContent);
+        }
 }

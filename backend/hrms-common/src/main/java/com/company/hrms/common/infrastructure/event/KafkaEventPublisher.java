@@ -42,6 +42,7 @@ public class KafkaEventPublisher implements EventPublisher {
     }
 
     @Override
+    @SuppressWarnings("null")
     public void publish(DomainEvent event) {
         String topic = buildTopicName(event);
         String key = event.getAggregateId();

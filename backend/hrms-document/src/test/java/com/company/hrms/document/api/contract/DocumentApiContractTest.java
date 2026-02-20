@@ -27,6 +27,7 @@ import com.company.hrms.document.application.assembler.DocumentVersionListQueryA
 @DisplayName("HR13 文件管理服務 API 合約測試")
 public class DocumentApiContractTest extends BaseContractTest {
 
+    // TODO: 需建立 contracts/document_contracts.md 合約規格檔
     private static final String CONTRACT = "document";
 
     // 自定義寬鬆比對引擎，解決依賴更新延遲 and 格式差異問題

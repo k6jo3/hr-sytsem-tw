@@ -50,9 +50,13 @@
                 "src/config/*"
             ]
         },
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "types": [
+            "node"
+        ]
     },
     "include": [
-        "src"
+        "src",
+        "vite.config.ts"
     ]
 }

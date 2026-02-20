@@ -28,27 +28,27 @@ public class CustomerQueryAssembler {
             query.eq("industry", request.getIndustry());
         }
 
-        // Has projects filter
+        // 有專案客戶過濾
         if (request.getHasProjects() != null && request.getHasProjects()) {
-            query.gt("projectCount", 0);
+            query.gt("project_count", 0);
         }
 
-        // Sales rep filter
+        // 負責業務過濾
         if (request.getSalesRepId() != null && !request.getSalesRepId().isEmpty()) {
-            query.eq("salesRepId", request.getSalesRepId());
+            query.eq("sales_rep_id", request.getSalesRepId());
         }
 
-        // Keyword filter (name OR code OR taxId)
+        // 關鍵字過濾 (客戶名稱 OR 客戶代碼 OR 統一編號)
         if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
             query.addSubGroup(
                     QueryGroup.or()
-                            .like("customerName", request.getKeyword())
-                            .like("customerCode", request.getKeyword())
-                            .like("taxId", request.getKeyword()));
+                            .like("customer_name", request.getKeyword())
+                            .like("customer_code", request.getKeyword())
+                            .like("tax_id", request.getKeyword()));
         }
 
         // 軟刪除過濾
-        query.eq("isDeleted", 0);
+        query.eq("is_deleted", 0);
 
         return query;
     }
