@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
+@SuppressWarnings("null")
 public class CommandContractTestExample extends BaseContractTest {
 
     @Autowired

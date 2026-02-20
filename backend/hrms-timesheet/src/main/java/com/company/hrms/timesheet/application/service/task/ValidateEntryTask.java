@@ -3,12 +3,12 @@ package com.company.hrms.timesheet.application.service.task;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
+import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.timesheet.application.service.context.TimesheetEntryContext;
+import com.company.hrms.timesheet.infrastructure.client.ProjectServiceClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.company.hrms.common.exception.DomainException;
-import com.company.hrms.timesheet.infrastructure.client.ProjectServiceClient;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +28,11 @@ public class ValidateEntryTask implements PipelineTask<TimesheetEntryContext> {
         java.util.UUID projectId = context.getRequest().getProjectId();
         try {
             var response = projectServiceClient.getProjectDetail(projectId.toString());
-            if (!response.getBody().getStatus().equals("IN_PROGRESS")) {
+            var body = response.getBody();
+            if (body == null) {
+                throw new DomainException("專案不存在或無權限存取");
+            }
+            if (!body.getStatus().equals("IN_PROGRESS")) {
                 // Warning or Error? HR usually allows tracking on non-closed projects.
                 // But strictly only IN_PROGRESS.
                 // Let's assume PLANNING is also allowed? No, usually not.

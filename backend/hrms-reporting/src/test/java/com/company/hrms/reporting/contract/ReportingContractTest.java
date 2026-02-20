@@ -48,6 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayName("HR14 報表分析服務合約測試")
 @Slf4j
+@SuppressWarnings("null")
 public class ReportingContractTest extends BaseContractTest {
 
     @Autowired

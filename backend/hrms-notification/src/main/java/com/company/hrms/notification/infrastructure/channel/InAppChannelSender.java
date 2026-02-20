@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class InAppChannelSender implements ChannelSender {
 
     private final SimpMessagingTemplate messagingTemplate;

@@ -2,6 +2,7 @@ package com.company.hrms.recruitment.application.dto.offer;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 
 import com.company.hrms.common.query.Operator;
 import com.company.hrms.common.query.QueryFilter;
@@ -53,26 +54,31 @@ public class OfferSearchDto implements Pageable {
         return (long) page * size;
     }
 
+    @NonNull
     @Override
     public org.springframework.data.domain.Sort getSort() {
         return org.springframework.data.domain.Sort.unsorted();
     }
 
+    @NonNull
     @Override
     public Pageable next() {
         return org.springframework.data.domain.PageRequest.of(page + 1, size);
     }
 
+    @NonNull
     @Override
     public Pageable previousOrFirst() {
         return page == 0 ? this : org.springframework.data.domain.PageRequest.of(page - 1, size);
     }
 
+    @NonNull
     @Override
     public Pageable first() {
         return org.springframework.data.domain.PageRequest.of(0, size);
     }
 
+    @NonNull
     @Override
     public Pageable withPage(int pageNumber) {
         return org.springframework.data.domain.PageRequest.of(pageNumber, size);
@@ -93,8 +99,10 @@ public class OfferSearchDto implements Pageable {
         return false;
     }
 
+    @NonNull
     @Override
-    public java.util.Optional<Pageable> toOptional() {
+    @SuppressWarnings("null")
+    public java.util.Optional<org.springframework.data.domain.Pageable> toOptional() {
         return java.util.Optional.of(this);
     }
 }

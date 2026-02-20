@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Repository
+@SuppressWarnings("null")
 public class WorkflowInstanceRepositoryImpl
         extends CommandBaseRepository<WorkflowInstanceEntity, String>
         implements IWorkflowInstanceRepository {

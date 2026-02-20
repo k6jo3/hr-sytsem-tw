@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DisplayName("招募報表 API 合約測試")
+@SuppressWarnings("null")
 public class ReportContractTest {
 
     @Autowired

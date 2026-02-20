@@ -22,6 +22,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 @Repository
+@SuppressWarnings("null")
 public class ApprovalTaskRepositoryImpl extends QueryBaseRepository<ApprovalTaskEntity, String>
         implements IApprovalTaskRepository {
 

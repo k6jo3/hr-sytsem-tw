@@ -35,6 +35,7 @@ import com.company.hrms.training.infrastructure.repository.TrainingEnrollmentQue
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @DisplayName("HR10 訓練管理服務 API 合約測試")
+@SuppressWarnings("null")
 public class TrainingApiContractTest extends BaseApiContractTest {
 
     private static final String CONTRACT = "training";

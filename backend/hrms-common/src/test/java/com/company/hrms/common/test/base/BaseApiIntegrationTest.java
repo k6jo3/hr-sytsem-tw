@@ -25,21 +25,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * API 整合測試基類
  * 完整測試 Controller → Service → Repository → H2 DB 流程
  *
- * <p>與 BaseApiContractTest 的差異:
+ * <p>
+ * 與 BaseApiContractTest 的差異:
  * <ul>
- *   <li>BaseApiContractTest: Mock Repository，只驗證 QueryGroup 組裝</li>
- *   <li>BaseApiIntegrationTest: 實際連接 H2 DB，驗證完整資料流</li>
+ * <li>BaseApiContractTest: Mock Repository，只驗證 QueryGroup 組裝</li>
+ * <li>BaseApiIntegrationTest: 實際連接 H2 DB，驗證完整資料流</li>
  * </ul>
  *
- * <p>測試重點:
+ * <p>
+ * 測試重點:
  * <ul>
- *   <li>完整 API 請求/回應流程</li>
- *   <li>資料持久化驗證</li>
- *   <li>交易處理</li>
- *   <li>錯誤處理</li>
+ * <li>完整 API 請求/回應流程</li>
+ * <li>資料持久化驗證</li>
+ * <li>交易處理</li>
+ * <li>錯誤處理</li>
  * </ul>
  *
- * <p>使用範例:
+ * <p>
+ * 使用範例:
+ * 
  * <pre>
  * {@literal @}Sql(scripts = "classpath:test-data/employee_integration_data.sql",
  *      executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -105,6 +109,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@SuppressWarnings("null")
 public abstract class BaseApiIntegrationTest extends BaseTest {
 
     @Autowired
@@ -252,23 +257,23 @@ public abstract class BaseApiIntegrationTest extends BaseTest {
      * 驗證分頁回應
      */
     protected ResultActions verifyPageResponse(ResultActions resultActions,
-                                                int expectedPage,
-                                                int expectedSize) throws Exception {
+            int expectedPage,
+            int expectedSize) throws Exception {
         return resultActions
-            .andExpect(jsonPath("$.pageable.pageNumber").value(expectedPage))
-            .andExpect(jsonPath("$.pageable.pageSize").value(expectedSize))
-            .andExpect(jsonPath("$.content").isArray());
+                .andExpect(jsonPath("$.pageable.pageNumber").value(expectedPage))
+                .andExpect(jsonPath("$.pageable.pageSize").value(expectedSize))
+                .andExpect(jsonPath("$.content").isArray());
     }
 
     /**
      * 驗證錯誤回應
      */
     protected ResultActions verifyErrorResponse(ResultActions resultActions,
-                                                 int expectedStatus,
-                                                 String expectedErrorCode) throws Exception {
+            int expectedStatus,
+            String expectedErrorCode) throws Exception {
         return resultActions
-            .andExpect(status().is(expectedStatus))
-            .andExpect(jsonPath("$.errorCode").value(expectedErrorCode));
+                .andExpect(status().is(expectedStatus))
+                .andExpect(jsonPath("$.errorCode").value(expectedErrorCode));
     }
 
     /**

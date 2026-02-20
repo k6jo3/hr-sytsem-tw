@@ -27,6 +27,7 @@ import org.springframework.data.domain.Sort;
  *
  * @param <T> 條件 DTO 類型
  */
+@SuppressWarnings("null")
 public class Condition<T> {
 
     private final T conditionDto;

@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 @Service("getCertificatesServiceImpl")
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class GetCertificatesServiceImpl implements QueryApiService<GetCertificatesRequest, Page<CertificateResponse>> {
 
     private final CertificateQueryRepository certificateRepository;

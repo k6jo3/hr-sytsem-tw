@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 @Transactional
 @DisplayName("HR12NotificationCmdController API 測試")
+@SuppressWarnings("null")
 class HR12NotificationCmdControllerTest {
 
         @Autowired

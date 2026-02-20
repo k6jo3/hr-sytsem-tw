@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @Service("getCoursesServiceImpl")
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class GetCoursesServiceImpl implements QueryApiService<GetCoursesRequest, Page<TrainingCourseResponse>> {
 
     private final TrainingCourseQueryRepository courseRepository;

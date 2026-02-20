@@ -19,7 +19,8 @@ import com.company.hrms.common.query.QueryGroup;
  * 合約測試基類
  * 提供合約驗證的共用方法
  */
-public abstract class BaseContractTest {
+public abstract @SuppressWarnings("null")
+class BaseContractTest {
 
     /** 合約規格根目錄 */
     protected static final String CONTRACT_SPEC_ROOT = "spec/contracts";

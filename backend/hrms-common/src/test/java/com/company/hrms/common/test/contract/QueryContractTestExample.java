@@ -73,6 +73,7 @@ public class QueryContractTestExample extends BaseContractTest {
      */
     @Test
     @DisplayName("RPT_QRY_001: 查詢在職人員名冊 - 完整合約驗證")
+    @SuppressWarnings("null")
     void testEmployeeRosterQuery_FullContract() throws Exception {
         // 1. 載入合約規格
         ContractSpec contract = loadContract("reporting", "RPT_QRY_001");
@@ -90,12 +91,7 @@ public class QueryContractTestExample extends BaseContractTest {
                 .andReturn();
 
         // 4. 取得實際回應
-        String actualResponseJson = result.getResponse().getContentAsString();
-        // 處理編碼問題，確保 JSON 正確
-        if (result.getResponse().getCharacterEncoding() == null) {
-            actualResponseJson = new String(result.getResponse().getContentAsByteArray(),
-                    java.nio.charset.StandardCharsets.UTF_8);
-        }
+        String actualResponseJson = result.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
 
         // 5. 捕獲 QueryGroup（從 Repository 呼叫）
         // verify(reportRepository).findPage(queryCaptor.capture(), any());
