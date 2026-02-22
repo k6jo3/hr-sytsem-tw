@@ -521,9 +521,6 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
         @Test
         @DisplayName("合約業務規則: 只有 DRAFT 或 REJECTED 狀態可提交")
         void submitTimesheet_WrongStatus_ShouldThrow() {
-            // TODO: Timesheet.submit() 未檢查狀態是否為 DRAFT 或 REJECTED，
-            //       需在 domain model 的 submit() 方法中加入狀態前置檢查，
-            //       合約 TSH_CMD_004 明確要求「狀態必須為 DRAFT 或 REJECTED」
             // Arrange - PENDING 狀態
             Timesheet ts = createPendingTimesheet();
 
