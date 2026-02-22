@@ -149,6 +149,8 @@ public class Timesheet extends AggregateRoot<TimesheetId> {
     }
 
     public void submit() {
+        // TODO: 需加入狀態前置檢查，只有 DRAFT 或 REJECTED 狀態才可提交
+        //       (合約 TSH_CMD_004 businessRules: 狀態必須為 DRAFT 或 REJECTED)
         if (this.entries.isEmpty()) {
             throw new DomainException("至少需要一筆工時記錄");
         }
