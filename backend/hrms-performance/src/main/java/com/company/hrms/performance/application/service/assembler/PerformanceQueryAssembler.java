@@ -4,6 +4,7 @@ import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.performance.api.request.GetCyclesRequest;
 import com.company.hrms.performance.api.request.GetMyReviewsRequest;
+import com.company.hrms.performance.api.request.GetTeamReviewsRequest;
 
 /**
  * 績效管理查詢組裝器 (用於合約測試)
@@ -24,6 +25,16 @@ public class PerformanceQueryAssembler {
      * GetMyReviewsRequest -> QueryGroup
      */
     public QueryGroup toQueryGroup(GetMyReviewsRequest request) {
+        return QueryBuilder.where()
+                .fromDto(request)
+                .eq("is_deleted", 0)
+                .build();
+    }
+
+    /**
+     * GetTeamReviewsRequest -> QueryGroup
+     */
+    public QueryGroup toQueryGroup(GetTeamReviewsRequest request) {
         return QueryBuilder.where()
                 .fromDto(request)
                 .eq("is_deleted", 0)

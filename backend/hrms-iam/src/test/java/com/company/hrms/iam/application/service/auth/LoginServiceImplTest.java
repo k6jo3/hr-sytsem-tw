@@ -28,7 +28,7 @@ import com.company.hrms.iam.domain.model.aggregate.User;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("LoginServiceImpl 測試")
-@SuppressWarnings("null")
+
 class LoginServiceImplTest {
 
     @Mock

@@ -16,7 +16,7 @@ import com.company.hrms.iam.api.request.user.GetUserListRequest;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 
 @DisplayName("GetUserListService 快照測試")
-@SuppressWarnings("null")
+
 class GetUserListServiceImplTest extends BaseServiceTest<GetUserListServiceImpl> {
 
     @Mock

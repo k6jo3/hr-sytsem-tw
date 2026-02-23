@@ -26,7 +26,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
  */
 @Component
 @ConditionalOnProperty(name = "spring.kafka.enabled", havingValue = "true", matchIfMissing = true)
-@SuppressWarnings("null")
+
 public class KafkaEventPublisher implements EventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaEventPublisher.class);
@@ -42,7 +42,7 @@ public class KafkaEventPublisher implements EventPublisher {
     }
 
     @Override
-    @SuppressWarnings("null")
+
     public void publish(DomainEvent event) {
         String topic = buildTopicName(event);
         String key = event.getAggregateId();

@@ -109,7 +109,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@SuppressWarnings("null")
+
 public abstract class BaseApiIntegrationTest extends BaseTest {
 
     @Autowired

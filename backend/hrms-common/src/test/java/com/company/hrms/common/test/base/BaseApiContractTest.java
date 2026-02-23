@@ -52,7 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@SuppressWarnings("null")
+
 public abstract class BaseApiContractTest extends BaseContractTest {
 
     @Autowired

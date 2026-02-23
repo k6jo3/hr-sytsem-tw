@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/reporting/export")
 @RequiredArgsConstructor
 @Tag(name = "HR14-報表匯出(Qry)", description = "下載匯出檔案")
-@SuppressWarnings("null")
+
 public class HR14ExportQryController extends QueryBaseController {
 
         @GetMapping("/{exportId}/download")

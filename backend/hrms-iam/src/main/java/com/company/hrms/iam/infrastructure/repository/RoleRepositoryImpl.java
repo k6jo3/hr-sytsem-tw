@@ -26,7 +26,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
  * 實作 Domain 層定義的 IRoleRepository 介面
  */
 @Component
-@SuppressWarnings("null")
+
 public class RoleRepositoryImpl implements IRoleRepository {
 
     private final RoleDAO roleDAO;

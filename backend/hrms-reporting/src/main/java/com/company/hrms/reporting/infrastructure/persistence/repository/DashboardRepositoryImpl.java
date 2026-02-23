@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Repository
 @RequiredArgsConstructor
-@SuppressWarnings("null")
+
 public class DashboardRepositoryImpl implements IDashboardRepository {
 
     private final EntityManager entityManager;

@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * 註冊自定義的參數解析器
  */
 @Configuration
-@SuppressWarnings("null")
+
 public class WebConfig implements WebMvcConfigurer {
 
     @Override

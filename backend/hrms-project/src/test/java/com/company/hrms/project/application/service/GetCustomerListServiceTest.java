@@ -27,7 +27,7 @@ import com.company.hrms.project.domain.model.valueobject.CustomerStatus;
 import com.company.hrms.project.domain.repository.ICustomerRepository;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("null")
+
 public class GetCustomerListServiceTest {
 
     @Mock

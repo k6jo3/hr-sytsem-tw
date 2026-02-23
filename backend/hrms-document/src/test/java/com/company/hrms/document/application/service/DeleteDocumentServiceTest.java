@@ -31,7 +31,7 @@ import com.company.hrms.document.domain.model.enums.DocumentClassification;
 import com.company.hrms.document.domain.model.enums.DocumentVisibility;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("null")
+
 class DeleteDocumentServiceTest {
 
     private DeleteDocumentServiceImpl service;

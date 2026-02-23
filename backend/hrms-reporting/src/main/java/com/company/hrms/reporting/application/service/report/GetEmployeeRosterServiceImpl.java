@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Service("getEmployeeRosterServiceImpl")
 @RequiredArgsConstructor
-@SuppressWarnings("null")
+
 public class GetEmployeeRosterServiceImpl
                 implements QueryApiService<GetEmployeeRosterRequest, EmployeeRosterResponse> {
 

@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings("null")
+
 public class InAppChannelSender implements ChannelSender {
 
     private final SimpMessagingTemplate messagingTemplate;

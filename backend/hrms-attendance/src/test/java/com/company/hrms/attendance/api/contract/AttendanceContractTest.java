@@ -60,7 +60,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
                 "classpath:test-data/attendance_test_data.sql"
 }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayName("HR03 考勤服務合約測試")
-@SuppressWarnings("null")
+
 public class AttendanceContractTest extends BaseContractTest {
 
         @Autowired

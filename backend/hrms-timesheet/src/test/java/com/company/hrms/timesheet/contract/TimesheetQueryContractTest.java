@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,21 +31,20 @@ import com.company.hrms.common.test.contract.BaseContractTest;
 import com.company.hrms.common.test.contract.ContractSpec;
 import com.company.hrms.timesheet.api.request.GetMyTimesheetRequest;
 import com.company.hrms.timesheet.api.request.GetPendingApprovalsRequest;
+import com.company.hrms.timesheet.api.request.GetProjectTimesheetSummaryRequest;
 import com.company.hrms.timesheet.api.request.GetTimesheetDetailRequest;
 import com.company.hrms.timesheet.api.request.GetTimesheetSummaryRequest;
-import com.company.hrms.timesheet.api.request.GetProjectTimesheetSummaryRequest;
 import com.company.hrms.timesheet.api.request.GetUnreportedEmployeesRequest;
 import com.company.hrms.timesheet.api.response.GetMyTimesheetResponse;
 import com.company.hrms.timesheet.api.response.GetPendingApprovalsResponse;
-import com.company.hrms.timesheet.api.response.GetTimesheetDetailResponse;
-import com.company.hrms.timesheet.api.response.GetTimesheetSummaryResponse;
 import com.company.hrms.timesheet.api.response.GetProjectTimesheetSummaryResponse;
+import com.company.hrms.timesheet.api.response.GetTimesheetDetailResponse;
 import com.company.hrms.timesheet.api.response.GetUnreportedEmployeesResponse;
 import com.company.hrms.timesheet.application.service.GetMyTimesheetServiceImpl;
 import com.company.hrms.timesheet.application.service.GetPendingApprovalsServiceImpl;
+import com.company.hrms.timesheet.application.service.GetProjectTimesheetSummaryServiceImpl;
 import com.company.hrms.timesheet.application.service.GetTimesheetDetailServiceImpl;
 import com.company.hrms.timesheet.application.service.GetTimesheetSummaryServiceImpl;
-import com.company.hrms.timesheet.application.service.GetProjectTimesheetSummaryServiceImpl;
 import com.company.hrms.timesheet.application.service.GetUnreportedEmployeesServiceImpl;
 import com.company.hrms.timesheet.domain.model.aggregate.Timesheet;
 import com.company.hrms.timesheet.domain.model.entity.TimesheetEntry;
@@ -90,6 +88,7 @@ public class TimesheetQueryContractTest extends BaseServiceTest<Object> {
         public String doLoadContractSpec(String serviceName) throws IOException {
             return loadContractSpec(serviceName);
         }
+
         public ContractSpec doLoadContractFromMarkdown(String markdown, String scenarioId) {
             return loadContractFromMarkdown(markdown, scenarioId);
         }
@@ -349,8 +348,7 @@ public class TimesheetQueryContractTest extends BaseServiceTest<Object> {
             request.setTimesheetId(UUID.randomUUID().toString());
 
             // Act & Assert
-            assertThrows(Exception.class, () ->
-                    service.getResponse(request, currentUser));
+            assertThrows(Exception.class, () -> service.getResponse(request, currentUser));
         }
     }
 
@@ -393,9 +391,11 @@ public class TimesheetQueryContractTest extends BaseServiceTest<Object> {
             QueryGroup capturedQuery = queryCaptor.getValue();
             assertNotNull(capturedQuery, "QueryGroup 不應為 null");
 
-            // 合約要求: periodStartDate >= startDate, periodEndDate <= endDate
-            // TODO: 合約要求 status = APPROVED 過濾，但目前 Service 僅使用 fromDto 建構查詢，
-            //       未明確加入 status 過濾條件，需在 Service 或 Request DTO 補充
+            // 合約要求: periodStartDate >= startDate, periodEndDate <= endDate, status =
+            // APPROVED
+            contractHelper.assertHasFilterForField(capturedQuery, "periodStartDate");
+            contractHelper.assertHasFilterForField(capturedQuery, "periodEndDate");
+            contractHelper.assertHasFilterForField(capturedQuery, "status");
         }
     }
 
@@ -441,6 +441,9 @@ public class TimesheetQueryContractTest extends BaseServiceTest<Object> {
             verify(timesheetRepository).findAll(queryCaptor.capture(), any(Pageable.class));
             QueryGroup capturedQuery = queryCaptor.getValue();
             assertNotNull(capturedQuery, "QueryGroup 不應為 null");
+            contractHelper.assertHasFilterForField(capturedQuery, "periodStartDate");
+            contractHelper.assertHasFilterForField(capturedQuery, "periodEndDate");
+            contractHelper.assertHasFilterForField(capturedQuery, "status");
 
             // Assert - 回應結構
             assertNotNull(response, "回應不應為 null");

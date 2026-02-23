@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service("getUnreportedEmployeesServiceImpl")
 @RequiredArgsConstructor
-@SuppressWarnings("null")
+
 public class GetUnreportedEmployeesServiceImpl
                 implements QueryApiService<GetUnreportedEmployeesRequest, GetUnreportedEmployeesResponse> {
 

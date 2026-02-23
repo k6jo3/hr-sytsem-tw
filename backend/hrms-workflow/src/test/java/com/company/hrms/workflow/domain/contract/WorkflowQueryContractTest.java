@@ -13,7 +13,6 @@ import com.company.hrms.workflow.api.request.GetPendingTasksRequest;
 import com.company.hrms.workflow.application.service.GetPendingTasksServiceImpl;
 import com.company.hrms.workflow.domain.repository.IApprovalTaskRepository;
 
-// TODO: 需建立 contracts/workflow_contracts.md 合約規格檔
 public class WorkflowQueryContractTest extends BaseContractTest {
 
     private GetPendingTasksServiceImpl getPendingTasksService;

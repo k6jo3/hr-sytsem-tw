@@ -8,6 +8,7 @@ import java.util.List;
 public class ExpectedEvent {
     private String eventType;
     private List<FieldAssertion> payload;
+    private Integer count;
 
     // Getters and Setters
     public String getEventType() {
@@ -24,5 +25,13 @@ public class ExpectedEvent {
 
     public void setPayload(List<FieldAssertion> payload) {
         this.payload = payload;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
     }
 }

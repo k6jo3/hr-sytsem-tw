@@ -37,13 +37,10 @@ import com.company.hrms.timesheet.api.request.LockTimesheetRequest;
 import com.company.hrms.timesheet.api.request.RejectTimesheetRequest;
 import com.company.hrms.timesheet.api.request.SubmitTimesheetRequest;
 import com.company.hrms.timesheet.api.request.UpdateTimesheetEntryRequest;
-import com.company.hrms.timesheet.api.response.ApproveTimesheetResponse;
 import com.company.hrms.timesheet.api.response.BatchApproveTimesheetResponse;
 import com.company.hrms.timesheet.api.response.CreateEntryResponse;
 import com.company.hrms.timesheet.api.response.DeleteTimesheetEntryResponse;
 import com.company.hrms.timesheet.api.response.LockTimesheetResponse;
-import com.company.hrms.timesheet.api.response.RejectTimesheetResponse;
-import com.company.hrms.timesheet.api.response.SubmitTimesheetResponse;
 import com.company.hrms.timesheet.api.response.UpdateTimesheetEntryResponse;
 import com.company.hrms.timesheet.application.service.ApproveTimesheetServiceImpl;
 import com.company.hrms.timesheet.application.service.BatchApproveTimesheetServiceImpl;
@@ -110,6 +107,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
         public String doLoadContractSpec(String serviceName) throws IOException {
             return loadContractSpec(serviceName);
         }
+
         public ContractSpec doLoadContractFromMarkdown(String markdown, String scenarioId) {
             return loadContractFromMarkdown(markdown, scenarioId);
         }
@@ -231,7 +229,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
             // Arrange
             Timesheet existing = createDraftTimesheetWithEntry();
             UUID projectId = UUID.randomUUID();
-            LocalDate workDate = existing.getPeriodStartDate().plusDays(1);
+            LocalDate workDate = existing.getPeriodStartDate();
 
             CreateEntryRequest request = new CreateEntryRequest();
             request.setEmployeeId(employeeId);
@@ -282,8 +280,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
                     .thenReturn(ResponseEntity.ok(projectDto));
 
             // Act & Assert - 未來日期應拋出例外
-            assertThrows(Exception.class, () ->
-                    service.execCommand(request, currentUser, ""));
+            assertThrows(Exception.class, () -> service.execCommand(request, currentUser, ""));
         }
 
         @Test
@@ -312,8 +309,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
                     .thenReturn(ResponseEntity.ok(projectDto));
 
             // Act & Assert
-            assertThrows(Exception.class, () ->
-                    service.execCommand(request, currentUser, ""));
+            assertThrows(Exception.class, () -> service.execCommand(request, currentUser, ""));
         }
     }
 
@@ -376,8 +372,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
             request.setHours(new BigDecimal("4.0"));
 
             // Act & Assert
-            assertThrows(Exception.class, () ->
-                    service.execCommand(request, currentUser, ""));
+            assertThrows(Exception.class, () -> service.execCommand(request, currentUser, ""));
         }
     }
 
@@ -437,8 +432,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
             request.setEntryId(entryId);
 
             // Act & Assert
-            assertThrows(Exception.class, () ->
-                    service.execCommand(request, currentUser, ""));
+            assertThrows(Exception.class, () -> service.execCommand(request, currentUser, ""));
         }
     }
 
@@ -514,8 +508,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
             request.setTimesheetId(ts.getId().getValue());
 
             // Act & Assert
-            assertThrows(Exception.class, () ->
-                    service.execCommand(request, currentUser, ""));
+            assertThrows(Exception.class, () -> service.execCommand(request, currentUser, ""));
         }
 
         @Test
@@ -530,8 +523,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
             request.setTimesheetId(ts.getId().getValue());
 
             // Act & Assert - PENDING 不可再提交
-            assertThrows(Exception.class, () ->
-                    service.execCommand(request, currentUser, ""));
+            assertThrows(Exception.class, () -> service.execCommand(request, currentUser, ""));
         }
     }
 
@@ -609,8 +601,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
             JWTModel approverUser = JWTModel.builder().userId(approverId.toString()).build();
 
             // Act & Assert
-            Exception ex = assertThrows(Exception.class, () ->
-                    service.execCommand(request, approverUser, ""));
+            Exception ex = assertThrows(Exception.class, () -> service.execCommand(request, approverUser, ""));
             // Pipeline 包裝 DomainException
             assertTrue(ex instanceof PipelineExecutionException, "應拋出 PipelineExecutionException");
             assertTrue(ex.getCause() instanceof DomainException, "根因應為 DomainException");
@@ -633,10 +624,9 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
         @Test
         @DisplayName("合約驗證: 批次核准 - 全部成功")
         void batchApprove_AllSuccess() throws Exception {
-            // TODO: TSH_CMD_006 合約 JSON 的 expectedEvents 含 "count" 欄位，
-            //       ExpectedEvent 不支援此欄位，待 common 框架擴充後再啟用合約載入
-            // ContractSpec contract = contractHelper.doLoadContractFromMarkdown(contractSpec, "TSH_CMD_006");
-            // assertNotNull(contract, "合約 TSH_CMD_006 應存在");
+            // TSH_CMD_006 合約 JSON 的 expectedEvents 含 "count" 欄位，已擴充支援
+            ContractSpec contract = contractHelper.doLoadContractFromMarkdown(contractSpec, "TSH_CMD_006");
+            assertNotNull(contract, "合約 TSH_CMD_006 應存在");
 
             // Arrange
             Timesheet ts1 = createPendingTimesheet();
@@ -770,8 +760,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
             JWTModel approverUser = JWTModel.builder().userId(approverId.toString()).build();
 
             // Act & Assert
-            assertThrows(Exception.class, () ->
-                    service.execCommand(request, approverUser, ""));
+            assertThrows(Exception.class, () -> service.execCommand(request, approverUser, ""));
         }
     }
 
@@ -826,8 +815,7 @@ public class TimesheetCommandContractTest extends BaseCommandServiceTest<Object>
             request.setTimesheetId(UUID.randomUUID().toString());
 
             // Act & Assert
-            assertThrows(EntityNotFoundException.class, () ->
-                    service.execCommand(request, currentUser, ""));
+            assertThrows(EntityNotFoundException.class, () -> service.execCommand(request, currentUser, ""));
         }
     }
 }

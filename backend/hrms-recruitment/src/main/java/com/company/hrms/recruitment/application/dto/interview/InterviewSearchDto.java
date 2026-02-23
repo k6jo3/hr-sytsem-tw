@@ -18,7 +18,7 @@ import lombok.Data;
 @Data
 @ParameterObject
 @Schema(description = "面試查詢條件")
-@SuppressWarnings("null")
+
 public class InterviewSearchDto implements Pageable {
 
     @QueryFilter(property = "candidateId", operator = Operator.EQ)
@@ -107,7 +107,7 @@ public class InterviewSearchDto implements Pageable {
 
     @NonNull
     @Override
-    @SuppressWarnings("null")
+
     public java.util.Optional<org.springframework.data.domain.Pageable> toOptional() {
         return java.util.Optional.of(this);
     }

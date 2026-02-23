@@ -30,7 +30,7 @@ import com.company.hrms.document.domain.model.IDocumentRepository;
 import com.company.hrms.document.domain.model.IDocumentTemplateRepository;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("null")
+
 class GenerateDocumentServiceTest {
 
         private GenerateDocumentServiceImpl service;

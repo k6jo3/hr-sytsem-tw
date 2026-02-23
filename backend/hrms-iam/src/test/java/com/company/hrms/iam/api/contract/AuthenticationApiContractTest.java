@@ -51,7 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:test-data/iam_base_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@SuppressWarnings("null")
+
 public class AuthenticationApiContractTest extends BaseContractTest {
 
     @Autowired

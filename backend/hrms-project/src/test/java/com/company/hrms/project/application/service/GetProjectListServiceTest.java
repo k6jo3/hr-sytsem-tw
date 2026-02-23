@@ -34,7 +34,7 @@ import com.company.hrms.project.domain.model.valueobject.ProjectType;
 import com.company.hrms.project.domain.repository.IProjectRepository;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("null")
+
 public class GetProjectListServiceTest {
 
     @Mock

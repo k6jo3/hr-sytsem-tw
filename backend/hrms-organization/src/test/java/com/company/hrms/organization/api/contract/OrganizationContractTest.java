@@ -55,7 +55,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
         "classpath:test-data/organization_test_data.sql"
 }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DisplayName("HR02 組織員工服務合約測試")
-@SuppressWarnings("null")
+
 public class OrganizationContractTest extends BaseContractTest {
 
     @Autowired

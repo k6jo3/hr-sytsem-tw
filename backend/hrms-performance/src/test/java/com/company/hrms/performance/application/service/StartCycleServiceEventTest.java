@@ -39,7 +39,7 @@ import com.company.hrms.performance.domain.model.valueobject.ScoringSystem;
 })
 @org.springframework.test.context.ActiveProfiles("test")
 @DisplayName("HR08 考核週期啟動事件測試")
-@SuppressWarnings("null")
+
 class StartCycleServiceEventTest {
 
     @Autowired

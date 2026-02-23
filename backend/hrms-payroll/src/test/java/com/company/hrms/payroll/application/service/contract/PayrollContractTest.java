@@ -1,5 +1,8 @@
 package com.company.hrms.payroll.application.service.contract;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.DisplayName;
@@ -26,20 +29,19 @@ import com.company.hrms.payroll.application.service.query.assembler.SalaryStruct
 @DisplayName("HR04 薪資管理服務業務合約測試")
 public class PayrollContractTest extends BaseContractTest {
 
-    // TODO: 需建立 contracts/payroll_contracts.md 合約規格檔
     private static final String CONTRACT = "payroll_contracts";
 
     @Override
     protected String loadContractSpec(String serviceName) throws java.io.IOException {
-        java.nio.file.Path current = java.nio.file.Paths.get("").toAbsolutePath();
+        Path current = Paths.get("").toAbsolutePath();
         for (int i = 0; i < 6; i++) {
-            java.nio.file.Path candidate = current.resolve("contracts/" + serviceName + ".md");
-            if (java.nio.file.Files.exists(candidate)) {
-                return java.nio.file.Files.readString(candidate);
+            Path candidate = current.resolve("contracts/" + serviceName + ".md");
+            if (Files.exists(candidate)) {
+                return Files.readString(candidate);
             }
-            java.nio.file.Path candidateSibling = current.resolve("../contracts/" + serviceName + ".md");
-            if (java.nio.file.Files.exists(candidateSibling)) {
-                return java.nio.file.Files.readString(candidateSibling);
+            Path candidateSibling = current.resolve("../contracts/" + serviceName + ".md");
+            if (Files.exists(candidateSibling)) {
+                return Files.readString(candidateSibling);
             }
             current = current.getParent();
             if (current == null)

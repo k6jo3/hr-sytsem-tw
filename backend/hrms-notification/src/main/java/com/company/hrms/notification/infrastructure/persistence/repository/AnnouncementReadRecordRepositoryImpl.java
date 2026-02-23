@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-@SuppressWarnings("null")
+
 public class AnnouncementReadRecordRepositoryImpl implements IAnnouncementReadRecordRepository {
 
     private final AnnouncementReadRecordDAO dao;

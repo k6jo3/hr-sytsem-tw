@@ -25,7 +25,7 @@ import com.company.hrms.training.infrastructure.entity.TrainingEnrollmentEntity;
 import com.company.hrms.training.infrastructure.repository.TrainingEnrollmentQueryRepository;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("null")
+
 class GetTrainingStatisticsServiceTest {
 
     @Mock

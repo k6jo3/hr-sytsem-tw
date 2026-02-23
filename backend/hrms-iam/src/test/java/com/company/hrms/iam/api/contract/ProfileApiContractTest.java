@@ -43,7 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 @Sql(scripts = "classpath:test-data/iam_base_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Transactional(propagation = Propagation.NEVER) // 不參與 Service 事務，確保能捕獲已提交的資料變更
-@SuppressWarnings("null")
+
 public class ProfileApiContractTest extends BaseContractTest {
 
     @Autowired

@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Document Query", description = "文件管理查詢 API")
 @RestController
 @RequestMapping("/api/v1/documents")
-@SuppressWarnings("null")
+
 public class HR13DocumentQryController extends QueryBaseController {
 
     /**

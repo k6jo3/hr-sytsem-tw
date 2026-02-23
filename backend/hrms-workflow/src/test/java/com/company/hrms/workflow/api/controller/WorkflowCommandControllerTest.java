@@ -17,7 +17,6 @@ import com.company.hrms.workflow.api.request.ApproveTaskRequest;
 import com.company.hrms.workflow.api.request.RejectTaskRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SuppressWarnings("null")
 public class WorkflowCommandControllerTest {
 
     private MockMvc mockMvc;

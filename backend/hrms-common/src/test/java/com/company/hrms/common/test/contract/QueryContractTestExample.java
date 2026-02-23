@@ -21,7 +21,7 @@ import com.company.hrms.common.query.QueryGroup;
 @Disabled("Example test, requires complex context setup")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
-@SuppressWarnings("null")
+
 public class QueryContractTestExample extends BaseContractTest {
 
     @org.springframework.boot.autoconfigure.SpringBootApplication(exclude = {
@@ -74,7 +74,7 @@ public class QueryContractTestExample extends BaseContractTest {
      */
     @Test
     @DisplayName("RPT_QRY_001: 查詢在職人員名冊 - 完整合約驗證")
-    @SuppressWarnings("null")
+
     void testEmployeeRosterQuery_FullContract() throws Exception {
         // 1. 載入合約規格
         ContractSpec contract = loadContract("reporting", "RPT_QRY_001");

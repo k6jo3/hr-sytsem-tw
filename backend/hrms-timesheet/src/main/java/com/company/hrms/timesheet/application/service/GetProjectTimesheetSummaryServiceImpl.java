@@ -36,6 +36,7 @@ public class GetProjectTimesheetSummaryServiceImpl
 
         QueryGroup query = QueryBuilder.where()
                 .fromDto(request)
+                .eq("status", "APPROVED")
                 .build();
 
         // 查詢所有符合條件的工時表（不分頁）

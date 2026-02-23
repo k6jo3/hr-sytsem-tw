@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings("null")
+
 public class EmailChannelSender implements ChannelSender {
 
     private final JavaMailSender mailSender;

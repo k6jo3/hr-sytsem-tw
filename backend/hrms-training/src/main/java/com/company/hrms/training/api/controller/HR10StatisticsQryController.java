@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/training/statistics")
 @Tag(name = "HR10 - Statistics", description = "訓練統計 (Query)")
 @RequiredArgsConstructor
-@SuppressWarnings("null")
+
 public class HR10StatisticsQryController extends QueryBaseController {
 
     private final ExportTrainingStatisticsServiceImpl exportService;
