@@ -10,6 +10,7 @@ import java.util.UUID;
  */
 import org.springframework.stereotype.Component;
 
+import com.company.hrms.common.query.LogicalOp;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryCondition;
 import com.company.hrms.common.query.QueryGroup;
@@ -39,17 +40,21 @@ public class RecruitmentQueryAssembler {
         condition.setDepartmentId(departmentId);
         condition.setIsDeleted(0);
 
-        var builder = QueryBuilder.where().fromDto(condition);
+        // 使用 fromCondition 解析 @QueryCondition.EQ / @LIKE 等標準注解
+        QueryGroup queryGroup = QueryBuilder.fromCondition(condition);
 
         if (keyword != null && !keyword.isBlank()) {
             JobOpeningKeywordCondition keywordCondition = new JobOpeningKeywordCondition();
             keywordCondition.setTitle(keyword);
             keywordCondition.setRequirements(keyword);
 
-            builder.orGroup(group -> group.fromDto(keywordCondition));
+            // 以 fromCondition 取得條件後，轉成 OR 子群組
+            QueryGroup kwGroup = QueryBuilder.fromCondition(keywordCondition);
+            kwGroup.setJunction(LogicalOp.OR);
+            queryGroup.addSubGroup(kwGroup);
         }
 
-        return builder.build();
+        return queryGroup;
     }
 
     @lombok.Data
@@ -87,17 +92,21 @@ public class RecruitmentQueryAssembler {
         }
         condition.setStatus(status);
 
-        var builder = QueryBuilder.where().fromDto(condition);
+        // 使用 fromCondition 解析 @QueryCondition.EQ / @LIKE 等標準注解
+        QueryGroup queryGroup = QueryBuilder.fromCondition(condition);
 
         if (keyword != null && !keyword.isBlank()) {
             CandidateKeywordCondition keywordCondition = new CandidateKeywordCondition();
             keywordCondition.setFullName(keyword);
             keywordCondition.setEmail(keyword);
 
-            builder.orGroup(group -> group.fromDto(keywordCondition));
+            // 以 fromCondition 取得條件後，轉成 OR 子群組
+            QueryGroup kwGroup = QueryBuilder.fromCondition(keywordCondition);
+            kwGroup.setJunction(LogicalOp.OR);
+            queryGroup.addSubGroup(kwGroup);
         }
 
-        return builder.build();
+        return queryGroup;
     }
 
     @lombok.Data
@@ -137,7 +146,8 @@ public class RecruitmentQueryAssembler {
         condition.setStartDate(startDate);
         condition.setEndDate(endDate);
 
-        return QueryBuilder.where().fromDto(condition).build();
+        // 使用 fromCondition 解析 @QueryCondition.EQ / @GTE / @LTE 等標準注解
+        return QueryBuilder.fromCondition(condition);
     }
 
     @lombok.Data
@@ -170,7 +180,8 @@ public class RecruitmentQueryAssembler {
             condition.setStatus(OfferStatus.valueOf(offerStatus));
         }
 
-        return QueryBuilder.where().fromDto(condition).build();
+        // 使用 fromCondition 解析 @QueryCondition.EQ 等標準注解
+        return QueryBuilder.fromCondition(condition);
     }
 
     @lombok.Data

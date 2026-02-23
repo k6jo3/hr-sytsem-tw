@@ -15,7 +15,7 @@ INSERT INTO training_courses (course_id, course_code, course_name, course_type, 
 ('C004', 'TRN-2025-004', '必修資安課程', 'INTERNAL', 'ONLINE', 'COMPLIANCE', 2.0, 1000, 1, 450, '2025-01-01', '2025-12-31', 'OPEN', true, 0, '2025-01-01 09:00:00', '2025-01-01 09:00:00'),
 -- CLOSED
 ('C005', 'TRN-2024-005', 'Java基礎課程', 'INTERNAL', 'OFFLINE', 'TECHNICAL', 24.0, 25, 5, 20, '2024-11-01', '2024-11-03', 'CLOSED', false, 0, '2024-10-01 09:00:00', '2024-12-01 09:00:00'),
-('C006', 'TRN-2024-006', '新人訓練', 'INTERNAL', 'OFFLINE', 'ONBOARDING', 8.0, 50, 1, 35, '2024-12-01', '2024-12-01', 'CLOSED', true, 0, '2024-11-15 09:00:00', '2024-12-15 09:00:00'),
+('C006', 'TRN-2024-006', '新人訓練', 'INTERNAL', 'OFFLINE', 'ORIENTATION', 8.0, 50, 1, 35, '2024-12-01', '2024-12-01', 'CLOSED', true, 0, '2024-11-15 09:00:00', '2024-12-15 09:00:00'),
 -- DRAFT
 ('C007', 'TRN-2025-007', 'AI應用開發', 'EXTERNAL', 'ONLINE', 'TECHNICAL', 32.0, 15, 5, 0, '2025-04-01', '2025-04-15', 'DRAFT', false, 0, '2025-01-25 09:00:00', '2025-01-25 09:00:00'),
 -- CANCELLED
@@ -25,14 +25,14 @@ INSERT INTO training_courses (course_id, course_code, course_name, course_type, 
 INSERT INTO training_enrollments (enrollment_id, course_id, employee_id, status, attendance, completed_hours, is_deleted, created_at, updated_at) VALUES
 ('E001-C001', 'C001', 'E001', 'APPROVED', false, 0, 0, '2025-01-15 09:00:00', '2025-01-15 09:00:00'),
 ('E001-C004', 'C004', 'E001', 'COMPLETED', true, 2.0, 0, '2025-01-05 09:00:00', '2025-01-10 09:00:00'),
-('E002-C001', 'C001', 'E002', 'PENDING', false, 0, 0, '2025-01-20 09:00:00', '2025-01-20 09:00:00'),
+('E002-C001', 'C001', 'E002', 'REGISTERED', false, 0, 0, '2025-01-20 09:00:00', '2025-01-20 09:00:00'),
 ('E002-C003', 'C003', 'E002', 'APPROVED', false, 0, 0, '2025-01-22 09:00:00', '2025-01-23 09:00:00'),
 ('E003-C004', 'C004', 'E003', 'COMPLETED', true, 2.0, 0, '2025-01-02 09:00:00', '2025-01-08 09:00:00'),
 ('E003-C002', 'C002', 'E003', 'APPROVED', false, 0, 0, '2025-01-25 09:00:00', '2025-01-26 09:00:00'),
 ('E001-C005', 'C005', 'E001', 'COMPLETED', true, 24.0, 0, '2024-10-20 09:00:00', '2024-11-05 09:00:00'),
 ('E002-C005', 'C005', 'E002', 'COMPLETED', true, 24.0, 0, '2024-10-22 09:00:00', '2024-11-05 09:00:00'),
 ('E001-C008', 'C008', 'E001', 'CANCELLED', false, 0, 0, '2025-01-10 09:00:00', '2025-01-20 09:00:00'),
-('E004-C004', 'C004', 'E004', 'PENDING', false, 0, 0, '2025-01-28 09:00:00', '2025-01-28 09:00:00');
+('E004-C004', 'C004', 'E004', 'REGISTERED', false, 0, 0, '2025-01-28 09:00:00', '2025-01-28 09:00:00');
 
 -- 證照資料 (共 5 筆)
 INSERT INTO certificates (certificate_id, employee_id, certificate_name, issuing_organization, issue_date, expiry_date, status, is_deleted, created_at, updated_at) VALUES

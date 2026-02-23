@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.base.BaseApiContractTest;
@@ -19,7 +20,7 @@ public class JobOpeningContractTest extends BaseApiContractTest {
     private IJobOpeningRepository jobOpeningRepository;
 
     @Test
-    @org.springframework.security.test.context.support.WithMockUser(username = "admin", roles = { "HR" })
+    @WithMockUser(username = "admin", roles = { "HR" })
     void searchJobOpening_ByTitle_ShouldMeetContract() throws Exception {
         // 1. Load Contract
         String contractSpec = loadContractSpec("recruitment");
