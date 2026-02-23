@@ -7,6 +7,7 @@
 下圖展示了系統從前端至後端資料庫的完整拓樸，以及 14 個微服務叢集的分佈與溝通機制。
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px', 'fontFamily': 'sans-serif', 'primaryTextColor': '#111111', 'lineColor': '#333333'}}}%%
 graph TD
     %% 定義樣式
     classDef frontend fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,color:#000

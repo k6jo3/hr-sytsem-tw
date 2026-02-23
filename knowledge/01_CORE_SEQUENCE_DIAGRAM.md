@@ -7,6 +7,7 @@
 這是最能展示微服務特性的經典場景。當 HR 建立一筆新員工資料時，系統**不會**讓 Organization (組織模組) 依序同步呼叫 IAM、Payroll、Insurance 等服務，而是採取「發布 / 訂閱 (Pub/Sub)」模式非同步處理，大幅縮短了 HR 的等待時間。
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px', 'fontFamily': 'sans-serif', 'textColor': '#111111', 'actorTextColor': '#111111', 'messageTextColor': '#111111', 'noteTextColor': '#111111', 'lineColor': '#333333'}}}%%
 sequenceDiagram
     autonumber
     
