@@ -69,10 +69,12 @@ public class NotificationRepositoryImpl
 
     @Override
     public List<Notification> findUnreadByRecipientId(String recipientId) {
-        // 使用宣告式 QueryBuilder 建立查詢條件
+        // 未讀 = PENDING 或 SENT (不含 READ 和 FAILED)
+        // 使用 status NOT IN (READ, FAILED) 排除已讀與失敗通知
         QueryGroup query = QueryBuilder.where()
                 .and("recipientId", Operator.EQ, recipientId)
                 .and("readAt", Operator.IS_NULL, null)
+                .and("status", Operator.NE, com.company.hrms.notification.domain.model.valueobject.NotificationStatus.FAILED.name())
                 .and("isDeleted", Operator.EQ, false)
                 .build();
 
@@ -82,10 +84,11 @@ public class NotificationRepositoryImpl
 
     @Override
     public long countUnreadByRecipientId(String recipientId) {
-        // 使用宣告式 QueryBuilder 建立查詢條件並使用 count() 方法
+        // 未讀 = PENDING 或 SENT (不含 READ 和 FAILED)
         QueryGroup query = QueryBuilder.where()
                 .and("recipientId", Operator.EQ, recipientId)
                 .and("readAt", Operator.IS_NULL, null)
+                .and("status", Operator.NE, com.company.hrms.notification.domain.model.valueobject.NotificationStatus.FAILED.name())
                 .and("isDeleted", Operator.EQ, false)
                 .build();
 
@@ -95,9 +98,10 @@ public class NotificationRepositoryImpl
     @Override
     public boolean existsByTemplateCodeAndStatus(String templateCode,
             com.company.hrms.notification.domain.model.valueobject.NotificationStatus status) {
+        // 傳遞 status.name() (String) 避免 String 欄位與 Enum 型別比較的問題
         QueryGroup query = QueryBuilder.where()
                 .and("templateCode", Operator.EQ, templateCode)
-                .and("status", Operator.EQ, status)
+                .and("status", Operator.EQ, status.name())
                 .and("isDeleted", Operator.EQ, false)
                 .build();
 

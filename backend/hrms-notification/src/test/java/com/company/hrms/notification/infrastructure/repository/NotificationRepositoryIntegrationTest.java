@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +46,14 @@ import com.company.hrms.notification.domain.repository.INotificationRepository;
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("Notification Repository 整合測試")
 class NotificationRepositoryIntegrationTest {
+
+    // 避免 WebSocket 相關 Bean 在測試環境中啟動失敗
+    @MockBean
+    private SimpMessagingTemplate simpMessagingTemplate;
+
+    // 避免 Email 相關 Bean 在測試環境中啟動失敗
+    @MockBean
+    private JavaMailSender javaMailSender;
 
     @Autowired
     private INotificationRepository notificationRepository;

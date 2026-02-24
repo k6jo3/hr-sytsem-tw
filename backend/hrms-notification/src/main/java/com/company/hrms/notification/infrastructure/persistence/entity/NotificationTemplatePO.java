@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "notification_templates", indexes = {
         @Index(name = "idx_template_code", columnList = "template_code", unique = true),
-        @Index(name = "idx_status", columnList = "status")
+        @Index(name = "idx_template_status", columnList = "status")
 })
 @Data
 @Builder

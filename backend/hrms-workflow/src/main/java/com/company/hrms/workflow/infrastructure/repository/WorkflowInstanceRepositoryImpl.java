@@ -30,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Repository
-
 public class WorkflowInstanceRepositoryImpl
         extends CommandBaseRepository<WorkflowInstanceEntity, String>
         implements IWorkflowInstanceRepository {
@@ -145,6 +144,32 @@ public class WorkflowInstanceRepositoryImpl
     }
 
     private WorkflowInstance toDomain(WorkflowInstanceEntity entity) {
+        WorkflowInstance domain = toBaseDomain(entity);
+
+        List<ApprovalTask> tasks = new ArrayList<>();
+        if (entity.getTasks() != null) {
+            tasks = entity.getTasks().stream()
+                    .map(this::toTaskDomain)
+                    .collect(Collectors.toList());
+        }
+        domain.setTasks(tasks);
+
+        return domain;
+    }
+
+    /**
+     * 僅轉換基本欄位，不載入 tasks（適用於 list/search 場景，避免 N+1 查詢）
+     */
+    private WorkflowInstance toDomainWithoutTasks(WorkflowInstanceEntity entity) {
+        WorkflowInstance domain = toBaseDomain(entity);
+        domain.setTasks(new ArrayList<>());
+        return domain;
+    }
+
+    /**
+     * 轉換基本欄位（不含 tasks），供 toDomain 與 toDomainWithoutTasks 共用
+     */
+    private WorkflowInstance toBaseDomain(WorkflowInstanceEntity entity) {
         Map<String, Object> variables = null;
         try {
             if (entity.getVariablesJson() != null) {
@@ -153,13 +178,6 @@ public class WorkflowInstanceRepositoryImpl
             }
         } catch (JsonProcessingException e) {
             log.error("Error deserializing instance variables", e);
-        }
-
-        List<ApprovalTask> tasks = new ArrayList<>();
-        if (entity.getTasks() != null) {
-            tasks = entity.getTasks().stream()
-                    .map(this::toTaskDomain)
-                    .collect(Collectors.toList());
         }
 
         WorkflowInstance domain = new WorkflowInstance(new WorkflowInstanceId(entity.getInstanceId()));
@@ -179,7 +197,6 @@ public class WorkflowInstanceRepositoryImpl
         domain.setCurrentNodeName(entity.getCurrentNodeName());
         domain.setStartedAt(entity.getStartedAt());
         domain.setCompletedAt(entity.getCompletedAt());
-        domain.setTasks(tasks);
 
         return domain;
     }
@@ -212,11 +229,10 @@ public class WorkflowInstanceRepositoryImpl
         // 使用 BaseRepository 的 findPage 方法查詢 Entity
         Page<WorkflowInstanceEntity> entityPage = super.findPage(queryGroup, pageable);
 
-        // 使用明確的 mapper 轉換，避免 objectMapper.convertValue() 在雙向關聯時產生無限遞迴
-        // TODO: 考慮使用 toDomainWithoutTasks() 改善 N+1 查詢問題（list 場景不需要載入 tasks）
+        // list 場景不需要載入 tasks，使用 toDomainWithoutTasks() 避免 N+1 查詢
         List<WorkflowInstance> domainList = entityPage.getContent()
                 .stream()
-                .map(this::toDomain)
+                .map(this::toDomainWithoutTasks)
                 .collect(Collectors.toList());
 
         return new PageImpl<>(
