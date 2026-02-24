@@ -10,7 +10,7 @@ import com.company.hrms.workflow.domain.repository.IWorkflowDefinitionRepository
 
 import lombok.RequiredArgsConstructor;
 
-@Component
+@Component("loadWorkflowDefinitionForUpdateTask")
 @RequiredArgsConstructor
 public class LoadWorkflowDefinitionTask implements PipelineTask<UpdateWorkflowDefinitionContext> {
 

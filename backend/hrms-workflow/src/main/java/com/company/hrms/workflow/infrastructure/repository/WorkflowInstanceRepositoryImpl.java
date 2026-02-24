@@ -212,10 +212,11 @@ public class WorkflowInstanceRepositoryImpl
         // 使用 BaseRepository 的 findPage 方法查詢 Entity
         Page<WorkflowInstanceEntity> entityPage = super.findPage(queryGroup, pageable);
 
-        // 使用 objectMapper 轉換為 Domain 物件
+        // 使用明確的 mapper 轉換，避免 objectMapper.convertValue() 在雙向關聯時產生無限遞迴
+        // TODO: 考慮使用 toDomainWithoutTasks() 改善 N+1 查詢問題（list 場景不需要載入 tasks）
         List<WorkflowInstance> domainList = entityPage.getContent()
                 .stream()
-                .map(entity -> objectMapper.convertValue(entity, WorkflowInstance.class))
+                .map(this::toDomain)
                 .collect(Collectors.toList());
 
         return new PageImpl<>(

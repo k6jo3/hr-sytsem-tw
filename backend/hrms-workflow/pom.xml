@@ -88,6 +88,13 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
 
+        <!-- H2 (測試用) -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- QueryDSL -->
         <dependency>
             <groupId>com.querydsl</groupId>

@@ -59,8 +59,8 @@ public class WorkflowQueryContractTest extends BaseContractTest {
         // 暫時直接驗證，若失敗再調整。
 
         // 由於 BaseContractTest.assertContract 是黑盒，我們假設它能處理或我們需要手動替換 Contract String 中的變數
-        String resolvedContract = contract.replace("{currentUserId}", "EMP001");
+        String resolvedContract = contract.replace("{currentUserEmployeeNumber}", "EMP001");
 
-        assertContract(actualQuery, resolvedContract, "WFL_T001");
+        assertContract(actualQuery, resolvedContract, "WFL_Q001");
     }
 }

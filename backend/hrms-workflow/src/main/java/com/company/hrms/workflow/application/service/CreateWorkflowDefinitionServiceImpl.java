@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * 建立流程定義服務
  */
-@Service("createWorkflowDefinitionServiceImpl")
+@Service("createDefinitionServiceImpl")
 @Transactional
 @RequiredArgsConstructor
 public class CreateWorkflowDefinitionServiceImpl
