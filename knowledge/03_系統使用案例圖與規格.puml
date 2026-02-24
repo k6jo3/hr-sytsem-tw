@@ -1,0 +1,66 @@
+@startuml 03_usecase
+skinparam actorStyle awesome
+skinparam DefaultFontName "sans-serif"
+skinparam DefaultFontSize 14
+
+skinparam usecase {
+  BackgroundColor #E8F5E9
+  BorderColor #2E7D32
+  FontSize 13
+  FontColor #000000
+}
+skinparam actor {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  FontColor #000000
+}
+skinparam ArrowColor #555555
+
+left to right direction
+
+actor "一般員工\nEmployee" as Emp
+actor "部門主管\nManager" as Mgr
+actor "人資管理員\nHR/Admin" as Admin
+
+Mgr --|> Emp : 繼承員工權限
+
+rectangle "HRMS 企業人資系統" {
+  package "ESS 員工自助服務" {
+    usecase "UC01\n個人資料與帳號維護" as UC01
+    usecase "UC02\n每日考勤打卡" as UC02
+    usecase "UC03\n發起請假/加班申請" as UC03
+    usecase "UC04\n查詢個人薪資單" as UC04
+  }
+
+  package "主管管理功能" {
+    usecase "UC05\n審核下屬差勤表單" as UC05
+    usecase "UC06\n指派專案工作包" as UC06
+    usecase "UC07\n進行下屬績效考核" as UC07
+  }
+
+  package "HR/Admin 系統管理" {
+    usecase "UC08\n員工到職/離職建檔" as UC08
+    usecase "UC09\n設定班表與假別參數" as UC09
+    usecase "UC10\n維護勞健保級距表" as UC10
+    usecase "UC11\n執行每月薪資結算" as UC11
+    usecase "UC12\n權限角色與工作流配置" as UC12
+  }
+}
+
+Emp --> UC01
+Emp --> UC02
+Emp --> UC03
+Emp --> UC04
+
+Mgr --> UC05
+Mgr --> UC06
+Mgr --> UC07
+
+Admin --> UC08
+Admin --> UC09
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+Admin --> UC04 : 查詢全員薪資
+
+@enduml

@@ -120,7 +120,13 @@
       "Bash(Select-String -Pattern \"\\(Tests run:|BUILD|場景.*驗證通過|場景.*失敗|at com.company\\)\")",
       "Bash(Select-Object -Last 50)",
       "Bash(tasklist:*)",
-      "Bash(del \"D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-attendance\\\\src\\\\test\\\\java\\\\com\\\\company\\\\hrms\\\\attendance\\\\api\\\\contract\\\\AttendanceApiContractTest.java\")"
+      "Bash(del \"D:\\\\git\\\\hr-system2\\\\hr-sytsem-2\\\\backend\\\\hrms-attendance\\\\src\\\\test\\\\java\\\\com\\\\company\\\\hrms\\\\attendance\\\\api\\\\contract\\\\AttendanceApiContractTest.java\")",
+      "Bash(node --version && npm --version 2>&1)",
+      "Bash(mmdc:*)",
+      "Bash(tail:*)",
+      "Bash(java:*)",
+      "Bash(puml:*)",
+      "Bash(mkdir:*)"
     ]
   }
 }
