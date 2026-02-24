@@ -12,7 +12,7 @@
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px', 'fontFamily': 'sans-serif'}}}%%
 flowchart LR
-    Dev((Developer)) -->|1. Git Push (main)| GitHub[GitHub Repository]
+    Dev((Developer)) -- 1. Git Push (main) --> GitHub[GitHub Repository]
     
     subgraph "CI/CD Pipeline (GitHub Actions)"
         direction TB
@@ -28,7 +28,7 @@ flowchart LR
     
     subgraph "GCP 部署環境"
         Run[6. 部署至 Cloud Run]
-        Run -->|注入憑證與環境變數| Env[(Cloud SQL / Redis)]
+        Run -- 注入憑證與環境變數 --> Env[(Cloud SQL / Redis)]
     end
     
     Push --> Run
