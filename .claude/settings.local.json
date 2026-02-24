@@ -126,7 +126,8 @@
       "Bash(tail:*)",
       "Bash(java:*)",
       "Bash(puml:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(sort:*)"
     ]
   }
 }
