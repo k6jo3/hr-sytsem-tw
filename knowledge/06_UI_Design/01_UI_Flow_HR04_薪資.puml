@@ -1,0 +1,64 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title HR04 薪資管理 - 計薪流程 (Saga Pattern)
+
+|HR|
+start
+:進入計薪作業中心 (HR04-P01);
+:建立薪資批次;
+note right: POST /api/v1/payroll-runs\n狀態: DRAFT
+
+:執行薪資計算;
+note right: POST .../execute\n回應: 202 Accepted
+
+|系統 (Saga)|
+:Step 1: 查詢員工清單;
+note right: Organization Service
+:Step 2: 取得差勤資料;
+note right: Attendance Service
+:Step 3: 取得保費資料;
+note right: Insurance Service
+:Step 4: 計算薪資;
+note right
+  底薪 + 加班費 + 津貼
+  - 勞保 - 健保 - 勞退
+  - 所得稅 = 實發金額
+end note
+:Step 5: 儲存薪資單;
+:狀態: COMPLETED;
+
+|HR|
+:檢視批次詳情 (HR04-P02);
+:確認明細無誤;
+:送審;
+note right: 狀態: SUBMITTED
+
+|Finance|
+:進入計薪審核 (HR04-P06);
+if (核准？) then (是)
+  :PUT .../approve;
+  :狀態: APPROVED;
+  :產生銀行轉帳檔 (HR04-P07);
+  :發布 PayrollRunCompletedEvent;
+
+  fork
+    :Timesheet 鎖定已核准工時;
+  fork again
+    :Notification 通知員工查閱;
+  fork again
+    :Report 更新月度統計;
+  end fork
+else (否)
+  :輸入駁回原因;
+  :狀態: 退回 COMPLETED;
+endif
+
+|員工|
+:查看薪資單 (HR04-P03);
+:下載 PDF;
+note right: 密碼: 身分證末4碼
+
+stop
+@enduml

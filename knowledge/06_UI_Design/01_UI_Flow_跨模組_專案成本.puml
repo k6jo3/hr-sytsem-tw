@@ -1,0 +1,38 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title 跨模組流程 - 專案成本追蹤
+
+|HR06 專案管理|
+start
+:PM 建立專案;
+:設定預算與成員;
+
+|HR07 工時管理|
+:員工填報工時;
+:PM 審核工時;
+:發布 TimesheetApprovedEvent;
+
+|HR06 專案管理|
+:計算成本 = hours × hourlyRate;
+:更新 Project.actualCost;
+:檢查預算使用率;
+
+if (超過 80% 預算？) then (是)
+  :發布 ProjectBudgetAlertEvent;
+
+  |HR12 通知服務|
+  :通知 PM 預算預警;
+endif
+
+|HR04 薪資管理|
+:月薪計算包含專案工時成本;
+
+|HR14 報表分析|
+:更新 project_cost_snapshots;
+:稼動率報表;
+:專案獲利分析;
+
+stop
+@enduml

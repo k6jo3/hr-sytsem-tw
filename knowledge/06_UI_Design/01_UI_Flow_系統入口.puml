@@ -1,0 +1,50 @@
+@startuml
+!theme plain
+skinparam ActivityBackgroundColor #f8f9fa
+skinparam ActivityBorderColor #667eea
+skinparam defaultFontName "Microsoft JhengHei"
+
+title 系統入口與導航總覽
+
+start
+:使用者存取系統;
+
+if (已登入？) then (是)
+  :進入主頁面 (PageLayout);
+else (否)
+  :重導至登入頁 (/login);
+
+  fork
+    :帳密登入;
+  fork again
+    :Google SSO;
+  fork again
+    :Azure SSO;
+  end fork
+
+  if (驗證成功？) then (是)
+    :儲存 Token 至 LocalStorage;
+    :更新 Redux auth 狀態;
+    :導向 /admin/reports (報表中心);
+  else (否)
+    if (連續失敗 5 次？) then (是)
+      :帳號鎖定 30 分鐘;
+    else (否)
+      :顯示錯誤訊息;
+    endif
+    stop
+  endif
+endif
+
+:依角色顯示側邊導航選單;
+
+fork
+  :管理功能 (/admin/*);
+fork again
+  :個人功能 (/profile/*);
+fork again
+  :考勤功能 (/attendance/*);
+end fork
+
+stop
+@enduml

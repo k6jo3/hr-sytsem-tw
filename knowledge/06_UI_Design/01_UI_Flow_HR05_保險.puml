@@ -1,0 +1,42 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title HR05 保險管理 - 自動加保流程
+
+start
+
+partition "事件驅動加保" {
+  :接收 EmployeeCreatedEvent;
+  :查詢投保級距表;
+  :自動建立三筆記錄;
+  note right
+    1. 勞工保險
+    2. 全民健保
+    3. 勞工退休金
+  end note
+  :發布 InsuranceEnrollmentCompleted;
+}
+
+partition "HR 手動操作" {
+  :進入勞健保管理 (HR05-P01);
+
+  fork
+    :手動加保 (HR05-M01);
+  fork again
+    :級距調整 (HR05-M02);
+    :發布 InsuranceLevelAdjusted;
+  fork again
+    :保費試算 (HR05-P02);
+  fork again
+    :產生申報檔;
+  end fork
+}
+
+partition "員工自助" {
+  :我的保險資訊 (HR05-P03);
+  :查看投保狀態與歷程;
+}
+
+stop
+@enduml

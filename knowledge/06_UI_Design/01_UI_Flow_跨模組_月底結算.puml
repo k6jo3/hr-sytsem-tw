@@ -1,0 +1,39 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title 跨模組流程 - 月底結算作業
+
+|HR03 考勤管理|
+start
+:HR 執行月結 (HR03-P10);
+:檢查異常考勤記錄;
+:鎖定月份考勤資料;
+:發布 MonthlyAttendanceClosedEvent;
+
+|HR04 薪資管理|
+:建立薪資批次 (HR04-P01);
+:執行 Saga 計薪流程;
+note right
+  1. 取得員工清單
+  2. 取得差勤資料
+  3. 取得保費資料
+  4. 計算薪資
+  5. 儲存薪資單
+end note
+:Finance 審核 (HR04-P06);
+:產生銀行轉帳檔 (HR04-P07);
+:發布 PayrollRunCompletedEvent;
+
+|HR07 工時管理|
+:鎖定已核准工時 (status=LOCKED);
+
+|HR14 報表分析|
+:更新 monthly_hr_stats;
+:刷新儀表板 KPI;
+
+|HR12 通知服務|
+:發送薪資單通知給全部員工;
+
+stop
+@enduml

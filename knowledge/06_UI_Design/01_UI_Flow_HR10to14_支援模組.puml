@@ -1,0 +1,41 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title HR10~HR14 支援模組 UI Flow
+
+partition "HR10 教育訓練" {
+  :課程管理 (HR10-P01);
+  :員工報名 → 主管審核 → 出席 → 標記完成;
+  :證照管理 → 到期提醒 (每週);
+}
+
+partition "HR11 簽核流程" {
+  :流程定義管理 (HR11-P01);
+  :可視化流程設計器 (HR11-P02);
+  :我的待辦 → 核准/駁回;
+  :我的申請 → 追蹤進度;
+}
+
+partition "HR12 通知服務" {
+  :範本管理 (HR12-P01);
+  :訂閱領域事件 → 發送通知;
+  :渠道: IN_APP | EMAIL | PUSH | TEAMS | LINE;
+  :WebSocket 即時推送;
+}
+
+partition "HR13 文件管理" {
+  :文件上傳/下載 (HR13-P01);
+  :版本管理;
+  :範本 + 變數替換 → 自動產生 PDF;
+  :薪資單 AES-256 加密;
+}
+
+partition "HR14 報表分析" {
+  :KPI 儀表板 (HR14-P01);
+  :CQRS ReadModel 事件驅動更新;
+  :ECharts 圖表視覺化;
+  :Excel/PDF 匯出;
+}
+
+@enduml

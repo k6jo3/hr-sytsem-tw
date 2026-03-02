@@ -1,0 +1,48 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title HR03 考勤管理 - 請假申請流程
+
+|員工|
+start
+:每日打卡 (HR03-P01);
+:查看考勤日誌 (HR03-P03);
+
+:進入請假申請 (HR03-P02);
+:選擇假別;
+:查詢假期餘額;
+note right: GET /api/v1/leave/balances/{type}
+
+if (餘額充足？) then (是)
+  :填寫請假日期與原因;
+  :POST /api/v1/leave/applications;
+else (否)
+  :顯示餘額不足提示;
+  stop
+endif
+
+|主管|
+:收到審核通知;
+:進入審核頁 (HR03-P04);
+:查看申請詳情;
+
+if (核准？) then (是)
+  :PUT .../approve;
+  :發布 LeaveApprovedEvent;
+else (否)
+  :輸入駁回原因;
+  :PUT .../reject;
+endif
+
+|員工|
+:收到審核結果通知;
+
+if (核准) then (是)
+  :假期餘額自動扣除;
+else (駁回)
+  :可複製重新申請;
+endif
+
+stop
+@enduml

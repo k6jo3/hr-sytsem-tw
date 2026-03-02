@@ -1,0 +1,58 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title HR02 組織員工 - 員工生命週期
+
+start
+
+partition "到職流程" {
+  :進入員工列表 (HR02-P02);
+  :點擊新增員工;
+  :步驟式表單;
+  note right: 基本資料 → 職務 → 銀行
+  :POST /api/v1/employees;
+  :發布 EmployeeCreatedEvent;
+
+  fork
+    :IAM 自動建立帳號;
+  fork again
+    :Insurance 產生加保提醒;
+  end fork
+}
+
+partition "在職管理" {
+  :查看員工詳情 (HR02-P03);
+
+  fork
+    :基本資訊 Tab;
+  fork again
+    :職務資訊 Tab;
+  fork again
+    :學經歷 Tab;
+  fork again
+    :合約資料 Tab;
+  fork again
+    :人事歷程 Tab;
+  end fork
+}
+
+partition "離職流程" {
+  :操作「辦理離職」;
+  :Modal.confirm 確認;
+  :POST /api/v1/employees/{id}/terminate;
+  :發布 EmployeeTerminatedEvent;
+
+  fork
+    :IAM 停用帳號;
+  fork again
+    :Attendance 計算未休假;
+  fork again
+    :Payroll 結算薪資;
+  fork again
+    :Insurance 辦理退保;
+  end fork
+}
+
+stop
+@enduml

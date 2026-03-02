@@ -1,0 +1,39 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title HR08 績效考核流程
+
+|HR|
+start
+:建立考核週期 (HR08-P01);
+:設計考核表單 (HR08-P02);
+note right: 設定項目、權重(=100%)、評分規則
+:啟動考核週期;
+:發布 CycleActivatedEvent;
+
+|員工|
+:收到自評通知;
+:進入我的評核表 (HR08-P03);
+:填寫自評分數與說明;
+:送出自評;
+note right: PUT .../submit-self
+
+|主管|
+:收到評核通知;
+:進入團隊績效 (HR08-P04);
+:評核下屬績效;
+:送出主管評核;
+note right: PUT .../submit-manager
+
+|HR|
+:確認所有評核完成;
+:發布績效評等;
+:查看績效報告 (HR08-P05);
+
+|系統|
+:發布 PerformanceCompletedEvent;
+:Payroll 訂閱進行薪資調整;
+
+stop
+@enduml

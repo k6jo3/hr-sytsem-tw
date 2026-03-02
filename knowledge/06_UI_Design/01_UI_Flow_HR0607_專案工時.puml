@@ -1,0 +1,46 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title HR06/07 專案與工時 - 成本追蹤閉迴路
+
+|PM|
+start
+:建立專案 (HR06-P04);
+:指派成員與工項 (HR06-P05);
+:設定預算;
+
+|員工|
+:填報每週工時 (HR07-P01);
+:選擇專案/任務;
+:填入每日工時;
+:送審;
+
+|PM|
+:工時審核看板 (HR07-P02);
+if (核准？) then (是)
+  :PUT .../approve;
+  :發布 TimesheetApprovedEvent;
+else (否)
+  :駁回（含原因）;
+  stop
+endif
+
+|系統|
+:接收 TimesheetApprovedEvent;
+:查詢員工時薪;
+:計算成本 = hours × hourlyRate;
+:更新 Project.actualCost;
+
+if (實際成本 > 預算 80%？) then (是)
+  :發布 ProjectBudgetAlertEvent;
+  :通知 PM 預算預警;
+endif
+
+|PM|
+:查看專案成本分析 (HR06-P03);
+:查看工時報告 (HR07-P03);
+:查看專案報表 (HR14-P03);
+
+stop
+@enduml

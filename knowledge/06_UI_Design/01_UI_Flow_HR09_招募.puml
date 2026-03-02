@@ -1,0 +1,44 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title HR09 招募管理 - Kanban 流程
+
+|HR|
+start
+:建立職缺;
+:收到應徵者投遞;
+
+partition "看板流程 (HR09-P01)" {
+  :履歷篩選 (SCREENING);
+  note right: 拖曳卡片至下一欄
+
+  if (通過篩選？) then (是)
+    :面試中 (INTERVIEWING);
+    :安排面試;
+    note right: 發布 InterviewScheduledEvent
+
+    if (面試通過？) then (是)
+      :Offer (OFFER);
+      :發送 Offer;
+
+      if (接受 Offer？) then (是)
+        :已錄取 (HIRED);
+        :發布 CandidateHiredEvent;
+        :Organization 自動建立員工;
+      else (否)
+        :流程結束;
+        stop
+      endif
+    else (否)
+      :流程結束;
+      stop
+    endif
+  else (否)
+    :流程結束;
+    stop
+  endif
+}
+
+stop
+@enduml

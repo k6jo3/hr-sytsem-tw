@@ -1,0 +1,38 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title 跨模組流程 - 員工離職
+
+|HR02 組織員工|
+start
+:HR 辦理離職 (HR02-P03);
+:Modal.confirm 確認;
+:POST .../terminate;
+:發布 EmployeeTerminatedEvent;
+
+|HR01 IAM|
+:停用使用者帳號;
+
+|HR03 考勤管理|
+:計算未休特休天數;
+:結算代金;
+
+|HR05 保險管理|
+:辦理退保 (勞保/健保/勞退);
+:發布 InsuranceWithdrawCompleted;
+
+|HR04 薪資管理|
+:結算最後薪資;
+:含未休假代金;
+:產生最終薪資單;
+
+|HR06 專案管理|
+:移除專案成員;
+:重新分配任務;
+
+|HR14 報表分析|
+:更新離職率統計;
+
+stop
+@enduml

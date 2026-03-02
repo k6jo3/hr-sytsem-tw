@@ -1,0 +1,46 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title HR01 IAM - 身分認證與權限管理
+
+start
+:存取系統;
+
+partition "登入流程" {
+  :顯示登入頁 (HR01-P01);
+  :輸入帳號密碼;
+  :POST /api/v1/auth/login;
+
+  if (驗證成功？) then (是)
+    :Token 存入 LocalStorage;
+  else (否)
+    :顯示錯誤;
+    stop
+  endif
+}
+
+partition "使用者管理" {
+  :進入使用者管理 (HR01-P02);
+  :搜尋/篩選使用者;
+
+  fork
+    :新增使用者 (HR01-M01);
+    :POST /api/v1/users;
+  fork again
+    :編輯使用者 (HR01-M01);
+    :PUT /api/v1/users/{id};
+  fork again
+    :停用/啟用使用者;
+  end fork
+}
+
+partition "角色權限管理" {
+  :進入角色管理 (HR01-P03);
+  :選擇角色;
+  :配置權限樹;
+  :PUT /api/v1/roles/{id}/permissions;
+}
+
+stop
+@enduml

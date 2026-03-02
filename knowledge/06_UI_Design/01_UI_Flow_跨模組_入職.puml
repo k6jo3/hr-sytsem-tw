@@ -1,0 +1,34 @@
+@startuml
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+
+title 跨模組流程 - 員工入職全流程
+
+|HR02 組織員工|
+start
+:HR 新增員工 (HR02-P04);
+:發布 EmployeeCreatedEvent;
+
+|HR01 IAM|
+:自動建立使用者帳號;
+:指派預設角色 (EMPLOYEE);
+:發送帳號啟用通知;
+
+|HR05 保險管理|
+:自動查詢投保級距;
+:建立勞保/健保/勞退記錄;
+:發布 InsuranceEnrollmentCompleted;
+
+|HR04 薪資管理|
+:建立薪資結構;
+:關聯薪資項目;
+
+|HR10 教育訓練|
+:自動加入新人訓練課程;
+
+|HR12 通知服務|
+:發送歡迎通知;
+:發送新人入職提醒給主管;
+
+stop
+@enduml
