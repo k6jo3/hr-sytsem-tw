@@ -1,0 +1,531 @@
+' ============================================================
+' HRMS 使用案例活動圖集 (UC01 ~ UC12)
+' 渲染指令：java -jar tools/plantuml.jar -smetana -o diagrams 03_系統使用案例圖與規格_活動圖.puml
+' ============================================================
+
+' ---- UC01：個人資料與帳號維護 ----
+@startuml UC01_個人資料與帳號維護
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC01 - 個人資料與帳號維護
+
+start
+:員工進入「個人設定」模組;
+:系統顯示目前基本資料;
+
+if (修改密碼？) then (是)
+  :輸入舊密碼;
+  if (舊密碼驗證通過？) then (是)
+    :設定新密碼（須符合複雜度規則）;
+  else (否)
+    :顯示驗證失敗訊息;
+    stop
+  endif
+else (否)
+  :修改一般欄位\n（聯絡資訊、緊急聯絡人等）;
+endif
+
+:員工提交變更;
+:系統驗證格式\n（手機、Email 等）;
+
+if (修改核心欄位？\n（姓名、身分證字號）) then (是)
+  :系統轉發 HR 審核流程;
+  :HR 審核;
+  if (核准？) then (是)
+    :系統儲存變更;
+  else (否)
+    :通知員工審核駁回;
+    stop
+  endif
+else (否)
+  :系統儲存變更;
+endif
+
+:寫入稽核日誌;
+:通知下游服務同步最新資訊\n（NTF 模組）;
+stop
+
+@enduml
+
+' ---- UC02：每日考勤打卡 ----
+@startuml UC02_每日考勤打卡
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC02 - 每日考勤打卡
+
+start
+:員工進入「考勤打卡」頁面;
+:系統顯示今日班表與打卡狀態;
+
+:員工點擊「上班打卡」或「下班打卡」;
+
+:系統記錄打卡時間與 IP 位址;
+
+if (啟用地理限制？) then (是)
+  if (IP 在允許範圍內？) then (是)
+    :正常記錄;
+  else (否)
+    :標記為「異常待確認」;
+    :自動通知主管;
+  endif
+else (否)
+  :正常記錄;
+endif
+
+:系統與排定班表比對;
+
+if (是否遲到/早退？) then (是)
+  :標記異常狀態\n（遲到/早退）;
+  if (超過遲到閾值？) then (是)
+    :自動通知直屬主管;
+  endif
+else (否)
+  :標記為「正常」;
+endif
+
+:顯示打卡結果;
+stop
+
+@enduml
+
+' ---- UC03：發起請假/加班申請 ----
+@startuml UC03_發起請假加班申請
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC03 - 發起請假/加班申請
+
+start
+:員工進入「差勤申請」模組;
+:系統帶出各假別可用餘額;
+
+:員工選擇假別或加班類別;
+:輸入起始與結束時間;
+:上傳證明附件（選填）;
+
+:員工提交申請;
+
+:系統驗證;
+if (時間是否與其他表單重疊？) then (是)
+  :顯示時間衝突錯誤;
+  stop
+endif
+
+if (餘額是否充足？\n（特休等有額度假別）) then (否)
+  :顯示餘額不足錯誤;
+  stop
+else (是)
+endif
+
+:建立表單紀錄;
+:暫時凍結對應時數額度;
+
+:Workflow 引擎匹配簽核者\n（直屬主管）;
+:NTF 模組發送通知給主管;
+
+:表單狀態 → PENDING_APPROVAL;
+stop
+
+@enduml
+
+' ---- UC04：查詢個人薪資單 ----
+@startuml UC04_查詢個人薪資單
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC04 - 查詢個人薪資單
+
+start
+:員工進入「薪資單查詢」模組;
+
+if (角色？) then (HR)
+  :可搜尋特定員工或部門;
+else (一般員工)
+  :僅顯示個人歷史薪資;
+endif
+
+:系統列出歷史薪資月份清單;
+:員工選擇欲查閱之月份;
+
+if (當月薪資已結算？) then (是)
+  :顯示詳細薪資明細;
+  note right
+    底薪、加給、加班費
+    請假扣薪、勞健保自付額
+    所得稅預扣、實領淨薪
+  end note
+
+  if (需要下載？) then (是)
+    :產生 PDF 電子薪資單;
+    :員工下載留存;
+  endif
+else (否)
+  :顯示「結算中，預計發放日為 XX/XX」;
+endif
+
+:查詢操作寫入存取稽核日誌;
+stop
+
+@enduml
+
+' ---- UC05：審核下屬差勤表單 ----
+@startuml UC05_審核下屬差勤表單
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC05 - 審核下屬差勤表單
+
+start
+:主管進入「待審核」任務列表;
+:系統列出所有待簽核差勤表單;
+
+:主管選擇一筆表單;
+:查看申請詳情\n（假別、時段、餘額、備註、附件）;
+
+if (核准或駁回？) then (核准)
+  :填寫審核意見（選填）;
+  :系統更新表單狀態 → APPROVED;
+  :正式扣除請假額度;
+  :考勤統計即時更新;
+  :NTF 通知申請員工「已核准」;
+else (駁回)
+  :填寫審核意見（必填）;
+  :系統更新表單狀態 → REJECTED;
+  :還原暫凍額度;
+  :NTF 通知申請員工「已駁回」;
+  note right
+    員工可修改後
+    重新提交
+  end note
+endif
+
+:月底薪資結算時\n自動計入請假扣薪;
+stop
+
+@enduml
+
+' ---- UC06：指派專案工作包 ----
+@startuml UC06_指派專案工作包
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC06 - 指派專案工作包
+
+start
+:主管進入「專案管理」模組;
+:選擇目標專案;
+:系統展示 WBS 樹狀結構;
+
+:主管選擇欲指派的工作包;
+:系統顯示目前指派狀態與預算使用率;
+
+if (工作包已有指派對象？) then (是)
+  :舊指派記錄標記為 REASSIGNED;
+  note right
+    歷史工時紀錄保留
+  end note
+endif
+
+:從部門人員清單選擇負責人員;
+:設定預計工時與截止日期;
+
+:系統建立指派記錄;
+:工作包狀態 → ASSIGNED;
+:NTF 通知受指派員工;
+
+:受指派員工可在「我的工作」查看\n並開始填寫 Timesheet;
+stop
+
+@enduml
+
+' ---- UC07：進行下屬績效考核 ----
+@startuml UC07_進行下屬績效考核
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC07 - 進行下屬績效考核
+
+start
+:主管進入「績效考核」模組;
+:系統列出本週期需評核的下屬清單;
+
+:主管選擇一位員工;
+:查看 OKR/KPI 目標與自評結果;
+
+if (啟用 360 度評估？) then (是)
+  :系統彙整同儕互評結果;
+  :主管參考互評資料;
+endif
+
+:主管填寫各評核項目評分;
+note right
+  工作品質
+  協作能力
+  目標達成率
+end note
+
+:填寫整體評語;
+:選擇最終評等（A/B/C/D）;
+:主管提交考核結果;
+
+:系統通知員工查閱結果;
+
+if (員工提出申覆？) then (是)
+  :啟動二次複評流程;
+  :HR 介入仲裁;
+  :更新最終考核結果;
+endif
+
+:考核結果儲存;
+:連動薪資調整與晉升作業;
+stop
+
+@enduml
+
+' ---- UC08：員工到職/離職建檔 ----
+@startuml UC08_員工到職離職建檔
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC08 - 員工到職/離職建檔
+
+start
+
+if (到職或離職？) then (到職)
+  :HR 進入「員工建檔」模組;
+  :填寫新員工基本資料;
+  note right
+    姓名、身份證、聯絡方式
+    到職日、部門、職稱
+    薪資結構
+  end note
+
+  :HR 提交;
+  :系統產生員工編號;
+  :發布 EmployeeCreatedEvent;
+
+  fork
+    :【IAM】建立登入帳號;
+    :發送報到通知;
+  fork again
+    :【INS】辦理勞健保加保;
+  fork again
+    :【PAY】建立薪資結構;
+  end fork
+
+  :員工狀態 → ACTIVE;
+
+else (離職)
+  :HR 進入員工資料頁;
+  :執行「辦理離職」;
+  :填寫離職日期、原因、交接人;
+
+  :發布 EmployeeTerminatedEvent;
+
+  fork
+    :【IAM】離職日停用帳號;
+  fork again
+    :【INS】辦理退保;
+  fork again
+    :【PAY】結算最終薪資;
+    note right
+      含未休特休折現
+    end note
+  end fork
+
+  :員工狀態 → TERMINATED;
+endif
+
+:所有下游服務自動同步完成;
+stop
+
+@enduml
+
+' ---- UC09：設定班表與假別參數 ----
+@startuml UC09_設定班表與假別參數
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC09 - 設定班表與假別參數
+
+start
+
+if (設定班表或假別？) then (班表)
+  :HR 進入「班表管理」模組;
+  :建立或修改班別;
+  note right
+    正常班、早班
+    晚班、彈性班
+  end note
+
+  :設定上下班時間;
+  :設定彈性打卡區間;
+  :設定強制休息時間;
+  :指定部門或員工適用班別;
+  :設定生效日期;
+
+else (假別)
+  :HR 進入「假別參數」模組;
+  :設定假別清單;
+  note right
+    特休、病假、事假
+    公傷假 等
+  end note
+
+  :設定年度給假天數;
+  :設定跨年度累計規則;
+  :設定折算規則;
+  :設定國定假日行事曆;
+  :設定補班補假對應規則;
+endif
+
+:系統儲存新設定;
+:新設定立即生效;
+:影響後續考勤判定與餘額計算;
+stop
+
+@enduml
+
+' ---- UC10：維護勞健保級距表 ----
+@startuml UC10_維護勞健保級距表
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC10 - 維護勞健保級距表
+
+start
+:HR 進入「勞健保設定」模組;
+:選擇欲更新的費率年度;
+
+:系統顯示目前各級距資訊;
+note right
+  投保薪資範圍
+  勞保費率、健保費率
+  勞退提撥比率
+end note
+
+:HR 依政府公告更新各項費率;
+:調整投保薪資級距表;
+
+:執行「批次試算」;
+:預覽費率調整對全體員工\n每月保費之影響;
+
+if (試算結果有異常？) then (是)
+  if (新級距低於員工目前投保薪資？) then (是)
+    #pink:系統警示：\n需人工確認是否降級調整;
+    note right
+      避免違反勞基法
+      最低投保規定
+    end note
+    :HR 人工確認處理;
+  endif
+endif
+
+:HR 確認無誤;
+:儲存並設定新生效日期;
+:新費率於生效日起\n套用至薪資結算;
+:歷史費率紀錄保留;
+stop
+
+@enduml
+
+' ---- UC11：執行每月薪資結算 ----
+@startuml UC11_執行每月薪資結算
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC11 - 執行每月薪資結算
+
+start
+:HR 進入「薪資結算」模組;
+:選擇結算計薪年月;
+
+:系統建立結算批次;
+:批次狀態 → PROCESSING;
+
+:CQRS + API Composition\n向【ATT 模組】拉取當月考勤資料;
+note right
+  請假扣薪加總
+  加班費加總
+end note
+
+:依【INS 模組】設定\n試算勞健保與勞退自付額;
+
+:薪資計算引擎 (SAGA Pattern);
+fork
+  :計算 Base Salary;
+fork again
+  :計算 Allowances;
+fork again
+  :計算 Deductions;
+end fork
+:彙算 Net Pay;
+
+:產出「發放前試算表」;
+:HR 預覽與微調;
+
+if (HR 確認正確？) then (是)
+  :HR 點擊「鎖定與發放」;
+  :產出銀行薪資轉帳媒體檔\n（TXT/CSV）;
+  :產生個別員工電子薪水單\n（PDF）;
+  :批次狀態 → COMPLETED;
+  :員工可於 ESS 查閱薪資單;
+else (否)
+  :HR 調整參數後重新試算;
+  stop
+endif
+
+stop
+
+@enduml
+
+' ---- UC12：權限角色與工作流配置 ----
+@startuml UC12_權限角色與工作流配置
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC12 - 權限角色與工作流配置
+
+start
+
+if (設定角色權限或工作流？) then (角色權限)
+  :Admin 進入「角色管理」模組;
+  :查看現有角色清單;
+  note right
+    一般員工、部門主管
+    HR、財務、系統管理員
+  end note
+
+  if (建立或修改？) then (建立)
+    :建立新角色;
+  else (修改)
+    :選擇現有角色;
+  endif
+
+  :設定各功能模組可操作動作;
+  note right
+    查詢 / 建立
+    修改 / 刪除
+  end note
+
+  :將角色指派給員工帳號或部門群組;
+  :儲存設定，權限立即生效;
+
+else (工作流)
+  :Admin 進入「流程設計器」;
+  :使用可視化工具建立/修改審核流程;
+
+  :設定流程節點;
+  note right
+    例：員工提交
+    → 直屬主管核准
+    → HR 備查
+  end note
+
+  :設定各節點條件規則;
+  note right
+    例：請假 > 3 天需雙重核准
+    加班費 > NT$5,000 需財務複核
+  end note
+
+  :發布流程設定;
+  note right
+    新表單套用新流程
+    進行中表單沿用舊流程
+  end note
+endif
+
+:Admin 可匯出/匯入設定\n供多租戶環境複製;
+stop
+
+@enduml

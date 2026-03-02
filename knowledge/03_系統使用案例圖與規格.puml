@@ -1,6 +1,6 @@
 @startuml 03_usecase
 skinparam actorStyle awesome
-skinparam DefaultFontName "sans-serif"
+skinparam DefaultFontName "Microsoft JhengHei"
 skinparam DefaultFontSize 14
 
 skinparam usecase {
