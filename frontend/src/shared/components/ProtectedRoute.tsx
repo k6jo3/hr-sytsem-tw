@@ -10,23 +10,38 @@ interface ProtectedRouteProps {
    * @default true
    */
   requireLayout?: boolean;
+  /**
+   * 可存取此路由的角色清單
+   * 未設定時所有已登入使用者皆可存取
+   */
+  requiredRoles?: string[];
 }
 
 /**
  * Protected Route Component
- * 保護需要身份認證的路由
+ * 保護需要身份認證的路由，並支援角色權限控制
  * 未登入時重定向到登入頁面
+ * 角色不符時重定向到 /dashboard
  */
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requireLayout = true,
+  requiredRoles,
 }) => {
   const location = useLocation();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   if (!isAuthenticated) {
-    // 保存當前路徑，登入後可以重定向回來
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // 角色權限檢查
+  if (requiredRoles && requiredRoles.length > 0) {
+    const userRoles = user?.roles ?? [];
+    const hasAccess = requiredRoles.some((role) => userRoles.includes(role));
+    if (!hasAccess) {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   if (requireLayout) {
