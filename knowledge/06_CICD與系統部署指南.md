@@ -9,30 +9,9 @@
 ### CI/CD 流程圖 (Pipeline Workflow)
 當開發人員將程式碼 Push 至 `main` 分支時，觸發以下自動化流程：
 
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px', 'fontFamily': 'sans-serif'}}}%%
-flowchart LR
-    Dev(("Developer")) -- "1. Git Push (main)" --> GitHub["GitHub Repository"]
-    
-    subgraph "CI/CD Pipeline (GitHub Actions)"
-        direction TB
-        Lint["2. 程式碼 Linting 與靜態掃描"]
-        Test["3. 執行整合測試 (Maven Test)"]
-        Build["4. 容器打包 (Docker Build)"]
-        Push["5. 推送映像檔 (Push to Artifact Registry)"]
-        
-        Lint --> Test --> Build --> Push
-    end
-    
-    GitHub --> Lint
-    
-    subgraph "GCP 部署環境"
-        Run["6. 部署至 Cloud Run"]
-        Run -- "注入憑證與環境變數" --> Env[("Cloud SQL / Redis")]
-    end
-    
-    Push --> Run
-```
+> **圖表格式：** PlantUML 渲染｜原始碼：`06_CICD與系統部署指南.puml`｜渲染指令：`java -jar tools/plantuml.jar -smetana -o diagrams 06_CICD與系統部署指南.puml`
+
+![CI/CD Pipeline 流程圖](diagrams/06_CICD_Pipeline.png)
 
 ---
 

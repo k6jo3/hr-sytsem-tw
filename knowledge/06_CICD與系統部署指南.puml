@@ -1,0 +1,26 @@
+@startuml 06_CICD_Pipeline
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title CI/CD Pipeline 流程圖
+
+|Developer|
+start
+:Git Push (main);
+
+|GitHub Actions|
+:程式碼 Linting\n與靜態掃描;
+:執行整合測試\n(Maven Test);
+:容器打包\n(Docker Build);
+:推送映像檔\n(Push to Artifact Registry);
+
+|GCP 部署環境|
+:部署至 Cloud Run;
+:注入憑證與環境變數;
+note right
+  Cloud SQL
+  Redis
+  環境 Secrets
+end note
+stop
+
+@enduml

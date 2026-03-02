@@ -1,0 +1,111 @@
+@startuml 02_跨微服務實體關聯圖
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam linetype ortho
+title HRMS 跨微服務實體關聯圖 (Logical ERD)
+
+' 隱藏 entity 的 methods 區塊
+hide methods
+
+' ========== ORG 模組 ==========
+package "ORG 模組 (Organization)" #E8F5E9 {
+  entity "EMPLOYEE" as emp {
+    * employee_id : UUID <<PK>>
+    --
+    employee_no : String
+    full_name : String
+    department_id : UUID <<FK>>
+    employment_status : String
+    hire_date : Date
+  }
+
+  entity "DEPARTMENT" as dept {
+    * department_id : UUID <<PK>>
+    --
+    department_code : String
+    department_name : String
+    parent_id : UUID <<FK>> (Self-Ref)
+    manager_id : UUID <<FK>> (Logical)
+  }
+}
+
+' ========== IAM 模組 ==========
+package "IAM 模組 (Identity & Access)" #E3F2FD {
+  entity "USER_ACCOUNT" as user {
+    * user_id : UUID <<PK>>
+    --
+    employee_id : UUID <<FK>> (Logical)
+    username : String
+    password_hash : String
+    account_status : String
+  }
+
+  entity "ROLE" as role {
+    * role_id : UUID <<PK>>
+    --
+    role_code : String
+  }
+}
+
+' ========== ATT 模組 ==========
+package "ATT 模組 (Attendance)" #FFF3E0 {
+  entity "ATTENDANCE_RECORD" as att {
+    * record_id : UUID <<PK>>
+    --
+    employee_id : UUID <<FK>> (Logical)
+    work_date : Date
+    clock_in_time : DateTime
+    clock_out_time : DateTime
+    status : String
+  }
+
+  entity "LEAVE_REQUEST" as leave {
+    * request_id : UUID <<PK>>
+    --
+    employee_id : UUID <<FK>> (Logical)
+    leave_type : String
+    start_date : Date
+    end_date : Date
+    approval_status : String
+  }
+}
+
+' ========== PAY 模組 ==========
+package "PAY 模組 (Payroll)" #FCE4EC {
+  entity "PAYROLL_RUN" as run {
+    * run_id : UUID <<PK>>
+    --
+    period_year_month : String
+    status : String
+  }
+
+  entity "PAYSLIP" as slip {
+    * payslip_id : UUID <<PK>>
+    --
+    run_id : UUID <<FK>>
+    employee_id : UUID <<FK>> (Logical)
+    base_salary : Decimal
+    overtime_pay : Decimal
+    deductions : Decimal
+    net_pay : Decimal
+  }
+}
+
+' ========== 同模組內部強關聯 (實線) ==========
+dept ||--o{ emp : "僱用 (has)"
+dept ||--o{ dept : "階層 (parent-child)"
+run ||--o{ slip : "包含 (contains)"
+user }o--o{ role : "分配 (many-to-many)"
+
+' ========== 跨模組邏輯關聯 (虛線：無實體 FK) ==========
+emp ||..o| user : "登入綁定\n(Logical)"
+emp ||..o{ att : "打卡產生\n(Logical)"
+emp ||..o{ leave : "發起請假\n(Logical)"
+emp ||..o{ slip : "領取薪資\n(Logical)"
+
+note bottom of emp
+  跨模組以 UUID 邏輯引用
+  無實體外鍵約束
+end note
+
+@enduml

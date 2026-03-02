@@ -1,0 +1,67 @@
+@startuml 04_考勤結算至薪資發放流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam sequenceMessageAlign center
+title 考勤結算至薪資發放流程 (Attendance to Payroll Flow)
+
+actor "員工 (ESS)" as Emp
+actor "部門主管" as Mgr
+actor "人資管理員" as HR
+participant "[ATT]\n考勤模組" as ATT
+participant "[PAY]\n薪資模組" as PAY
+participant "[INS]\n保險模組" as INS
+
+== Phase 1: 日常打卡與月底修正 ==
+
+Emp -> ATT : 每日上下班打卡\n(Clock In/Out)
+ATT -> ATT : 比對班表排程\n標記異常 (遲到/早退/缺卡)
+
+loop 每月底前
+  Emp -> ATT : 針對異常發起補卡/請假單
+  Mgr -> ATT : 審核補卡/請假單\n(Approve/Reject)
+end
+
+== Phase 2: 考勤資料凍結 (Attendance Lock) ==
+
+HR -> ATT : 發起「當月考勤結算」指令
+activate ATT
+ATT -> ATT : 檢查是否仍有未簽核表單\n(Pending Requests)
+
+alt 尚有未簽核表單
+  ATT --> HR : 阻擋結算\n提示未完成簽核清單
+else 全部結算完成
+  ATT -> ATT : 關班計算：\n總工時、加班總時數、請假扣薪時數
+  ATT -> ATT : 鎖定考勤週期 (Locked)
+  ATT -> PAY : Publish:\nAttendancePeriodClosedEvent
+end
+deactivate ATT
+
+== Phase 3: 薪資結算與 SAGA 處理 ==
+
+HR -> PAY : 執行本月計薪作業\n(Run Payroll)
+activate PAY
+PAY -> ATT : API Query:\n取得當月扣薪時數與加班費基礎
+PAY -> INS : API Query:\n取得當月勞健保、勞退自付額級距
+
+note right of PAY
+  [計薪引擎運算]
+  1. 底薪計算
+  2. 加上: 獎金、加班費
+  3. 扣除: 請假扣款、請假半薪
+  4. 扣除: 勞健保自付額
+end note
+
+PAY -> PAY : 產出個人薪資初步試算表
+PAY --> HR : 呈現試算單預覽\n(Draft Version)
+
+== Phase 4: 鎖定與發放 ==
+
+HR -> PAY : 確認無誤\n發送算定薪資 (Lock & Publish)
+PAY -> PAY : 生成銀行媒體格式檔 (TXT)
+PAY -> PAY : 生成 PDF 加密電子薪資單
+
+PAY -> Emp : 解鎖薪資單檢視權限
+deactivate PAY
+Emp -> PAY : 輸入驗證密碼\n查看電子薪資單
+
+@enduml

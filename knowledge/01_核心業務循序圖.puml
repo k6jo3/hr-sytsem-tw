@@ -1,0 +1,251 @@
+' ============================================================
+' HRMS 核心業務循序圖 (4 個場景)
+' 渲染指令：java -jar tools/plantuml.jar -smetana -o diagrams 01_核心業務循序圖.puml
+' ============================================================
+
+' ---- 場景一：新進員工入職流程 ----
+@startuml 01_員工入職流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam sequenceMessageAlign center
+title 新進員工入職流程 (Employee Onboarding)
+
+actor "人資/管理員(UI)" as HR
+participant "ORG 微服務\n(Organization)" as ORG
+database "ORG 資料庫" as DB_ORG
+queue "Kafka\n(Event Bus)" as Kafka
+participant "IAM 微服務\n(身份認證)" as IAM
+participant "INS 微服務\n(勞健保)" as INS
+participant "PAY 微服務\n(薪資)" as PAY
+participant "NTF 微服務\n(通知服務)" as NTF
+
+== Phase 1: 同步寫入與事件發布 (Synchronous) ==
+
+HR -> ORG : POST /api/v1/employees\n(新增員工資料)
+activate ORG
+ORG -> ORG : 驗證必填欄位與格式\n(Business Validation)
+ORG -> DB_ORG : INSERT 員工基本資料\n(State Change)
+DB_ORG --> ORG : 寫入成功 (Return ID)
+ORG -> Kafka : Publish: EmployeeCreatedEvent\n{empId, name, email, deptId}
+note right of ORG : 遵循 Outbox Pattern\n確保事件不遺失
+ORG --> HR : HTTP 200 OK (建檔完成)
+note left of ORG : HR 無須等待後續流程\n前端畫面瞬間收到成功回饋
+deactivate ORG
+
+== Phase 2: 非同步業務處理 (Asynchronous Pub/Sub) ==
+
+par 並發處理
+  Kafka --> IAM : Consume: EmployeeCreatedEvent
+  activate IAM
+  IAM -> IAM : 產生系統預設密碼\n綁定基礎 Role
+  IAM -> IAM : 寫入 IAM Schema\n(帳號就緒)
+  deactivate IAM
+else 保險投保
+  Kafka --> INS : Consume: EmployeeCreatedEvent
+  activate INS
+  INS -> INS : 產生預設勞健保級距檔案
+  INS -> INS : 寫入 INS Schema\n(待 HR 呈報)
+  deactivate INS
+else 薪資建檔
+  Kafka --> PAY : Consume: EmployeeCreatedEvent
+  activate PAY
+  PAY -> PAY : 產生空白計薪結構\n與預設薪資帳戶格式
+  PAY -> PAY : 寫入 PAY Schema
+  deactivate PAY
+else 發送歡迎信
+  Kafka --> NTF : Consume: EmployeeCreatedEvent
+  activate NTF
+  NTF -> NTF : 渲染 Email 版面
+  NTF --> HR : 寄送「歡迎入職與登入密碼信」
+  deactivate NTF
+end
+
+@enduml
+
+' ---- 場景二：請假簽核流程 ----
+@startuml 01_請假簽核流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam sequenceMessageAlign center
+title 請假簽核流程 (Leave Approval Flow)
+
+actor "員工(UI)" as Emp
+participant "ATT 微服務\n(考勤)" as ATT
+database "ATT 資料庫" as DB_ATT
+queue "Kafka\n(Event Bus)" as Kafka
+participant "WFL 微服務\n(工作流引擎)" as WFL
+participant "NTF 微服務\n(通知)" as NTF
+actor "直屬主管(UI)" as Mgr
+
+== Phase 1: 提交申請 & 暫凍餘額 (Synchronous) ==
+
+Emp -> ATT : POST /api/v1/leaves\n{type: 特休, startDate, endDate}
+activate ATT
+ATT -> ATT : 驗證：餘額充足？\n時段不衝突？
+ATT -> DB_ATT : INSERT leave_requests\n(status: PENDING_APPROVAL)\nUPDATE leave_balances\n(暫凍對應時數)
+DB_ATT --> ATT : 寫入成功
+ATT -> Kafka : Publish: LeaveRequestCreatedEvent\n{requestId, empId, type, hours, managerId}
+ATT --> Emp : HTTP 200 OK\n(申請已送出，等待主管審核)
+deactivate ATT
+
+== Phase 2: 簽核任務指派 (Asynchronous) ==
+
+par 建立簽核任務
+  Kafka --> WFL : Consume: LeaveRequestCreatedEvent
+  activate WFL
+  WFL -> WFL : 依流程定義建立 WorkflowInstance\n指派 ApprovalTask 給 managerId
+  deactivate WFL
+else 通知主管
+  Kafka --> NTF : Consume: LeaveRequestCreatedEvent
+  activate NTF
+  NTF --> Mgr : 推送簽核通知\n(站內信 + Email)
+  deactivate NTF
+end
+
+== Phase 3: 主管審核 (Decision) ==
+
+Mgr -> WFL : PUT /api/v1/workflow/tasks/{taskId}/approve\n{decision: APPROVED, comment: "同意"}
+activate WFL
+
+alt 核准 (Approved)
+  WFL -> Kafka : Publish: LeaveApprovedEvent\n{requestId, empId, hours}
+  deactivate WFL
+  Kafka --> ATT : Consume: LeaveApprovedEvent
+  activate ATT
+  ATT -> DB_ATT : UPDATE leave_requests\n(status: APPROVED)\n確認扣除假期餘額\n(暫凍轉正式扣除)
+  deactivate ATT
+  Kafka --> NTF : Consume: LeaveApprovedEvent
+  activate NTF
+  NTF --> Emp : 通知員工：請假已核准
+  deactivate NTF
+
+else 駁回 (Rejected)
+  WFL -> Kafka : Publish: LeaveRejectedEvent\n{requestId, empId, hours, reason}
+  Kafka --> ATT : Consume: LeaveRejectedEvent
+  activate ATT
+  ATT -> DB_ATT : UPDATE leave_requests\n(status: REJECTED)\n還原暫凍的假期餘額
+  deactivate ATT
+  Kafka --> NTF : Consume: LeaveRejectedEvent
+  activate NTF
+  NTF --> Emp : 通知員工：請假已駁回（含原因）
+  deactivate NTF
+end
+
+@enduml
+
+' ---- 場景三：薪資月結 SAGA 補償流程 ----
+@startuml 01_薪資SAGA補償流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam sequenceMessageAlign center
+title 薪資月結 SAGA 補償流程 (Payroll Monthly Run with SAGA)
+
+actor "人資管理員(UI)" as HR
+participant "PAY 微服務\n(薪資結算)" as PAY
+database "PAY 資料庫" as DB_PAY
+participant "ATT 微服務\n(考勤)" as ATT
+participant "INS 微服務\n(勞健保)" as INS
+queue "Kafka\n(Event Bus)" as Kafka
+participant "NTF 微服務\n(通知)" as NTF
+
+== SAGA Step 1~3：啟動結算 & 跨服務資料聚合 ==
+
+HR -> PAY : POST /api/v1/payroll/runs\n{year: 2026, month: 2}
+activate PAY
+PAY -> DB_PAY : INSERT payroll_runs\n(status: PROCESSING)
+DB_PAY --> PAY : OK (runId: R2026-02)
+PAY --> HR : HTTP 202 Accepted\n(結算進行中)
+
+note over PAY, INS : SAGA Step 2:\nAPI Composition 聚合各服務資料
+PAY -> ATT : GET /api/v1/attendance/monthly-summary\n?month=2026-02
+ATT --> PAY : 全員考勤摘要\n(出勤天數、加班時數、請假扣薪)
+PAY -> INS : GET /api/v1/insurance/monthly-contributions\n?month=2026-02
+INS --> PAY : 全員保費自付額清單\n(勞保 + 健保 + 勞退)
+
+== SAGA Step 4~6：計算、鎖定與完成 ==
+
+PAY -> PAY : 依序計算每位員工淨薪\n(底薪 + 加給 + 加班費\n- 請假扣薪 - 保費 - 預扣稅)
+
+alt SAGA 成功路徑 (All Steps Pass)
+  PAY -> DB_PAY : UPDATE payroll_runs\n(status: LOCKED)\nBULK INSERT payroll_items\n(每位員工明細)
+  PAY -> PAY : 產出銀行轉帳媒體檔\n(TXT/CSV)
+  PAY -> Kafka : Publish: PayrollCompletedEvent\n{runId, month, totalNetPay}
+  Kafka --> NTF : Consume: PayrollCompletedEvent
+  activate NTF
+  NTF -> NTF : 產生個人電子薪資單 PDF
+  NTF -> NTF : 寄送薪資單通知給全體員工
+  deactivate NTF
+  PAY --> HR : 結算完成\n(含媒體檔下載連結)
+
+else SAGA 補償路徑 (Compensating Transaction)
+  note over PAY : 計算失敗\n(如：某員工薪資結構異常)
+  PAY -> DB_PAY : UPDATE payroll_runs\n(status: FAILED)\nDELETE 本次已寫入的\n中間計算資料（補償回滾）
+  PAY -> Kafka : Publish: PayrollFailedEvent\n{runId, failedStep, errorDetail}
+  Kafka --> NTF : Consume: PayrollFailedEvent
+  activate NTF
+  NTF --> HR : 緊急警示通知\n(結算失敗 + 錯誤明細)
+  deactivate NTF
+  note over PAY : 資料庫回到結算前的乾淨狀態\nHR 修正錯誤後可重新觸發結算
+end
+
+deactivate PAY
+
+@enduml
+
+' ---- 場景四：員工離職流程 ----
+@startuml 01_員工離職流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam sequenceMessageAlign center
+title 員工離職流程 (Employee Offboarding Flow)
+
+actor "人資管理員(UI)" as HR
+participant "ORG 微服務\n(組織員工)" as ORG
+database "ORG 資料庫" as DB_ORG
+queue "Kafka\n(Event Bus)" as Kafka
+participant "IAM 微服務\n(身份認證)" as IAM
+participant "INS 微服務\n(勞健保)" as INS
+participant "PAY 微服務\n(薪資)" as PAY
+participant "NTF 微服務\n(通知)" as NTF
+
+== Phase 1: 離職建檔 & 事件發布 (Synchronous) ==
+
+HR -> ORG : POST /api/v1/employees/{id}/offboard\n{terminationDate, reason, handoverTo}
+activate ORG
+ORG -> ORG : 前置檢查：確認無未結清的代墊款\n無進行中的待審核表單
+ORG -> DB_ORG : UPDATE employees\n(status: TERMINATED, terminationDate)\nINSERT offboarding_records\n(交接人、離職原因)
+DB_ORG --> ORG : 寫入成功
+ORG -> Kafka : Publish: EmployeeTerminatedEvent\n{empId, terminationDate, remainingLeaveDays}
+ORG --> HR : HTTP 200 OK (離職手續完成)
+note left of ORG : HR 無須等待帳號停用\n退保等後續流程即可完成操作
+deactivate ORG
+
+== Phase 2: 非同步自動化離職作業 (Asynchronous Pub/Sub) ==
+
+par 帳號排程停用
+  Kafka --> IAM : Consume: EmployeeTerminatedEvent
+  activate IAM
+  IAM -> IAM : 設定帳號停用排程\n(生效時間 = terminationDate 23:59)
+  note right of IAM : 允許員工在離職日當天\n仍可正常使用系統
+  deactivate IAM
+else 勞健保退保
+  Kafka --> INS : Consume: EmployeeTerminatedEvent
+  activate INS
+  INS -> INS : 建立退保申請記錄\n(退保日 = terminationDate)
+  INS -> INS : 計算最後一個月保費（按比例）
+  deactivate INS
+else 最終薪資結算
+  Kafka --> PAY : Consume: EmployeeTerminatedEvent
+  activate PAY
+  PAY -> PAY : 計算未休特休折現金額\n(remainingLeaveDays × 日薪)
+  PAY -> PAY : 標記該員工於下次月結時\n納入離職月份最終薪資計算
+  deactivate PAY
+else 寄送離職通知
+  Kafka --> NTF : Consume: EmployeeTerminatedEvent
+  activate NTF
+  NTF --> HR : 離職辦理完成確認單\n(含交接清單)
+  NTF -> NTF : 寄送離職感謝信給員工
+  deactivate NTF
+end
+
+@enduml

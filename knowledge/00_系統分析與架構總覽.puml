@@ -1,0 +1,139 @@
+@startuml 00_系統架構拓撲圖
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam defaultFontSize 13
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+title HRMS 系統整體架構拓撲圖
+
+skinparam package {
+  BackgroundColor<<frontend>> #E3F2FD
+  BorderColor<<frontend>> #1565C0
+  BackgroundColor<<gateway>> #FFF3E0
+  BorderColor<<gateway>> #EF6C00
+  BackgroundColor<<core>> #E8F5E9
+  BorderColor<<core>> #2E7D32
+  BackgroundColor<<hr>> #E8F5E9
+  BorderColor<<hr>> #2E7D32
+  BackgroundColor<<pm>> #E8F5E9
+  BorderColor<<pm>> #2E7D32
+  BackgroundColor<<talent>> #E8F5E9
+  BorderColor<<talent>> #2E7D32
+  BackgroundColor<<support>> #E8F5E9
+  BorderColor<<support>> #2E7D32
+  BackgroundColor<<event>> #F3E5F5
+  BorderColor<<event>> #7B1FA2
+  BackgroundColor<<data>> #FCE4EC
+  BorderColor<<data>> #C2185B
+  BackgroundColor<<ext>> #ECEFF1
+  BorderColor<<ext>> #455A64
+}
+
+' ========== 使用者介面層 ==========
+package "使用者介面層 (React + Vite)" <<frontend>> {
+  [HR / 系統管理員入口] as UI_Admin
+  [主管簽核入口] as UI_Manager
+  [員工自助服務 (ESS)] as UI_Employee
+}
+
+' ========== API 閘道層 ==========
+package "API 閘道 / 負載均衡" <<gateway>> {
+  [API Gateway / Cloud Run Ingress\n(Authentication / Routing / Rate Limiting)] as APIGateway
+}
+
+' ========== 微服務架構層 ==========
+package "微服務架構層 (Spring Boot + Java 21)" {
+
+  package "核心領域 (Core)" <<core>> {
+    [01-IAM\n身分認證與權限] as IAM
+    [02-ORG\n組織與員工] as ORG
+  }
+
+  package "人力資源 (HR)" <<hr>> {
+    [03-ATT\n考勤與差假] as ATT
+    [04-PAY\n薪資與結算] as PAY
+    [05-INS\n勞健保與退休金] as INS
+  }
+
+  package "專案與績效" <<pm>> {
+    [06-PRJ\n專案成本與WBS] as PRJ
+    [07-TMS\n工時報表] as TMS
+    [08-PFM\n績效考核] as PFM
+  }
+
+  package "人才發展與招募" <<talent>> {
+    [09-RCT\n招募與面試] as RCT
+    [10-TRN\n教育訓練與證照] as TRN
+  }
+
+  package "共通支援服務" <<support>> {
+    [11-WFL\n流程引擎與簽核] as WFL
+    [12-NTF\n系統通知/Email] as NTF
+    [13-DOC\n文件庫與檔案] as DOC
+    [14-RPT\n報表與戰情室] as RPT
+  }
+}
+
+' ========== 事件總線 ==========
+package "非同步通訊事件總線" <<event>> {
+  [Apache Kafka (Event Bus)\nDomain Events] as Kafka
+}
+
+' ========== 基礎資料層 ==========
+package "基礎資料層 (Database-Per-Service)" <<data>> {
+  database "Cloud SQL\nPostgreSQL" as DB_PG
+  database "Redis Cache\nSession/字典快取" as Redis
+  database "S3 / GCS\n物件儲存" as Storage
+}
+
+' ========== 外部服務 ==========
+package "外部服務介接" <<ext>> {
+  [Email Server / SendGrid] as EmailService
+  [銀行撥薪系統 API] as BankAPI
+  [國稅局申報系統] as TaxAPI
+}
+
+' ========== 連線關係 ==========
+UI_Admin --> APIGateway : HTTPS / JWT
+UI_Manager --> APIGateway : HTTPS / JWT
+UI_Employee --> APIGateway : HTTPS / JWT
+
+APIGateway --> IAM : REST API
+APIGateway --> ORG : REST API
+APIGateway --> ATT : REST API
+APIGateway --> PAY : REST API
+APIGateway ..> WFL : REST API
+APIGateway ..> NTF : REST API
+APIGateway ..> DOC : REST API
+APIGateway ..> RPT : REST API
+
+' 資料庫
+IAM --> DB_PG : JDBC / QueryDSL
+ORG --> DB_PG : JDBC / QueryDSL
+ATT --> DB_PG : JDBC / QueryDSL
+PAY --> DB_PG : JDBC / QueryDSL
+PRJ --> DB_PG : JDBC / QueryDSL
+RCT --> DB_PG : JDBC / QueryDSL
+IAM --> Redis : Session / Token
+ORG --> Redis : Session / Token
+DOC --> Storage : 上傳/下載
+
+' Kafka 發布
+ORG --> Kafka : Publish:\n員工異動事件
+ATT --> Kafka : Publish:\n請假/考勤事件
+PRJ --> Kafka : Publish:\n專案預算事件
+
+' Kafka 訂閱
+Kafka ..> IAM : Subscribe
+Kafka ..> PAY : Subscribe
+Kafka ..> NTF : Subscribe
+Kafka ..> RPT : Subscribe
+
+' 外部系統
+NTF --> EmailService : SMTP
+PAY ..> BankAPI : 生成媒體檔
+PAY ..> TaxAPI : 申報
+
+@enduml
