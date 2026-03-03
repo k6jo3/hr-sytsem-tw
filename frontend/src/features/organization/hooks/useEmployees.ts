@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import * as OrganizationApi from '../api/OrganizationApi';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { OrganizationApi } from '../api/OrganizationApi';
 import { EmployeeViewModelFactory } from '../factory/EmployeeViewModelFactory';
 import type { EmployeeViewModel } from '../model/EmployeeViewModel';
 import type { GetEmployeeListRequest } from '../api/OrganizationTypes';
@@ -14,11 +14,18 @@ export const useEmployees = (params?: GetEmployeeListRequest) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 穩定化 params 參考，避免每次 render 產生新物件觸發無限迴圈
+  const stableParams = useMemo(
+    () => params,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(params)]
+  );
+
   const fetchEmployees = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await OrganizationApi.getEmployeeList(params);
+      const response = await OrganizationApi.getEmployeeList(stableParams);
       const viewModels = EmployeeViewModelFactory.createListFromDTOs(
         response.employees
       );
@@ -33,7 +40,7 @@ export const useEmployees = (params?: GetEmployeeListRequest) => {
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  }, [stableParams]);
 
   useEffect(() => {
     fetchEmployees();

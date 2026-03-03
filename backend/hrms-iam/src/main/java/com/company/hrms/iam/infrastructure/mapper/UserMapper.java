@@ -132,8 +132,19 @@ public interface UserMapper {
                         @Param("roleId") String roleId);
 
         /**
-         * 查詢使用者的角色 ID 列表
+         * 查詢使用者的角色代碼列表（JOIN roles 表取得 role_code）
          */
-        @Select("SELECT role_id FROM user_roles WHERE user_id = #{userId}")
+        @Select("SELECT r.role_code FROM user_roles ur " +
+                "JOIN roles r ON ur.role_id = r.role_id " +
+                "WHERE ur.user_id = #{userId}")
         List<String> selectUserRoles(@Param("userId") String userId);
+
+        /**
+         * 查詢使用者的權限代碼列表（透過角色關聯取得細粒度權限）
+         */
+        @Select("SELECT DISTINCT p.permission_code FROM user_roles ur " +
+                        "JOIN role_permissions rp ON ur.role_id = rp.role_id " +
+                        "JOIN permissions p ON rp.permission_id = p.permission_id " +
+                        "WHERE ur.user_id = #{userId}")
+        List<String> selectUserPermissionCodes(@Param("userId") String userId);
 }

@@ -51,6 +51,7 @@ export class MockAuthApi {
       display_name: 'System Admin',
       first_name: 'System',
       last_name: 'Admin',
+      employee_id: '00000000-0000-0000-0000-000000000001',
       status: 'ACTIVE' as UserStatus,
       role_list: ['ADMIN'],
       role_ids: ['r001'],

@@ -16,12 +16,12 @@ public class ShiftQueryAssembler {
     public QueryGroup toQueryGroup(GetShiftListRequest request) {
         QueryBuilder builder = QueryBuilder.where();
 
-        // 班別狀態
+        // 班別狀態（ShiftPO.isActive 為 Integer 型別，需傳入 1/0）
         if (request.getIsActive() != null) {
-            builder.and("isActive", Operator.EQ, request.getIsActive());
+            builder.and("isActive", Operator.EQ, request.getIsActive() ? 1 : 0);
         } else {
             // 預設查詢啟用的班別 (依合約 ATT_QRY_S001)
-            builder.and("isActive", Operator.EQ, true);
+            builder.and("isActive", Operator.EQ, 1);
         }
 
         // 組織 ID

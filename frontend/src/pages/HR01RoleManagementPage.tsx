@@ -204,7 +204,7 @@ const HR01RoleManagementPage: React.FC = () => {
       <Content style={{ padding: 24 }}>
         <Row gutter={16}>
           {/* 左側：角色列表 */}
-          <Col xs={24} sm={24} md={8} lg={6}>
+          <Col xs={24} sm={24} md={8} lg={8}>
             <Card
               title="角色列表"
               extra={
@@ -241,7 +241,7 @@ const HR01RoleManagementPage: React.FC = () => {
           </Col>
 
           {/* 右側：角色詳細資訊與權限設定 */}
-          <Col xs={24} sm={24} md={16} lg={18}>
+          <Col xs={24} sm={24} md={16} lg={16}>
             <Card style={{ height: 'calc(100vh - 112px)' }}>
               {selectedRole ? (
                 <>

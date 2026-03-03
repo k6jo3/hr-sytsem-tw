@@ -1,6 +1,7 @@
 package com.company.hrms.common.infrastructure.security;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.lang.NonNull;
@@ -23,14 +24,29 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class MockJwtAuthenticationFilter extends OncePerRequestFilter {
 
+    /**
+     * 本地管理員擁有的所有權限（對應 data-local.sql 中的 SYSTEM_ADMIN 角色）
+     */
+    private static final List<String> ALL_PERMISSIONS = List.of(
+            "user:create", "user:read", "user:update", "user:delete",
+            "user:activate", "user:deactivate", "user:reset-password", "user:assign-role",
+            "role:create", "role:read", "role:update", "role:delete", "role:assign-permission",
+            "permission:read",
+            "employee:create", "employee:read", "employee:update", "employee:delete",
+            "attendance:read", "attendance:clock", "attendance:approve",
+            "payroll:read", "payroll:calculate", "payroll:approve",
+            "project:create", "project:read", "project:update", "project:delete",
+            "timesheet:read", "timesheet:submit", "timesheet:approve",
+            "report:read", "report:export");
+
     private static final JWTModel MOCK_USER = JWTModel.builder()
-            .userId("local-admin-001")
+            .userId("00000000-0000-0000-0000-000000000001")
             .username("admin")
-            .employeeId("EMP-001")
+            .employeeId("00000000-0000-0000-0000-000000000001")
             .employeeNumber("A001")
             .displayName("本地管理員")
             .email("admin@local.dev")
-            .departmentId("DEPT-001")
+            .departmentId("00000000-0000-0000-0000-000000000101")
             .departmentName("系統管理部")
             .roles(List.of("ADMIN", "HR"))
             .permissions(List.of("*"))
@@ -44,9 +60,12 @@ public class MockJwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            List<SimpleGrantedAuthority> authorities = MOCK_USER.getRoles().stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                    .toList();
+            // 角色權限 (ROLE_xxx) + 細粒度權限 (resource:action)
+            List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            MOCK_USER.getRoles().forEach(role ->
+                    authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+            ALL_PERMISSIONS.forEach(perm ->
+                    authorities.add(new SimpleGrantedAuthority(perm)));
 
             // 使用 JWTModel 作為 principal，讓 CurrentUserArgumentResolver 能正確解析
             UsernamePasswordAuthenticationToken authentication =

@@ -1,9 +1,9 @@
 package com.company.hrms.iam.infrastructure.security;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.iam.domain.service.JwtBlacklistDomainService;
 import com.company.hrms.iam.domain.service.JwtTokenDomainService;
+import com.company.hrms.iam.infrastructure.dao.UserDAO;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,11 +35,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenDomainService jwtTokenService;
     private final JwtBlacklistDomainService jwtBlacklistService;
+    private final UserDAO userDAO;
 
     public JwtAuthenticationFilter(JwtTokenDomainService jwtTokenService,
-            JwtBlacklistDomainService jwtBlacklistService) {
+            JwtBlacklistDomainService jwtBlacklistService,
+            UserDAO userDAO) {
         this.jwtTokenService = jwtTokenService;
         this.jwtBlacklistService = jwtBlacklistService;
+        this.userDAO = userDAO;
     }
 
     @Override
@@ -78,10 +82,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .roles(roles != null ? roles : List.of())
                             .build();
 
-                    // 4. 構建權限列表
-                    List<SimpleGrantedAuthority> authorities = jwtModel.getRoles().stream()
-                            .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                            .collect(Collectors.toList());
+                    // 4. 構建權限列表（角色 + 細粒度權限）
+                    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                    // 4a. 角色權限（ROLE_xxx）
+                    jwtModel.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+                    // 4b. 細粒度權限（user:read, role:read 等）
+                    try {
+                        List<String> permissions = userDAO.selectUserPermissionCodes(userId);
+                        if (permissions != null) {
+                            permissions.forEach(perm -> authorities.add(new SimpleGrantedAuthority(perm)));
+                        }
+                    } catch (Exception e) {
+                        logger.warn("無法載入使用者權限，僅使用角色權限: " + e.getMessage());
+                    }
 
                     // 5. 創建認證對象（JWTModel 作為 principal）
                     JwtAuthenticationToken authentication = new JwtAuthenticationToken(

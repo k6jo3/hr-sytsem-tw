@@ -73,7 +73,7 @@ const App: React.FC = () => {
       <Routes>
         {/* ========== 身分認證與權限 (HR01) ========== */}
         <Route path="/login" element={<HR01LoginPage />} />
-        <Route path="/dashboard" element={<Navigate to="/admin/reports" replace />} />
+        <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
         <Route path="/profile" element={<ProtectedRoute><HR01ProfilePage /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute requiredRoles={['ADMIN']}><HR01UserManagementPage /></ProtectedRoute>} />
         <Route path="/admin/roles" element={<ProtectedRoute requiredRoles={['ADMIN']}><HR01RoleManagementPage /></ProtectedRoute>} />

@@ -303,6 +303,16 @@ public class UltimateQueryEngine<T> {
             }
         }
 
+        // null 值守衛：明確的 IS_NULL/IS_NOT_NULL 運算子生成對應條件，
+        // 其他運算子（EQ/NE 等）遇 null 值時跳過此條件（視為「不篩選」）
+        if (finalValue == null) {
+            return switch (op) {
+                case IS_NULL -> path.get(fieldName).isNull();
+                case IS_NOT_NULL -> path.get(fieldName).isNotNull();
+                default -> null; // EQ/NE/LIKE 等遇 null 值時跳過
+            };
+        }
+
         switch (op) {
             case EQ:
                 return path.get(fieldName).eq(finalValue);

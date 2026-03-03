@@ -1,13 +1,12 @@
 /**
- * Mock Configuration
- * Controls whether to use mock APIs or real backend APIs.
+ * Mock 配置
+ * 控制各模組使用 Mock API 或真實後端 API。
+ *
+ * 漸進式切換：將模組設為 false 即切換為真實 API。
+ * 當後端服務尚未建置時保持 true 使用 Mock 資料。
  */
 export const MockConfig = {
-  // Master switch: If true, all modules will use mock APIs by default
-  USE_MOCK_ALL: true, 
-
-  // Per-module overrides
-  // These are checked if USE_MOCK_ALL is false, or can satisfy specific logic
+  // 各模組 Mock 開關（false = 使用真實後端 API）
   modules: {
     AUTH: true,
     ORGANIZATION: true,
@@ -23,14 +22,12 @@ export const MockConfig = {
     NOTIFICATION: true,
     DOCUMENT: true,
     REPORT: true,
-  },
+  } as Record<string, boolean>,
 
   /**
-   * Check if a specific module should use mock API
-   * @param moduleName The key of the module in the modules object
-   * @returns boolean
+   * 檢查指定模組是否使用 Mock API
    */
   isEnabled(moduleName: string): boolean {
-    return this.USE_MOCK_ALL || (this.modules as any)[moduleName];
+    return this.modules[moduleName] ?? true;
   }
-} as const;
+};

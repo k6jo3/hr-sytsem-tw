@@ -13,7 +13,7 @@ export class EmployeeViewModelFactory {
     return {
       id: dto.id,
       employeeNumber: dto.employee_number,
-      fullName: `${dto.last_name}${dto.first_name}`,
+      fullName: this.formatFullName(dto.first_name, dto.last_name),
       email: dto.email,
       phone: dto.phone,
       departmentName: dto.department_name,
@@ -29,6 +29,17 @@ export class EmployeeViewModelFactory {
    */
   static createListFromDTOs(dtos: EmployeeDto[]): EmployeeViewModel[] {
     return dtos.map((dto) => this.createFromDTO(dto));
+  }
+
+  /**
+   * 組合姓名：中文姓名不加空格，英文姓名加空格
+   * 當 lastName 為空時直接回傳 firstName（處理後端只有 fullName 的情況）
+   */
+  private static formatFullName(firstName: string, lastName: string): string {
+    if (!lastName) return firstName;
+    if (!firstName) return lastName;
+    const isCJK = /[\u4e00-\u9fff\u3400-\u4dbf]/.test(firstName + lastName);
+    return isCJK ? `${lastName}${firstName}` : `${firstName} ${lastName}`;
   }
 
   /**

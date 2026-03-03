@@ -2,6 +2,7 @@ import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
 import type {
     ApproveCorrectionResponse,
+    AttendanceRecordDto,
     CheckInRequest,
     CheckInResponse,
     CheckOutRequest,
@@ -16,6 +17,52 @@ import type {
     GetTodayAttendanceResponse
 } from './AttendanceTypes';
 import { MockAttendanceApi } from './MockAttendanceApi';
+
+/**
+ * 將後端每日出勤紀錄轉為前端 AttendanceRecordDto 格式
+ * 後端格式：一筆 = 一天（含 checkInTime + checkOutTime）
+ * 前端格式：一筆 = 一次打卡（checkType + checkTime）
+ */
+function adaptBackendRecords(backendItems: any[]): AttendanceRecordDto[] {
+  const records: AttendanceRecordDto[] = [];
+  for (const item of backendItems) {
+    if (item.checkInTime) {
+      records.push({
+        id: `${item.recordId}-in`,
+        employeeId: item.employeeId,
+        employeeName: item.employeeName ?? '',
+        checkType: 'CHECK_IN',
+        checkTime: item.checkInTime,
+        status: item.lateMinutes > 0 ? 'LATE' : 'NORMAL',
+        createdAt: item.checkInTime,
+      });
+    }
+    if (item.checkOutTime) {
+      records.push({
+        id: `${item.recordId}-out`,
+        employeeId: item.employeeId,
+        employeeName: item.employeeName ?? '',
+        checkType: 'CHECK_OUT',
+        checkTime: item.checkOutTime,
+        status: item.earlyLeaveMinutes > 0 ? 'EARLY_LEAVE' : 'NORMAL',
+        createdAt: item.checkOutTime,
+      });
+    }
+  }
+  return records;
+}
+
+/**
+ * 將後端分頁回應轉為前端 GetAttendanceHistoryResponse 格式
+ */
+function adaptAttendanceHistoryResponse(raw: any): GetAttendanceHistoryResponse {
+  return {
+    records: adaptBackendRecords(raw.items ?? []),
+    total: raw.totalElements ?? 0,
+    page: raw.page ?? 1,
+    pageSize: raw.size ?? 20,
+  };
+}
 
 /**
  * Attendance API (考勤 API)
@@ -57,7 +104,8 @@ export class AttendanceApi {
     params?: GetAttendanceHistoryRequest
   ): Promise<GetAttendanceHistoryResponse> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getAttendanceHistory(params);
-    return apiClient.get(`${this.BASE_PATH}/records`, { params });
+    const raw = await apiClient.get(`${this.BASE_PATH}/records`, { params });
+    return adaptAttendanceHistoryResponse(raw);
   }
 
   /**

@@ -106,11 +106,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- H2 Database -->
+        <!-- H2 Database (scope 由 Maven profile 控制: test=預設, runtime=local) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>${h2.scope}</scope>
         </dependency>
     </dependencies>
 

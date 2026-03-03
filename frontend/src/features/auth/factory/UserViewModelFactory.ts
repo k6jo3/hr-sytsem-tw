@@ -86,6 +86,7 @@ export class UserViewModelFactory {
       username: dto.username,
       email: dto.email,
       fullName: dto.display_name || `${dto.first_name ?? ''} ${dto.last_name ?? ''}`.trim(),
+      employeeId: dto.employee_id,
       roles: dto.role_list,
       displayRoles: mapRolesToDisplay(dto.role_list),
       isAdmin: dto.role_list.includes('ADMIN') || dto.role_list.includes('HR_ADMIN'),

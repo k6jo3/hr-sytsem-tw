@@ -1,6 +1,7 @@
 -- =====================================================
 -- HRMS Organization Service - Local Profile 初始資料
 -- H2 相容語法（使用 MERGE INTO 取代 ON CONFLICT）
+-- 所有 ID 使用 UUID 格式（配合 Domain Value Object）
 -- =====================================================
 
 -- =====================================================
@@ -10,7 +11,7 @@ MERGE INTO organizations (
     organization_id, organization_code, organization_name, organization_name_en,
     organization_type, tax_id, address, phone_number, established_date, status
 ) KEY (organization_id) VALUES (
-    'org-0001',
+    '10000000-0000-0000-0000-000000000001',
     'COMPANY',
     '範例科技股份有限公司',
     'Example Technology Co., Ltd.',
@@ -31,11 +32,11 @@ MERGE INTO departments (
     department_id, department_code, department_name, department_name_en,
     organization_id, level, display_order, status
 ) KEY (department_id) VALUES (
-    'dept-0001',
+    '20000000-0000-0000-0000-000000000001',
     'CEO',
     '總經理室',
     'CEO Office',
-    'org-0001',
+    '10000000-0000-0000-0000-000000000001',
     1,
     1,
     'ACTIVE'
@@ -46,12 +47,12 @@ MERGE INTO departments (
     department_id, department_code, department_name, department_name_en,
     organization_id, parent_department_id, level, display_order, status
 ) KEY (department_id) VALUES (
-    'dept-0002',
+    '20000000-0000-0000-0000-000000000002',
     'HR',
     '人力資源部',
     'Human Resources',
-    'org-0001',
-    'dept-0001',
+    '10000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
     2,
     2,
     'ACTIVE'
@@ -62,12 +63,12 @@ MERGE INTO departments (
     department_id, department_code, department_name, department_name_en,
     organization_id, parent_department_id, level, display_order, status
 ) KEY (department_id) VALUES (
-    'dept-0003',
+    '20000000-0000-0000-0000-000000000003',
     'IT',
     '資訊技術部',
     'Information Technology',
-    'org-0001',
-    'dept-0001',
+    '10000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
     2,
     3,
     'ACTIVE'
@@ -78,12 +79,12 @@ MERGE INTO departments (
     department_id, department_code, department_name, department_name_en,
     organization_id, parent_department_id, level, display_order, status
 ) KEY (department_id) VALUES (
-    'dept-0004',
+    '20000000-0000-0000-0000-000000000004',
     'FIN',
     '財務部',
     'Finance',
-    'org-0001',
-    'dept-0001',
+    '10000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
     2,
     4,
     'ACTIVE'
@@ -94,12 +95,12 @@ MERGE INTO departments (
     department_id, department_code, department_name, department_name_en,
     organization_id, parent_department_id, level, display_order, status
 ) KEY (department_id) VALUES (
-    'dept-0005',
+    '20000000-0000-0000-0000-000000000005',
     'SALES',
     '業務部',
     'Sales',
-    'org-0001',
-    'dept-0001',
+    '10000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
     2,
     5,
     'ACTIVE'
@@ -118,7 +119,7 @@ MERGE INTO employees (
     job_title, job_level, employment_type, employment_status,
     hire_date
 ) KEY (employee_id) VALUES (
-    'emp-0001',
+    '00000000-0000-0000-0000-000000000001',
     'EMP001',
     '大明',
     '王',
@@ -130,8 +131,8 @@ MERGE INTO employees (
     'MARRIED',
     'david.wang@company.com',
     '0912345678',
-    'org-0001',
-    'dept-0001',
+    '10000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000001',
     '總經理',
     'C-LEVEL',
     'FULL_TIME',
@@ -148,21 +149,21 @@ MERGE INTO employees (
     job_title, job_level, employment_type, employment_status,
     hire_date
 ) KEY (employee_id) VALUES (
-    'emp-0002',
+    '00000000-0000-0000-0000-000000000002',
     'EMP002',
     '小美',
     '李',
     '李小美',
     'Mary Lee',
-    'B234567890',
+    'B200000004',
     '1985-07-22',
     'FEMALE',
     'SINGLE',
     'mary.lee@company.com',
     '0923456789',
-    'org-0001',
-    'dept-0002',
-    'emp-0001',
+    '10000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-000000000001',
     'HR 經理',
     'MANAGER',
     'FULL_TIME',
@@ -179,20 +180,20 @@ MERGE INTO employees (
     job_title, job_level, employment_type, employment_status,
     hire_date
 ) KEY (employee_id) VALUES (
-    'emp-0003',
+    '00000000-0000-0000-0000-000000000003',
     'EMP003',
     '志強',
     '陳',
     '陳志強',
     'John Chen',
-    'C345678901',
+    'C100000003',
     '1990-11-08',
     'MALE',
     'john.chen@company.com',
     '0934567890',
-    'org-0001',
-    'dept-0003',
-    'emp-0001',
+    '10000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000003',
+    '00000000-0000-0000-0000-000000000001',
     '資深工程師',
     'SENIOR',
     'FULL_TIME',
@@ -209,20 +210,20 @@ MERGE INTO employees (
     job_title, job_level, employment_type, employment_status,
     hire_date, probation_end_date
 ) KEY (employee_id) VALUES (
-    'emp-0004',
+    '00000000-0000-0000-0000-000000000004',
     'EMP004',
     '雅婷',
     '林',
     '林雅婷',
     'Yating Lin',
-    'D456789012',
+    'D100000022',
     '1995-04-18',
     'FEMALE',
     'yating.lin@company.com',
     '0945678901',
-    'org-0001',
-    'dept-0003',
-    'emp-0003',
+    '10000000-0000-0000-0000-000000000001',
+    '20000000-0000-0000-0000-000000000003',
+    '00000000-0000-0000-0000-000000000003',
     '初級工程師',
     'JUNIOR',
     'FULL_TIME',
@@ -234,9 +235,9 @@ MERGE INTO employees (
 -- =====================================================
 -- 4. 設定部門主管
 -- =====================================================
-UPDATE departments SET manager_id = 'emp-0001' WHERE department_id = 'dept-0001';
-UPDATE departments SET manager_id = 'emp-0002' WHERE department_id = 'dept-0002';
-UPDATE departments SET manager_id = 'emp-0003' WHERE department_id = 'dept-0003';
+UPDATE departments SET manager_id = '00000000-0000-0000-0000-000000000001' WHERE department_id = '20000000-0000-0000-0000-000000000001';
+UPDATE departments SET manager_id = '00000000-0000-0000-0000-000000000002' WHERE department_id = '20000000-0000-0000-0000-000000000002';
+UPDATE departments SET manager_id = '00000000-0000-0000-0000-000000000003' WHERE department_id = '20000000-0000-0000-0000-000000000003';
 
 -- =====================================================
 -- 5. 測試用合約資料
@@ -245,8 +246,8 @@ MERGE INTO employee_contracts (
     contract_id, employee_id, contract_type, contract_number,
     start_date, working_hours, status
 ) KEY (contract_id) VALUES (
-    'contract-0001',
-    'emp-0001',
+    '30000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000001',
     'INDEFINITE',
     'CTR-2020-001',
     '2020-01-01',
@@ -258,8 +259,8 @@ MERGE INTO employee_contracts (
     contract_id, employee_id, contract_type, contract_number,
     start_date, working_hours, status
 ) KEY (contract_id) VALUES (
-    'contract-0002',
-    'emp-0002',
+    '30000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-000000000002',
     'INDEFINITE',
     'CTR-2020-002',
     '2020-06-01',
@@ -273,8 +274,8 @@ MERGE INTO employee_contracts (
 MERGE INTO employee_history (
     history_id, employee_id, event_type, event_date, description, created_by
 ) KEY (history_id) VALUES (
-    'hist-0001',
-    'emp-0001',
+    '40000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000001',
     'ONBOARDING',
     '2020-01-01',
     '到職報到',
@@ -284,8 +285,8 @@ MERGE INTO employee_history (
 MERGE INTO employee_history (
     history_id, employee_id, event_type, event_date, description, created_by
 ) KEY (history_id) VALUES (
-    'hist-0002',
-    'emp-0004',
+    '40000000-0000-0000-0000-000000000002',
+    '00000000-0000-0000-0000-000000000004',
     'ONBOARDING',
     '2026-01-15',
     '到職報到（試用期）',

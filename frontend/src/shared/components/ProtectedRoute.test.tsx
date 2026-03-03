@@ -71,7 +71,7 @@ const RouteGuard: React.FC<{
     const userRoles: string[] = user?.roles ?? [];
     const hasAccess = requiredRoles.some((role: string) => userRoles.includes(role));
     if (!hasAccess) {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to="/profile" replace />;
     }
   }
 
@@ -96,7 +96,7 @@ const renderWithRoute = (
             }
           />
           <Route path="/login" element={<div>登入頁面</div>} />
-          <Route path="/dashboard" element={<div>儀表板</div>} />
+          <Route path="/profile" element={<div>個人資料</div>} />
         </Routes>
       </MemoryRouter>
     </Provider>
@@ -129,7 +129,7 @@ describe('ProtectedRoute（路由守衛邏輯）', () => {
     expect(screen.getByText('受保護的內容')).toBeTruthy();
   });
 
-  it('有 requiredRoles 且角色不符時應重導至 /dashboard', () => {
+  it('有 requiredRoles 且角色不符時應重導至 /profile', () => {
     renderWithRoute(
       {
         isAuthenticated: true,
@@ -137,7 +137,7 @@ describe('ProtectedRoute（路由守衛邏輯）', () => {
       },
       ['ADMIN']
     );
-    expect(screen.getByText('儀表板')).toBeTruthy();
+    expect(screen.getByText('個人資料')).toBeTruthy();
     expect(screen.queryByText('受保護的內容')).toBeNull();
   });
 

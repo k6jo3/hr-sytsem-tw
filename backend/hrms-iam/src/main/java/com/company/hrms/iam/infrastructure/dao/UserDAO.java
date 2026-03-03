@@ -111,4 +111,11 @@ public class UserDAO {
     public List<String> selectUserRoles(String userId) {
         return userMapper.selectUserRoles(userId);
     }
+
+    /**
+     * 查詢使用者的權限代碼列表（透過角色關聯取得細粒度權限）
+     */
+    public List<String> selectUserPermissionCodes(String userId) {
+        return userMapper.selectUserPermissionCodes(userId);
+    }
 }

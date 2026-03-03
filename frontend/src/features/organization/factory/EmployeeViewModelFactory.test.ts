@@ -77,6 +77,18 @@ describe('EmployeeViewModelFactory', () => {
       expect(viewModel.statusColor).toBe('error');
     });
 
+    it('應該正確處理英文姓名（加空格）', () => {
+      const englishDto: EmployeeDto = {
+        ...mockEmployeeDto,
+        first_name: 'John',
+        last_name: 'Doe',
+      };
+
+      const viewModel = EmployeeViewModelFactory.createFromDTO(englishDto);
+
+      expect(viewModel.fullName).toBe('John Doe');
+    });
+
     it('應該處理缺少電話號碼的情況', () => {
       const dtoWithoutPhone: EmployeeDto = {
         ...mockEmployeeDto,
@@ -86,6 +98,30 @@ describe('EmployeeViewModelFactory', () => {
       const viewModel = EmployeeViewModelFactory.createFromDTO(dtoWithoutPhone);
 
       expect(viewModel.phone).toBeUndefined();
+    });
+
+    it('應該正確處理後端格式（fullName 在 first_name，last_name 為空）', () => {
+      const backendAdaptedDto: EmployeeDto = {
+        ...mockEmployeeDto,
+        first_name: '王小明',
+        last_name: '',
+      };
+
+      const viewModel = EmployeeViewModelFactory.createFromDTO(backendAdaptedDto);
+
+      expect(viewModel.fullName).toBe('王小明');
+    });
+
+    it('應該正確處理後端英文 fullName（last_name 為空）', () => {
+      const backendAdaptedDto: EmployeeDto = {
+        ...mockEmployeeDto,
+        first_name: 'John Doe',
+        last_name: '',
+      };
+
+      const viewModel = EmployeeViewModelFactory.createFromDTO(backendAdaptedDto);
+
+      expect(viewModel.fullName).toBe('John Doe');
     });
   });
 

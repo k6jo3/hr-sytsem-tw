@@ -8,6 +8,22 @@ import type {
 import { MockAttendanceApi } from './MockAttendanceApi';
 
 /**
+ * 後端 shiftType → 前端 shiftType 映射
+ */
+const SHIFT_TYPE_MAP: Record<string, ShiftDto['shiftType']> = {
+  REGULAR: 'STANDARD',
+  FLEXIBLE: 'FLEXIBLE',
+  SHIFT: 'ROTATING',
+};
+
+function adaptShiftDto(raw: any): ShiftDto {
+  return {
+    ...raw,
+    shiftType: SHIFT_TYPE_MAP[raw.shiftType] ?? raw.shiftType,
+  };
+}
+
+/**
  * Shift Management API (班別管理 API)
  * Domain Code: HR03
  */
@@ -19,7 +35,8 @@ export class ShiftApi {
    */
   static async getShiftList(params?: any): Promise<ShiftDto[]> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getShifts();
-    return apiClient.get(this.BASE_PATH, { params });
+    const data: any[] = await apiClient.get(this.BASE_PATH, { params });
+    return data.map(adaptShiftDto);
   }
 
   /**

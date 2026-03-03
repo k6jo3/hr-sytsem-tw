@@ -16,6 +16,7 @@ export interface UserProfile {
   username: string;
   email: string;
   fullName: string;
+  employeeId?: string;
   roles: string[];
   displayRoles: string;
   isAdmin: boolean;

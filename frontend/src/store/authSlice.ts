@@ -17,10 +17,24 @@ export interface AuthState {
   error: string | null;
 }
 
+/**
+ * 從 localStorage 恢復使用者資訊
+ */
+const restoreUser = (): UserViewModel | null => {
+  try {
+    const raw = localStorage.getItem('user');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const storedUser = restoreUser();
+
 const initialState: AuthState = {
-  user: null,
+  user: storedUser,
   token: localStorage.getItem('accessToken'),
-  isAuthenticated: !!localStorage.getItem('accessToken'),
+  isAuthenticated: !!localStorage.getItem('accessToken') && !!storedUser,
   isLoading: false,
   error: null,
 };
@@ -44,6 +58,7 @@ export const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
       localStorage.setItem('accessToken', action.payload.token);
+      localStorage.setItem('user', JSON.stringify(action.payload.user));
     },
     /** 登入失敗 */
     loginFailure: (state, action: PayloadAction<string>) => {
@@ -56,6 +71,7 @@ export const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
     },
     /** 設定使用者資訊 */
     setUser: (state, action: PayloadAction<UserViewModel>) => {

@@ -21,7 +21,7 @@ interface ProtectedRouteProps {
  * Protected Route Component
  * 保護需要身份認證的路由，並支援角色權限控制
  * 未登入時重定向到登入頁面
- * 角色不符時重定向到 /dashboard
+ * 角色不符時重定向到 /profile（避免環形重導）
  */
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
@@ -40,7 +40,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     const userRoles = user?.roles ?? [];
     const hasAccess = requiredRoles.some((role) => userRoles.includes(role));
     if (!hasAccess) {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to="/profile" replace />;
     }
   }
 

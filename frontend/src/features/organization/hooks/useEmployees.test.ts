@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useEmployees } from './useEmployees';
-import * as OrganizationApi from '../api/OrganizationApi';
+import { OrganizationApi } from '../api/OrganizationApi';
 import type { EmployeeDto } from '../api/OrganizationTypes';
 
 // Mock OrganizationApi
 vi.mock('../api/OrganizationApi', () => ({
-  getEmployeeList: vi.fn(),
+  OrganizationApi: {
+    getEmployeeList: vi.fn(),
+  },
 }));
 
 describe('useEmployees', () => {

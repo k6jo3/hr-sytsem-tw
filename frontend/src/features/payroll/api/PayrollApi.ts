@@ -10,10 +10,64 @@ import type {
     GetPayslipListResponse,
     PayrollItemDefinitionDto,
     PayrollRunDto,
+    PayslipDto,
+    PayslipSummaryDto,
     SalaryStructureDto,
     StartPayrollRunRequest,
     UpdateSalaryStructureRequest,
 } from './PayrollTypes';
+
+// ========== Response Adapters ==========
+// 後端 camelCase → 前端 snake_case
+
+/** 後端薪資單狀態 → 前端狀態映射 */
+const PAYSLIP_STATUS_MAP: Record<string, PayslipDto['status']> = {
+  DRAFT: 'DRAFT',
+  FINALIZED: 'APPROVED',
+  SENT: 'PAID',
+};
+
+/**
+ * 後端 PayslipResponse → 前端 PayslipDto
+ */
+function adaptPayslipDto(raw: any): PayslipDto {
+  return {
+    id: raw.id,
+    payslip_code: raw.employeeNumber ?? '',
+    employee_id: raw.employeeId,
+    employee_name: raw.employeeName,
+    employee_code: raw.employeeNumber ?? '',
+    department_name: raw.departmentName,
+    pay_period_start: raw.periodStartDate,
+    pay_period_end: raw.periodEndDate,
+    payment_date: raw.payDate,
+    status: PAYSLIP_STATUS_MAP[raw.status] ?? raw.status,
+    items: [], // 後端列表查詢不含 items 明細
+    gross_pay: raw.grossWage ?? 0,
+    total_deductions: raw.totalDeductions ?? 0,
+    net_pay: raw.netWage ?? 0,
+    overtime_hours: raw.overtimeHours,
+    created_at: raw.createdAt ?? '',
+    updated_at: raw.updatedAt ?? '',
+  };
+}
+
+/**
+ * 後端 PayslipResponse → 前端 PayslipSummaryDto（列表摘要）
+ */
+function adaptPayslipSummary(raw: any): PayslipSummaryDto {
+  const start = raw.periodStartDate ?? '';
+  const end = raw.periodEndDate ?? '';
+  return {
+    id: raw.id,
+    payslip_code: raw.employeeNumber ?? '',
+    pay_period: start && end ? `${start} ~ ${end}` : '',
+    payment_date: raw.payDate ?? '',
+    gross_pay: raw.grossWage ?? 0,
+    net_pay: raw.netWage ?? 0,
+    status: PAYSLIP_STATUS_MAP[raw.status] ?? raw.status,
+  };
+}
 
 /**
  * Payroll API (薪資管理 API)
@@ -24,6 +78,7 @@ export class PayrollApi {
 
   /**
    * 取得我的薪資單列表
+   * 後端無 /my 端點，改用 /payslips 查詢並轉換格式
    */
   static async getMyPayslips(params: GetMyPayslipsRequest): Promise<GetMyPayslipsResponse> {
     if (MockConfig.isEnabled('PAYROLL')) {
@@ -43,7 +98,14 @@ export class PayrollApi {
         page_size: result.page_size
       };
     }
-    return apiClient.get<GetMyPayslipsResponse>(`${this.BASE_PATH}/my`, { params });
+    const raw: any = await apiClient.get(`${this.BASE_PATH}`, { params });
+    const items = raw.items ?? [];
+    return {
+      payslips: items.map(adaptPayslipSummary),
+      total: raw.totalElements ?? items.length,
+      page: raw.page ?? 1,
+      page_size: raw.size ?? 20,
+    };
   }
 
   /**
@@ -54,7 +116,8 @@ export class PayrollApi {
       const payslip = await MockPayrollApi.getPayslipById(id);
       return { payslip };
     }
-    return apiClient.get<GetPayslipDetailResponse>(`${this.BASE_PATH}/${id}`);
+    const raw: any = await apiClient.get(`${this.BASE_PATH}/${id}`);
+    return { payslip: adaptPayslipDto(raw) };
   }
 
   /**
@@ -109,7 +172,11 @@ export class PayrollApi {
    */
   static async getPayrollRuns(params?: any): Promise<any> {
     if (MockConfig.isEnabled('PAYROLL')) return MockPayrollApi.getPayrollRuns(params);
-    return apiClient.get('/payroll-runs', { params });
+    const raw: any = await apiClient.get('/payroll-runs', { params });
+    return {
+      items: raw.items ?? [],
+      total: raw.totalElements ?? 0,
+    };
   }
 
   /**
@@ -181,7 +248,12 @@ export class PayrollApi {
         total: result.total
       };
     }
-    return apiClient.get('/payslips', { params });
+    const raw: any = await apiClient.get('/payslips', { params });
+    const items = (raw.items ?? []).map(adaptPayslipDto);
+    return {
+      items,
+      total: raw.totalElements ?? items.length,
+    };
   }
 
   // ========== Payroll Item Definition Management ==========

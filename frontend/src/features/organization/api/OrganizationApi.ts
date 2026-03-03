@@ -4,12 +4,57 @@ import { MockOrganizationApi } from './MockOrganizationApi';
 import type {
     DepartmentDto,
     DepartmentRequest,
+    EmployeeDto,
     GetEmployeeDetailResponse,
     GetEmployeeListRequest,
     GetEmployeeListResponse,
     OrganizationDto,
     OrganizationRequest,
 } from './OrganizationTypes';
+
+/**
+ * 將後端 camelCase 員工項目轉換為前端 snake_case EmployeeDto
+ */
+function adaptEmployeeItem(raw: any): EmployeeDto {
+  const statusMap: Record<string, EmployeeDto['status']> = {
+    ACTIVE: 'ACTIVE',
+    PROBATION: 'ACTIVE',
+    TERMINATED: 'TERMINATED',
+    ON_LEAVE: 'ON_LEAVE',
+    INACTIVE: 'INACTIVE',
+  };
+  const backendStatus = raw.employmentStatus ?? raw.status ?? 'ACTIVE';
+
+  return {
+    id: raw.employeeId ?? raw.id,
+    employee_number: raw.employeeNumber ?? raw.employee_number ?? '',
+    first_name: raw.fullName ?? raw.first_name ?? '',
+    last_name: raw.last_name ?? '',
+    email: raw.companyEmail ?? raw.email ?? '',
+    phone: raw.phone,
+    department_id: raw.departmentId ?? raw.department_id ?? '',
+    department_name: raw.departmentName ?? raw.department_name ?? '',
+    position: raw.jobTitle ?? raw.position ?? '',
+    status: statusMap[backendStatus] ?? 'INACTIVE',
+    hire_date: raw.hireDate ?? raw.hire_date ?? '',
+    termination_date: raw.terminationDate ?? raw.termination_date,
+    created_at: raw.createdAt ?? raw.created_at ?? '',
+    updated_at: raw.updatedAt ?? raw.updated_at ?? '',
+  };
+}
+
+/**
+ * 將後端分頁回應轉換為前端 GetEmployeeListResponse
+ */
+function adaptEmployeeListResponse(raw: any): GetEmployeeListResponse {
+  const items = raw.items ?? raw.content ?? raw.employees ?? [];
+  return {
+    employees: items.map(adaptEmployeeItem),
+    total: raw.total ?? raw.totalElements ?? 0,
+    page: raw.page ?? raw.number ?? 1,
+    page_size: raw.size ?? raw.page_size ?? 20,
+  };
+}
 
 /**
  * Organization API
@@ -21,9 +66,10 @@ export const OrganizationApi = {
   /**
    * 取得員工列表
    */
-  getEmployeeList: (params?: GetEmployeeListRequest): Promise<GetEmployeeListResponse> => {
+  getEmployeeList: async (params?: GetEmployeeListRequest): Promise<GetEmployeeListResponse> => {
     if (MockConfig.isEnabled('ORGANIZATION')) return MockOrganizationApi.getEmployeeList(params);
-    return apiClient.get<GetEmployeeListResponse>('/employees', { params });
+    const raw = await apiClient.get('/employees', { params });
+    return adaptEmployeeListResponse(raw);
   },
 
   /**
