@@ -3,6 +3,7 @@ package com.company.hrms.iam.infrastructure.security;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,6 +31,9 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    @Value("${spring.h2.console.enabled:false}")
+    private boolean h2ConsoleEnabled;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
             JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
@@ -64,9 +68,9 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
                 // 路由權限配置
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> {
                         // 公開端點 - 不需要認證
-                        .requestMatchers(
+                        auth.requestMatchers(
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/register",
@@ -90,14 +94,25 @@ public class SecurityConfig {
                         .permitAll()
 
                         // OPTIONS 請求 (CORS preflight)
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+
+                        // H2 Console（僅 local profile 啟用時開放）
+                        if (h2ConsoleEnabled) {
+                            auth.requestMatchers("/h2-console/**").permitAll();
+                        }
 
                         // 其他所有請求需要認證
-                        .anyRequest().authenticated())
+                        auth.anyRequest().authenticated();
+                })
 
                 // 添加 JWT 過濾器
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
+
+        // H2 Console 需要 frame 支援
+        if (h2ConsoleEnabled) {
+            http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+        }
 
         return http.build();
     }

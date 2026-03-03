@@ -47,8 +47,21 @@
         <jjwt.version>0.12.3</jjwt.version>
         <querydsl.version>5.0.0</querydsl.version>
         <lombok.version>1.18.30</lombok.version>
+        <jedis-mock.version>1.1.4</jedis-mock.version>
+        <h2.scope>test</h2.scope>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <!-- Maven Profiles：local profile 讓 H2 與 jedis-mock 在 runtime 可用 -->
+    <profiles>
+        <profile>
+            <id>local</id>
+            <properties>
+                <h2.scope>runtime</h2.scope>
+                <spring.profiles.active>local</spring.profiles.active>
+            </properties>
+        </profile>
+    </profiles>
 
     <dependencyManagement>
         <dependencies>
@@ -124,6 +137,13 @@
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt.version}</version>
+            </dependency>
+
+            <!-- Embedded Redis (jedis-mock)：local profile 時自動啟動 -->
+            <dependency>
+                <groupId>com.github.fppt</groupId>
+                <artifactId>jedis-mock</artifactId>
+                <version>${jedis-mock.version}</version>
             </dependency>
 
             <!-- Mockito upgrade for Java 21 compatibility -->

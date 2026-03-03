@@ -99,11 +99,17 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- H2 Database for Testing -->
+        <!-- H2 Database：scope 由 parent profile 控制（test or runtime） -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>${h2.scope}</scope>
+        </dependency>
+
+        <!-- Embedded Redis (jedis-mock)：@Profile("local") 控制啟用時機 -->
+        <dependency>
+            <groupId>com.github.fppt</groupId>
+            <artifactId>jedis-mock</artifactId>
         </dependency>
 
         <!-- Testcontainers for PostgreSQL Testing -->

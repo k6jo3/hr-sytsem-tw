@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { MenuFactory } from './MenuFactory';
-import type { MenuItemConfig, SystemRole } from '../config/menuConfig';
+import type { MenuItemConfig } from '../config/menuConfig';
 
 /**
  * MenuFactory 單元測試

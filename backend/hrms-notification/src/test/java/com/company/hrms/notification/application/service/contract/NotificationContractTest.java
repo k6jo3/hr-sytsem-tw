@@ -29,7 +29,6 @@ import com.company.hrms.notification.infrastructure.persistence.assembler.Prefer
  * </ul>
  */
 @DisplayName("HR12 通知服務合約測試")
-// TODO: 需建立 contracts/notification_contracts.md 合約規格檔
 public class NotificationContractTest extends BaseContractTest {
 
     /**

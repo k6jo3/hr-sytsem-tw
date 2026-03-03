@@ -94,11 +94,11 @@
             <version>5.2.5</version>
         </dependency>
 
-        <!-- H2 Database for Testing -->
+        <!-- H2 Database：scope 由 parent profile 控制（test or runtime） -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>${h2.scope}</scope>
         </dependency>
 
         <!-- Spring Security Test -->

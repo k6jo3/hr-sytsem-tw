@@ -4,6 +4,8 @@
  */
 
 import { apiClient } from '@shared/api';
+import { MockConfig } from '../../../config/MockConfig';
+import { MockAuthApi } from './MockAuthApi';
 import type {
   RoleDto,
   CreateRoleRequest,
@@ -25,6 +27,7 @@ export const RoleApi = {
    * 取得角色列表
    */
   getRoles: async (params?: GetRolesRequest): Promise<GetRolesResponse> => {
+    if (MockConfig.isEnabled('AUTH')) return MockAuthApi.getRoles(params || {});
     return apiClient.get<GetRolesResponse>(ROLE_URL, { params });
   },
 
@@ -32,6 +35,12 @@ export const RoleApi = {
    * 取得單一角色
    */
   getRole: async (roleId: string): Promise<RoleDto> => {
+    if (MockConfig.isEnabled('AUTH')) {
+      const response = await MockAuthApi.getRoles({});
+      const role = response.roles.find(r => r.id === roleId);
+      if (!role) throw new Error('Role not found');
+      return role;
+    }
     return apiClient.get<RoleDto>(`${ROLE_URL}/${roleId}`);
   },
 
@@ -39,6 +48,10 @@ export const RoleApi = {
    * 取得所有角色 (不分頁，用於下拉選單)
    */
   getAllRoles: async (): Promise<RoleDto[]> => {
+    if (MockConfig.isEnabled('AUTH')) {
+      const response = await MockAuthApi.getRoles({});
+      return response.roles;
+    }
     const response = await apiClient.get<GetRolesResponse>(ROLE_URL, {
       params: { page_size: 1000 },
     });
@@ -93,6 +106,7 @@ export const RoleApi = {
    * 取得權限列表 (樹狀結構)
    */
   getPermissions: async (): Promise<GetPermissionsResponse> => {
+    if (MockConfig.isEnabled('AUTH')) return MockAuthApi.getPermissions();
     return apiClient.get<GetPermissionsResponse>(PERMISSION_URL);
   },
 
@@ -100,6 +114,10 @@ export const RoleApi = {
    * 取得模組權限列表
    */
   getPermissionsByModule: async (module: string): Promise<PermissionDto[]> => {
+    if (MockConfig.isEnabled('AUTH')) {
+      const response = await MockAuthApi.getPermissions();
+      return response.permissions.filter(p => p.module === module);
+    }
     const response = await apiClient.get<GetPermissionsResponse>(PERMISSION_URL, {
       params: { module },
     });

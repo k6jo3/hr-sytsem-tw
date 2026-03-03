@@ -4,6 +4,8 @@
  */
 
 import { apiClient } from '@shared/api';
+import { MockConfig } from '../../../config/MockConfig';
+import { MockAuthApi } from './MockAuthApi';
 import type {
   UserDto,
   CreateUserRequest,
@@ -24,6 +26,7 @@ export const UserApi = {
    * 取得使用者列表
    */
   getUsers: async (params?: GetUsersRequest): Promise<GetUsersResponse> => {
+    if (MockConfig.isEnabled('AUTH')) return MockAuthApi.getUsers(params || {});
     return apiClient.get<GetUsersResponse>(BASE_URL, { params });
   },
 
@@ -31,6 +34,7 @@ export const UserApi = {
    * 取得單一使用者
    */
   getUser: async (userId: string): Promise<UserDto> => {
+    if (MockConfig.isEnabled('AUTH')) return MockAuthApi.getUser(userId);
     return apiClient.get<UserDto>(`${BASE_URL}/${userId}`);
   },
 
@@ -40,6 +44,7 @@ export const UserApi = {
    * 建立使用者
    */
   createUser: async (request: CreateUserRequest): Promise<UserDto> => {
+    if (MockConfig.isEnabled('AUTH')) return MockAuthApi.createUser(request);
     return apiClient.post<UserDto>(BASE_URL, request);
   },
 
@@ -47,6 +52,7 @@ export const UserApi = {
    * 更新使用者
    */
   updateUser: async (userId: string, request: UpdateUserRequest): Promise<UserDto> => {
+    if (MockConfig.isEnabled('AUTH')) return MockAuthApi.updateUser(userId, request);
     return apiClient.put<UserDto>(`${BASE_URL}/${userId}`, request);
   },
 
