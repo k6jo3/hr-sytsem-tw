@@ -3,27 +3,24 @@ package com.company.hrms.iam.infrastructure.security;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
+import com.company.hrms.common.model.JWTModel;
+
 import java.util.Collection;
 import java.util.List;
 
 /**
  * JWT 認證令牌
- * 存儲從 JWT Token 中解析出的用戶信息
+ * 存儲從 JWT Token 中解析出的用戶信息，
+ * principal 為 JWTModel 以供 CurrentUserArgumentResolver 正確解析
  */
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final String userId;
-    private final String username;
-    private final List<String> roles;
+    private final JWTModel jwtModel;
 
-    public JwtAuthenticationToken(String userId,
-                                  String username,
-                                  List<String> roles,
+    public JwtAuthenticationToken(JWTModel jwtModel,
                                   Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
-        this.userId = userId;
-        this.username = username;
-        this.roles = roles;
+        this.jwtModel = jwtModel;
         setAuthenticated(true);
     }
 
@@ -34,18 +31,18 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return username;
+        return jwtModel;
     }
 
     public String getUserId() {
-        return userId;
+        return jwtModel.getUserId();
     }
 
     public String getUsername() {
-        return username;
+        return jwtModel.getUsername();
     }
 
     public List<String> getRoles() {
-        return roles;
+        return jwtModel.getRoles();
     }
 }

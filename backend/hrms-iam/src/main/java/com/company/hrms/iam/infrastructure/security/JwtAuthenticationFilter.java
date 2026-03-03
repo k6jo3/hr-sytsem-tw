@@ -2,6 +2,7 @@ package com.company.hrms.iam.infrastructure.security;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.NonNull;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.iam.domain.service.JwtBlacklistDomainService;
 import com.company.hrms.iam.domain.service.JwtTokenDomainService;
 
@@ -59,21 +61,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             // 401)
                     // 上述 return 會導致請求中斷，前端可能收到空響應。比較好的做法是不設置 Authentication，讓 Spring Security 攔截。
                 } else {
-                    // 3. 提取用戶信息
-                    String userId = jwtTokenService.extractUserId(token);
-                    String username = jwtTokenService.extractUsername(token);
-                    List<String> roles = jwtTokenService.extractRoles(token);
+                    // 3. 提取用戶信息並建構 JWTModel
+                    Map<String, Object> claims = jwtTokenService.extractAllClaims(token);
+                    String userId = (String) claims.get("sub");
+                    String username = (String) claims.get("username");
+                    String email = (String) claims.get("email");
+                    String displayName = (String) claims.get("displayName");
+                    @SuppressWarnings("unchecked")
+                    List<String> roles = (List<String>) claims.get("roles");
+
+                    JWTModel jwtModel = JWTModel.builder()
+                            .userId(userId)
+                            .username(username)
+                            .email(email)
+                            .displayName(displayName)
+                            .roles(roles != null ? roles : List.of())
+                            .build();
 
                     // 4. 構建權限列表
-                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                    List<SimpleGrantedAuthority> authorities = jwtModel.getRoles().stream()
                             .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                             .collect(Collectors.toList());
 
-                    // 5. 創建認證對象
+                    // 5. 創建認證對象（JWTModel 作為 principal）
                     JwtAuthenticationToken authentication = new JwtAuthenticationToken(
-                            userId,
-                            username,
-                            roles,
+                            jwtModel,
                             authorities);
                     authentication.setDetails(
                             new WebAuthenticationDetailsSource().buildDetails(request));
