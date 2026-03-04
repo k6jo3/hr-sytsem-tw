@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.query.QueryGroup;
@@ -76,6 +77,9 @@ public class TimesheetQueryContractTest extends BaseServiceTest<Object> {
 
     @Mock
     private OrganizationServiceClient organizationServiceClient;
+
+    @Mock
+    private JdbcTemplate jdbcTemplate;
 
     private ContractTestHelper contractHelper;
     private String contractSpec;
@@ -222,7 +226,7 @@ public class TimesheetQueryContractTest extends BaseServiceTest<Object> {
 
         @BeforeEach
         void setUp() {
-            service = new GetPendingApprovalsServiceImpl(timesheetRepository);
+            service = new GetPendingApprovalsServiceImpl(timesheetRepository, jdbcTemplate);
         }
 
         @Test
