@@ -85,23 +85,22 @@
    - 在對應的 API 檔案中建立 Response Adapter
    - 更新 Factory 和測試
 
-5. **恢復 MockConfig**
-   - 驗證完成後將 MockConfig 恢復為全開
-   - 確保不影響其他開發者
+5. **確認 MockConfig**
+   - 驗證完成後確認 MockConfig 目標模組為 `false`（使用真實 API）
+   - 截至 2026-03-04，全部 14 模組均已設為 `false`
 
 ---
 
 ## Round 對照表
 
-| Round | 服務 | 前端頁面 | 後端 Port |
-|:---:|:---|:---|:---:|
-| 1 | IAM + Organization | 登入、員工列表、組織管理 | 8081, 8082 |
-| 2 | Attendance + Payroll | 考勤、薪資 | 8083, 8084 |
-| 3 | Insurance + Project | 保險、專案 | 8085, 8086 |
-| 4 | Timesheet + Performance | 工時、績效 | 8087, 8088 |
-| 5 | Recruitment + Training | 招募、訓練 | 8089, 8090 |
-| 6 | Workflow + Notification | 簽核、通知 | 8091, 8092 |
-| 7 | Document + Reporting | 文件、報表 | 8093, 8094 |
+| Round | 服務 | 前端頁面 | 後端 Port | 狀態 |
+|:---:|:---|:---|:---:|:---:|
+| 1 | IAM + Organization | 登入、員工列表、使用者管理、角色管理 | 8081, 8082 | ✅ |
+| 2 | Attendance + Payroll | 考勤、薪資 | 8083, 8084 | ✅ |
+| 3 | Project + Timesheet | 專案（列表/客戶/WBS）、工時（填報/審核） | 8086, 8087 | ✅ |
+| 4 | Insurance + Performance | 保險、績效（週期/表單/考核/報表） | 8085, 8088 | ✅ |
+| 5 | Recruitment + Training | 招募（Kanban）、訓練（課程/證照） | 8089, 8090 | ✅ |
+| 6 | Workflow + Notification + Document + Reporting | 簽核、通知、文件、報表 | 8091-8094 | ✅ |
 
 ---
 

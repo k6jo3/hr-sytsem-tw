@@ -29,7 +29,7 @@
 ```
 1. browser_navigate → http://localhost:5173/login
 2. browser_type → 帳號欄位輸入 admin
-3. browser_type → 密碼欄位輸入 password
+3. browser_type → 密碼欄位輸入 admin123
 4. browser_click → 點擊「登入」按鈕
 5. browser_screenshot → 確認登入成功
 ```
