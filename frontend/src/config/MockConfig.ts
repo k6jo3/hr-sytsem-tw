@@ -18,10 +18,10 @@ export const MockConfig = {
     PERFORMANCE: false,
     RECRUITMENT: false,
     TRAINING: false,
-    WORKFLOW: true,
-    NOTIFICATION: true,
-    DOCUMENT: true,
-    REPORT: true,
+    WORKFLOW: false,
+    NOTIFICATION: false,
+    DOCUMENT: false,
+    REPORT: false,
   } as Record<string, boolean>,
 
   /**

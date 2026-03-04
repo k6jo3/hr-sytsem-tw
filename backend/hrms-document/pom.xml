@@ -106,10 +106,11 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- H2 (測試 + Local Profile) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>${h2.scope}</scope>
         </dependency>
     </dependencies>
 

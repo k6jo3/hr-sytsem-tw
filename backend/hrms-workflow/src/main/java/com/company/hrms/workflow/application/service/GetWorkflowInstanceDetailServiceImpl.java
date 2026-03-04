@@ -17,7 +17,7 @@ import com.company.hrms.workflow.infrastructure.repository.WorkflowInstanceQuery
 
 import lombok.RequiredArgsConstructor;
 
-@Service("getWorkflowInstanceDetailServiceImpl")
+@Service("getInstanceDetailServiceImpl")
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class GetWorkflowInstanceDetailServiceImpl

@@ -37,7 +37,11 @@ public class MockJwtAuthenticationFilter extends OncePerRequestFilter {
             "payroll:read", "payroll:calculate", "payroll:approve",
             "project:create", "project:read", "project:update", "project:delete",
             "timesheet:read", "timesheet:submit", "timesheet:approve",
-            "report:read", "report:export");
+            "report:read", "report:export",
+            // HR12 Notification 權限
+            "NOTIFICATION:SEND", "NOTIFICATION:SEND_BATCH",
+            "NOTIFICATION:ANNOUNCEMENT:CREATE", "NOTIFICATION:ANNOUNCEMENT:UPDATE",
+            "NOTIFICATION:ANNOUNCEMENT:DELETE");
 
     private static final JWTModel MOCK_USER = JWTModel.builder()
             .userId("00000000-0000-0000-0000-000000000001")

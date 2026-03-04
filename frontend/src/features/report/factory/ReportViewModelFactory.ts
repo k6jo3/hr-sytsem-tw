@@ -104,7 +104,8 @@ const formatDateTime = (dateString: string): string => {
 };
 
 const formatDate = (dateString: string): string => {
-  return dayjs(dateString).format('YYYY-MM-DD');
+  const d = dayjs(dateString);
+  return d.isValid() ? d.format('YYYY-MM-DD') : dateString || '-';
 };
 
 const formatMonth = (monthString: string): string => {
@@ -112,7 +113,7 @@ const formatMonth = (monthString: string): string => {
 };
 
 const formatPercentage = (value: number): string => {
-  return `${(value * 100).toFixed(1)}%`;
+  return `${value.toFixed(1)}%`;
 };
 
 // ========== Factory Class ==========

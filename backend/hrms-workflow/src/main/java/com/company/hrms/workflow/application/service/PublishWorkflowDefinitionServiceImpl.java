@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * 發佈流程定義服務
  */
-@Service("publishWorkflowDefinitionServiceImpl")
+@Service("publishDefinitionServiceImpl")
 @Transactional
 @RequiredArgsConstructor
 public class PublishWorkflowDefinitionServiceImpl implements CommandApiService<PublishWorkflowDefinitionRequest, Void> {

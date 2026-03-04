@@ -43,7 +43,7 @@ public class GetNotificationTemplateListServiceImpl
                 // 1. 組裝查詢條件 - 使用 Fluent-Query-Engine 標準模式
                 QueryGroup queryGroup = QueryBuilder.where()
                                 .fromDto(request)
-                                .eq("is_deleted", 0) // 隱含業務邏輯：過濾軟刪除
+                                .eq("is_deleted", false) // 隱含業務邏輯：過濾軟刪除
                                 .build();
 
                 // 2. 建立分頁參數

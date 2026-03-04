@@ -56,13 +56,13 @@ export default defineConfig({
       // HR10 訓練服務 (port 8090)
       '/api/v1/training': { target: 'http://localhost:8090', changeOrigin: true },
       // HR11 簽核服務 (port 8091)
-      '/api/v1/workflow': { target: 'http://localhost:8091', changeOrigin: true },
+      '/api/v1/workflows': { target: 'http://localhost:8091', changeOrigin: true },
       // HR12 通知服務 (port 8092)
       '/api/v1/notifications': { target: 'http://localhost:8092', changeOrigin: true },
       // HR13 文件服務 (port 8093)
       '/api/v1/documents': { target: 'http://localhost:8093', changeOrigin: true },
       // HR14 報表服務 (port 8094)
-      '/api/v1/reports': { target: 'http://localhost:8094', changeOrigin: true },
+      '/api/v1/reporting': { target: 'http://localhost:8094', changeOrigin: true },
     }
   }
 });

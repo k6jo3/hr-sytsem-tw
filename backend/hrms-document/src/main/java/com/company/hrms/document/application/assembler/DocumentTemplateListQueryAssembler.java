@@ -34,7 +34,7 @@ public class DocumentTemplateListQueryAssembler {
 
         // Soft Delete (Always required)
         // 確保不查詢已刪除的範本
-        query.eq("is_deleted", 0);
+        query.eq("is_deleted", false);
 
         return query;
     }

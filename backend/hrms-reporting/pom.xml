@@ -79,11 +79,11 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
 
-        <!-- H2 Database (for testing) -->
+        <!-- H2 Database (測試 + Local Profile) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>${h2.scope}</scope>
         </dependency>
 
         <!-- Spring Security Test -->

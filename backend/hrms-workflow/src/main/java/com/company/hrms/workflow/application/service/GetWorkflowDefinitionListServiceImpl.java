@@ -18,7 +18,7 @@ import com.company.hrms.workflow.application.service.task.definition.TransformWo
 
 import lombok.RequiredArgsConstructor;
 
-@Service("getWorkflowDefinitionListServiceImpl")
+@Service("getDefinitionsServiceImpl")
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class GetWorkflowDefinitionListServiceImpl

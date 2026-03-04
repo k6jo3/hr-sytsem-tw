@@ -7,6 +7,7 @@ import com.company.hrms.notification.domain.model.aggregate.NotificationPreferen
 import com.company.hrms.notification.domain.model.valueobject.QuietHours;
 import com.company.hrms.notification.domain.repository.INotificationPreferenceRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 
@@ -17,6 +18,7 @@ import java.time.format.DateTimeFormatter;
  * @since 2025-01-23
  */
 @Service("getNotificationPreferenceServiceImpl")
+@Transactional
 public class GetNotificationPreferenceServiceImpl
         implements QueryApiService<Void, NotificationPreferenceResponse> {
 
