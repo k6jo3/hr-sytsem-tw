@@ -18,8 +18,7 @@ export const useTemplate = (cycleId: string) => {
       const viewModel = PerformanceViewModelFactory.createTemplateViewModel(response.template);
       setTemplate(viewModel);
     } catch (error) {
-      // message.error('無法取得表單設定');
-      // If 404, might be new template, just set default or null and handle in UI
+      console.error('fetchTemplate error:', error);
       setTemplate(null);
     } finally {
       setLoading(false);

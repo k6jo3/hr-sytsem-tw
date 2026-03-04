@@ -40,6 +40,7 @@ public class GetCycleDetailServiceImpl
                                 .startDate(cycle.getStartDate())
                                 .endDate(cycle.getEndDate())
                                 .hasTemplate(cycle.getTemplate() != null)
+                                .template(cycle.getTemplate())
                                 .build();
         }
 }

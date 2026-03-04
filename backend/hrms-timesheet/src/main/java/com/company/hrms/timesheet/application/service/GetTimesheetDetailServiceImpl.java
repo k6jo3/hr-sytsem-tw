@@ -20,7 +20,7 @@ import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
 
 import lombok.RequiredArgsConstructor;
 
-@Service("getTimesheetDetailServiceImpl")
+@Service("getTimesheetServiceImpl")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class GetTimesheetDetailServiceImpl

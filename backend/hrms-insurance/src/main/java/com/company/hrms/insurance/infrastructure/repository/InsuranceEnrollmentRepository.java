@@ -73,6 +73,13 @@ public class InsuranceEnrollmentRepository
         }
 
         @Override
+        public List<InsuranceEnrollment> findAll() {
+                return super.findAll(QueryGroup.and()).stream()
+                                .map(this::toDomain)
+                                .collect(Collectors.toList());
+        }
+
+        @Override
         public List<InsuranceEnrollment> findByDateRange(java.time.LocalDate startDate, java.time.LocalDate endDate) {
                 // 查詢加保日期在區間內 或 退保日期在區間內的記錄
                 QueryGroup query = QueryGroup.and()

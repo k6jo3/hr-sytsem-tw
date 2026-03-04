@@ -217,7 +217,7 @@ class LeaveApiIntegrationTest extends BaseApiIntegrationTest {
 					.andReturn();
 
 			String responseBody = response.getResponse().getContentAsString();
-			assertThat(responseBody).contains("test-leave-001");
+			assertThat(responseBody).contains("test-leave-004");
 		}
 
 		@Test

@@ -41,7 +41,7 @@ export const HR08TemplateDesignPage: React.FC = () => {
         comments: vm.comments,
       }));
       setItems(itemDtos);
-      
+
       if (template.distributionRules) {
         setDistributionRules(template.distributionRules);
       }

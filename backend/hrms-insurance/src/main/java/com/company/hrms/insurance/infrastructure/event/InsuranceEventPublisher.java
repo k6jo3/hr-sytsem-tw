@@ -1,5 +1,6 @@
 package com.company.hrms.insurance.infrastructure.event;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +19,9 @@ import lombok.extern.slf4j.Slf4j;
  * 負責將領域事件發布到 Kafka
  */
 @Component
+@ConditionalOnProperty(name = "spring.kafka.enabled", havingValue = "true", matchIfMissing = true)
 @RequiredArgsConstructor
 @Slf4j
-
 public class InsuranceEventPublisher {
 
     private static final String TOPIC_ENROLLMENT = "insurance.enrollment";

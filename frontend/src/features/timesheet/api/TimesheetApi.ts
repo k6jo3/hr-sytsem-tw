@@ -219,17 +219,21 @@ export class TimesheetApi {
       endDate: params.end_date,
     };
     const raw: any = await apiClient.get(`${this.BASE_PATH}/summary`, { params: backendParams });
+    // 後端回傳 projectHours 為數字（總計），非陣列明細
+    const projectsArr = Array.isArray(raw.projects) ? raw.projects : [];
+    const deptArr = Array.isArray(raw.departmentHours) ? raw.departmentHours : [];
+    const empArr = Array.isArray(raw.employees ?? raw.unreportedEmployees) ? (raw.employees ?? raw.unreportedEmployees) : [];
     return {
       total_hours: raw.totalHours ?? 0,
-      project_hours: (raw.projects ?? raw.projectHours ?? []).map((p: any) => ({
+      project_hours: projectsArr.map((p: any) => ({
         project_name: p.projectName ?? p.project_name ?? '',
         hours: p.totalHours ?? p.hours ?? 0,
       })),
-      department_hours: (raw.departmentHours ?? []).map((d: any) => ({
+      department_hours: deptArr.map((d: any) => ({
         department_name: d.departmentName ?? d.department_name ?? '',
         hours: d.totalHours ?? d.hours ?? 0,
       })),
-      unreported_employees: (raw.employees ?? raw.unreportedEmployees ?? []).map((e: any) => ({
+      unreported_employees: empArr.map((e: any) => ({
         id: e.employeeId ?? e.id ?? '',
         name: e.employeeName ?? e.name ?? '',
       })),

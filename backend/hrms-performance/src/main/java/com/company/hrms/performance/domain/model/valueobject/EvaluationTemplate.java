@@ -126,7 +126,7 @@ public class EvaluationTemplate {
      * 新增評估項目
      */
     public void addEvaluationItem(EvaluationItem item) {
-        if (isPublished) {
+        if (Boolean.TRUE.equals(isPublished)) {
             throw new IllegalStateException("表單已發布，無法修改");
         }
         if (item == null) {
@@ -136,13 +136,20 @@ public class EvaluationTemplate {
     }
 
     /**
-     * 設定強制分配規則
+     * 設定強制分配規則（JSON 反序列化用，不做業務驗證）
      */
     public void setDistributionRules(Map<String, Integer> rules) {
-        if (isPublished) {
+        this.distributionRules = rules != null ? new HashMap<>(rules) : null;
+    }
+
+    /**
+     * 業務操作：更新強制分配規則（含業務驗證）
+     */
+    public void updateDistributionRules(Map<String, Integer> rules) {
+        if (Boolean.TRUE.equals(isPublished)) {
             throw new IllegalStateException("表單已發布，無法修改");
         }
-        if (!forcedDistribution) {
+        if (!Boolean.TRUE.equals(forcedDistribution)) {
             throw new IllegalStateException("未啟用強制分配");
         }
 

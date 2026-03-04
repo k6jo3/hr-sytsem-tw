@@ -42,4 +42,9 @@ public interface IInsuranceEnrollmentRepository {
      * 根據日期區間查詢加退保記錄 (用於申報檔匯出)
      */
     List<InsuranceEnrollment> findByDateRange(LocalDate startDate, LocalDate endDate);
+
+    /**
+     * 查詢所有加退保記錄
+     */
+    List<InsuranceEnrollment> findAll();
 }

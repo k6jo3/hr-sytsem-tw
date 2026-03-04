@@ -74,7 +74,8 @@ export class PerformanceViewModelFactory {
    * 將 EvaluationItemDto 轉換為 EvaluationItemViewModel
    */
   static createEvaluationItemViewModel(dto: EvaluationItemDto): EvaluationItemViewModel {
-    const weightedScore = dto.score !== undefined ? dto.weight * dto.score : undefined;
+    const hasScore = dto.score != null;
+    const weightedScore = hasScore ? dto.weight * dto.score! : undefined;
 
     return {
       itemId: dto.item_id,
@@ -82,7 +83,7 @@ export class PerformanceViewModelFactory {
       weight: dto.weight,
       weightDisplay: `${Math.round(dto.weight * 100)}%`,
       score: dto.score,
-      scoreDisplay: dto.score !== undefined ? dto.score.toString() : '-',
+      scoreDisplay: hasScore ? dto.score!.toString() : '-',
       comments: dto.comments,
       maxScore: dto.max_score,
       isRequired: true,

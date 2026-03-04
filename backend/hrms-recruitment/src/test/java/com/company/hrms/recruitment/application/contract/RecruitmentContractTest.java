@@ -1,4 +1,4 @@
-﻿package com.company.hrms.recruitment.application.contract;
+package com.company.hrms.recruitment.application.contract;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

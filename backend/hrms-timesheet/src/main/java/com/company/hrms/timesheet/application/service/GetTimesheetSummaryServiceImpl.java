@@ -35,7 +35,8 @@ public class GetTimesheetSummaryServiceImpl
                                 .build();
 
                 // 查詢所有符合條件的工時表（不分頁）
-                var timesheets = timesheetRepository.findAll(query, org.springframework.data.domain.Pageable.unpaged())
+                var timesheets = timesheetRepository.findAll(query,
+                                org.springframework.data.domain.PageRequest.of(0, 10000))
                                 .getContent();
 
                 // 計算統計數據

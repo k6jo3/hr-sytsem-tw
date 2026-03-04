@@ -11,6 +11,7 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.insurance.api.request.GetEnrollmentListRequest;
 import com.company.hrms.insurance.api.response.EnrollmentDetailResponse;
+import com.company.hrms.insurance.application.assembler.EnrollmentResponseAssembler;
 import com.company.hrms.insurance.domain.model.aggregate.InsuranceEnrollment;
 import com.company.hrms.insurance.domain.repository.IInsuranceEnrollmentRepository;
 
@@ -25,6 +26,7 @@ public class GetEnrollmentsServiceImpl
         implements QueryApiService<GetEnrollmentListRequest, PageResponse<EnrollmentDetailResponse>> {
 
     private final IInsuranceEnrollmentRepository enrollmentRepository;
+    private final EnrollmentResponseAssembler assembler;
 
     @Override
     public PageResponse<EnrollmentDetailResponse> getResponse(GetEnrollmentListRequest request, JWTModel currentUser,
@@ -38,30 +40,13 @@ public class GetEnrollmentsServiceImpl
         if (employeeId != null && !employeeId.isBlank()) {
             enrollments = enrollmentRepository.findByEmployeeId(employeeId);
         } else {
-            // 暫時返回空列表
-            enrollments = List.of();
+            enrollments = enrollmentRepository.findAll();
         }
 
         List<EnrollmentDetailResponse> items = enrollments.stream()
-                .map(this::toDetailResponse)
+                .map(e -> assembler.toDetailResponse(e, null))
                 .collect(Collectors.toList());
 
         return PageResponse.of(items, 1, 20, items.size());
-    }
-
-    private EnrollmentDetailResponse toDetailResponse(InsuranceEnrollment enrollment) {
-        return EnrollmentDetailResponse.builder()
-                .enrollmentId(enrollment.getId().getValue())
-                .employeeId(enrollment.getEmployeeId())
-                .insuranceType(enrollment.getInsuranceType().name())
-                .insuranceTypeDisplay(enrollment.getInsuranceType().getDisplayName())
-                .status(enrollment.getStatus().name())
-                .statusDisplay(enrollment.getStatus().getDisplayName())
-                .enrollDate(enrollment.getEnrollDate().toString())
-                .withdrawDate(enrollment.getWithdrawDate() != null
-                        ? enrollment.getWithdrawDate().toString()
-                        : null)
-                .monthlySalary(enrollment.getMonthlySalary())
-                .build();
     }
 }
