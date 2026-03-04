@@ -8,9 +8,9 @@
 export const MockConfig = {
   // 各模組 Mock 開關（false = 使用真實後端 API）
   modules: {
-    AUTH: true,
-    ORGANIZATION: true,
-    ATTENDANCE: true,
+    AUTH: false,
+    ORGANIZATION: false,
+    ATTENDANCE: false,
     PAYROLL: true,
     INSURANCE: false,
     PROJECT: false,

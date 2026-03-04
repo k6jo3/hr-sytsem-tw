@@ -84,6 +84,7 @@ public class LoginServiceImpl
                         .username(user.getUsername())
                         .displayName(user.getDisplayName())
                         .email(user.getEmail().getValue())
+                        .employeeId(user.getEmployeeId())
                         .roles(user.getRoles())
                         .build())
                 .build();

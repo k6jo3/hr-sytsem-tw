@@ -51,6 +51,7 @@ public class JwtTokenDomainService {
         claims.put("username", user.getUsername());
         claims.put("email", user.getEmail().getValue());
         claims.put("displayName", user.getDisplayName());
+        claims.put("employeeId", user.getEmployeeId());
         claims.put("roles", user.getRoles());
         claims.put("type", "access");
 

@@ -239,3 +239,60 @@ MERGE INTO users (
 
 MERGE INTO user_roles (user_role_id, user_id, role_id, assigned_at) KEY (user_role_id) VALUES
     ('ur-0003', '00000000-0000-0000-0000-000000000003', 'role-0004', CURRENT_TIMESTAMP);
+
+-- =====================================================
+-- 8. 測試用部門主管帳號 (密碼: Admin@123)
+-- 對應員工：陳志強 (EMP003, 資深工程師, IT 部)
+-- =====================================================
+MERGE INTO users (
+    user_id, username, email, password_hash, display_name,
+    employee_id, tenant_id, status, must_change_password, is_deleted, created_at, updated_at
+) KEY (user_id) VALUES (
+    '00000000-0000-0000-0000-000000000004',
+    'manager',
+    'manager@company.com',
+    '$2a$12$ay7Ck9tjsekCgXckaXiVFO4op2tlVz3fLcyxG1DhLtCkqJ68TlPe.',
+    '陳志強',
+    '00000000-0000-0000-0000-000000000003',
+    '00000000-0000-0000-0000-000000000001',
+    'ACTIVE',
+    FALSE,
+    FALSE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+);
+
+MERGE INTO user_roles (user_role_id, user_id, role_id, assigned_at) KEY (user_role_id) VALUES
+    ('ur-0004', '00000000-0000-0000-0000-000000000004', 'role-0003', CURRENT_TIMESTAMP);
+
+-- =====================================================
+-- 9. 測試用專案經理帳號 (密碼: Admin@123)
+-- 對應員工：林雅婷 (EMP004, 初級工程師, IT 部)
+-- =====================================================
+MERGE INTO users (
+    user_id, username, email, password_hash, display_name,
+    employee_id, tenant_id, status, must_change_password, is_deleted, created_at, updated_at
+) KEY (user_id) VALUES (
+    '00000000-0000-0000-0000-000000000005',
+    'pm',
+    'pm@company.com',
+    '$2a$12$ay7Ck9tjsekCgXckaXiVFO4op2tlVz3fLcyxG1DhLtCkqJ68TlPe.',
+    '林雅婷',
+    '00000000-0000-0000-0000-000000000004',
+    '00000000-0000-0000-0000-000000000001',
+    'ACTIVE',
+    FALSE,
+    FALSE,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+);
+
+MERGE INTO user_roles (user_role_id, user_id, role_id, assigned_at) KEY (user_role_id) VALUES
+    ('ur-0005', '00000000-0000-0000-0000-000000000005', 'role-0005', CURRENT_TIMESTAMP);
+
+-- =====================================================
+-- 10. 更新既有帳號的 employee_id 關聯
+-- =====================================================
+UPDATE users SET employee_id = '00000000-0000-0000-0000-000000000001' WHERE user_id = '00000000-0000-0000-0000-000000000001';
+UPDATE users SET employee_id = '00000000-0000-0000-0000-000000000002' WHERE user_id = '00000000-0000-0000-0000-000000000002';
+UPDATE users SET employee_id = '00000000-0000-0000-0000-000000000003' WHERE user_id = '00000000-0000-0000-0000-000000000003';

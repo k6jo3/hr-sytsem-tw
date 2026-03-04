@@ -71,6 +71,11 @@ public class LoginResponse {
         private String email;
 
         /**
+         * 關聯員工 ID
+         */
+        private String employeeId;
+
+        /**
          * 角色列表
          */
         private List<String> roles;
