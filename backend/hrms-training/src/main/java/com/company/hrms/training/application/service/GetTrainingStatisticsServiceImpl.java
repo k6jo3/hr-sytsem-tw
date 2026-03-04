@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +37,9 @@ public class GetTrainingStatisticsServiceImpl
                                 .build();
 
                 // Fetch all matching enrollments (unpaged)
+                // Pageable.unpaged() 不支援 getOffset()，改用 PageRequest
                 List<TrainingEnrollmentEntity> enrollments = enrollmentRepository
-                                .findPage(queryGroup, Pageable.unpaged())
+                                .findPage(queryGroup, PageRequest.of(0, 10000))
                                 .getContent();
 
                 int totalEnrollments = enrollments.size();

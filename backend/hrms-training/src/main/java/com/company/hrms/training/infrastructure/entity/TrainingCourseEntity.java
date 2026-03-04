@@ -112,5 +112,5 @@ public class TrainingCourseEntity {
     private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted")
-    private Integer is_deleted = 0;
+    private Integer isDeleted = 0;
 }

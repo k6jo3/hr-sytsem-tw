@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import com.company.hrms.common.annotation.CurrentUser;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +32,7 @@ public class HR10CourseCmdController extends CommandBaseController {
     @PostMapping
     @Operation(summary = "建立課程", operationId = "createCourse")
     public ResponseEntity<TrainingCourseResponse> createCourse(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "課程資訊") @org.springframework.validation.annotation.Validated({
                     Default.class }) CreateCourseRequest request)
             throws Exception {
@@ -42,7 +42,7 @@ public class HR10CourseCmdController extends CommandBaseController {
     @PutMapping("/{courseId}")
     @Operation(summary = "更新課程", operationId = "updateCourse")
     public ResponseEntity<TrainingCourseResponse> updateCourse(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @PathVariable String courseId,
             @RequestBody @Valid UpdateCourseRequest request) throws Exception {
         return ResponseEntity.ok(execCommand(request, currentUser, courseId));
@@ -51,7 +51,7 @@ public class HR10CourseCmdController extends CommandBaseController {
     @PostMapping("/{courseId}/publish")
     @Operation(summary = "發布課程", operationId = "publishCourse")
     public ResponseEntity<Void> publishCourse(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @PathVariable String courseId) throws Exception {
         return ResponseEntity.ok(execCommand(new CourseActionRequest(), currentUser, courseId));
     }
@@ -59,7 +59,7 @@ public class HR10CourseCmdController extends CommandBaseController {
     @PostMapping("/{courseId}/close")
     @Operation(summary = "關閉課程報名", operationId = "closeCourseEnrollment")
     public ResponseEntity<Void> closeCourse(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @PathVariable String courseId,
             @RequestBody @Valid CloseCourseRequest request) throws Exception {
         return ResponseEntity.ok(execCommand(request, currentUser, courseId));
@@ -68,7 +68,7 @@ public class HR10CourseCmdController extends CommandBaseController {
     @PostMapping("/{courseId}/complete")
     @Operation(summary = "完成結訓", operationId = "completeCourse")
     public ResponseEntity<Void> completeCourse(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @PathVariable String courseId) throws Exception {
         return ResponseEntity.ok(execCommand(new CourseActionRequest(), currentUser, courseId));
     }

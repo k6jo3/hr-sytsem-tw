@@ -28,14 +28,14 @@ public class TrainingEnrollmentEntity {
     private String enrollmentId;
 
     @Column(name = "course_id")
-    private String course_id;
+    private String courseId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", insertable = false, updatable = false)
     private TrainingCourseEntity course;
 
     @Column(name = "employee_id")
-    private String employee_id;
+    private String employeeId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -102,5 +102,5 @@ public class TrainingEnrollmentEntity {
     private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted")
-    private Integer is_deleted = 0;
+    private Integer isDeleted = 0;
 }

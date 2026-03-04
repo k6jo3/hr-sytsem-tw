@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import com.company.hrms.common.annotation.CurrentUser;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +30,7 @@ public class HR10CourseQryController extends QueryBaseController {
     @GetMapping
     @Operation(summary = "查詢課程列表", operationId = "getCourses")
     public ResponseEntity<Page<TrainingCourseResponse>> getCourses(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             GetCoursesRequest request) throws Exception {
         if (request == null) {
             request = new GetCoursesRequest();
@@ -41,7 +41,7 @@ public class HR10CourseQryController extends QueryBaseController {
     @GetMapping("/{courseId}")
     @Operation(summary = "查詢課程詳情", operationId = "getCourseDetail")
     public ResponseEntity<TrainingCourseResponse> getCourseDetail(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @PathVariable String courseId) throws Exception {
         return ResponseEntity.ok(getResponse(courseId, currentUser));
     }

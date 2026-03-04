@@ -19,8 +19,8 @@ public class TrainingEnrollmentAssembler {
 
         TrainingEnrollmentResponse res = new TrainingEnrollmentResponse();
         res.setEnrollmentId(enrollment.getEnrollmentId());
-        res.setCourseId(enrollment.getCourse_id());
-        res.setEmployeeId(enrollment.getEmployee_id());
+        res.setCourseId(enrollment.getCourseId());
+        res.setEmployeeId(enrollment.getEmployeeId());
         res.setStatus(enrollment.getStatus());
         res.setReason(enrollment.getReason());
         res.setRemarks(enrollment.getRemarks());

@@ -78,6 +78,9 @@ public class JobOpeningEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "is_deleted", nullable = false)
+    private int isDeleted = 0;
+
     // === Getters and Setters ===
 
     public UUID getOpeningId() {
@@ -222,5 +225,13 @@ public class JobOpeningEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public int getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(int isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }

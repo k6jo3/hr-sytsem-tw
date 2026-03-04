@@ -4,7 +4,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import com.company.hrms.common.annotation.CurrentUser;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,7 +40,7 @@ public class HR10StatisticsQryController extends QueryBaseController {
     @GetMapping
     @Operation(summary = "查詢訓練統計", operationId = "getTrainingStatistics")
     public ResponseEntity<TrainingStatisticsResponse> getTrainingStatistics(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @Parameter(description = "統計條件") TrainingStatisticsQuery query) throws Exception {
         if (query == null) {
             query = new TrainingStatisticsQuery();
@@ -55,7 +55,7 @@ public class HR10StatisticsQryController extends QueryBaseController {
     @GetMapping("/export")
     @Operation(summary = "匯出統計報表", operationId = "exportTrainingStatistics")
     public ResponseEntity<byte[]> exportTrainingStatistics(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @Parameter(description = "匯出條件") TrainingStatisticsQuery query) throws Exception {
         if (query == null) {
             query = new TrainingStatisticsQuery();

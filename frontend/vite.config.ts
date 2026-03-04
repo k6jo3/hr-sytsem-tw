@@ -52,6 +52,7 @@ export default defineConfig({
       '/api/v1/performance': { target: 'http://localhost:8088', changeOrigin: true },
       // HR09 招募服務 (port 8089)
       '/api/v1/recruitment': { target: 'http://localhost:8089', changeOrigin: true },
+      '/api/v1/candidates': { target: 'http://localhost:8089', changeOrigin: true },
       // HR10 訓練服務 (port 8090)
       '/api/v1/training': { target: 'http://localhost:8090', changeOrigin: true },
       // HR11 簽核服務 (port 8091)

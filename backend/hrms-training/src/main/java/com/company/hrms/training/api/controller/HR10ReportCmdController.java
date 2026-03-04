@@ -2,7 +2,7 @@ package com.company.hrms.training.api.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import com.company.hrms.common.annotation.CurrentUser;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +25,7 @@ public class HR10ReportCmdController extends CommandBaseController {
     @PostMapping("/export")
     @Operation(summary = "匯出訓練報表", operationId = "exportTrainingReport")
     public ResponseEntity<FileResponse> exportTrainingReport(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @RequestBody ExportReportRequest request) throws Exception {
         return ResponseEntity.ok(execCommand(request, currentUser));
     }

@@ -2,6 +2,7 @@ package com.company.hrms.recruitment.application.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.company.hrms.common.model.JWTModel;
@@ -39,7 +40,8 @@ public class GetJobOpeningsServiceImpl implements QueryApiService<JobOpeningSear
                 request.getKeyword());
 
         // 3. 執行查詢（分頁由 Pageable 控制）
-        return jobOpeningRepository.findAll(queryGroup, org.springframework.data.domain.Pageable.unpaged())
+        // Pageable.unpaged() 不支援 getOffset()，改用 PageRequest
+        return jobOpeningRepository.findAll(queryGroup, PageRequest.of(0, 10000))
                 .map(e -> (Object) e);
     }
 }

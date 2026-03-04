@@ -3,7 +3,7 @@ package com.company.hrms.training.api.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import com.company.hrms.common.annotation.CurrentUser;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,7 +41,7 @@ public class HR10MyTrainingQryController extends QueryBaseController {
     @GetMapping
     @Operation(summary = "查詢我的訓練", operationId = "getMyTrainings")
     public ResponseEntity<Page<TrainingEnrollmentResponse>> getMyTrainings(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @Parameter(description = "查詢條件") GetMyTrainingsRequest request) throws Exception {
         if (request == null) {
             request = new GetMyTrainingsRequest();
@@ -56,7 +56,7 @@ public class HR10MyTrainingQryController extends QueryBaseController {
     @GetMapping("/hours")
     @Operation(summary = "查詢我的訓練時數", operationId = "getMyTrainingHours")
     public ResponseEntity<MyTrainingHoursResponse> getMyTrainingHours(
-            @RequestAttribute("currentUser") JWTModel currentUser) throws Exception {
+            @CurrentUser JWTModel currentUser) throws Exception {
         return ResponseEntity.ok(getMyTrainingHoursServiceImpl.getResponse(new QueryGroup(), currentUser));
     }
 }

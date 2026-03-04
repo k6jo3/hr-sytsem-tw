@@ -48,8 +48,8 @@ public class TrainingEnrollmentRepositoryImpl
     public boolean existsByCourseIdAndEmployeeId(String courseId, String employeeId) {
         QTrainingEnrollmentEntity qEnrollment = QTrainingEnrollmentEntity.trainingEnrollmentEntity;
         return factory.selectFrom(qEnrollment)
-                .where(qEnrollment.course_id.eq(courseId)
-                        .and(qEnrollment.employee_id.eq(employeeId)))
+                .where(qEnrollment.courseId.eq(courseId)
+                        .and(qEnrollment.employeeId.eq(employeeId)))
                 .fetchFirst() != null;
     }
 
@@ -60,7 +60,7 @@ public class TrainingEnrollmentRepositoryImpl
 
         java.math.BigDecimal sum = factory.select(qEnrollment.completedHours.sum())
                 .from(qEnrollment)
-                .where(qEnrollment.employee_id.eq(employeeId)
+                .where(qEnrollment.employeeId.eq(employeeId)
                         .and(qEnrollment.status
                                 .eq(EnrollmentStatus.COMPLETED)))
                 .fetchOne();
@@ -85,8 +85,8 @@ public class TrainingEnrollmentRepositoryImpl
     private TrainingEnrollmentEntity toEntity(TrainingEnrollment domain) {
         TrainingEnrollmentEntity entity = new TrainingEnrollmentEntity();
         entity.setEnrollmentId(domain.getId().toString());
-        entity.setCourse_id(domain.getCourseId());
-        entity.setEmployee_id(domain.getEmployeeId());
+        entity.setCourseId(domain.getCourseId());
+        entity.setEmployeeId(domain.getEmployeeId());
         entity.setStatus(domain.getStatus());
         entity.setReason(domain.getReason());
         entity.setRemarks(domain.getRemarks());
@@ -114,8 +114,8 @@ public class TrainingEnrollmentRepositoryImpl
     private TrainingEnrollment toDomain(TrainingEnrollmentEntity entity) {
         return TrainingEnrollment.reconstitute(
                 EnrollmentId.from(entity.getEnrollmentId()),
-                entity.getCourse_id(),
-                entity.getEmployee_id(),
+                entity.getCourseId(),
+                entity.getEmployeeId(),
                 entity.getStatus(),
                 entity.getReason(),
                 entity.getRemarks(),

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import com.company.hrms.common.annotation.CurrentUser;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +35,7 @@ public class HR10CertificateQryController extends QueryBaseController {
     @GetMapping
     @Operation(summary = "查詢證照列表", operationId = "getCertificates")
     public ResponseEntity<Page<CertificateResponse>> getCertificates(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             GetCertificatesRequest request) throws Exception {
         if (request == null) {
             request = new GetCertificatesRequest();
@@ -46,7 +46,7 @@ public class HR10CertificateQryController extends QueryBaseController {
     @GetMapping("/{certificateId}")
     @Operation(summary = "查詢證照詳情", operationId = "getCertificateDetail")
     public ResponseEntity<CertificateResponse> getCertificateDetail(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @PathVariable String certificateId) throws Exception {
         return ResponseEntity.ok(getResponse(certificateId, currentUser));
     }
@@ -54,7 +54,7 @@ public class HR10CertificateQryController extends QueryBaseController {
     @GetMapping("/expiring")
     @Operation(summary = "查詢即將到期證照", operationId = "getExpiringCertificates")
     public ResponseEntity<List<CertificateResponse>> getExpiringCertificates(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @Parameter(description = "到期天數") @RequestParam(defaultValue = "90") Integer days) throws Exception {
         // 即將到期的查詢使用專用 Service
         return ResponseEntity.ok(getResponse(new QueryGroup(), currentUser));

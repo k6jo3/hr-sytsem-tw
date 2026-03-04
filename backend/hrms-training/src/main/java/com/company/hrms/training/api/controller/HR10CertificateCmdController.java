@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
+import com.company.hrms.common.annotation.CurrentUser;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +31,7 @@ public class HR10CertificateCmdController extends CommandBaseController {
     @PostMapping
     @Operation(summary = "新增證照", operationId = "addCertificate")
     public ResponseEntity<CertificateResponse> addCertificate(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @RequestBody @org.springframework.validation.annotation.Validated({
                     Default.class }) AddCertificateRequest request)
             throws Exception {
@@ -41,7 +41,7 @@ public class HR10CertificateCmdController extends CommandBaseController {
     @PutMapping("/{certificateId}")
     @Operation(summary = "更新證照", operationId = "updateCertificate")
     public ResponseEntity<CertificateResponse> updateCertificate(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @PathVariable String certificateId,
             @RequestBody @Valid UpdateCertificateRequest request) throws Exception {
         return ResponseEntity.ok(execCommand(request, currentUser, certificateId));
@@ -50,7 +50,7 @@ public class HR10CertificateCmdController extends CommandBaseController {
     @DeleteMapping("/{certificateId}")
     @Operation(summary = "刪除證照", operationId = "deleteCertificate")
     public ResponseEntity<Void> deleteCertificate(
-            @RequestAttribute("currentUser") JWTModel currentUser,
+            @CurrentUser JWTModel currentUser,
             @PathVariable String certificateId) throws Exception {
         return ResponseEntity.ok(execCommand(null, currentUser, certificateId));
     }
