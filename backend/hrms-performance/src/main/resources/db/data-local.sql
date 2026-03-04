@@ -4,6 +4,13 @@
 -- 員工 UUID: 001=王大明, 002=李小美, 003=陳志強, 004=林雅婷(主管)
 -- ============================================================================
 
+-- === 員工 ReadModel（來自 HR02 Organization 的快照） ===
+MERGE INTO employee_read_models (employee_id, employee_name) KEY(employee_id) VALUES
+('00000000-0000-0000-0000-000000000001', '王大明'),
+('00000000-0000-0000-0000-000000000002', '李小美'),
+('00000000-0000-0000-0000-000000000003', '陳志強'),
+('00000000-0000-0000-0000-000000000004', '林雅婷');
+
 -- === 考核週期 (2 筆) ===
 MERGE INTO performance_cycles (cycle_id, cycle_name, cycle_type, start_date, end_date, self_eval_deadline, manager_eval_deadline, status, template, created_at, updated_at) KEY(cycle_id) VALUES
 

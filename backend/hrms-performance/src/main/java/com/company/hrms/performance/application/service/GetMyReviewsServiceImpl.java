@@ -70,7 +70,7 @@ public class GetMyReviewsServiceImpl
         Map<UUID, String> cycleNameMap = buildCycleNameMap(reviews);
 
         List<GetReviewsResponse.ReviewSummary> items = reviews.stream()
-                .map(r -> ReviewDtoFactory.toSummary(r, cycleNameMap))
+                .map(r -> ReviewDtoFactory.toSummary(r, cycleNameMap, Map.of()))
                 .collect(Collectors.toList());
 
         return PageResponse.of(items, request.getPage(), request.getSize(), page.getTotalElements());

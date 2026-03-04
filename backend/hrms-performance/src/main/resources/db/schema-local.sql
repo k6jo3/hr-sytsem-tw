@@ -18,6 +18,12 @@ CREATE TABLE IF NOT EXISTS performance_cycles (
     updated_at TIMESTAMP NOT NULL
 );
 
+-- 員工 ReadModel（跨服務 CQRS 讀取模型，由 EmployeeCreatedEvent 維護）
+CREATE TABLE IF NOT EXISTS employee_read_models (
+    employee_id UUID PRIMARY KEY,
+    employee_name VARCHAR(100) NOT NULL
+);
+
 -- 考核記錄
 CREATE TABLE IF NOT EXISTS performance_reviews (
     review_id UUID PRIMARY KEY,

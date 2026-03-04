@@ -18,17 +18,20 @@ public class ReviewDtoFactory {
      * @param cycleNameMap cycleId → cycleName 對照表
      */
     public static GetReviewsResponse.ReviewSummary toSummary(
-            PerformanceReview review, Map<UUID, String> cycleNameMap) {
+            PerformanceReview review,
+            Map<UUID, String> cycleNameMap,
+            Map<UUID, String> employeeNameMap) {
 
         UUID cycleUuid = review.getCycleId().getValue();
         String cycleName = cycleNameMap.getOrDefault(cycleUuid, "未知週期");
+        String employeeName = employeeNameMap.getOrDefault(review.getEmployeeId(), "未知員工");
 
         return GetReviewsResponse.ReviewSummary.builder()
                 .reviewId(review.getReviewId().getValue().toString())
                 .cycleId(cycleUuid.toString())
                 .cycleName(cycleName)
                 .employeeId(review.getEmployeeId().toString())
-                .employeeName(review.getEmployeeId().toString())
+                .employeeName(employeeName)
                 .reviewType(review.getReviewType())
                 .status(review.getStatus())
                 .overallScore(review.getOverallScore())

@@ -18,7 +18,12 @@ export class AttendanceReportApi {
    */
   static async getMonthlyReport(params: { year: number; month: number; departmentId?: string }): Promise<GetMonthlyReportResponse> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getMonthlyReport(params.year, params.month);
-    return apiClient.get(`${this.BASE_PATH}/monthly`, { params });
+    // organizationId 為後端必填參數，使用預設組織 ID
+    const queryParams = {
+      ...params,
+      organizationId: '00000000-0000-0000-0000-000000000001',
+    };
+    return apiClient.get(`${this.BASE_PATH}/monthly`, { params: queryParams });
   }
 
   /**

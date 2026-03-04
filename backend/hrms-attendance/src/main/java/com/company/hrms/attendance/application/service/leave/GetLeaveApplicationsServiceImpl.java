@@ -3,6 +3,7 @@ package com.company.hrms.attendance.application.service.leave;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -14,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.company.hrms.attendance.api.controller.leave.HR03LeaveQryController;
 import com.company.hrms.attendance.api.response.leave.LeaveApplicationListResponse;
 import com.company.hrms.attendance.domain.model.aggregate.LeaveApplication;
+import com.company.hrms.attendance.domain.model.aggregate.LeaveType;
 import com.company.hrms.attendance.domain.repository.ILeaveApplicationRepository;
+import com.company.hrms.attendance.domain.repository.ILeaveTypeRepository;
 import com.company.hrms.common.api.response.PageResponse;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.query.Operator;
@@ -36,6 +39,7 @@ public class GetLeaveApplicationsServiceImpl implements
         QueryApiService<HR03LeaveQryController.LeaveApplicationQueryRequest, PageResponse<LeaveApplicationListResponse>> {
 
     private final ILeaveApplicationRepository leaveApplicationRepository;
+    private final ILeaveTypeRepository leaveTypeRepository;
 
     @Override
     public PageResponse<LeaveApplicationListResponse> getResponse(
@@ -70,26 +74,39 @@ public class GetLeaveApplicationsServiceImpl implements
 
         Page<LeaveApplication> resultPage = leaveApplicationRepository.searchPage(query, pageable);
 
+        // 批量查詢假別名稱對照表
+        Map<String, String> leaveTypeNameMap = buildLeaveTypeNameMap();
+
         List<LeaveApplicationListResponse> responseList = resultPage.getContent().stream()
-                .map(this::toResponse)
+                .map(entity -> toResponse(entity, leaveTypeNameMap))
                 .collect(Collectors.toList());
 
         return PageResponse.of(responseList, page, size, resultPage.getTotalElements());
     }
 
-    private LeaveApplicationListResponse toResponse(LeaveApplication entity) {
-        // Calculate approx days
+    private Map<String, String> buildLeaveTypeNameMap() {
+        return leaveTypeRepository.findAll().stream()
+                .collect(Collectors.toMap(
+                        lt -> lt.getId().getValue(),
+                        LeaveType::getName,
+                        (a, b) -> a));
+    }
+
+    private LeaveApplicationListResponse toResponse(LeaveApplication entity, Map<String, String> leaveTypeNameMap) {
         BigDecimal days = BigDecimal.ZERO;
         if (entity.getStartDate() != null && entity.getEndDate() != null) {
             long daysDiff = ChronoUnit.DAYS.between(entity.getStartDate(), entity.getEndDate()) + 1;
             days = BigDecimal.valueOf(daysDiff);
         }
 
+        String leaveTypeId = entity.getLeaveTypeId().getValue();
+        String leaveTypeName = leaveTypeNameMap.getOrDefault(leaveTypeId, leaveTypeId);
+
         return LeaveApplicationListResponse.builder()
                 .applicationId(entity.getId().getValue())
                 .employeeId(entity.getEmployeeId())
-                .leaveTypeCode(entity.getLeaveTypeId().getValue())
-                .leaveTypeName(entity.getLeaveTypeId().getValue()) // Placeholder
+                .leaveTypeCode(leaveTypeId)
+                .leaveTypeName(leaveTypeName)
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
                 .leaveDays(days)

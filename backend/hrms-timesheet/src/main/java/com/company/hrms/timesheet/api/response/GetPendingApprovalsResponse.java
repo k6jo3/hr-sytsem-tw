@@ -17,7 +17,8 @@ public class GetPendingApprovalsResponse {
     @Builder
     public static class TimesheetSummaryDto {
         private String timesheetId;
-        private String employeeId; // Manager needs to know whose timesheet it is
+        private String employeeId;
+        private String employeeName;
         private String periodStartDate;
         private String periodEndDate;
         private java.math.BigDecimal totalHours;

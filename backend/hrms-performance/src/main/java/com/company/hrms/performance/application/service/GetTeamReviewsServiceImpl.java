@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +41,7 @@ public class GetTeamReviewsServiceImpl
 
     private final IPerformanceReviewRepository repository;
     private final IPerformanceCycleRepository cycleRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     protected QueryGroup buildQuery(GetTeamReviewsRequest request, JWTModel currentUser) {
@@ -64,11 +66,12 @@ public class GetTeamReviewsServiceImpl
         Page<PerformanceReview> page = repository.findAll(query, pageable);
         List<PerformanceReview> reviews = page.getContent();
 
-        // 批量查詢週期名稱
+        // 批量查詢週期名稱與員工名稱
         Map<UUID, String> cycleNameMap = buildCycleNameMap(reviews);
+        Map<UUID, String> employeeNameMap = buildEmployeeNameMap(reviews);
 
         List<GetReviewsResponse.ReviewSummary> items = reviews.stream()
-                .map(r -> ReviewDtoFactory.toSummary(r, cycleNameMap))
+                .map(r -> ReviewDtoFactory.toSummary(r, cycleNameMap, employeeNameMap))
                 .collect(Collectors.toList());
 
         return PageResponse.of(items, request.getPage(), request.getSize(), page.getTotalElements());
@@ -83,6 +86,34 @@ public class GetTeamReviewsServiceImpl
         for (UUID cid : cycleIds) {
             cycleRepository.findById(CycleId.of(cid))
                     .ifPresent(c -> map.put(cid, c.getCycleName()));
+        }
+        return map;
+    }
+
+    /**
+     * 從 CQRS ReadModel 查詢員工名稱（跨服務資料，由 EmployeeCreatedEvent 維護）
+     */
+    private Map<UUID, String> buildEmployeeNameMap(List<PerformanceReview> reviews) {
+        Set<UUID> employeeIds = reviews.stream()
+                .map(PerformanceReview::getEmployeeId)
+                .collect(Collectors.toSet());
+
+        if (employeeIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<UUID, String> map = new HashMap<>();
+        try {
+            jdbcTemplate.query(
+                    "SELECT employee_id, employee_name FROM employee_read_models",
+                    rs -> {
+                        UUID id = UUID.fromString(rs.getString("employee_id"));
+                        if (employeeIds.contains(id)) {
+                            map.put(id, rs.getString("employee_name"));
+                        }
+                    });
+        } catch (Exception e) {
+            // ReadModel 表可能不存在（非 local profile），降級為顯示 ID
         }
         return map;
     }

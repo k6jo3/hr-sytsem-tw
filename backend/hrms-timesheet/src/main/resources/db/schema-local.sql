@@ -2,6 +2,12 @@
 -- HR07 Timesheet Service - Local Schema (H2)
 -- ============================================================================
 
+-- 員工 ReadModel（跨服務 CQRS 讀取模型，由 EmployeeCreatedEvent 維護）
+CREATE TABLE IF NOT EXISTS employee_read_models (
+    employee_id VARCHAR(36) PRIMARY KEY,
+    employee_name VARCHAR(100) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS timesheets (
     timesheet_id    VARCHAR(36) PRIMARY KEY,
     employee_id     VARCHAR(36) NOT NULL,

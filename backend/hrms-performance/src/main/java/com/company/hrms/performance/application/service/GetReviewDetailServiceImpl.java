@@ -54,6 +54,6 @@ public class GetReviewDetailServiceImpl
                                 .orElse("未知週期");
 
                 Map<UUID, String> cycleNameMap = Map.of(cycleUuid, cycleName);
-                return ReviewDtoFactory.toSummary(review, cycleNameMap);
+                return ReviewDtoFactory.toSummary(review, cycleNameMap, Map.of());
         }
 }
