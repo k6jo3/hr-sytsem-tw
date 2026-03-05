@@ -2086,6 +2086,7 @@ sequenceDiagram
 | BE-01-11 | 權限API (2端點) | 4h | P1 |
 | BE-01-12 | 個人資料API (3端點) | 4h | P1 |
 | BE-01-13 | OAuth2整合 (Google, Microsoft) | 16h | P2 |
+| BE-01-16 | LDAP/AD 企業登入整合 | 24h | P2 |
 | BE-01-14 | 領域事件發布 | 8h | P0 |
 | BE-01-15 | Swagger文件 | 4h | P1 |
 | **小計** | | **132h** | |
@@ -2128,8 +2129,67 @@ sequenceDiagram
 
 ---
 
+## 12. LDAP/AD 企業登入整合
+
+### 12.1 架構設計
+
+**混合模式：** LDAP/AD 認證與本地帳號並存，透過 `ldap.enabled` 配置開關控制。
+
+```
+使用者登入 → LoginServiceImpl
+  ├─ ldap.enabled=true → 先嘗試 LDAP 認證
+  │     ├─ 成功 → JIT Provisioning → 群組角色映射 → JWT
+  │     └─ 失敗 → 回退本地認證
+  └─ ldap.enabled=false → 僅本地認證
+```
+
+### 12.2 核心元件
+
+| 元件 | 職責 |
+|:---|:---|
+| `LdapProperties` | LDAP 連線配置（URL、BaseDN、Filter、群組映射） |
+| `LdapAuthenticationDomainService` | LDAP 認證介面（authenticate + getUserGroups） |
+| `LdapAuthenticationServiceImpl` | JNDI 實作，支援 LDAP/LDAPS (AD) |
+| `LdapLoginService` | LDAP 登入流程（認證 + JIT + 角色同步） |
+| `LdapGroupRoleMappingService` | LDAP 群組 DN → RBAC 角色代碼映射 |
+
+### 12.3 JIT Provisioning（即時佈建）
+
+LDAP 使用者首次登入時自動建立本地帳號：
+- `authSource = "LDAP"`
+- `passwordHash = null`（LDAP 使用者不儲存密碼）
+- `status = ACTIVE`（LDAP 認證通過即啟用）
+- `ldapDn` 記錄 LDAP Distinguished Name
+- 後續登入自動同步 displayName、email 等屬性
+
+### 12.4 LDAP Group → RBAC Role 映射
+
+```yaml
+ldap:
+  group-role-mapping:
+    "CN=HR_DEPT,OU=Groups,DC=company,DC=com": "HR"
+    "CN=Managers,OU=Groups,DC=company,DC=com": "MANAGER"
+    "CN=IT_Admin,OU=Groups,DC=company,DC=com": "ADMIN"
+```
+
+支援精確 DN 匹配和 CN 模糊匹配。
+
+### 12.5 資料庫變更
+
+`users` 表新增欄位：
+- `auth_source VARCHAR(20) DEFAULT 'LOCAL'` — 認證來源 (LOCAL/LDAP)
+- `ldap_dn VARCHAR(500)` — LDAP Distinguished Name
+- `password_hash` 改為 nullable（LDAP 使用者無密碼）
+
+### 12.6 安全考量
+
+- LDAP Filter 輸入轉義防止 LDAP Injection
+- LDAPS (SSL) 支援加密傳輸
+- 管理者 Bind DN/Password 不寫入程式碼，由環境變數注入
+- LDAP 連線超時設定避免阻塞
+
 **文件完成日期:** 2025-12-26
-**版本:** 1.0
+**版本:** 1.1
 
 
 # API詳細規格

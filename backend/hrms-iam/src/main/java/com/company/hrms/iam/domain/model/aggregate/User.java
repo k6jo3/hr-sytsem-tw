@@ -37,6 +37,11 @@ public class User {
     private String timezone;
 
     @Builder.Default
+    private String authSource = "LOCAL"; // LOCAL or LDAP
+
+    private String ldapDn; // LDAP Distinguished Name（LDAP 使用者專用）
+
+    @Builder.Default
     private boolean mustChangePassword = false;
 
     @Builder.Default
@@ -213,5 +218,48 @@ public class User {
 
     public boolean isActive() {
         return this.status == UserStatus.ACTIVE && !isDeleted;
+    }
+
+    public boolean isLdapUser() {
+        return "LDAP".equals(this.authSource);
+    }
+
+    /**
+     * JIT Provisioning：LDAP 首次登入自動建立本地帳號
+     */
+    public static User createFromLdap(String username, String email, String displayName,
+            String ldapDn, String tenantId) {
+        return User.builder()
+                .id(UserId.generate())
+                .username(username)
+                .email(email != null ? new Email(email) : null)
+                .passwordHash(null) // LDAP 使用者不儲存密碼
+                .displayName(displayName)
+                .tenantId(tenantId)
+                .authSource("LDAP")
+                .ldapDn(ldapDn)
+                .status(UserStatus.ACTIVE) // LDAP 驗證通過即啟用
+                .failedLoginAttempts(0)
+                .mustChangePassword(false)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .roles(new ArrayList<>())
+                .build();
+    }
+
+    /**
+     * 從 LDAP 同步更新使用者資訊
+     */
+    public void syncFromLdap(String displayName, String email, String ldapDn) {
+        if (displayName != null && !displayName.isBlank()) {
+            this.displayName = displayName;
+        }
+        if (email != null && !email.isBlank()) {
+            this.email = new Email(email);
+        }
+        if (ldapDn != null) {
+            this.ldapDn = ldapDn;
+        }
+        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -104,6 +104,16 @@ public class UserPO {
     private Timestamp passwordChangedAt;
 
     /**
+     * 認證來源 (LOCAL / LDAP)
+     */
+    private String authSource;
+
+    /**
+     * LDAP Distinguished Name
+     */
+    private String ldapDn;
+
+    /**
      * 是否必須變更密碼 (首次登入強制改密)
      */
     private Boolean mustChangePassword;
