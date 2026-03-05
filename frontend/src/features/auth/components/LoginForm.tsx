@@ -5,38 +5,32 @@
  */
 
 import React from 'react';
-import { Form, Input, Button, Checkbox, Alert, Divider, Space, Typography } from 'antd';
+import { Form, Input, Button, Checkbox, Alert, Typography } from 'antd';
 import {
   UserOutlined,
   LockOutlined,
-  GoogleOutlined,
-  WindowsOutlined,
 } from '@ant-design/icons';
-import type { LoginFormData, SsoProvider } from '../api/AuthTypes';
+import type { LoginFormData } from '../api/AuthTypes';
 
 const { Link } = Typography;
 
 interface LoginFormProps {
   onSubmit: (data: LoginFormData) => void;
-  onSsoLogin?: (provider: SsoProvider) => void;
   onForgotPassword?: () => void;
   loading?: boolean;
   error?: string | null;
-  showSso?: boolean;
   showForgotPassword?: boolean;
 }
 
 /**
  * 登入表單元件
- * 包含帳號密碼登入、SSO 登入、忘記密碼功能
+ * 包含帳號密碼登入、忘記密碼功能
  */
 export const LoginForm: React.FC<LoginFormProps> = ({
   onSubmit,
-  onSsoLogin,
   onForgotPassword,
   loading = false,
   error,
-  showSso = true,
   showForgotPassword = true,
 }) => {
   const [form] = Form.useForm();
@@ -47,12 +41,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       password: values.password,
       remember: values.remember ?? false,
     });
-  };
-
-  const handleSsoLogin = (provider: SsoProvider) => {
-    if (onSsoLogin) {
-      onSsoLogin(provider);
-    }
   };
 
   return (
@@ -132,48 +120,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </Button>
         </Form.Item>
       </Form>
-
-      {showSso && (
-        <>
-          <Divider plain>
-            <span style={{ color: '#999', fontSize: 12 }}>或使用以下方式登入</span>
-          </Divider>
-
-          <Space direction="vertical" style={{ width: '100%' }} size="middle">
-            <Button
-              block
-              size="large"
-              icon={<GoogleOutlined />}
-              onClick={() => handleSsoLogin('GOOGLE')}
-              disabled={loading}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-              }}
-            >
-              使用 Google 帳號登入
-            </Button>
-
-            <Button
-              block
-              size="large"
-              icon={<WindowsOutlined />}
-              onClick={() => handleSsoLogin('MICROSOFT')}
-              disabled={loading}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-              }}
-            >
-              使用 Microsoft 帳號登入
-            </Button>
-          </Space>
-        </>
-      )}
 
       <div style={{ marginTop: 24, textAlign: 'center' }}>
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
