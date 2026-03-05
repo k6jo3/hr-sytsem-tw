@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS shifts (
     break_end_time VARCHAR(20),
     late_tolerance_minutes INTEGER,
     early_leave_tolerance_minutes INTEGER,
+    late_check_enabled BOOLEAN DEFAULT TRUE,
+    late_salary_deduction BOOLEAN DEFAULT TRUE,
     is_active INTEGER DEFAULT 1,
     is_deleted INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

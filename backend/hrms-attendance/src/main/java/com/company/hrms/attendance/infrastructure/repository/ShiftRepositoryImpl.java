@@ -88,6 +88,8 @@ public class ShiftRepositoryImpl extends BaseRepository<ShiftPO, String> impleme
                 po.getBreakEndTime() != null ? LocalTime.parse(po.getBreakEndTime()) : null,
                 po.getLateToleranceMinutes() != null ? po.getLateToleranceMinutes() : 0,
                 po.getEarlyLeaveToleranceMinutes() != null ? po.getEarlyLeaveToleranceMinutes() : 0,
+                po.getLateCheckEnabled() != null ? po.getLateCheckEnabled() : true,
+                po.getLateSalaryDeduction() != null ? po.getLateSalaryDeduction() : true,
                 po.getIsActive() != null && po.getIsActive() == 1,
                 po.getIsDeleted() != null && po.getIsDeleted() == 1);
     }
@@ -105,6 +107,8 @@ public class ShiftRepositoryImpl extends BaseRepository<ShiftPO, String> impleme
                 .breakEndTime(shift.getBreakEndTime() != null ? shift.getBreakEndTime().toString() : null)
                 .lateToleranceMinutes(shift.getLateToleranceMinutes())
                 .earlyLeaveToleranceMinutes(shift.getEarlyLeaveToleranceMinutes())
+                .lateCheckEnabled(shift.isLateCheckEnabled())
+                .lateSalaryDeduction(shift.isLateSalaryDeduction())
                 .isActive(shift.isActive() ? 1 : 0)
                 .isDeleted(shift.isDeleted() ? 1 : 0)
                 .build();

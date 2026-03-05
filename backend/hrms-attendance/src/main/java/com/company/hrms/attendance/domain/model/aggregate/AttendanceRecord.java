@@ -49,16 +49,18 @@ public class AttendanceRecord extends AggregateRoot<RecordId> {
             throw new IllegalStateException("Already checked in");
         }
         this.checkInTime = time;
-        this.shiftId = shift.getId().getValue(); // 綁定班別
+        this.shiftId = shift.getId().getValue();
 
-        // Calculate Late
-        LocalDateTime expectedStart = LocalDateTime.of(date, shift.getWorkStartTime());
-        int tolerance = shift.getLateToleranceMinutes();
+        // 遲到判定（若班別關閉遲到判定則跳過）
+        if (shift.isLateCheckEnabled()) {
+            LocalDateTime expectedStart = LocalDateTime.of(date, shift.getWorkStartTime());
+            int tolerance = shift.getLateToleranceMinutes();
 
-        if (time.isAfter(expectedStart.plusMinutes(tolerance))) {
-            this.isLate = true;
-            this.lateMinutes = (int) Duration.between(expectedStart, time).toMinutes();
-            this.anomalyType = AnomalyType.LATE;
+            if (time.isAfter(expectedStart.plusMinutes(tolerance))) {
+                this.isLate = true;
+                this.lateMinutes = (int) Duration.between(expectedStart, time).toMinutes();
+                this.anomalyType = AnomalyType.LATE;
+            }
         }
     }
 

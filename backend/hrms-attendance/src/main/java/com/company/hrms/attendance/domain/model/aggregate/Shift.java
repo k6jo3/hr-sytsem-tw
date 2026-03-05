@@ -24,6 +24,8 @@ public class Shift extends AggregateRoot<ShiftId> {
     private LocalTime breakEndTime;
     private int lateToleranceMinutes;
     private int earlyLeaveToleranceMinutes;
+    private boolean lateCheckEnabled;
+    private boolean lateSalaryDeduction;
     private boolean isActive;
     private boolean isDeleted;
 
@@ -38,6 +40,8 @@ public class Shift extends AggregateRoot<ShiftId> {
         this.workEndTime = workEndTime;
         this.lateToleranceMinutes = 0;
         this.earlyLeaveToleranceMinutes = 0;
+        this.lateCheckEnabled = true;
+        this.lateSalaryDeduction = true;
         this.isActive = true;
         this.isDeleted = false;
         validate();
@@ -71,6 +75,20 @@ public class Shift extends AggregateRoot<ShiftId> {
         this.earlyLeaveToleranceMinutes = earlyLeaveToleranceMinutes;
     }
 
+    /**
+     * 設定遲到判定開關
+     */
+    public void setLateCheckEnabled(boolean enabled) {
+        this.lateCheckEnabled = enabled;
+    }
+
+    /**
+     * 設定遲到扣薪開關
+     */
+    public void setLateSalaryDeduction(boolean enabled) {
+        this.lateSalaryDeduction = enabled;
+    }
+
     private void validate() {
         if (organizationId == null || organizationId.isBlank()) {
             throw new IllegalArgumentException("Organization ID cannot be empty");
@@ -93,6 +111,7 @@ public class Shift extends AggregateRoot<ShiftId> {
             LocalTime workStartTime, LocalTime workEndTime,
             LocalTime breakStartTime, LocalTime breakEndTime,
             int lateToleranceMinutes, int earlyLeaveToleranceMinutes,
+            boolean lateCheckEnabled, boolean lateSalaryDeduction,
             boolean isActive, boolean isDeleted) {
         super(id);
         this.organizationId = organizationId;
@@ -105,6 +124,8 @@ public class Shift extends AggregateRoot<ShiftId> {
         this.breakEndTime = breakEndTime;
         this.lateToleranceMinutes = lateToleranceMinutes;
         this.earlyLeaveToleranceMinutes = earlyLeaveToleranceMinutes;
+        this.lateCheckEnabled = lateCheckEnabled;
+        this.lateSalaryDeduction = lateSalaryDeduction;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
     }
@@ -116,6 +137,17 @@ public class Shift extends AggregateRoot<ShiftId> {
             boolean isActive, boolean isDeleted) {
         return new Shift(id, organizationId, code, name, type, workStartTime, workEndTime,
                 breakStartTime, breakEndTime, lateToleranceMinutes, earlyLeaveToleranceMinutes,
-                isActive, isDeleted);
+                true, true, isActive, isDeleted);
+    }
+
+    public static Shift reconstitute(ShiftId id, String organizationId, String code, String name, ShiftType type,
+            LocalTime workStartTime, LocalTime workEndTime,
+            LocalTime breakStartTime, LocalTime breakEndTime,
+            int lateToleranceMinutes, int earlyLeaveToleranceMinutes,
+            boolean lateCheckEnabled, boolean lateSalaryDeduction,
+            boolean isActive, boolean isDeleted) {
+        return new Shift(id, organizationId, code, name, type, workStartTime, workEndTime,
+                breakStartTime, breakEndTime, lateToleranceMinutes, earlyLeaveToleranceMinutes,
+                lateCheckEnabled, lateSalaryDeduction, isActive, isDeleted);
     }
 }

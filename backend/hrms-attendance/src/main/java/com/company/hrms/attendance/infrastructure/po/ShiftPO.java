@@ -57,6 +57,12 @@ public class ShiftPO {
     @Column(name = "early_leave_tolerance_minutes")
     private Integer earlyLeaveToleranceMinutes;
 
+    @Column(name = "late_check_enabled")
+    private Boolean lateCheckEnabled;
+
+    @Column(name = "late_salary_deduction")
+    private Boolean lateSalaryDeduction;
+
     @Column(name = "is_active")
     private Integer isActive; // 使用 Integer 配合原有邏輯或 Boolean 都行，此處改為符合 Assembler 邏輯
 
