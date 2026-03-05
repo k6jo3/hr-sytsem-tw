@@ -1015,6 +1015,9 @@
 | `LABOR` | 勞工保險 | 勞保局 |
 | `HEALTH` | 全民健康保險 | 健保署 |
 | `PENSION` | 勞工退休金 | 勞退局 |
+| `GROUP_LIFE` | 團體壽險 | 依合約 |
+| `GROUP_ACCIDENT` | 團體傷害險 | 依合約 |
+| `GROUP_MEDICAL` | 團體醫療險 | 依合約 |
 
 ### 8.2 加保狀態枚舉 (EnrollmentStatus)
 

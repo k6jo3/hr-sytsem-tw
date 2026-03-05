@@ -48,6 +48,33 @@ CREATE TABLE insurance_enrollments (
     updated_at          TIMESTAMP
 );
 
+-- 團體保險方案
+CREATE TABLE group_insurance_plans (
+    plan_id             VARCHAR(36)    NOT NULL PRIMARY KEY,
+    organization_id     VARCHAR(255)   NOT NULL,
+    plan_name           VARCHAR(100)   NOT NULL,
+    plan_code           VARCHAR(50)    NOT NULL UNIQUE,
+    insurance_type      VARCHAR(30)    NOT NULL,
+    insurer_name        VARCHAR(100),
+    policy_number       VARCHAR(50),
+    contract_start_date DATE           NOT NULL,
+    contract_end_date   DATE,
+    is_active           BOOLEAN        DEFAULT TRUE,
+    created_at          TIMESTAMP,
+    updated_at          TIMESTAMP
+);
+
+-- 團體保險方案職等對應
+CREATE TABLE group_insurance_plan_tiers (
+    tier_id             VARCHAR(36)    NOT NULL PRIMARY KEY,
+    plan_id             VARCHAR(36)    NOT NULL,
+    job_grade           VARCHAR(20)    NOT NULL,
+    coverage_amount     NUMERIC(12,2)  NOT NULL,
+    monthly_premium     NUMERIC(10,2)  NOT NULL,
+    employer_share_rate NUMERIC(5,4)   NOT NULL,
+    CONSTRAINT fk_tier_plan FOREIGN KEY (plan_id) REFERENCES group_insurance_plans(plan_id)
+);
+
 -- 補充保費
 CREATE TABLE supplementary_premiums (
     premium_id      VARCHAR(36)    NOT NULL PRIMARY KEY,
