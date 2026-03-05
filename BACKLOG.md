@@ -18,7 +18,7 @@
 | HR08 | Performance | 6 | 8088 | Complete | ✅ | ✅ |
 | HR09 | Recruitment | 9 | 8089 | Complete | ✅ | ✅ |
 | HR10 | Training | 10 | 8090 | Complete | ✅ | ✅ |
-| HR11 | Workflow | 2 | 8091 | Skeleton | ✅ | ✅ |
+| HR11 | Workflow | 2 | 8091 | Complete | ✅ | ✅ |
 | HR12 | Notification | 8 | 8092 | Skeleton | ✅ | ✅ |
 | HR13 | Document | 6 | 8093 | Skeleton | ✅ | ✅ |
 | HR14 | Reporting | 7 | 8094 | Skeleton | ✅ | ✅ |
@@ -33,7 +33,7 @@ HR11-HR14 目前僅有 Skeleton 前端，需完整實作。
 
 | # | 模組 | Port | 目前狀態 | 需實作內容 |
 |:---:|:---|:---:|:---|:---|
-| A1 | HR11 Workflow | 8091 | Skeleton | 視覺化流程設計器（拖拉元件）、多層簽核 UI、流程實例追蹤、簽核歷程 |
+| A1 | HR11 Workflow | 8091 | ✅ Complete | 視覺化流程設計器、多層簽核 UI、流程實例追蹤、簽核歷程、代理人管理 |
 | A2 | HR12 Notification | 8092 | Skeleton | 通知中心列表、已讀/未讀標記、偏好設定（Email/Push/Teams/LINE）、公告管理 |
 | A3 | HR13 Document | 8093 | Skeleton | 文件上傳/下載、版本控制 UI、範本管理、加密文件處理、存取日誌 |
 | A4 | HR14 Reporting | 8094 | Skeleton | 儀表板拖拉配置、報表查詢（HR/財務/專案）、匯出 Excel/PDF、政府報表 |
