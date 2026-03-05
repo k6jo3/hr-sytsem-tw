@@ -114,6 +114,19 @@ public class LeaveApplicationRepositoryImpl extends BaseRepository<LeaveApplicat
         super.deleteById(id.getValue());
     }
 
+    @Override
+    public List<String> findEmployeeIdsWithApprovedLeaveOnDate(LocalDate date) {
+        QueryGroup query = QueryBuilder.where()
+                .and("status", Operator.EQ, ApplicationStatus.APPROVED.name())
+                .and("startDate", Operator.LTE, date)
+                .and("endDate", Operator.GTE, date)
+                .build();
+        return super.findAll(query).stream()
+                .map(LeaveApplicationPO::getEmployeeId)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     private LeaveApplication toDomain(LeaveApplicationPO po) {
         return LeaveApplication.reconstitute(
                 new ApplicationId(po.getId()),

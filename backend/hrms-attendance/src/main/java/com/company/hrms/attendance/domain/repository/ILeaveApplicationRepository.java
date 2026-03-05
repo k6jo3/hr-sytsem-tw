@@ -35,4 +35,9 @@ public interface ILeaveApplicationRepository {
     Page<LeaveApplication> searchPage(QueryGroup query, Pageable pageable);
 
     void delete(ApplicationId id);
+
+    /**
+     * 查詢指定日期已核准請假的員工 ID 清單
+     */
+    List<String> findEmployeeIdsWithApprovedLeaveOnDate(LocalDate date);
 }

@@ -112,6 +112,15 @@ public class AttendanceRecord extends AggregateRoot<RecordId> {
         this.isCorrected = isCorrected;
     }
 
+    /**
+     * 建立缺勤記錄（排程自動判定用）
+     */
+    public static AttendanceRecord createAbsentRecord(RecordId id, String employeeId, LocalDate date) {
+        AttendanceRecord record = new AttendanceRecord(id, employeeId, date);
+        record.anomalyType = AnomalyType.ABSENT;
+        return record;
+    }
+
     public static AttendanceRecord reconstitute(RecordId id, String employeeId, LocalDate date, String shiftId,
             LocalDateTime checkInTime, LocalDateTime checkOutTime,
             boolean isLate, int lateMinutes, boolean isEarlyLeave, int earlyLeaveMinutes,

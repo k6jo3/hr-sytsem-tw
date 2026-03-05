@@ -84,6 +84,17 @@ public class AttendanceRecordRepositoryImpl extends BaseRepository<AttendanceRec
         super.deleteById(id.getValue());
     }
 
+    @Override
+    public List<String> findEmployeeIdsWithRecordOnDate(LocalDate date) {
+        QueryGroup query = QueryBuilder.where()
+                .and("recordDate", Operator.EQ, date)
+                .build();
+        return super.findAll(query).stream()
+                .map(AttendanceRecordPO::getEmployeeId)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     private AttendanceRecord toDomain(AttendanceRecordPO po) {
         return AttendanceRecord.reconstitute(
                 new RecordId(po.getId()),

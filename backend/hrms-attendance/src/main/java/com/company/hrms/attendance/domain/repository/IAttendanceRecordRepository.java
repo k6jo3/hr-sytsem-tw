@@ -25,4 +25,9 @@ public interface IAttendanceRecordRepository {
     Page<AttendanceRecord> findPageByQuery(QueryGroup query, Pageable pageable);
 
     void delete(RecordId id);
+
+    /**
+     * 查詢指定日期已有打卡記錄的員工 ID 清單
+     */
+    List<String> findEmployeeIdsWithRecordOnDate(LocalDate date);
 }
