@@ -36,8 +36,8 @@ public class FetchMonthlyReportEmployeesTask implements PipelineTask<MonthlyRepo
 
             context.setEmployees(response.getData());
         } catch (Exception e) {
-            log.error("Failed to fetch employees from Organization Service", e);
-            throw new RuntimeException("無法獲取員工名單，請稍後重試");
+            log.warn("Organization Service 不可用，使用空員工名單進行降級處理", e);
+            context.setEmployees(Collections.emptyList());
         }
     }
 }

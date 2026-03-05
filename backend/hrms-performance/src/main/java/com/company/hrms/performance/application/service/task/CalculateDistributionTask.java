@@ -44,9 +44,18 @@ public class CalculateDistributionTask implements PipelineTask<GetDistributionCo
                     .build());
         });
 
+        // 計算平均分數
+        double averageScore = reviews.stream()
+                .filter(r -> r.getFinalScore() != null)
+                .mapToDouble(r -> r.getFinalScore().doubleValue())
+                .average()
+                .orElse(0.0);
+
         GetDistributionResponse response = GetDistributionResponse.builder()
                 .distribution(distribution)
                 .totalCount(totalCount)
+                .totalEmployees(totalCount)
+                .averageScore(Math.round(averageScore * 100.0) / 100.0)
                 .build();
 
         context.setResponse(response);

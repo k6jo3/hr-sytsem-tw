@@ -30,9 +30,14 @@ public class GetDistributionResponse {
     @Schema(description = "分布數據 Key:評等 Value:數據")
     private Map<String, DistributionData> distribution;
 
-    @Schema(description = "總數") // Keep for backward compatibility if needed, or remove if totalReviews replaces
-                                // it
+    @Schema(description = "總數")
     private int totalCount;
+
+    @Schema(description = "總員工數", example = "50")
+    private int totalEmployees;
+
+    @Schema(description = "平均分數", example = "3.75")
+    private double averageScore;
 
     @Data
     @Builder

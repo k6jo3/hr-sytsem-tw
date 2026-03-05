@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * 負責專案成本分析查詢操作
  */
 @RestController
-@RequestMapping("/api/v1/projects")
+@RequestMapping("/api/v1/projects/{projectId}/cost")
 @Tag(name = "HR06-成本分析", description = "專案管理 - 專案成本分析 API")
 public class HR06CostQryController extends QueryBaseController {
 
@@ -45,7 +45,7 @@ public class HR06CostQryController extends QueryBaseController {
         @ApiResponse(responseCode = "404", description = "專案不存在"),
         @ApiResponse(responseCode = "403", description = "無權限查看成本資訊")
     })
-    @GetMapping("/{projectId}/cost")
+    @GetMapping
     public ResponseEntity<GetProjectCostResponse> getProjectCost(
             @Parameter(description = "專案 ID", required = true) @PathVariable String projectId,
             @Parameter(description = "期間起 (YYYY-MM)") @RequestParam(required = false) String periodFrom,

@@ -1,6 +1,6 @@
 # HRMS 剩餘工項待辦
 
-> 最後更新：2026-03-05
+> 最後更新：2026-03-06
 
 ---
 
@@ -48,13 +48,13 @@ HR11-HR14 前端已全部完整實作。
 
 ---
 
-## B. 待觀察問題（3 項）
+## B. 待觀察問題（3 項）— ✅ 全部修復
 
-| # | 服務 | 問題 | 可能原因 |
+| # | 服務 | 問題 | 修復方式 |
 |:---:|:---|:---|:---|
-| B1 | HR06 Project | `GET /projects/{id}/cost` 偶發 405 | 路由衝突或 Controller mapping 問題 |
-| B2 | HR03 Attendance | 考勤月報 pipeline 跨服務依賴 | `FetchMonthlyReportEmployeesTask` 呼叫 Organization 服務 |
-| B3 | HR08 Performance | 績效報表 totalEmployees/avgScore = 0 | 後端未回傳統計資料，需補 Service 邏輯 |
+| B1 | HR06 Project | `GET /projects/{id}/cost` 偶發 405 | ✅ 將 CostQryController 的 `@RequestMapping` 提升為 `/api/v1/projects/{projectId}/cost`，避免與 `/{id}` 路由衝突 |
+| B2 | HR03 Attendance | 考勤月報 pipeline 跨服務依賴 | ✅ `FetchMonthlyReportEmployeesTask` 改為 graceful degradation，Organization 不可用時回傳空列表繼續流程 |
+| B3 | HR08 Performance | 績效報表 totalEmployees/avgScore = 0 | ✅ `CalculateDistributionTask` 補上 averageScore/totalEmployees 計算，`GetDistributionResponse` 新增欄位，前端 API 層補上 `totalEmployees` fallback |
 
 ---
 

@@ -419,7 +419,7 @@ export class PerformanceApi {
     }
     return {
       distribution,
-      total_employees: raw.totalReviews ?? raw.totalCount ?? 0,
+      total_employees: raw.totalEmployees ?? raw.totalReviews ?? raw.totalCount ?? 0,
       average_score: raw.averageScore ?? 0,
     };
   }
