@@ -7,8 +7,15 @@ import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
 import { MockNotificationApi } from '../../../shared/api/SupportModuleMockApis';
 import type {
+    AnnouncementDto,
+    CreateAnnouncementRequest,
+    CreateAnnouncementResponse,
     CreateNotificationTemplateRequest,
     CreateNotificationTemplateResponse,
+    DeleteAnnouncementResponse,
+    DeleteNotificationTemplateResponse,
+    GetAnnouncementsRequest,
+    GetAnnouncementsResponse,
     GetMyNotificationsRequest,
     GetMyNotificationsResponse,
     GetNotificationPreferenceResponse,
@@ -22,8 +29,12 @@ import type {
     NotificationTemplateDto,
     SendNotificationRequest,
     SendNotificationResponse,
+    UpdateAnnouncementRequest,
+    UpdateAnnouncementResponse,
     UpdateNotificationPreferenceRequest,
     UpdateNotificationPreferenceResponse,
+    UpdateNotificationTemplateRequest,
+    UpdateNotificationTemplateResponse,
 } from './NotificationTypes';
 
 const BASE_URL = '/notifications';
@@ -81,6 +92,22 @@ function adaptTemplate(raw: any): NotificationTemplateDto {
     body: raw.contentTemplate ?? raw.body ?? raw.content ?? '',
     default_channels: raw.defaultChannels ?? raw.default_channels ?? [],
     is_active: raw.status === 'ACTIVE' || (raw.isActive ?? raw.is_active ?? true),
+    created_at: raw.createdAt ?? raw.created_at ?? '',
+  };
+}
+
+/** 後端 camelCase → 前端 AnnouncementDto */
+function adaptAnnouncement(raw: any): AnnouncementDto {
+  return {
+    announcement_id: raw.announcementId ?? raw.announcement_id ?? '',
+    title: raw.title ?? '',
+    content: raw.content ?? '',
+    priority: raw.priority ?? 'NORMAL',
+    target_roles: raw.targetRoles ?? raw.target_roles ?? [],
+    published_at: raw.publishedAt ?? raw.published_at ?? '',
+    expires_at: raw.expiresAt ?? raw.expires_at ?? '',
+    status: raw.status ?? 'DRAFT',
+    created_by: raw.createdBy ?? raw.created_by ?? '',
     created_at: raw.createdAt ?? raw.created_at ?? '',
   };
 }
@@ -234,5 +261,84 @@ export const NotificationApi = {
     if (MockConfig.isEnabled('NOTIFICATION')) return { message: '設定已更新 (Mock)' };
     const raw = await apiClient.put<any>(`${BASE_URL}/preferences`, request);
     return { message: raw.message ?? '設定已更新' };
+  },
+
+  // ========== Template CRUD (Admin) ==========
+
+  /**
+   * 更新通知範本
+   */
+  updateTemplate: async (
+    templateId: string,
+    request: UpdateNotificationTemplateRequest
+  ): Promise<UpdateNotificationTemplateResponse> => {
+    if (MockConfig.isEnabled('NOTIFICATION')) return { message: '範本已更新 (Mock)' };
+    const raw = await apiClient.put<any>(`${BASE_URL}/templates/${templateId}`, request);
+    return { message: raw.message ?? '範本已更新' };
+  },
+
+  /**
+   * 刪除通知範本
+   */
+  deleteTemplate: async (templateId: string): Promise<DeleteNotificationTemplateResponse> => {
+    if (MockConfig.isEnabled('NOTIFICATION')) return { message: '範本已刪除 (Mock)' };
+    const raw = await apiClient.delete<any>(`${BASE_URL}/templates/${templateId}`);
+    return { message: raw.message ?? '範本已刪除' };
+  },
+
+  // ========== Announcement CRUD (Admin) ==========
+
+  /**
+   * 取得公告列表
+   */
+  getAnnouncements: async (
+    params?: GetAnnouncementsRequest
+  ): Promise<GetAnnouncementsResponse> => {
+    if (MockConfig.isEnabled('NOTIFICATION')) return { data: [], total: 0, page: 1, page_size: 10 };
+    const raw = await apiClient.get<any>(`${BASE_URL}/announcements`, { params: adaptPageParams(params) });
+    if (raw.items) {
+      return {
+        data: (raw.items ?? []).map(adaptAnnouncement),
+        total: raw.pagination?.totalItems ?? raw.items.length,
+        page: raw.pagination?.currentPage ?? 1,
+        page_size: raw.pagination?.pageSize ?? 10,
+      };
+    }
+    return adaptPage(raw, adaptAnnouncement);
+  },
+
+  /**
+   * 建立公告
+   */
+  createAnnouncement: async (
+    request: CreateAnnouncementRequest
+  ): Promise<CreateAnnouncementResponse> => {
+    if (MockConfig.isEnabled('NOTIFICATION')) return { announcement_id: 'mock-ann-id', message: '公告已發布 (Mock)' };
+    const raw = await apiClient.post<any>(`${BASE_URL}/announcements`, request);
+    return {
+      announcement_id: raw.announcementId ?? raw.announcement_id ?? '',
+      message: raw.message ?? '公告已發布',
+    };
+  },
+
+  /**
+   * 更新公告
+   */
+  updateAnnouncement: async (
+    announcementId: string,
+    request: UpdateAnnouncementRequest
+  ): Promise<UpdateAnnouncementResponse> => {
+    if (MockConfig.isEnabled('NOTIFICATION')) return { message: '公告已更新 (Mock)' };
+    const raw = await apiClient.put<any>(`${BASE_URL}/announcements/${announcementId}`, request);
+    return { message: raw.message ?? '公告已更新' };
+  },
+
+  /**
+   * 撤銷公告
+   */
+  deleteAnnouncement: async (announcementId: string): Promise<DeleteAnnouncementResponse> => {
+    if (MockConfig.isEnabled('NOTIFICATION')) return { message: '公告已撤銷 (Mock)' };
+    const raw = await apiClient.delete<any>(`${BASE_URL}/announcements/${announcementId}`);
+    return { message: raw.message ?? '公告已撤銷' };
   },
 };

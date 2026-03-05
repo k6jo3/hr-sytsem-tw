@@ -4,6 +4,7 @@
  */
 
 import type {
+  AnnouncementDto,
   NotificationChannel,
   NotificationDto,
   NotificationPreferenceDto,
@@ -13,6 +14,7 @@ import type {
   NotificationType,
 } from '../api/NotificationTypes';
 import type {
+  AnnouncementViewModel,
   NotificationPreferenceViewModel,
   NotificationSummaryViewModel,
   NotificationTemplateViewModel,
@@ -198,6 +200,56 @@ export class NotificationViewModelFactory {
         .length,
       reminderCount: notifications.filter((n) => n.notification_type === 'REMINDER').length,
     };
+  }
+
+  // ========== Announcement ==========
+
+  static createAnnouncementViewModel(dto: AnnouncementDto): AnnouncementViewModel {
+    const roleLabels: Record<string, string> = {
+      ADMIN: '管理員',
+      HR: '人資',
+      FINANCE: '財務',
+      PM: '專案經理',
+      MANAGER: '主管',
+      EMPLOYEE: '員工',
+    };
+    const statusLabels: Record<string, string> = {
+      DRAFT: '草稿',
+      PUBLISHED: '已發布',
+      EXPIRED: '已過期',
+      REVOKED: '已撤銷',
+    };
+    const statusColors: Record<string, string> = {
+      DRAFT: 'default',
+      PUBLISHED: 'success',
+      EXPIRED: 'warning',
+      REVOKED: 'error',
+    };
+
+    return {
+      announcementId: dto.announcement_id,
+      title: dto.title,
+      content: dto.content,
+      priority: dto.priority,
+      priorityLabel: this.mapPriorityLabel(dto.priority),
+      priorityColor: this.mapPriorityColor(dto.priority),
+      targetRoles: dto.target_roles ?? [],
+      targetRolesDisplay: (dto.target_roles ?? []).map((r) => roleLabels[r] ?? r).join(', ') || '全體',
+      publishedAt: dto.published_at,
+      publishedAtDisplay: dto.published_at ? this.formatDateTime(dto.published_at) : undefined,
+      expiresAt: dto.expires_at,
+      expiresAtDisplay: dto.expires_at ? this.formatDateTime(dto.expires_at) : undefined,
+      status: dto.status,
+      statusLabel: statusLabels[dto.status] ?? dto.status,
+      statusColor: statusColors[dto.status] ?? 'default',
+      createdBy: dto.created_by,
+      createdAt: dto.created_at,
+      createdAtDisplay: this.formatDateTime(dto.created_at),
+    };
+  }
+
+  static createAnnouncementList(dtos: AnnouncementDto[]): AnnouncementViewModel[] {
+    return dtos.map((dto) => this.createAnnouncementViewModel(dto));
   }
 
   // ========== Utility Methods ==========

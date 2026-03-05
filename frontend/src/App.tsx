@@ -50,9 +50,17 @@ import {
     HR11DelegationPage,
     HR11WorkflowDefinitionPage,
     HR11WorkflowListPage,
+    HR12AnnouncementPage,
     HR12NotificationPage,
+    HR12PreferencePage,
+    HR12TemplateManagementPage,
     HR13DocumentListPage,
-    HR14ReportDashboardPage
+    HR13DocumentManagementPage,
+    HR13TemplateManagementPage,
+    HR14ReportDashboardPage,
+    HR14HRReportPage,
+    HR14ProjectReportPage,
+    HR14FinanceReportPage
 } from './pages/index';
 import { ProtectedRoute } from './shared/components/index';
 
@@ -139,10 +147,22 @@ const App: React.FC = () => {
         <Route path="/admin/recruitment" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR09RecruitmentPage /></ProtectedRoute>} />
         <Route path="/admin/training" element={<ProtectedRoute><HR10TrainingListPage /></ProtectedRoute>} />
 
-        {/* ========== 文件與決策分析 (HR12/13/14) ========== */}
-        <Route path="/admin/notifications" element={<ProtectedRoute><HR12NotificationPage /></ProtectedRoute>} />
-        <Route path="/admin/documents" element={<ProtectedRoute><HR13DocumentListPage /></ProtectedRoute>} />
+        {/* ========== 通知與公告 (HR12) ========== */}
+        <Route path="/profile/notifications" element={<ProtectedRoute><HR12NotificationPage /></ProtectedRoute>} />
+        <Route path="/profile/notification-settings" element={<ProtectedRoute><HR12PreferencePage /></ProtectedRoute>} />
+        <Route path="/admin/notifications/templates" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR12TemplateManagementPage /></ProtectedRoute>} />
+        <Route path="/admin/notifications/announcements" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR12AnnouncementPage /></ProtectedRoute>} />
+
+        {/* ========== 文件管理 (HR13) ========== */}
+        <Route path="/profile/documents" element={<ProtectedRoute><HR13DocumentListPage /></ProtectedRoute>} />
+        <Route path="/admin/documents" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR13DocumentManagementPage /></ProtectedRoute>} />
+        <Route path="/admin/documents/templates" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR13TemplateManagementPage /></ProtectedRoute>} />
+
+        {/* ========== 報表中心 (HR14) ========== */}
         <Route path="/admin/reports" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR', 'FINANCE', 'PM']}><HR14ReportDashboardPage /></ProtectedRoute>} />
+        <Route path="/admin/reports/hr" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR14HRReportPage /></ProtectedRoute>} />
+        <Route path="/admin/reports/project" element={<ProtectedRoute requiredRoles={['ADMIN', 'PM']}><HR14ProjectReportPage /></ProtectedRoute>} />
+        <Route path="/admin/reports/finance" element={<ProtectedRoute requiredRoles={['ADMIN', 'FINANCE']}><HR14FinanceReportPage /></ProtectedRoute>} />
 
         {/* ========== 預設與錯誤處理 ========== */}
         <Route path="/" element={<Navigate to="/login" replace />} />

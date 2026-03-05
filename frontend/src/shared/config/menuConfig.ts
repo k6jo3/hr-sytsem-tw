@@ -127,7 +127,36 @@ export const MENU_CONFIG: MenuItemConfig[] = [
       { key: '/profile/delegation', label: '代理人設定' },
     ],
   },
-  { key: '/admin/notifications', icon: 'BellOutlined', label: '訊息通知' },
-  { key: '/admin/documents', icon: 'FileOutlined', label: '文件管理' },
-  { key: '/admin/reports', icon: 'BarChartOutlined', label: '報表中心', roles: ['ADMIN', 'HR', 'FINANCE', 'PM'] },
+  {
+    key: 'notification',
+    icon: 'BellOutlined',
+    label: '訊息通知',
+    children: [
+      { key: '/profile/notifications', label: '我的通知' },
+      { key: '/profile/notification-settings', label: '通知偏好設定' },
+      { key: '/admin/notifications/templates', label: '通知範本管理', roles: ['ADMIN', 'HR'] },
+      { key: '/admin/notifications/announcements', label: '公告管理', roles: ['ADMIN', 'HR'] },
+    ],
+  },
+  {
+    key: 'document',
+    icon: 'FileOutlined',
+    label: '文件管理',
+    children: [
+      { key: '/profile/documents', label: '我的文件' },
+      { key: '/admin/documents', label: '文件總管', roles: ['ADMIN', 'HR'] },
+      { key: '/admin/documents/templates', label: '範本管理', roles: ['ADMIN', 'HR'] },
+    ],
+  },
+  {
+    key: 'reports',
+    icon: 'BarChartOutlined',
+    label: '報表中心',
+    children: [
+      { key: '/admin/reports', label: '總覽儀表板', roles: ['ADMIN', 'HR', 'FINANCE', 'PM'] },
+      { key: '/admin/reports/hr', label: '人力資源報表', roles: ['ADMIN', 'HR'] },
+      { key: '/admin/reports/project', label: '專案管理報表', roles: ['ADMIN', 'PM'] },
+      { key: '/admin/reports/finance', label: '財務報表', roles: ['ADMIN', 'FINANCE'] },
+    ],
+  },
 ];

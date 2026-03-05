@@ -12,18 +12,24 @@ import type {
     DocumentDto,
     DocumentRequestDto,
     DocumentTemplateDto,
+    DocumentVersionDto,
+    DownloadLogDto,
     GenerateDocumentRequest,
     GenerateDocumentResponse,
     GetDocumentRequestsRequest,
     GetDocumentRequestsResponse,
     GetDocumentsRequest,
     GetDocumentsResponse,
+    GetDocumentVersionsResponse,
+    GetDownloadLogsRequest,
+    GetDownloadLogsResponse,
     GetDownloadUrlResponse,
     GetMyDocumentsRequest,
     GetMyDocumentsResponse,
     GetTemplatesRequest,
     GetTemplatesResponse,
     PaginationInfo,
+    UpdateTemplateRequest,
     UploadDocumentResponse,
 } from './DocumentTypes';
 
@@ -222,5 +228,63 @@ export const DocumentApi = {
     if (MockConfig.isEnabled('DOCUMENT')) return { template: {} as any, message: '範本已建立 (Mock)' };
     const raw = await apiClient.post<any>(`${BASE_URL}/templates`, request);
     return { template: adaptTemplate(raw), message: raw.message ?? '範本已建立' };
+  },
+
+  /**
+   * 更新文件範本
+   */
+  updateTemplate: async (templateId: string, request: UpdateTemplateRequest): Promise<{ message: string }> => {
+    if (MockConfig.isEnabled('DOCUMENT')) return { message: '範本已更新 (Mock)' };
+    const raw = await apiClient.put<any>(`${BASE_URL}/templates/${templateId}`, request);
+    return { message: raw.message ?? '範本已更新' };
+  },
+
+  /**
+   * 刪除文件範本
+   */
+  deleteTemplate: async (templateId: string): Promise<{ message: string }> => {
+    if (MockConfig.isEnabled('DOCUMENT')) return { message: '範本已刪除 (Mock)' };
+    return apiClient.delete<{ message: string }>(`${BASE_URL}/templates/${templateId}`);
+  },
+
+  /**
+   * 取得文件版本歷史
+   */
+  getDocumentVersions: async (documentId: string): Promise<GetDocumentVersionsResponse> => {
+    if (MockConfig.isEnabled('DOCUMENT')) return { versions: [] };
+    const raw = await apiClient.get<any>(`${BASE_URL}/${documentId}/versions`);
+    const content = raw.content ?? raw.data ?? (Array.isArray(raw) ? raw : []);
+    return {
+      versions: content.map((v: any): DocumentVersionDto => ({
+        id: v.versionId ?? v.id ?? '',
+        document_id: v.documentId ?? v.document_id ?? documentId,
+        version: v.version ?? 1,
+        file_name: v.fileName ?? v.file_name ?? '',
+        file_size: v.fileSize ?? v.file_size ?? 0,
+        uploaded_by_name: v.uploadedByName ?? v.uploaded_by_name ?? '',
+        uploaded_at: v.uploadedAt ?? v.uploaded_at ?? '',
+      })),
+    };
+  },
+
+  /**
+   * 取得下載記錄
+   */
+  getDownloadLogs: async (params?: GetDownloadLogsRequest): Promise<GetDownloadLogsResponse> => {
+    if (MockConfig.isEnabled('DOCUMENT')) return { logs: [], pagination: { page: 1, page_size: 10, total: 0, total_pages: 0 } };
+    const raw = await apiClient.get<any>(`${BASE_URL}/download-logs`, { params: adaptPageParams(params) });
+    const content = raw.content ?? raw.data ?? (Array.isArray(raw) ? raw : []);
+    return {
+      logs: content.map((l: any): DownloadLogDto => ({
+        id: l.logId ?? l.id ?? '',
+        document_id: l.documentId ?? l.document_id ?? '',
+        document_name: l.documentName ?? l.document_name ?? '',
+        downloaded_by: l.downloadedBy ?? l.downloaded_by ?? '',
+        downloaded_by_name: l.downloadedByName ?? l.downloaded_by_name ?? '',
+        downloaded_at: l.downloadedAt ?? l.downloaded_at ?? '',
+        ip_address: l.ipAddress ?? l.ip_address ?? '',
+      })),
+      pagination: adaptPagination(raw),
+    };
   },
 };

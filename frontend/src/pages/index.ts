@@ -69,9 +69,17 @@ export { HR11DelegationPage } from './HR11DelegationPage';
 
 // Notification (HR12)
 export { HR12NotificationPage } from './HR12NotificationPage';
+export { HR12TemplateManagementPage } from './HR12TemplateManagementPage';
+export { HR12PreferencePage } from './HR12PreferencePage';
+export { HR12AnnouncementPage } from './HR12AnnouncementPage';
 
 // Document (HR13)
 export { HR13DocumentListPage } from './HR13DocumentListPage';
+export { HR13DocumentManagementPage } from './HR13DocumentManagementPage';
+export { HR13TemplateManagementPage } from './HR13TemplateManagementPage';
 
 // Report (HR14)
 export { HR14ReportDashboardPage } from './HR14ReportDashboardPage';
+export { HR14HRReportPage } from './HR14HRReportPage';
+export { HR14ProjectReportPage } from './HR14ProjectReportPage';
+export { HR14FinanceReportPage } from './HR14FinanceReportPage';

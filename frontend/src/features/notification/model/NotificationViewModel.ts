@@ -78,6 +78,30 @@ export interface NotificationPreferenceViewModel {
 }
 
 /**
+ * 公告 ViewModel
+ */
+export interface AnnouncementViewModel {
+  announcementId: string;
+  title: string;
+  content: string;
+  priority: NotificationPriority;
+  priorityLabel: string;
+  priorityColor: string;
+  targetRoles: string[];
+  targetRolesDisplay: string;
+  publishedAt?: string;
+  publishedAtDisplay?: string;
+  expiresAt?: string;
+  expiresAtDisplay?: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'EXPIRED' | 'REVOKED';
+  statusLabel: string;
+  statusColor: string;
+  createdBy: string;
+  createdAt: string;
+  createdAtDisplay: string;
+}
+
+/**
  * 通知摘要統計 ViewModel
  */
 export interface NotificationSummaryViewModel {

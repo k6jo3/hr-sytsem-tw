@@ -178,3 +178,78 @@ export interface UpdateNotificationPreferenceRequest {
 export interface UpdateNotificationPreferenceResponse {
   message: string;
 }
+
+// ========== Template Update/Delete ==========
+
+export interface UpdateNotificationTemplateRequest {
+  template_name?: string;
+  subject?: string;
+  body?: string;
+  default_channels?: NotificationChannel[];
+  is_active?: boolean;
+}
+
+export interface UpdateNotificationTemplateResponse {
+  message: string;
+}
+
+export interface DeleteNotificationTemplateResponse {
+  message: string;
+}
+
+// ========== Announcement ==========
+
+export interface AnnouncementDto {
+  announcement_id: string;
+  title: string;
+  content: string;
+  priority: NotificationPriority;
+  target_roles?: string[];
+  published_at?: string;
+  expires_at?: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'EXPIRED' | 'REVOKED';
+  created_by: string;
+  created_at: string;
+}
+
+export interface GetAnnouncementsRequest {
+  status?: string;
+  page?: number;
+  page_size?: number;
+}
+
+export interface GetAnnouncementsResponse {
+  data: AnnouncementDto[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface CreateAnnouncementRequest {
+  title: string;
+  content: string;
+  priority?: NotificationPriority;
+  target_roles?: string[];
+  expires_at?: string;
+}
+
+export interface CreateAnnouncementResponse {
+  announcement_id: string;
+  message: string;
+}
+
+export interface UpdateAnnouncementRequest {
+  title?: string;
+  content?: string;
+  priority?: NotificationPriority;
+  target_roles?: string[];
+  expires_at?: string;
+}
+
+export interface UpdateAnnouncementResponse {
+  message: string;
+}
+
+export interface DeleteAnnouncementResponse {
+  message: string;
+}

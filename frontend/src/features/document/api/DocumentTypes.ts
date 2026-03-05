@@ -166,6 +166,69 @@ export interface CreateTemplateRequest {
   variables: string[];
 }
 
+/**
+ * 更新文件範本請求
+ */
+export interface UpdateTemplateRequest {
+  template_name?: string;
+  template_type?: TemplateType;
+  template_content?: string;
+  variables?: string[];
+  is_active?: boolean;
+}
+
+/**
+ * 下載記錄 DTO
+ */
+export interface DownloadLogDto {
+  id: string;
+  document_id: string;
+  document_name: string;
+  downloaded_by: string;
+  downloaded_by_name: string;
+  downloaded_at: string;
+  ip_address: string;
+}
+
+/**
+ * 取得下載記錄請求
+ */
+export interface GetDownloadLogsRequest {
+  document_id?: string;
+  start_date?: string;
+  end_date?: string;
+  page?: number;
+  page_size?: number;
+}
+
+/**
+ * 取得下載記錄回應
+ */
+export interface GetDownloadLogsResponse {
+  logs: DownloadLogDto[];
+  pagination: PaginationInfo;
+}
+
+/**
+ * 文件版本 DTO
+ */
+export interface DocumentVersionDto {
+  id: string;
+  document_id: string;
+  version: number;
+  file_name: string;
+  file_size: number;
+  uploaded_by_name: string;
+  uploaded_at: string;
+}
+
+/**
+ * 取得版本歷史回應
+ */
+export interface GetDocumentVersionsResponse {
+  versions: DocumentVersionDto[];
+}
+
 // ========== Response Types ==========
 
 /**
