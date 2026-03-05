@@ -348,6 +348,16 @@ public class Payslip {
         this.emailSentAt = LocalDateTime.now();
     }
 
+    /**
+     * 作廢薪資單（產生沖正時呼叫）
+     */
+    public void voidPayslip() {
+        if (this.status != PayslipStatus.FINALIZED && this.status != PayslipStatus.SENT) {
+            throw new DomainException("PAY_CANNOT_VOID", "僅已定案或已發送的薪資單可作廢");
+        }
+        this.status = PayslipStatus.VOIDED;
+    }
+
     // ==================== 查詢方法 ====================
 
     /**

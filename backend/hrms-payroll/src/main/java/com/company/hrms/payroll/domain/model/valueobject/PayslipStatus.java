@@ -22,5 +22,17 @@ public enum PayslipStatus {
      * 已發送
      * 薪資單已發送給員工
      */
-    SENT
+    SENT,
+
+    /**
+     * 已作廢
+     * 薪資單已被作廢（產生沖正單）
+     */
+    VOIDED,
+
+    /**
+     * 已沖正
+     * 作為沖正記錄（負數薪資單）
+     */
+    REVERSED
 }
