@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,11 +22,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MvcResult;
 
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.base.BaseApiContractTest;
+import com.company.hrms.common.test.contract.ContractSpec;
 import com.company.hrms.training.domain.model.aggregate.TrainingCourse;
 import com.company.hrms.training.domain.model.aggregate.TrainingEnrollment;
 import com.company.hrms.training.domain.model.valueobject.CourseId;
@@ -46,6 +51,8 @@ import com.company.hrms.training.infrastructure.repository.TrainingEnrollmentQue
  * 驗證 Controller -> Service -> QueryAssembler -> QueryGroup 的完整流程
  * 同時涵蓋 Query 合約驗證與 Command 業務流程驗證
  */
+// TODO: 以下測試仍有失敗待修復：
+// 1. [合約格式] TRN_C001, C005, C006, E001, E005, CT001：training_contracts.md 缺少 JSON 合約區塊
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -53,7 +60,6 @@ import com.company.hrms.training.infrastructure.repository.TrainingEnrollmentQue
 public class TrainingApiContractTest extends BaseApiContractTest {
 
     private static final String CONTRACT = "training";
-    private String contractSpec;
 
     // === 查詢用 Repository (Query Repositories) ===
 
@@ -90,13 +96,16 @@ public class TrainingApiContractTest extends BaseApiContractTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        contractSpec = loadContractSpec(CONTRACT);
-
         // 設定測試用模擬使用者
         mockUser = new JWTModel();
-        mockUser.setUserId("E001");
+        mockUser.setUserId("00000000-0000-0000-0000-000000000001");
         mockUser.setUsername("test-user");
+        mockUser.setEmployeeNumber("00000000-0000-0000-0000-000000000003");
         mockUser.setRoles(Collections.singletonList("EMPLOYEE"));
+
+        // 設定 SecurityContext（供 @CurrentUser 注入使用）
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(mockUser, null, Collections.emptyList()));
 
         // 建立 OPEN 狀態課程 (enrollmentDeadline=null, maxParticipants=null 確保 canEnroll()=true)
         openCourse = TrainingCourse.reconstitute(
@@ -177,6 +186,11 @@ public class TrainingApiContractTest extends BaseApiContractTest {
         lenient().when(certificateRepository.save(any())).thenReturn(null);
     }
 
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
+
     // =========================================================================
     // 課程管理 API 合約
     // =========================================================================
@@ -189,57 +203,63 @@ public class TrainingApiContractTest extends BaseApiContractTest {
         @DisplayName("TRN_C001: 員工查詢開放報名課程")
         void searchOpenCourses_AsEmployee_ShouldIncludeFilters() throws Exception {
             // Arrange
+            ContractSpec contract = loadContract(CONTRACT, "TRN_C001");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(courseQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
             // Act
-            mockMvc.perform(get("/api/v1/training/courses?status=OPEN")
+            MvcResult result = mockMvc.perform(get("/api/v1/training/courses?status=OPEN")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
             // Assert
             QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_C001");
+            verifyQueryContract(query, result.getResponse().getContentAsString(), contract);
         }
 
         @Test
         @DisplayName("TRN_C005: 依類別查詢技術類課程")
         void searchTechnicalCourses_ShouldIncludeFilters() throws Exception {
             // Arrange
+            ContractSpec contract = loadContract(CONTRACT, "TRN_C005");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(courseQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
             // Act
-            mockMvc.perform(get("/api/v1/training/courses?category=TECHNICAL")
+            MvcResult result = mockMvc.perform(get("/api/v1/training/courses?category=TECHNICAL")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
             // Assert
             QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_C005");
+            verifyQueryContract(query, result.getResponse().getContentAsString(), contract);
         }
 
         @Test
         @DisplayName("TRN_C006: 依名稱模糊查詢課程")
         void searchByNameKeyword_ShouldIncludeFilters() throws Exception {
             // Arrange
+            ContractSpec contract = loadContract(CONTRACT, "TRN_C006");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(courseQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
             // Act
-            mockMvc.perform(get("/api/v1/training/courses?name=領導")
+            MvcResult result = mockMvc.perform(get("/api/v1/training/courses?name=領導")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
             // Assert
             QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_C006");
+            verifyQueryContract(query, result.getResponse().getContentAsString(), contract);
         }
 
         @Test
@@ -304,39 +324,42 @@ public class TrainingApiContractTest extends BaseApiContractTest {
         @DisplayName("TRN_E001: 查詢特定課程的報名紀錄")
         void searchEnrollmentsByCourse_ShouldIncludeFilters() throws Exception {
             // Arrange
+            ContractSpec contract = loadContract(CONTRACT, "TRN_E001");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(enrollmentQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
             // Act
-            mockMvc.perform(get("/api/v1/training/enrollments?courseId=C001")
+            MvcResult result = mockMvc.perform(get("/api/v1/training/enrollments?courseId=C001")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
             // Assert
             QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_E001");
+            verifyQueryContract(query, result.getResponse().getContentAsString(), contract);
         }
 
         @Test
         @DisplayName("TRN_E005: 員工查詢自己的報名紀錄")
         void searchMyEnrollments_ShouldIncludeFilters() throws Exception {
             // Arrange
+            ContractSpec contract = loadContract(CONTRACT, "TRN_E005");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(enrollmentQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
             // Act
-            mockMvc.perform(get("/api/v1/training/enrollments/me")
+            MvcResult result = mockMvc.perform(get("/api/v1/training/enrollments/me")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
             // Assert
             QueryGroup query = queryCaptor.getValue();
-            String processedSpec = contractSpec.replace("{currentUserId}", mockUser.getUserId());
-            assertContract(query, processedSpec, "TRN_E005");
+            verifyQueryContract(query, result.getResponse().getContentAsString(), contract);
         }
 
         @Test
@@ -397,19 +420,21 @@ public class TrainingApiContractTest extends BaseApiContractTest {
         @DisplayName("TRN_CT001: 查詢員工的證照")
         void searchCertificatesByEmployee_ShouldIncludeFilters() throws Exception {
             // Arrange
+            ContractSpec contract = loadContract(CONTRACT, "TRN_CT001");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(certificateQueryRepository.findPage(queryCaptor.capture(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
             // Act
-            mockMvc.perform(get("/api/v1/training/certificates?employeeId=E001")
+            MvcResult result = mockMvc.perform(get("/api/v1/training/certificates?employeeId=E001")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
             // Assert
             QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "TRN_CT001");
+            verifyQueryContract(query, result.getResponse().getContentAsString(), contract);
         }
 
         @Test

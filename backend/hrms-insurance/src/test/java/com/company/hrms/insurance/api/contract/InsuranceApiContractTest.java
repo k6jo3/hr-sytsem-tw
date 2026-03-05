@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,6 +20,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.company.hrms.common.model.JWTModel;
@@ -43,6 +46,8 @@ import com.company.hrms.insurance.domain.repository.IInsuranceUnitRepository;
  * 不使用 QueryGroup 模式。因此本測試以 verify() 驗證正確的 Repository 方法被呼叫，
  * 而非使用 assertContract() 驗證 QueryGroup。
  */
+// TODO: 以下測試仍有失敗待修復：
+// 1. [Command] INS_CMD_E001 enrollEmployee：pipeline「查詢投保級距」NPE，levelRepository mock 條件可能不匹配
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -76,6 +81,9 @@ public class InsuranceApiContractTest extends BaseApiContractTest {
         mockUser.setUsername("test-user");
         mockUser.setRoles(Collections.singletonList("HR"));
 
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(mockUser, null, Collections.emptyList()));
+
         // 建立測試用投保單位
         testUnit = new InsuranceUnit(
                 new UnitId("unit-001"),
@@ -103,6 +111,11 @@ public class InsuranceApiContractTest extends BaseApiContractTest {
         lenient().when(levelRepository.findByTypeAndActiveOn(any(), any()))
                 .thenReturn(List.of(testLaborLevel));
         lenient().when(levelRepository.findById(any())).thenReturn(Optional.of(testLaborLevel));
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     // =========================================================================

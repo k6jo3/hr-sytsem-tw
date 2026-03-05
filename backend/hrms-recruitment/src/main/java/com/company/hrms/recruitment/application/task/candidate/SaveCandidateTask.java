@@ -9,13 +9,13 @@ import com.company.hrms.recruitment.application.dto.candidate.CreateCandidateReq
 import com.company.hrms.recruitment.domain.model.aggregate.Candidate;
 import com.company.hrms.recruitment.domain.model.valueobject.OpeningId;
 import com.company.hrms.recruitment.domain.model.valueobject.RecruitmentSource;
-import com.company.hrms.recruitment.infrastructure.repository.CandidateRepositoryImpl;
+import com.company.hrms.recruitment.domain.repository.ICandidateRepository;
 
 @Component
 public class SaveCandidateTask implements PipelineTask<CreateCandidateContext> {
 
     @Autowired
-    private CandidateRepositoryImpl candidateRepository;
+    private ICandidateRepository candidateRepository;
 
     @Override
     public void execute(CreateCandidateContext context) {

@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.Collections;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,12 +20,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MvcResult;
 
 import com.company.hrms.common.domain.event.EventPublisher;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.base.BaseApiContractTest;
+import com.company.hrms.common.test.contract.ContractSpec;
 import com.company.hrms.project.domain.model.aggregate.Project;
 import com.company.hrms.project.domain.repository.ICustomerRepository;
 import com.company.hrms.project.domain.repository.IProjectRepository;
@@ -39,6 +44,9 @@ import com.company.hrms.project.domain.repository.ITaskRepository;
  * 透過 ArgumentCaptor 擷取 QueryGroup 並以 assertContract() 驗證合約。
  * 客戶查詢 (ICustomerRepository.findAll) 不使用 QueryGroup。
  */
+// TODO: 以下測試仍有失敗待修復：
+// 1. [合約格式] PRJ_P001, P003, P004：project_contracts.md 缺少 JSON 合約區塊
+// 2. [Command] PRJ_CMD_P001 createProject：400 驗證失敗，需檢查 Request DTO 必填欄位
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -46,7 +54,6 @@ import com.company.hrms.project.domain.repository.ITaskRepository;
 public class ProjectApiContractTest extends BaseApiContractTest {
 
     private static final String CONTRACT = "project";
-    private String contractSpec;
 
     // === 領域 Repository ===
 
@@ -68,13 +75,15 @@ public class ProjectApiContractTest extends BaseApiContractTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        contractSpec = loadContractSpec(CONTRACT);
-
         // 設定測試用模擬使用者
         mockUser = new JWTModel();
         mockUser.setUserId("00000000-0000-0000-0000-000000000001");
         mockUser.setUsername("test-user");
         mockUser.setRoles(Collections.singletonList("PM"));
+
+        // 設定 SecurityContext
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(mockUser, null, Collections.emptyList()));
 
         // 設定 Repository 的 lenient 預設行為
         lenient().when(projectRepository.findProjects(any(QueryGroup.class), any(Pageable.class)))
@@ -85,6 +94,11 @@ public class ProjectApiContractTest extends BaseApiContractTest {
         lenient().when(customerRepository.save(any())).thenReturn(null);
         lenient().when(customerRepository.existsByCustomerCode(anyString())).thenReturn(false);
         lenient().when(customerRepository.existsByTaxId(anyString())).thenReturn(false);
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     // =========================================================================
@@ -99,57 +113,63 @@ public class ProjectApiContractTest extends BaseApiContractTest {
         @DisplayName("PRJ_P001: 查詢進行中專案 - status = IN_PROGRESS, is_deleted = 0")
         void searchInProgressProjects_ShouldIncludeFilters() throws Exception {
             // Arrange
+            ContractSpec contract = loadContract(CONTRACT, "PRJ_P001");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(projectRepository.findProjects(queryCaptor.capture(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
             // Act
-            mockMvc.perform(get("/api/v1/projects?status=IN_PROGRESS")
+            MvcResult result = mockMvc.perform(get("/api/v1/projects?status=IN_PROGRESS")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
             // Assert
             QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "PRJ_P001");
+            verifyQueryContract(query, result.getResponse().getContentAsString(), contract);
         }
 
         @Test
         @DisplayName("PRJ_P003: 依客戶查詢專案 - customer_id = {value}, is_deleted = 0")
         void searchProjectsByCustomer_ShouldIncludeFilters() throws Exception {
             // Arrange
+            ContractSpec contract = loadContract(CONTRACT, "PRJ_P003");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(projectRepository.findProjects(queryCaptor.capture(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
             // Act
-            mockMvc.perform(get("/api/v1/projects?customerId=C001")
+            MvcResult result = mockMvc.perform(get("/api/v1/projects?customerId=C001")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
             // Assert
             QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "PRJ_P003");
+            verifyQueryContract(query, result.getResponse().getContentAsString(), contract);
         }
 
         @Test
         @DisplayName("PRJ_P004: 依 PM 查詢專案 - pm_id = {value}, is_deleted = 0")
         void searchProjectsByPm_ShouldIncludeFilters() throws Exception {
             // Arrange
+            ContractSpec contract = loadContract(CONTRACT, "PRJ_P004");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(projectRepository.findProjects(queryCaptor.capture(), any(Pageable.class)))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
             // Act
-            mockMvc.perform(get("/api/v1/projects?pmId=E001")
+            MvcResult result = mockMvc.perform(get("/api/v1/projects?pmId=E001")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andReturn();
 
             // Assert
             QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "PRJ_P004");
+            verifyQueryContract(query, result.getResponse().getContentAsString(), contract);
         }
     }
 
