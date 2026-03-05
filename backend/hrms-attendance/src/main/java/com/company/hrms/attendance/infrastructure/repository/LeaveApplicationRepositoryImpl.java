@@ -98,6 +98,18 @@ public class LeaveApplicationRepositoryImpl extends BaseRepository<LeaveApplicat
     }
 
     @Override
+    public boolean existsByLeaveTypeIdAndStatusIn(String leaveTypeId, List<ApplicationStatus> statuses) {
+        List<String> statusNames = statuses.stream()
+                .map(ApplicationStatus::name)
+                .collect(Collectors.toList());
+        QueryGroup query = QueryBuilder.where()
+                .and("leaveTypeId", Operator.EQ, leaveTypeId)
+                .and("status", Operator.IN, statusNames)
+                .build();
+        return !super.findAll(query).isEmpty();
+    }
+
+    @Override
     public void delete(ApplicationId id) {
         super.deleteById(id.getValue());
     }

@@ -13,6 +13,11 @@ import com.company.hrms.attendance.domain.model.valueobject.ApplicationStatus;
 import com.company.hrms.common.query.QueryGroup;
 
 public interface ILeaveApplicationRepository {
+
+    /**
+     * 檢查指定假別是否有指定狀態的請假申請存在
+     */
+    boolean existsByLeaveTypeIdAndStatusIn(String leaveTypeId, List<ApplicationStatus> statuses);
     void save(LeaveApplication application);
 
     Optional<LeaveApplication> findById(ApplicationId id);
