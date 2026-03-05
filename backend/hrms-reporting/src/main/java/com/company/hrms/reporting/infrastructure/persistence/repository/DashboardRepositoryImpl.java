@@ -52,21 +52,23 @@ public class DashboardRepositoryImpl implements IDashboardRepository {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public Page<Dashboard> findPage(QueryGroup query, Pageable pageable) {
-        // 使用 UltimateQueryEngine 建立查詢
-        UltimateQueryEngine<DashboardPO> engine = new UltimateQueryEngine<>(queryFactory, DashboardPO.class);
+        // 使用 UltimateQueryEngine 建立查詢條件
+        UltimateQueryEngine<DashboardPO> countEngine = new UltimateQueryEngine<>(queryFactory, DashboardPO.class);
+        BooleanExpression countPredicate = countEngine.parse(query);
 
-        BooleanExpression predicate = engine.parse(query);
+        // 查詢總數（使用獨立的 engine 實例，避免重用已執行的 JPAQuery）
+        long total = countEngine.getQuery()
+                .where(countPredicate)
+                .fetch()
+                .size();
 
-        // 查詢總數
-        long total = engine.getQuery()
-                .where(predicate)
-                .fetchCount();
+        // 使用新的 engine 實例查詢資料
+        UltimateQueryEngine<DashboardPO> dataEngine = new UltimateQueryEngine<>(queryFactory, DashboardPO.class);
+        BooleanExpression dataPredicate = dataEngine.parse(query);
 
-        // 查詢資料
-        var results = engine.getQuery()
-                .where(predicate)
+        var results = dataEngine.getQuery()
+                .where(dataPredicate)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

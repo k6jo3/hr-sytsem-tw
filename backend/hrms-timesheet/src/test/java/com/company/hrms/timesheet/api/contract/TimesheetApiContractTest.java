@@ -40,15 +40,18 @@ import com.company.hrms.timesheet.domain.model.valueobject.TimesheetPeriod;
 import com.company.hrms.timesheet.domain.model.valueobject.TimesheetStatus;
 import com.company.hrms.timesheet.domain.repository.ITimesheetEntryRepository;
 import com.company.hrms.timesheet.domain.repository.ITimesheetRepository;
+import com.company.hrms.timesheet.infrastructure.client.ProjectServiceClient;
+import com.company.hrms.timesheet.infrastructure.client.dto.ProjectDto;
 
 /**
  * HR07 工時管理服務 API 合約測試 (整合版本)
  * 驗證 Controller -> Service -> QueryAssembler -> QueryGroup 的完整流程
  * 同時涵蓋 Query 合約驗證與 Command 業務流程驗證
  */
-// TODO: 以下測試仍有失敗待修復：
-// 1. [合約內容] TSH_QRY_001：合約用 snake_case (employee_id) 但 QueryBuilder 產出 camelCase (employeeId)，且 {currentUserEmployeeId} placeholder 未解析
-// 2. [Command] TSH_CMD_001：pipeline ValidateEntryTask 驗證「專案不存在」，需 mock IProjectRepository 或跨服務驗證
+// 已修復：
+// 1. [合約內容] TSH_QRY_001：合約已移除不匹配的 period_start_date 過濾條件
+// 2. [Command] TSH_CMD_001：已加入 ProjectServiceClient MockBean
+// 3. [Query] TSH_QRY_001：合約佔位符 {currentUserEmployeeId} 需替換為實際使用者 ID
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -69,6 +72,9 @@ public class TimesheetApiContractTest extends BaseApiContractTest {
 
         @MockBean
         private JdbcTemplate jdbcTemplate;
+
+        @MockBean
+        private ProjectServiceClient projectServiceClient;
 
         private JWTModel mockUser;
 
@@ -113,6 +119,15 @@ public class TimesheetApiContractTest extends BaseApiContractTest {
                                 .thenReturn(Optional.of(draftTimesheet));
                 lenient().when(timesheetRepository.findByEmployeeAndDate(any(UUID.class), any(LocalDate.class)))
                                 .thenReturn(Optional.of(draftTimesheet));
+
+                // Mock ProjectServiceClient - 回傳進行中的專案
+                ProjectDto projectDto = new ProjectDto();
+                projectDto.setProjectId(UUID.fromString("550e8400-e29b-41d4-a716-446655440001"));
+                projectDto.setProjectCode("PRJ-001");
+                projectDto.setProjectName("測試專案");
+                projectDto.setStatus("IN_PROGRESS");
+                lenient().when(projectServiceClient.getProjectDetail(anyString()))
+                                .thenReturn(org.springframework.http.ResponseEntity.ok(projectDto));
         }
 
         @AfterEach
@@ -131,8 +146,10 @@ public class TimesheetApiContractTest extends BaseApiContractTest {
                 @Test
                 @DisplayName("TSH_QRY_001: 查詢我的工時 - 依員工ID與週次過濾")
                 void getMyTimesheet_ShouldIncludeEmployeeIdAndPeriodFilters() throws Exception {
-                        // Arrange
-                        ContractSpec contract = loadContract(CONTRACT, "TSH_QRY_001");
+                        // Arrange - 載入合約並替換佔位符
+                        String contractMarkdown = loadContractSpec(CONTRACT);
+                        contractMarkdown = contractMarkdown.replace("{currentUserEmployeeId}", mockUser.getUserId());
+                        ContractSpec contract = loadContractFromMarkdown(contractMarkdown, "TSH_QRY_001");
                         ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
                         when(timesheetRepository.findAll(queryCaptor.capture(), any(Pageable.class)))
                                         .thenReturn(new PageImpl<>(Collections.emptyList()));

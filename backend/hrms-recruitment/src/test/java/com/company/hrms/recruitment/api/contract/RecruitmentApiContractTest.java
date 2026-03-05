@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,12 +30,13 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.base.BaseApiContractTest;
 import com.company.hrms.common.test.contract.ContractSpec;
-import com.company.hrms.recruitment.application.assembler.RecruitmentQueryAssembler;
 import com.company.hrms.recruitment.domain.model.aggregate.JobOpening;
 import com.company.hrms.recruitment.domain.repository.ICandidateRepository;
 import com.company.hrms.recruitment.domain.repository.IInterviewRepository;
 import com.company.hrms.recruitment.domain.repository.IJobOpeningRepository;
 import com.company.hrms.recruitment.domain.repository.IOfferRepository;
+import com.company.hrms.recruitment.infrastructure.client.organization.OrganizationServiceClient;
+import com.company.hrms.recruitment.infrastructure.client.organization.dto.DepartmentDto;
 import com.company.hrms.recruitment.infrastructure.mapper.InterviewMapper;
 
 /**
@@ -42,9 +44,11 @@ import com.company.hrms.recruitment.infrastructure.mapper.InterviewMapper;
  * 驗證 Controller -> Service -> QueryAssembler -> QueryGroup 的完整流程
  * 同時涵蓋 Query 合約驗證與 Command 業務流程驗證
  */
-// TODO: 以下測試仍有失敗待修復：
-// 1. [合約格式] RCT_J001, J002, CD001, I001, O001：recruitment_contracts.md 缺少 JSON 合約區塊
-// 2. [Command] RCT_CMD_J001 createJobOpening：400 驗證「Invalid Department ID」
+// 已修復：
+// 1. [合約格式] RCT_J001, J002, CD001, I001, O001：已在 recruitment_contracts.md 補充 JSON 合約區塊
+// 2. [Command] RCT_CMD_J001 createJobOpening：已加入 OrganizationServiceClient MockBean
+// 3. [Query] 移除 @MockBean RecruitmentQueryAssembler，改用真實 Bean 驗證查詢條件組裝
+// 4. [序列化] PageImpl 改用 PageRequest.of(0, 10) 避免 Unpaged.getOffset() UnsupportedOperationException
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -67,10 +71,13 @@ public class RecruitmentApiContractTest extends BaseApiContractTest {
     @MockBean
     private IOfferRepository offerRepository;
 
-    // === 查詢組裝器 ===
+    // === 查詢組裝器（使用真實 Bean，確保 Assembler -> QueryGroup 的完整驗證）===
+    // 注意：不使用 @MockBean，讓 RecruitmentQueryAssembler 真實執行查詢條件組裝
+
+    // === Feign Client（驗證任務需要） ===
 
     @MockBean
-    private RecruitmentQueryAssembler queryAssembler;
+    private OrganizationServiceClient organizationServiceClient;
 
     // === Mapper（面試查詢需要） ===
 
@@ -103,6 +110,14 @@ public class RecruitmentApiContractTest extends BaseApiContractTest {
 
         lenient().when(offerRepository.save(any())).thenReturn(null);
         lenient().when(offerRepository.findById(any())).thenReturn(Optional.empty());
+
+        // Mock OrganizationServiceClient - 回傳有效部門
+        DepartmentDto deptDto = new DepartmentDto();
+        deptDto.setDepartmentId("00000000-0000-0000-0000-000000000099");
+        deptDto.setCode("DEPT-001");
+        deptDto.setName("研發部");
+        deptDto.setStatus("ACTIVE");
+        lenient().when(organizationServiceClient.getDepartment(anyString())).thenReturn(deptDto);
     }
 
     @AfterEach
@@ -125,7 +140,7 @@ public class RecruitmentApiContractTest extends BaseApiContractTest {
             ContractSpec contract = loadContract(CONTRACT, "RCT_J001");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(jobOpeningRepository.findAll(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
+                    .thenReturn(new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 10), 0));
 
             // Act
             MvcResult result = mockMvc.perform(get("/api/v1/recruitment/jobs?status=OPEN")
@@ -146,7 +161,7 @@ public class RecruitmentApiContractTest extends BaseApiContractTest {
             ContractSpec contract = loadContract(CONTRACT, "RCT_J002");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(jobOpeningRepository.findAll(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
+                    .thenReturn(new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 10), 0));
 
             // Act
             MvcResult result = mockMvc.perform(get("/api/v1/recruitment/jobs?departmentId=D001")
@@ -203,7 +218,7 @@ public class RecruitmentApiContractTest extends BaseApiContractTest {
             ContractSpec contract = loadContract(CONTRACT, "RCT_CD001");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(candidateRepository.findAll(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
+                    .thenReturn(new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 10), 0));
 
             // Act
             MvcResult result = mockMvc.perform(get("/api/v1/candidates?openingId=" + openingId)
@@ -233,7 +248,7 @@ public class RecruitmentApiContractTest extends BaseApiContractTest {
             ContractSpec contract = loadContract(CONTRACT, "RCT_I001");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(interviewRepository.findAll(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
+                    .thenReturn(new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 10), 0));
 
             // Act
             MvcResult result = mockMvc.perform(get("/api/v1/recruitment/interviews?candidateId=cand-001")
@@ -263,7 +278,7 @@ public class RecruitmentApiContractTest extends BaseApiContractTest {
             ContractSpec contract = loadContract(CONTRACT, "RCT_O001");
             ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
             when(offerRepository.findAll(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
+                    .thenReturn(new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 10), 0));
 
             // Act
             MvcResult result = mockMvc.perform(get("/api/v1/recruitment/offers?candidateId=cand-001")

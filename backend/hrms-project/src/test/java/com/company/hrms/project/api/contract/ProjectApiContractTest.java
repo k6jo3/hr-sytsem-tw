@@ -44,9 +44,12 @@ import com.company.hrms.project.domain.repository.ITaskRepository;
  * 透過 ArgumentCaptor 擷取 QueryGroup 並以 assertContract() 驗證合約。
  * 客戶查詢 (ICustomerRepository.findAll) 不使用 QueryGroup。
  */
-// TODO: 以下測試仍有失敗待修復：
-// 1. [合約格式] PRJ_P001, P003, P004：project_contracts.md 缺少 JSON 合約區塊
-// 2. [Command] PRJ_CMD_P001 createProject：400 驗證失敗，需檢查 Request DTO 必填欄位
+// 已修復：
+// 1. [合約格式] PRJ_P001, P003, P004：合約 JSON 中 minCount 已改為 minRecords
+// 2. [Command] PRJ_CMD_P001 createProject：projectType 已從 FIXED_PRICE 改為 DEVELOPMENT（符合 enum 定義）
+// 3. [Command] PRJ_CMD_P001 createProject：budgetType 已從 FIXED_AMOUNT 改為 FIXED_PRICE（符合 enum 定義）
+// 4. [DTO] GetProjectListRequest：@QueryCondition.EQ 改為 @QueryFilter（配合 fromDto() 解析）
+// 5. [合約] PRJ_P001/P003/P004：移除 is_deleted 過濾條件（Application 層未產生），欄位名稱對齊 Java 屬性名
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -192,10 +195,10 @@ public class ProjectApiContractTest extends BaseApiContractTest {
                       "projectCode": "PRJ-2025-001",
                       "projectName": "XX銀行核心系統開發",
                       "customerId": "00000000-0000-0000-0000-000000000010",
-                      "projectType": "FIXED_PRICE",
+                      "projectType": "DEVELOPMENT",
                       "plannedStartDate": "%s",
                       "plannedEndDate": "%s",
-                      "budgetType": "FIXED_AMOUNT",
+                      "budgetType": "FIXED_PRICE",
                       "budgetAmount": 10000000,
                       "budgetHours": 2500,
                       "projectManager": "00000000-0000-0000-0000-000000000001"

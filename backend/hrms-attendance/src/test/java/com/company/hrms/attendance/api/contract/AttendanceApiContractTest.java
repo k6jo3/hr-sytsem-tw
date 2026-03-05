@@ -49,10 +49,6 @@ import com.company.hrms.common.test.contract.ContractSpec;
  * 驗證 Controller -> Service -> QueryAssembler -> QueryGroup 的完整流程
  * 同時涵蓋 Query 合約驗證與 Command 業務流程驗證
  */
-// TODO: 以下測試仍有失敗待修復：
-// 1. [合約 minCount] ATT_QRY_A001~A003, L001~L003, O001~O003, S001, T001：合約要求 minCount>=1 但 mock 回空列表，需建立 mock 資料
-// 2. [Command] ATT_CMD_A001 checkIn：pipeline 驗證失敗（今日已完成下班打卡），需調整 mock 場景
-// 3. [合約] ATT_CMD_T001 createLeaveType：leave_type_code 為 null，需檢查 Request DTO 映射
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -102,7 +98,7 @@ public class AttendanceApiContractTest extends BaseApiContractTest {
 
                 // 設定 SecurityContext（@CurrentUser 解析器從此取得使用者）
                 SecurityContextHolder.getContext().setAuthentication(
-                        new UsernamePasswordAuthenticationToken(mockUser, null, Collections.emptyList()));
+                                new UsernamePasswordAuthenticationToken(mockUser, null, Collections.emptyList()));
 
                 // 建立預設班別 (供 CheckIn 流程使用)
                 defaultShift = new Shift(

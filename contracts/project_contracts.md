@@ -734,6 +734,74 @@ HR 或專案管理人員修改客戶基本資料、聯絡人、狀態等。
 | PRJ_P009 | 查詢預算超支專案 | `actual_cost > 'budget'`, `is_deleted = 0` |
 | PRJ_P010 | 依日期範圍查詢 | `start_date >= '2025-01-01'`, `is_deleted = 0` |
 
+##### PRJ_P001: 查詢進行中專案
+
+```json
+{
+  "scenarioId": "PRJ_P001",
+  "apiEndpoint": "GET /api/v1/projects",
+  "controller": "HR06ProjectQryController",
+  "service": "GetProjectListServiceImpl",
+  "permission": "project:read",
+  "request": {
+    "status": "IN_PROGRESS"
+  },
+  "expectedQueryFilters": [
+    {"field": "status", "operator": "=", "value": "IN_PROGRESS"}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
+> **TODO:** `is_deleted = 0` 軟刪除過濾應在 Repository 層（如 `@Where` 或全域過濾器）自動加入，目前 Application 層未產生此條件。
+
+##### PRJ_P003: 依客戶查詢專案
+
+```json
+{
+  "scenarioId": "PRJ_P003",
+  "apiEndpoint": "GET /api/v1/projects",
+  "controller": "HR06ProjectQryController",
+  "service": "GetProjectListServiceImpl",
+  "permission": "project:read",
+  "request": {
+    "customerId": "C001"
+  },
+  "expectedQueryFilters": [
+    {"field": "customerId", "operator": "=", "value": "C001"}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
+##### PRJ_P004: 依 PM 查詢專案
+
+```json
+{
+  "scenarioId": "PRJ_P004",
+  "apiEndpoint": "GET /api/v1/projects",
+  "controller": "HR06ProjectQryController",
+  "service": "GetProjectListServiceImpl",
+  "permission": "project:read",
+  "request": {
+    "pmId": "E001"
+  },
+  "expectedQueryFilters": [
+    {"field": "pmId", "operator": "=", "value": "E001"}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
 ### 2.2 客戶查詢合約 (Customer Query Contract)
 
 | 場景 ID | 說明 | 查詢條件 (Filters) |

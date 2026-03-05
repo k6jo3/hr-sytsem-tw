@@ -1,5 +1,8 @@
 package com.company.hrms.project.api.request;
 
+import com.company.hrms.common.query.Operator;
+import com.company.hrms.common.query.QueryFilter;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,17 +28,19 @@ public class GetProjectListRequest {
     private String keyword;
 
     @Schema(description = "專案狀態")
-    @com.company.hrms.common.query.QueryCondition.EQ("status")
+    @QueryFilter(property = "status", operator = Operator.EQ)
     private String status;
 
     @Schema(description = "負責人ID")
-    @com.company.hrms.common.query.QueryCondition.EQ("ownerId")
+    @QueryFilter(property = "ownerId", operator = Operator.EQ)
     private String ownerId;
 
     @Schema(description = "客戶ID")
+    @QueryFilter(property = "customerId", operator = Operator.EQ)
     private String customerId;
 
     @Schema(description = "專案經理ID")
+    @QueryFilter(property = "pmId", operator = Operator.EQ)
     private String pmId;
 
     @Schema(description = "部門ID")

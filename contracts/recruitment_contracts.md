@@ -877,6 +877,52 @@ HR 延長 Offer 到期日。
 | RCT_J006 | 關鍵字搜尋職缺 | HR | `{"keyword":"工程師"}` | `is_deleted = '0'`, `title LIKE '%工程師%'`, `requirements LIKE '%工程師%'` |
 | RCT_J007 | 組合查詢: 狀態+關鍵字 | HR | `{"status":"OPEN","keyword":"工程師"}` | `status = 'OPEN'`, `is_deleted = '0'`, `title LIKE '%工程師%'`, `requirements LIKE '%工程師%'` |
 
+##### RCT_J001: 查詢開放中職缺
+
+```json
+{
+  "scenarioId": "RCT_J001",
+  "apiEndpoint": "GET /api/v1/recruitment/jobs",
+  "controller": "HR09JobQryController",
+  "service": "GetJobOpeningsServiceImpl",
+  "permission": "recruitment:job:read",
+  "request": {
+    "status": "OPEN"
+  },
+  "expectedQueryFilters": [
+    {"field": "status", "operator": "=", "value": "OPEN"},
+    {"field": "is_deleted", "operator": "=", "value": 0}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
+##### RCT_J002: 查詢特定部門職缺
+
+```json
+{
+  "scenarioId": "RCT_J002",
+  "apiEndpoint": "GET /api/v1/recruitment/jobs",
+  "controller": "HR09JobQryController",
+  "service": "GetJobOpeningsServiceImpl",
+  "permission": "recruitment:job:read",
+  "request": {
+    "departmentId": "D001"
+  },
+  "expectedQueryFilters": [
+    {"field": "department_id", "operator": "=", "value": "D001"},
+    {"field": "is_deleted", "operator": "=", "value": 0}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
 #### 2.2 應徵者查詢
 
 | 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 |
@@ -886,6 +932,28 @@ HR 延長 Offer 到期日。
 | RCT_CD003 | 關鍵字搜尋應徵者 | HR | `{"keyword":"John"}` | `fullName LIKE '%John%'`, `email LIKE '%John%'` |
 | RCT_CD004 | 組合查詢: 職缺+狀態 | HR | `{"openingId":"550e8400-e29b-41d4-a716-446655440000","status":"NEW"}` | `openingId = '550e8400-e29b-41d4-a716-446655440000'`, `status = 'NEW'` |
 | RCT_CD005 | 查詢已錄用應徵者 | HR | `{"status":"HIRED"}` | `status = 'HIRED'` |
+
+##### RCT_CD001: 查詢特定職缺應徵者
+
+```json
+{
+  "scenarioId": "RCT_CD001",
+  "apiEndpoint": "GET /api/v1/candidates",
+  "controller": "HR09CandidateQryController",
+  "service": "GetCandidatesServiceImpl",
+  "permission": "recruitment:candidate:read",
+  "request": {
+    "openingId": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  "expectedQueryFilters": [
+    {"field": "openingId", "operator": "=", "value": "550e8400-e29b-41d4-a716-446655440000"}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
 
 #### 2.3 面試查詢
 
@@ -898,6 +966,28 @@ HR 延長 Offer 到期日。
 | RCT_I005 | 查詢第一輪面試 | HR | `{"interviewRound":1}` | `interviewRound = '1'` |
 | RCT_I006 | 組合查詢: 應徵者+狀態 | HR | `{"candidateId":"cand-001","status":"SCHEDULED"}` | `candidateId = 'cand-001'`, `status = 'SCHEDULED'` |
 
+##### RCT_I001: 查詢特定應徵者面試
+
+```json
+{
+  "scenarioId": "RCT_I001",
+  "apiEndpoint": "GET /api/v1/recruitment/interviews",
+  "controller": "HR09InterviewQryController",
+  "service": "GetInterviewsServiceImpl",
+  "permission": "recruitment:interview:read",
+  "request": {
+    "candidateId": "cand-001"
+  },
+  "expectedQueryFilters": [
+    {"field": "candidateId", "operator": "=", "value": "cand-001"}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
 #### 2.4 Offer 查詢
 
 | 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 |
@@ -907,3 +997,25 @@ HR 延長 Offer 到期日。
 | RCT_O003 | 姓名模糊搜尋 Offer | HR | `{"candidateName":"王"}` | `candidateName LIKE '王'` |
 | RCT_O004 | 職位模糊搜尋 Offer | HR | `{"offeredPosition":"工程師"}` | `offeredPosition LIKE '工程師'` |
 | RCT_O005 | 組合查詢: 應徵者+狀態 | HR | `{"candidateId":"cand-001","status":"PENDING"}` | `candidateId = 'cand-001'`, `status = 'PENDING'` |
+
+##### RCT_O001: 查詢特定應徵者 Offer
+
+```json
+{
+  "scenarioId": "RCT_O001",
+  "apiEndpoint": "GET /api/v1/recruitment/offers",
+  "controller": "HR09OfferQryController",
+  "service": "GetOffersServiceImpl",
+  "permission": "recruitment:offer:read",
+  "request": {
+    "candidateId": "cand-001"
+  },
+  "expectedQueryFilters": [
+    {"field": "candidateId", "operator": "=", "value": "cand-001"}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```

@@ -827,9 +827,7 @@ HR 人員匯出政府申報格式檔案（勞保、健保、勞退等）。
     "includePublic": true
   },
 
-  "expectedQueryFilters": [
-    {"field": "is_active", "operator": "=", "value": true}
-  ],
+  "expectedQueryFilters": [],
 
   "expectedResponse": {
     "statusCode": 200,

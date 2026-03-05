@@ -2,6 +2,7 @@ package com.company.hrms.insurance.domain.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -40,8 +41,8 @@ public class InsuranceLevelMatchingService {
             return Optional.empty();
         }
 
-        // 取得該保險類型的所有有效級距
-        List<InsuranceLevel> levels = levelRepository.findByTypeAndActiveOn(type, referenceDate);
+        // 取得該保險類型的所有有效級距（轉為可變 List 以便排序）
+        List<InsuranceLevel> levels = new ArrayList<>(levelRepository.findByTypeAndActiveOn(type, referenceDate));
 
         if (levels.isEmpty()) {
             return Optional.empty();

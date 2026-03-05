@@ -8,5 +8,9 @@
     "f" : "employment_status",
     "op" : "EQ",
     "v" : "ACTIVE"
+  }, {
+    "f" : "is_deleted",
+    "op" : "EQ",
+    "v" : false
   } ]
 }

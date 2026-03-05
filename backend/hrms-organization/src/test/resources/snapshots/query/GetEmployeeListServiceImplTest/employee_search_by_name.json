@@ -5,6 +5,10 @@
     "op" : "LIKE",
     "v" : "John"
   }, {
+    "f" : "is_deleted",
+    "op" : "EQ",
+    "v" : false
+  }, {
     "f" : "employment_status",
     "op" : "NE",
     "v" : "TERMINATED"

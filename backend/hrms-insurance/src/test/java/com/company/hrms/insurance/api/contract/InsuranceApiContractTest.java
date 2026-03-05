@@ -46,8 +46,8 @@ import com.company.hrms.insurance.domain.repository.IInsuranceUnitRepository;
  * 不使用 QueryGroup 模式。因此本測試以 verify() 驗證正確的 Repository 方法被呼叫，
  * 而非使用 assertContract() 驗證 QueryGroup。
  */
-// TODO: 以下測試仍有失敗待修復：
-// 1. [Command] INS_CMD_E001 enrollEmployee：pipeline「查詢投保級距」NPE，levelRepository mock 條件可能不匹配
+// 已修復：
+// 1. [Command] INS_CMD_E001 enrollEmployee：InsuranceLevelMatchingService 對 List.of() 不可變列表呼叫 sort() 導致 UnsupportedOperationException
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")

@@ -842,6 +842,75 @@ HR 標記課程已結束，系統更新已出席學員的訓練記錄。
 | TRN_C008 | 查詢實體課程 | EMPLOYEE | `{"mode":"OFFLINE"}` | `mode = 'OFFLINE'` |
 | TRN_C009 | 依講師查詢 | HR | `{"instructorId":"E001"}` | `instructor_id = 'E001'` |
 
+##### TRN_C001: 查詢開放報名課程
+
+```json
+{
+  "scenarioId": "TRN_C001",
+  "apiEndpoint": "GET /api/v1/training/courses",
+  "controller": "HR10CourseQryController",
+  "service": "GetCoursesServiceImpl",
+  "permission": "training:course:read",
+  "request": {
+    "status": "OPEN"
+  },
+  "expectedQueryFilters": [
+    {"field": "status", "operator": "=", "value": "OPEN"},
+    {"field": "is_deleted", "operator": "=", "value": 0}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
+##### TRN_C005: 依類別查詢（技術類）
+
+```json
+{
+  "scenarioId": "TRN_C005",
+  "apiEndpoint": "GET /api/v1/training/courses",
+  "controller": "HR10CourseQryController",
+  "service": "GetCoursesServiceImpl",
+  "permission": "training:course:read",
+  "request": {
+    "category": "TECHNICAL"
+  },
+  "expectedQueryFilters": [
+    {"field": "category", "operator": "=", "value": "TECHNICAL"},
+    {"field": "is_deleted", "operator": "=", "value": 0}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
+##### TRN_C006: 依名稱模糊查詢
+
+```json
+{
+  "scenarioId": "TRN_C006",
+  "apiEndpoint": "GET /api/v1/training/courses",
+  "controller": "HR10CourseQryController",
+  "service": "GetCoursesServiceImpl",
+  "permission": "training:course:read",
+  "request": {
+    "name": "領導"
+  },
+  "expectedQueryFilters": [
+    {"field": "name", "operator": "LIKE", "value": "領導"},
+    {"field": "is_deleted", "operator": "=", "value": 0}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
 #### 2.2 報名查詢
 
 | 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 |
@@ -854,6 +923,50 @@ HR 標記課程已結束，系統更新已出席學員的訓練記錄。
 | TRN_E006 | 主管查詢下屬報名 | MANAGER | `{}` | `employee.department_id IN ('{managedDeptIds}')` |
 | TRN_E007 | 查詢已完成課程 | EMPLOYEE | `{"status":"COMPLETED"}` | `employee_id = '{currentUserId}'`, `status = 'COMPLETED'` |
 
+##### TRN_E001: 查詢課程報名
+
+```json
+{
+  "scenarioId": "TRN_E001",
+  "apiEndpoint": "GET /api/v1/training/enrollments",
+  "controller": "HR10EnrollmentQryController",
+  "service": "GetEnrollmentsServiceImpl",
+  "permission": "training:enrollment:read",
+  "request": {
+    "courseId": "C001"
+  },
+  "expectedQueryFilters": [
+    {"field": "course_id", "operator": "=", "value": "C001"},
+    {"field": "is_deleted", "operator": "=", "value": 0}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
+##### TRN_E005: 員工查詢自己報名
+
+```json
+{
+  "scenarioId": "TRN_E005",
+  "apiEndpoint": "GET /api/v1/training/enrollments/me",
+  "controller": "HR10EnrollmentQryController",
+  "service": "GetMyTrainingsServiceImpl",
+  "permission": "training:enrollment:read",
+  "request": {},
+  "expectedQueryFilters": [
+    {"field": "employee_id", "operator": "=", "value": "00000000-0000-0000-0000-000000000001"},
+    {"field": "is_deleted", "operator": "=", "value": 0}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
+
 #### 2.3 證照查詢
 
 | 場景 ID | 測試描述 | 模擬角色 | 輸入 (Request) | 必須包含的過濾條件 |
@@ -864,6 +977,29 @@ HR 標記課程已結束，系統更新已出席學員的訓練記錄。
 | TRN_CT004 | 查詢已過期證照 | HR | `{"status":"EXPIRED"}` | `status = 'EXPIRED'` |
 | TRN_CT005 | 員工查詢自己證照 | EMPLOYEE | `{}` | `employee_id = '{currentUserId}'` |
 | TRN_CT006 | 依認證類型查詢 | HR | `{"certType":"PROFESSIONAL"}` | `cert_type = 'PROFESSIONAL'` |
+
+##### TRN_CT001: 查詢員工證照
+
+```json
+{
+  "scenarioId": "TRN_CT001",
+  "apiEndpoint": "GET /api/v1/training/certificates",
+  "controller": "HR10CertificateQryController",
+  "service": "GetCertificatesServiceImpl",
+  "permission": "training:certificate:read",
+  "request": {
+    "employeeId": "E001"
+  },
+  "expectedQueryFilters": [
+    {"field": "employee_id", "operator": "=", "value": "E001"},
+    {"field": "is_deleted", "operator": "=", "value": 0}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "minRecords": 0
+  }
+}
+```
 
 #### 2.4 訓練紀錄查詢
 
