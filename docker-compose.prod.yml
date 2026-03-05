@@ -1,0 +1,319 @@
+# Docker Compose - 生產部署（作品集展示）
+# 使用方式：docker compose -f docker-compose.prod.yml up -d
+#
+# 前置需求：
+#   1. 複製 .env.example 為 .env 並填入設定
+#   2. 確保 deploy/nginx/ 下有配置檔
+
+services:
+  # ==========================================
+  # 基礎設施
+  # ==========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: hrms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-hrms_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hrms_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/docker/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-hrms_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hrms-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: hrms-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hrms-network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: hrms-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - hrms-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: hrms-kafka
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # 前端 + Nginx 反向代理
+  # ==========================================
+  nginx:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/frontend:${IMAGE_TAG:-latest}
+    container_name: hrms-nginx
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./deploy/nginx/proxy_params:/etc/nginx/proxy_params:ro
+    depends_on:
+      - hrms-iam
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # 後端微服務（14 個）
+  # ==========================================
+  hrms-iam:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-iam:${IMAGE_TAG:-latest}
+    container_name: hrms-iam
+    restart: unless-stopped
+    environment: &backend-env
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: hrms_iam
+      DB_USERNAME: ${DB_USERNAME:-hrms_user}
+      DB_PASSWORD: ${DB_PASSWORD:-hrms_password}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KAFKA_SERVERS: kafka:9092
+      EUREKA_ENABLED: "false"
+      JWT_SECRET: ${JWT_SECRET:-your-256-bit-secret-key-for-jwt-token-generation-must-be-at-least-256-bits-long}
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    networks:
+      - hrms-network
+
+  hrms-organization:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-organization:${IMAGE_TAG:-latest}
+    container_name: hrms-organization
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_organization
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-attendance:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-attendance:${IMAGE_TAG:-latest}
+    container_name: hrms-attendance
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_attendance
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-payroll:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-payroll:${IMAGE_TAG:-latest}
+    container_name: hrms-payroll
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_payroll
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-insurance:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-insurance:${IMAGE_TAG:-latest}
+    container_name: hrms-insurance
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_insurance
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-project:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-project:${IMAGE_TAG:-latest}
+    container_name: hrms-project
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_project
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-timesheet:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-timesheet:${IMAGE_TAG:-latest}
+    container_name: hrms-timesheet
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_timesheet
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-performance:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-performance:${IMAGE_TAG:-latest}
+    container_name: hrms-performance
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_performance
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-recruitment:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-recruitment:${IMAGE_TAG:-latest}
+    container_name: hrms-recruitment
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_recruitment
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-training:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-training:${IMAGE_TAG:-latest}
+    container_name: hrms-training
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_training
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-workflow:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-workflow:${IMAGE_TAG:-latest}
+    container_name: hrms-workflow
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_workflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-notification:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-notification:${IMAGE_TAG:-latest}
+    container_name: hrms-notification
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_notification
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-document:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-document:${IMAGE_TAG:-latest}
+    container_name: hrms-document
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_document
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  hrms-reporting:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_REPO:-k6jo3/hr-system-2}/hrms-reporting:${IMAGE_TAG:-latest}
+    container_name: hrms-reporting
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+      DB_NAME: hrms_reporting
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+networks:
+  hrms-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: hrms_prod_postgres
+  redis_data:
+    name: hrms_prod_redis

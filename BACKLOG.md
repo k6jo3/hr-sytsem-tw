@@ -62,10 +62,10 @@ HR11-HR14 前端已全部完整實作。
 
 | # | 項目 | 說明 | 優先級 |
 |:---:|:---|:---|:---:|
-| C1 | 前端測試覆蓋 | Factory/Component/Hook 單元測試（CLAUDE.md 規定必要） | 高 |
+| C1 | 前端測試覆蓋 | ✅ Factory 14/14、Hook 14/14、Component 9/9 | 高 |
 | C2 | 跨服務整合測試 | Kafka Event 端到端驗證（目前用 InMemoryEventPublisher） | 中 |
-| C3 | CI/CD Pipeline | GitHub Actions 自動化建置、測試、部署 | 中 |
-| C4 | Docker 部署配置 | Docker Compose（開發）/ K8s（生產）配置 | 中 |
+| C3 | CI/CD Pipeline | ✅ GitHub Actions：前端測試+建置、後端測試、Docker Image 建置推送、SSH 部署 | 中 |
+| C4 | Docker 部署配置 | ✅ docker-compose.prod.yml + Nginx 反向代理 + 後端/前端 Dockerfile | 中 |
 | C5 | 效能測試 | JMeter/Gatling 負載測試、壓力測試 | 低 |
 | C6 | API 文件自動生成 | Swagger/OpenAPI 自動產生 + Swagger UI | 低 |
 
