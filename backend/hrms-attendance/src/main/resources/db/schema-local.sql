@@ -217,3 +217,84 @@ CREATE TABLE IF NOT EXISTS annual_leave_rules (
     created_by VARCHAR(50),
     updated_by VARCHAR(50)
 );
+
+-- =====================================================
+-- 排班表
+-- =====================================================
+CREATE TABLE IF NOT EXISTS shift_schedules (
+    id VARCHAR(50) PRIMARY KEY,
+    employee_id VARCHAR(50) NOT NULL,
+    shift_id VARCHAR(50) NOT NULL,
+    schedule_date DATE NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'DRAFT',
+    rotation_pattern_id VARCHAR(50),
+    note VARCHAR(500),
+    is_deleted INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50),
+    updated_by VARCHAR(50)
+);
+
+CREATE INDEX IF NOT EXISTS idx_shift_sched_emp_id ON shift_schedules(employee_id);
+CREATE INDEX IF NOT EXISTS idx_shift_sched_date ON shift_schedules(schedule_date);
+CREATE INDEX IF NOT EXISTS idx_shift_sched_shift_id ON shift_schedules(shift_id);
+
+-- =====================================================
+-- 輪班模式表
+-- =====================================================
+CREATE TABLE IF NOT EXISTS rotation_patterns (
+    id VARCHAR(50) PRIMARY KEY,
+    organization_id VARCHAR(50) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(50) NOT NULL,
+    cycle_days INTEGER NOT NULL,
+    is_active INTEGER DEFAULT 1,
+    is_deleted INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50),
+    updated_by VARCHAR(50)
+);
+
+CREATE INDEX IF NOT EXISTS idx_rotation_pat_code ON rotation_patterns(code);
+CREATE INDEX IF NOT EXISTS idx_rotation_pat_org_id ON rotation_patterns(organization_id);
+
+-- =====================================================
+-- 輪班天序表
+-- =====================================================
+CREATE TABLE IF NOT EXISTS rotation_days (
+    id VARCHAR(50) PRIMARY KEY,
+    pattern_id VARCHAR(50) NOT NULL,
+    day_order INTEGER NOT NULL,
+    shift_id VARCHAR(50),
+    is_rest_day BOOLEAN DEFAULT FALSE
+);
+
+CREATE INDEX IF NOT EXISTS idx_rotation_days_pattern ON rotation_days(pattern_id);
+
+-- =====================================================
+-- 換班申請表
+-- =====================================================
+CREATE TABLE IF NOT EXISTS shift_swap_requests (
+    id VARCHAR(50) PRIMARY KEY,
+    requester_id VARCHAR(50) NOT NULL,
+    counterpart_id VARCHAR(50) NOT NULL,
+    requester_date DATE NOT NULL,
+    counterpart_date DATE NOT NULL,
+    requester_shift_id VARCHAR(50),
+    counterpart_shift_id VARCHAR(50),
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING_COUNTERPART',
+    reason VARCHAR(500),
+    rejection_reason VARCHAR(500),
+    approver_id VARCHAR(50),
+    is_deleted INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(50),
+    updated_by VARCHAR(50)
+);
+
+CREATE INDEX IF NOT EXISTS idx_swap_req_requester ON shift_swap_requests(requester_id);
+CREATE INDEX IF NOT EXISTS idx_swap_req_counterpart ON shift_swap_requests(counterpart_id);
+CREATE INDEX IF NOT EXISTS idx_swap_req_status ON shift_swap_requests(status);
