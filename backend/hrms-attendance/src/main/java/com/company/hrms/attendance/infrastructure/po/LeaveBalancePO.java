@@ -1,6 +1,7 @@
 package com.company.hrms.attendance.infrastructure.po;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -37,6 +38,12 @@ public class LeaveBalancePO {
 
     @Column(name = "used_days", precision = 5, scale = 2)
     private BigDecimal usedDays;
+
+    @Column(name = "carry_over_days", precision = 5, scale = 2)
+    private BigDecimal carryOverDays;
+
+    @Column(name = "expiry_date")
+    private LocalDate expiryDate;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

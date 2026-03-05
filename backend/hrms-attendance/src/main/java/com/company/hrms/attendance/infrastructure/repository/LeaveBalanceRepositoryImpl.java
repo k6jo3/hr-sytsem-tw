@@ -66,7 +66,9 @@ public class LeaveBalanceRepositoryImpl implements ILeaveBalanceRepository {
                 new LeaveTypeId(po.getLeaveTypeId()),
                 po.getYear(),
                 po.getTotalDays(),
-                po.getUsedDays());
+                po.getUsedDays(),
+                po.getCarryOverDays(),
+                po.getExpiryDate());
     }
 
     private LeaveBalancePO toPO(LeaveBalance balance) {
@@ -77,6 +79,8 @@ public class LeaveBalanceRepositoryImpl implements ILeaveBalanceRepository {
         po.setYear(balance.getYear());
         po.setTotalDays(balance.getTotalDays());
         po.setUsedDays(balance.getUsedDays());
+        po.setCarryOverDays(balance.getCarryOverDays());
+        po.setExpiryDate(balance.getExpiryDate());
         return po;
     }
 }

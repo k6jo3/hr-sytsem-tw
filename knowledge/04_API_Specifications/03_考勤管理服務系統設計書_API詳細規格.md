@@ -650,7 +650,8 @@
         "leaveCode": "ANNUAL",
         "totalDays": 10,
         "usedDays": 3.5,
-        "remainingDays": 6.5,
+        "carryOverDays": 2.0,
+        "remainingDays": 8.5,
         "unit": "FULL_DAY",
         "expiryDate": "2026-12-31",
         "isExpiringSoon": false
@@ -2286,6 +2287,29 @@
 | `PATERNITY_LEAVE` | 陪產假 | 是 | 7 天 |
 | `MENSTRUAL_LEAVE` | 生理假 | 半薪 | 12 天 |
 | `PARENTAL_LEAVE` | 育嬰留停 | 否 | 依規定 |
+
+### 8.10 特休年度制度 (AnnualLeaveSystem)
+
+| 值 | 說明 |
+|:---|:---|
+| `CALENDAR_YEAR` | 歷年制（1/1～12/31） |
+| `ANNIVERSARY` | 週年制（到職日起算） |
+
+### 8.11 超額請假政策 (OverdrawPolicy)
+
+| 值 | 說明 |
+|:---|:---|
+| `DENY` | 拒絕申請（預設） |
+| `CONVERT_TO_PERSONAL` | 自動轉為事假，超出部分以事假計 |
+| `ADVANCE` | 預支下年度額度，離職時需結算 |
+
+### 8.12 未休假處理政策 (ExpiryPolicy)
+
+| 值 | 說明 |
+|:---|:---|
+| `CARRYOVER` | 結轉至下年度（可設定上限天數） |
+| `PAY_COMPENSATION` | 折算未休假工資（依勞基法） |
+| `FORFEIT` | 過期作廢（需符合法令限制） |
 
 ---
 
