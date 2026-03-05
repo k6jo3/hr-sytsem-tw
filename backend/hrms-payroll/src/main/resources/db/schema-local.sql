@@ -146,3 +146,49 @@ CREATE TABLE IF NOT EXISTS hr04_adjustment_audit_trail (
     timestamp           TIMESTAMP   NOT NULL,
     CONSTRAINT fk_audit_adjustment FOREIGN KEY (adjustment_id) REFERENCES hr04_payroll_adjustments(adjustment_id)
 );
+
+-- 薪資預借
+CREATE TABLE IF NOT EXISTS hr04_salary_advances (
+    advance_id          VARCHAR(36) PRIMARY KEY,
+    employee_id         VARCHAR(36)  NOT NULL,
+    requested_amount    DECIMAL(10,2) NOT NULL,
+    approved_amount     DECIMAL(10,2),
+    installment_months  INTEGER      NOT NULL,
+    installment_amount  DECIMAL(10,2),
+    repaid_amount       DECIMAL(10,2) DEFAULT 0,
+    remaining_balance   DECIMAL(10,2),
+    application_date    DATE,
+    disbursement_date   DATE,
+    status              VARCHAR(20)  NOT NULL,
+    reason              VARCHAR(500),
+    rejection_reason    VARCHAR(500),
+    approver_id         VARCHAR(36),
+    created_at          TIMESTAMP,
+    updated_at          TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_advance_emp_id ON hr04_salary_advances(employee_id);
+CREATE INDEX IF NOT EXISTS idx_advance_status ON hr04_salary_advances(status);
+
+-- 法扣款
+CREATE TABLE IF NOT EXISTS hr04_legal_deductions (
+    deduction_id        VARCHAR(36) PRIMARY KEY,
+    employee_id         VARCHAR(36)  NOT NULL,
+    court_order_number  VARCHAR(100) NOT NULL,
+    garnishment_type    VARCHAR(30)  NOT NULL,
+    total_amount        DECIMAL(12,2) NOT NULL,
+    deducted_amount     DECIMAL(12,2) DEFAULT 0,
+    remaining_amount    DECIMAL(12,2),
+    priority            INTEGER      DEFAULT 1,
+    effective_date      DATE         NOT NULL,
+    expiry_date         DATE,
+    status              VARCHAR(20)  NOT NULL,
+    issuing_authority   VARCHAR(100),
+    case_number         VARCHAR(100),
+    note                VARCHAR(500),
+    created_at          TIMESTAMP,
+    updated_at          TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_legal_ded_emp_id ON hr04_legal_deductions(employee_id);
+CREATE INDEX IF NOT EXISTS idx_legal_ded_status ON hr04_legal_deductions(status);
