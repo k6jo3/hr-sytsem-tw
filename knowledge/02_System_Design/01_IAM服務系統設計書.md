@@ -2188,8 +2188,65 @@ ldap:
 - 管理者 Bind DN/Password 不寫入程式碼，由環境變數注入
 - LDAP 連線超時設定避免阻塞
 
+## 13. 系統管理模組（整合至 HR01 IAM）
+
+### 13.1 模組定位
+
+系統管理功能整合至 IAM 服務（HR01），提供 IT 管理員日常維運所需工具，包含功能開關、系統參數、排程管理。
+
+### 13.2 核心 Domain
+
+#### 13.2.1 FeatureToggle（功能開關）
+
+**職責：** 控制各模組業務功能的即時啟停，不需重啟服務
+
+**欄位：** featureCode、featureName、module、enabled、tenantId
+**方法：** enable()、disable()、toggle()
+
+**預設開關：**
+| 功能代碼 | 名稱 | 模組 | 預設 |
+|:---|:---|:---|:---:|
+| LATE_CHECK | 遲到判定 | HR03 | ON |
+| LATE_SALARY_DEDUCTION | 遲到扣薪 | HR03 | ON |
+| SHIFT_SCHEDULING | 輪班排程 | HR03 | ON |
+| SALARY_ADVANCE | 薪資預借 | HR04 | ON |
+| LEGAL_DEDUCTION | 法扣款 | HR04 | ON |
+| LDAP_AUTH | LDAP 認證 | HR01 | OFF |
+| ABSENT_DETECTION | 曠職自動判定 | HR03 | ON |
+| AUTO_INSURANCE_WITHDRAW | 離職自動退保 | HR05 | ON |
+
+#### 13.2.2 SystemParameter（系統參數）
+
+**職責：** 管理全域及各模組業務參數，支援 audit trail
+
+**參數型別：** STRING / INTEGER / DECIMAL / BOOLEAN / JSON
+**分類：** SECURITY / BUSINESS / UI / SYSTEM
+**方法：** updateValue() → 回傳 ParameterChange 記錄（含 oldValue/newValue/operator/timestamp）
+
+#### 13.2.3 ScheduledJobConfig（排程任務配置）
+
+**職責：** 管理系統排程任務的啟停和 Cron 表達式
+
+**預設排程：**
+| 任務代碼 | 名稱 | Cron | 說明 |
+|:---|:---|:---|:---|
+| ABSENT_DETECTION | 曠職判定 | 0 0 19 * * ? | 每日 19:00 |
+| ANNUAL_LEAVE_SETTLEMENT | 特休年度結算 | 0 0 1 1 1 ? | 每年 1/1 |
+| INSURANCE_DAILY_REPORT | 保險異動報表 | 0 30 8 * * ? | 每日 08:30 |
+| PAYROLL_MONTHLY_CLOSE | 薪資月結 | 0 0 2 1 * ? | 每月 1 日 02:00 |
+
+**連續失敗告警：** consecutiveFailures >= 3 時觸發告警
+
+### 13.3 資料庫
+
+新增 4 張表：
+- `feature_toggles` — 功能開關
+- `system_parameters` — 系統參數
+- `parameter_change_logs` — 參數異動記錄
+- `scheduled_job_configs` — 排程任務配置
+
 **文件完成日期:** 2025-12-26
-**版本:** 1.1
+**版本:** 1.2
 
 
 # API詳細規格

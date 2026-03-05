@@ -296,3 +296,51 @@ MERGE INTO user_roles (user_role_id, user_id, role_id, assigned_at) KEY (user_ro
 UPDATE users SET employee_id = '00000000-0000-0000-0000-000000000001' WHERE user_id = '00000000-0000-0000-0000-000000000001';
 UPDATE users SET employee_id = '00000000-0000-0000-0000-000000000002' WHERE user_id = '00000000-0000-0000-0000-000000000002';
 UPDATE users SET employee_id = '00000000-0000-0000-0000-000000000003' WHERE user_id = '00000000-0000-0000-0000-000000000003';
+
+-- =====================================================
+-- 11. 功能開關（預設值）
+-- =====================================================
+MERGE INTO feature_toggles (id, feature_code, feature_name, module, enabled, description) KEY (id) VALUES
+    ('ft-0001', 'LATE_CHECK', '遲到判定', 'HR03', TRUE, '啟用考勤遲到自動判定功能');
+MERGE INTO feature_toggles (id, feature_code, feature_name, module, enabled, description) KEY (id) VALUES
+    ('ft-0002', 'LATE_SALARY_DEDUCTION', '遲到扣薪', 'HR03', TRUE, '啟用遲到連動薪資扣款');
+MERGE INTO feature_toggles (id, feature_code, feature_name, module, enabled, description) KEY (id) VALUES
+    ('ft-0003', 'SHIFT_SCHEDULING', '輪班排程', 'HR03', TRUE, '啟用輪班排程管理功能');
+MERGE INTO feature_toggles (id, feature_code, feature_name, module, enabled, description) KEY (id) VALUES
+    ('ft-0004', 'SALARY_ADVANCE', '薪資預借', 'HR04', TRUE, '啟用薪資預借申請功能');
+MERGE INTO feature_toggles (id, feature_code, feature_name, module, enabled, description) KEY (id) VALUES
+    ('ft-0005', 'LEGAL_DEDUCTION', '法扣款', 'HR04', TRUE, '啟用法院扣押執行功能');
+MERGE INTO feature_toggles (id, feature_code, feature_name, module, enabled, description) KEY (id) VALUES
+    ('ft-0006', 'LDAP_AUTH', 'LDAP 認證', 'HR01', FALSE, '啟用 LDAP/AD 企業登入整合');
+MERGE INTO feature_toggles (id, feature_code, feature_name, module, enabled, description) KEY (id) VALUES
+    ('ft-0007', 'ABSENT_DETECTION', '曠職自動判定', 'HR03', TRUE, '啟用每日下班後曠職自動判定排程');
+MERGE INTO feature_toggles (id, feature_code, feature_name, module, enabled, description) KEY (id) VALUES
+    ('ft-0008', 'AUTO_INSURANCE_WITHDRAW', '離職自動退保', 'HR05', TRUE, '啟用離職連動保險自動退保');
+
+-- =====================================================
+-- 12. 系統參數（預設值）
+-- =====================================================
+MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
+    ('sp-0001', 'MAX_FAILED_LOGIN_ATTEMPTS', '登入失敗上限', '5', 'INTEGER', 'HR01', 'SECURITY', '5', '帳號鎖定前允許的最大登入失敗次數');
+MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
+    ('sp-0002', 'ACCOUNT_LOCK_DURATION_MINUTES', '帳號鎖定時長', '30', 'INTEGER', 'HR01', 'SECURITY', '30', '帳號鎖定時長（分鐘）');
+MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
+    ('sp-0003', 'PASSWORD_MIN_LENGTH', '密碼最短長度', '8', 'INTEGER', 'HR01', 'SECURITY', '8', '密碼最低字元數');
+MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
+    ('sp-0004', 'SALARY_ADVANCE_MAX_RATE', '預借上限比率', '0.9', 'DECIMAL', 'HR04', 'BUSINESS', '0.9', '可預借金額佔（淨薪-法扣）的比率上限');
+MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
+    ('sp-0005', 'GARNISHMENT_ONE_THIRD_RULE', '法扣三分之一規則', 'true', 'BOOLEAN', 'HR04', 'BUSINESS', 'true', '是否啟用強制執行法§115-1 三分之一扣薪上限');
+MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
+    ('sp-0006', 'ABSENT_DETECTION_CRON', '曠職判定排程', '0 0 19 * * ?', 'STRING', 'HR03', 'SYSTEM', '0 0 19 * * ?', '曠職自動判定排程的 Cron 表達式');
+
+-- =====================================================
+-- 13. 排程任務配置
+-- =====================================================
+MERGE INTO scheduled_job_configs (id, job_code, job_name, module, cron_expression, enabled, description) KEY (id) VALUES
+    ('job-0001', 'ABSENT_DETECTION', '曠職自動判定', 'HR03', '0 0 19 * * ?', TRUE, '每日 19:00 掃描無打卡且無請假的員工');
+MERGE INTO scheduled_job_configs (id, job_code, job_name, module, cron_expression, enabled, description) KEY (id) VALUES
+    ('job-0002', 'ANNUAL_LEAVE_SETTLEMENT', '特休年度結算', 'HR03', '0 0 1 1 1 ?', TRUE, '每年 1/1 凌晨結算特休假（結轉/折薪/作廢）');
+MERGE INTO scheduled_job_configs (id, job_code, job_name, module, cron_expression, enabled, description) KEY (id) VALUES
+    ('job-0003', 'INSURANCE_DAILY_REPORT', '保險每日異動報表', 'HR05', '0 30 8 * * ?', TRUE, '每日 08:30 匯出加退保異動清單');
+MERGE INTO scheduled_job_configs (id, job_code, job_name, module, cron_expression, enabled, description) KEY (id) VALUES
+    ('job-0004', 'PAYROLL_MONTHLY_CLOSE', '薪資月結', 'HR04', '0 0 2 1 * ?', TRUE, '每月 1 日凌晨 2:00 執行薪資月結');
