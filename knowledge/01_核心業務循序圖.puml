@@ -1,5 +1,5 @@
 ' ============================================================
-' HRMS 核心業務循序圖 (4 個場景)
+' HRMS 核心業務循序圖 (7 個場景)
 ' 渲染指令：java -jar tools/plantuml.jar -smetana -o diagrams 01_核心業務循序圖.puml
 ' ============================================================
 
@@ -245,6 +245,355 @@ else 寄送離職通知
   activate NTF
   NTF --> HR : 離職辦理完成確認單\n(含交接清單)
   NTF -> NTF : 寄送離職感謝信給員工
+  deactivate NTF
+end
+
+@enduml
+
+' ---- 場景五：LDAP 登入與 JIT Provisioning 流程 ----
+@startuml 01_LDAP登入流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam sequenceMessageAlign center
+title LDAP 登入與 JIT Provisioning 流程 (LDAP Login with JIT Provisioning)
+
+actor "使用者(UI)" as User
+participant "IAM 微服務\nHR01AuthCmdController" as Ctrl
+participant "LoginServiceImpl\n(本地認證 Pipeline)" as Login
+participant "LdapLoginService\n(LDAP 認證服務)" as LdapSvc
+participant "LdapAuthenticationServiceImpl\n(LDAP 基礎設施)" as LdapInfra
+database "LDAP/AD 伺服器" as LDAP
+participant "LdapGroupRoleMappingService\n(群組角色映射)" as RoleMap
+participant "User 聚合根\n(Domain)" as Domain
+database "IAM 資料庫" as DB_IAM
+
+== Phase 1: 使用者提交登入請求 ==
+
+User -> Ctrl : POST /api/v1/auth/login\n{username, password}
+activate Ctrl
+Ctrl -> Login : execCommand(LoginRequest)
+activate Login
+
+== Phase 2: LDAP 認證 (混合模式) ==
+
+Login -> Login : 檢查 ldap.enabled 設定
+alt LDAP 已啟用
+  Login -> LdapSvc : authenticateViaLdap(username, password)
+  activate LdapSvc
+
+  note right of LdapSvc : 步驟一：LDAP Bind 認證
+
+  LdapSvc -> LdapInfra : authenticate(username, password)
+  activate LdapInfra
+  LdapInfra -> LdapInfra : escapeLdapFilter(username)\n（防 LDAP Injection）
+  LdapInfra -> LDAP : 管理者 Bind → 搜尋使用者 DN\n(sAMAccountName={0})
+  LDAP --> LdapInfra : 回傳使用者 DN
+
+  alt 使用者不存在於 AD
+    LdapInfra --> LdapSvc : throw LdapAuthenticationException\n("LDAP 使用者不存在")
+    LdapSvc --> Login : 認證失敗
+    Login -> Login : 回退本地密碼認證\n(ValidatePasswordTask)
+  else 使用者存在
+    LdapInfra -> LDAP : 使用者帳密 Bind 驗證
+    alt 密碼錯誤
+      LDAP --> LdapInfra : NamingException
+      LdapInfra --> LdapSvc : throw LdapAuthenticationException\n("LDAP 認證失敗")
+      LdapSvc --> Login : 認證失敗
+      Login --> Ctrl : HTTP 401 Unauthorized
+    else 密碼正確
+      LDAP --> LdapInfra : Bind 成功
+      LdapInfra -> LDAP : 查詢使用者屬性\n(displayName, mail, employeeID, memberOf)
+      LDAP --> LdapInfra : 使用者完整資訊 + 群組清單
+      LdapInfra --> LdapSvc : LdapUserInfo\n{username, dn, displayName, email,\nemployeeId, groups}
+      deactivate LdapInfra
+
+      == Phase 3: JIT Provisioning ==
+
+      note right of LdapSvc : 步驟二：JIT Provisioning\n（首次建帳 / 資訊同步）
+
+      LdapSvc -> DB_IAM : findByUsername(username)
+      alt 帳號已存在
+        DB_IAM --> LdapSvc : 既有 User
+        LdapSvc -> Domain : syncFromLdap(displayName, email, dn)\n同步最新 LDAP 資訊
+      else 首次登入（帳號不存在）
+        DB_IAM --> LdapSvc : empty
+        LdapSvc -> LdapSvc : 確認 jitProvisioning = true
+        LdapSvc -> Domain : User.createFromLdap(username, email,\ndisplayName, dn, defaultTenantId)\nauthSource=LDAP, passwordHash=null
+        note right of Domain : LDAP 使用者不儲存密碼\n認證永遠由 AD 負責
+        LdapSvc -> DB_IAM : save(newUser)
+      end
+
+      == Phase 4: LDAP 群組 → RBAC 角色同步 ==
+
+      note right of LdapSvc : 步驟三：群組角色映射
+
+      LdapSvc -> LdapSvc : 確認 syncRoles = true
+      LdapSvc -> RoleMap : mapGroupsToRoles(groups, groupRoleMapping)
+      activate RoleMap
+      RoleMap -> RoleMap : 精確匹配 DN\n或 CN 模糊匹配
+      RoleMap --> LdapSvc : 映射後的角色清單\n如 [ADMIN, HR, EMPLOYEE]
+      deactivate RoleMap
+      LdapSvc -> Domain : assignRole(role) ×N\n清除舊角色、重新設定
+
+      == Phase 5: 記錄登入 & 產生 JWT ==
+
+      note right of LdapSvc : 步驟四：記錄登入
+
+      LdapSvc -> Domain : recordLogin()\n更新 lastLoginAt, 清除 failedAttempts
+      LdapSvc -> DB_IAM : save(user)
+      LdapSvc --> Login : 認證完成的 User
+      deactivate LdapSvc
+    end
+  end
+
+  Login -> Login : GenerateTokenTask\n產生 JWT Access/Refresh Token
+  Login --> Ctrl : LoginResponse\n{accessToken, refreshToken, userInfo}
+  deactivate Login
+  Ctrl --> User : HTTP 200 OK\n（含 JWT Token + 角色資訊）
+
+else LDAP 未啟用
+  Login -> Login : 走本地認證 Pipeline\n(LoadUser → CheckStatus →\nValidatePassword → RecordLogin →\nGenerateToken)
+  Login --> Ctrl : LoginResponse
+  deactivate Login
+  Ctrl --> User : HTTP 200 OK
+end
+
+deactivate Ctrl
+
+@enduml
+
+' ---- 場景六：曠職自動判定流程 ----
+@startuml 01_曠職判定流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam sequenceMessageAlign center
+title 曠職自動判定流程 (Absent Detection Flow)
+
+participant "Spring Scheduler\n(cron: 每日 19:00)" as Cron
+participant "AbsentDetectionJob\n(排程任務)" as Job
+participant "AbsentDetectionDomainService\n(領域服務)" as DomSvc
+database "employee_read_models\n(CQRS ReadModel)" as ReadModel
+database "ATT 資料庫" as DB_ATT
+participant "IAttendanceRecordRepository" as RecordRepo
+participant "ILeaveApplicationRepository" as LeaveRepo
+participant "AttendanceRecord\n(聚合根)" as AR
+queue "Kafka\n(Event Bus)" as Kafka
+participant "NTF 微服務\n(通知)" as NTF
+actor "直屬主管(UI)" as Mgr
+actor "人資管理員(UI)" as HR
+
+== Phase 1: 排程觸發 & 資料蒐集 ==
+
+Cron -> Job : detectAbsentEmployees()\n（每日 19:00 自動觸發）
+activate Job
+
+Job -> ReadModel : SELECT employee_id\nFROM employee_read_models
+alt ReadModel 可用
+  ReadModel --> Job : 全體在職員工 ID 清單
+else ReadModel 不可用（降級）
+  Job -> DB_ATT : SELECT DISTINCT employee_id\nFROM leave_balances\nWHERE year = 今年
+  DB_ATT --> Job : 從假期餘額推導員工清單
+end
+
+Job -> RecordRepo : findEmployeeIdsWithRecordOnDate(today)
+RecordRepo -> DB_ATT : 查詢今日已有打卡記錄的員工
+DB_ATT --> RecordRepo : 已打卡員工 ID 清單
+RecordRepo --> Job : employeeIdsWithRecord
+
+Job -> LeaveRepo : findEmployeeIdsWithApprovedLeaveOnDate(today)
+LeaveRepo -> DB_ATT : 查詢今日有核准請假的員工
+DB_ATT --> LeaveRepo : 已請假員工 ID 清單
+LeaveRepo --> Job : employeeIdsOnLeave
+
+== Phase 2: 領域邏輯 - 缺勤判定 ==
+
+Job -> DomSvc : detectAbsentEmployees(\n  allEmployeeIds,\n  employeeIdsWithRecord,\n  employeeIdsOnLeave)
+activate DomSvc
+DomSvc -> DomSvc : 集合運算：\n全員 - 已打卡 - 已請假\n= 缺勤員工清單
+DomSvc --> Job : absentEmployeeIds
+deactivate DomSvc
+
+alt 無缺勤員工
+  Job -> Job : 記錄日誌：缺勤人數 = 0\n結束排程
+else 有缺勤員工
+
+  == Phase 3: 逐筆建立缺勤記錄 & 發布事件 ==
+
+  loop 每位缺勤員工
+    Job -> DomSvc : createAbsentRecord(employeeId, today)
+    activate DomSvc
+    DomSvc -> AR : AttendanceRecord.createAbsentRecord(\n  recordId, employeeId, date)\nstatus=ABSENT, clockIn/Out=null
+    AR --> DomSvc : 缺勤記錄
+    DomSvc --> Job : absentRecord
+    deactivate DomSvc
+
+    alt 建立成功
+      Job -> RecordRepo : save(absentRecord)
+      RecordRepo -> DB_ATT : INSERT attendance_records\n(status: ABSENT)
+
+      Job -> Kafka : Publish: AttendanceAnomalyDetectedEvent\n{recordId, employeeId, date,\nanomalyType: ABSENT, anomalyMinutes: 0}
+      note right of Job : 事件攜帶異常類型\n供下游服務判斷處理方式
+
+    else 建立失敗（如重複記錄）
+      Job -> Job : catch Exception\n記錄 failCount++\n不中斷其餘員工處理
+      note right of Job : 容錯設計：\n單筆失敗不影響整批
+    end
+  end
+end
+
+== Phase 4: 非同步通知 (Asynchronous) ==
+
+par 通知直屬主管
+  Kafka --> NTF : Consume: AttendanceAnomalyDetectedEvent
+  activate NTF
+  NTF --> Mgr : 推送曠職警示通知\n「員工 XXX 於 YYYY-MM-DD 無出勤紀錄」
+  deactivate NTF
+else 通知 HR
+  Kafka --> NTF : Consume: AttendanceAnomalyDetectedEvent
+  activate NTF
+  NTF --> HR : 曠職彙總日報\n（含員工清單與統計）
+  deactivate NTF
+end
+
+Job -> Job : 記錄日誌：\n在職={}, 已打卡={}, 請假={},\n缺勤={}, 成功={}, 失敗={}
+deactivate Job
+
+@enduml
+
+' ---- 場景七：薪資預借審核流程 ----
+@startuml 01_薪資預借審核流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+skinparam sequenceMessageAlign center
+title 薪資預借審核流程 (Salary Advance Approval Flow)
+
+actor "員工(UI)" as Emp
+participant "PAY 微服務\n(薪資)" as PAY
+participant "SalaryAdvance\n(聚合根)" as SA
+database "PAY 資料庫" as DB_PAY
+queue "Kafka\n(Event Bus)" as Kafka
+participant "WFL 微服務\n(工作流引擎)" as WFL
+participant "NTF 微服務\n(通知)" as NTF
+actor "主管(UI)" as Mgr
+
+== Phase 1: 員工提交預借申請 (Synchronous) ==
+
+Emp -> PAY : POST /api/v1/salary-advances\n{requestedAmount, installmentMonths, reason}
+activate PAY
+PAY -> PAY : 查詢員工薪資結構\n(grossSalary, statutoryDeductions, garnishments)
+PAY -> SA : calculateMaxAdvance(\n  grossSalary, statutoryDeductions, garnishments)\n公式：(應發 - 法扣 - 法定) × 90%
+SA --> PAY : maxAdvance
+
+alt 申請金額 > 可借上限
+  PAY --> Emp : HTTP 400\n「申請金額超過可借上限」
+else 申請金額合法
+  PAY -> PAY : 檢查是否有未清償的預借\n(DISBURSED / REPAYING 狀態)
+
+  alt 存在未清償預借
+    PAY --> Emp : HTTP 400\n「尚有未清償的預借，不可重複申請」
+  else 無未清償預借
+    PAY -> SA : new SalaryAdvance(\n  advanceId, employeeId, requestedAmount,\n  installmentMonths, reason)\nstatus = PENDING
+    SA --> PAY : 新建預借申請
+
+    PAY -> DB_PAY : INSERT hr04_salary_advances\n(status: PENDING)
+    DB_PAY --> PAY : 寫入成功
+
+    PAY -> Kafka : Publish: SalaryAdvanceRequestedEvent\n{advanceId, empId, amount, managerId}
+    PAY --> Emp : HTTP 200 OK\n(預借申請已送出，等待主管審核)
+  end
+end
+deactivate PAY
+
+== Phase 2: 簽核任務指派 (Asynchronous) ==
+
+par 建立簽核任務
+  Kafka --> WFL : Consume: SalaryAdvanceRequestedEvent
+  activate WFL
+  WFL -> WFL : 依流程定義建立 WorkflowInstance\n指派 ApprovalTask 給 managerId
+  deactivate WFL
+else 通知主管
+  Kafka --> NTF : Consume: SalaryAdvanceRequestedEvent
+  activate NTF
+  NTF --> Mgr : 推送簽核通知\n「員工 XXX 申請預借 $YYY」
+  deactivate NTF
+end
+
+== Phase 3: 主管審核 (Decision) ==
+
+Mgr -> WFL : PUT /api/v1/workflow/tasks/{taskId}/approve\n{decision, approvedAmount, comment}
+activate WFL
+
+alt 核准 (Approved)
+  WFL -> Kafka : Publish: SalaryAdvanceApprovedEvent\n{advanceId, approverId, approvedAmount}
+  deactivate WFL
+
+  Kafka --> PAY : Consume: SalaryAdvanceApprovedEvent
+  activate PAY
+  PAY -> SA : approve(approverId, approvedAmount)
+  activate SA
+  SA -> SA : 狀態檢查：status == PENDING ?\n核准金額 <= 申請金額 ?
+  SA -> SA : 計算每期扣回金額\n= approvedAmount / installmentMonths\n（向上取整）
+  SA -> SA : status = APPROVED\n設定 remainingBalance = approvedAmount
+  SA --> PAY : 核准完成
+  deactivate SA
+  PAY -> DB_PAY : UPDATE hr04_salary_advances\n(status: APPROVED,\napproved_amount, installment_amount)
+
+  == Phase 4: 撥款 ==
+
+  PAY -> SA : disburse(disbursementDate)
+  activate SA
+  SA -> SA : 狀態檢查：status == APPROVED ?
+  SA -> SA : status = DISBURSED\n設定 disbursementDate
+  SA --> PAY : 撥款完成
+  deactivate SA
+  PAY -> DB_PAY : UPDATE hr04_salary_advances\n(status: DISBURSED, disbursement_date)
+  PAY -> Kafka : Publish: SalaryAdvanceDisbursedEvent\n{advanceId, empId, amount, disbursementDate}
+  deactivate PAY
+
+  Kafka --> NTF : Consume: SalaryAdvanceDisbursedEvent
+  activate NTF
+  NTF --> Emp : 通知員工：預借已核准並撥款\n金額 $YYY，將分 N 期扣回
+  deactivate NTF
+
+  == Phase 5: 月薪自動分期扣回 ==
+
+  note over PAY, DB_PAY : 每月薪資結算時自動觸發
+
+  loop 每月薪資計算 (直到全額清償)
+    PAY -> DB_PAY : 查詢 DISBURSED / REPAYING\n狀態的預借記錄
+    DB_PAY --> PAY : activeAdvances
+    activate PAY
+    PAY -> SA : repay(installmentAmount)
+    activate SA
+    SA -> SA : 實際扣回 = min(installmentAmount, remainingBalance)\n更新 repaidAmount, remainingBalance
+
+    alt remainingBalance == 0
+      SA -> SA : status = FULLY_REPAID
+      note right of SA : 全額清償\n自動結案
+    else remainingBalance > 0
+      SA -> SA : status = REPAYING\n（繼續扣回）
+    end
+    SA --> PAY : 本期實際扣回金額\n（納入薪資明細扣除項）
+    deactivate SA
+    PAY -> DB_PAY : UPDATE hr04_salary_advances\n(repaid_amount, remaining_balance, status)
+    deactivate PAY
+  end
+
+else 駁回 (Rejected)
+  WFL -> Kafka : Publish: SalaryAdvanceRejectedEvent\n{advanceId, approverId, reason}
+  Kafka --> PAY : Consume: SalaryAdvanceRejectedEvent
+  activate PAY
+  PAY -> SA : reject(approverId, reason)
+  activate SA
+  SA -> SA : 狀態檢查：status == PENDING ?
+  SA -> SA : status = REJECTED\n設定 rejectionReason
+  SA --> PAY : 駁回完成
+  deactivate SA
+  PAY -> DB_PAY : UPDATE hr04_salary_advances\n(status: REJECTED, rejection_reason)
+  deactivate PAY
+  Kafka --> NTF : Consume: SalaryAdvanceRejectedEvent
+  activate NTF
+  NTF --> Emp : 通知員工：預借申請已駁回\n原因：{reason}
   deactivate NTF
 end
 

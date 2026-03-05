@@ -1,7 +1,7 @@
 # HR01 IAM服務 API詳細規格
 
-**版本:** 1.0
-**日期:** 2025-12-29
+**版本:** 1.1
+**日期:** 2025-12-29（最後更新：2026-03-05）
 **服務代碼:** HR01
 **服務名稱:** IAM服務 (Identity & Access Management)
 
@@ -15,8 +15,11 @@
 4. [角色管理API](#4-角色管理api)
 5. [權限管理API](#5-權限管理api)
 6. [個人資料API](#6-個人資料api)
-7. [錯誤碼總覽](#7-錯誤碼總覽)
-8. [領域事件總覽](#8-領域事件總覽)
+7. [系統管理API — 功能開關](#7-系統管理api--功能開關)
+8. [系統管理API — 系統參數](#8-系統管理api--系統參數)
+9. [系統管理API — 排程管理](#9-系統管理api--排程管理)
+10. [錯誤碼總覽](#10-錯誤碼總覽)
+11. [領域事件總覽](#11-領域事件總覽)
 
 ---
 
@@ -34,8 +37,14 @@
 | `HR01PermissionQryController` | 權限Query操作 | HR01-P03 角色權限管理 |
 | `HR01ProfileCmdController` | 個人資料Command操作 | HR01-P04 密碼修改 |
 | `HR01ProfileQryController` | 個人資料Query操作 | HR01-P04 密碼修改 |
+| `HR01SystemFeatureCmdController` | 功能開關Command操作 | HR01-P05 系統管理 |
+| `HR01SystemFeatureQryController` | 功能開關Query操作 | HR01-P05 系統管理 |
+| `HR01SystemConfigCmdController` | 系統參數Command操作 | HR01-P05 系統管理 |
+| `HR01SystemConfigQryController` | 系統參數Query操作 | HR01-P05 系統管理 |
+| `HR01SystemSchedulerCmdController` | 排程管理Command操作 | HR01-P05 系統管理 |
+| `HR01SystemSchedulerQryController` | 排程管理Query操作 | HR01-P05 系統管理 |
 
-### 1.2 API總覽 (29個端點)
+### 1.2 API總覽 (41個端點)
 
 | 端點 | 方法 | Controller | 說明 | 權限 |
 |:---|:---:|:---|:---|:---|
@@ -68,6 +77,18 @@
 | `/api/v1/profile` | GET | HR01ProfileQryController | 查詢個人資料 | - |
 | `/api/v1/profile` | PUT | HR01ProfileCmdController | 更新個人資料 | - |
 | `/api/v1/profile/change-password` | PUT | HR01ProfileCmdController | 修改密碼 | - |
+| `/api/v1/iam/system/features` | GET | HR01SystemFeatureQryController | 查詢功能開關列表 | system:feature:read |
+| `/api/v1/iam/system/features/{featureId}` | GET | HR01SystemFeatureQryController | 查詢功能開關詳情 | system:feature:read |
+| `/api/v1/iam/system/features/{featureId}` | PUT | HR01SystemFeatureCmdController | 更新功能開關 | system:feature:write |
+| `/api/v1/iam/system/features/{featureId}/toggle` | PUT | HR01SystemFeatureCmdController | 切換功能開關 | system:feature:write |
+| `/api/v1/iam/system/configs` | GET | HR01SystemConfigQryController | 查詢系統參數列表 | system:config:read |
+| `/api/v1/iam/system/configs/{configId}` | GET | HR01SystemConfigQryController | 查詢系統參數詳情 | system:config:read |
+| `/api/v1/iam/system/configs/{configId}` | PUT | HR01SystemConfigCmdController | 更新系統參數 | system:config:write |
+| `/api/v1/iam/system/configs/{configId}/reset` | PUT | HR01SystemConfigCmdController | 重設系統參數為預設值 | system:config:write |
+| `/api/v1/iam/system/schedulers` | GET | HR01SystemSchedulerQryController | 查詢排程列表 | system:scheduler:read |
+| `/api/v1/iam/system/schedulers/{schedulerId}` | GET | HR01SystemSchedulerQryController | 查詢排程詳情 | system:scheduler:read |
+| `/api/v1/iam/system/schedulers/{schedulerId}` | PUT | HR01SystemSchedulerCmdController | 更新排程配置 | system:scheduler:write |
+| `/api/v1/iam/system/schedulers/{schedulerId}/trigger` | POST | HR01SystemSchedulerCmdController | 手動觸發排程 | system:scheduler:execute |
 
 ---
 
@@ -2352,9 +2373,1143 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 ---
 
-## 7. 錯誤碼總覽
+## 7. 系統管理API — 功能開關
 
-### 7.1 認證相關 (AUTH_)
+### 7.1 查詢功能開關列表
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/iam/system/features` |
+| Controller | `HR01SystemFeatureQryController` |
+| Service | `GetFeatureListServiceImpl` |
+| 權限 | `system:feature:read` |
+| 版本 | v1 |
+
+**用途說明**
+
+查詢所有功能開關列表，支援依模組篩選。IT 管理員透過此 API 檢視各模組業務功能的啟停狀態，功能開關的變更即時生效，不需重啟服務。
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Query Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| module | String | ⬚ | 模組代碼篩選（HR01-HR14） | `"HR03"` |
+| enabled | Boolean | ⬚ | 僅顯示啟用/停用的功能 | `true` |
+| keyword | String | ⬚ | 模糊搜尋（功能代碼或名稱） | `"LATE"` |
+
+**範例：**
+```
+GET /api/v1/iam/system/features?module=HR03&enabled=true
+```
+
+**Response**
+
+**成功回應 (200 OK)**
+
+| 欄位 | 類型 | 說明 |
+|:---|:---|:---|
+| id | String | 功能開關ID |
+| featureCode | String | 功能代碼 |
+| featureName | String | 功能名稱 |
+| module | String | 所屬模組代碼 |
+| enabled | Boolean | 是否啟用 |
+| description | String | 功能說明 |
+| updatedAt | DateTime | 最後更新時間 |
+| updatedBy | String | 最後更新者 |
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "查詢成功",
+  "data": [
+    {
+      "id": "feat-uuid-001",
+      "featureCode": "LATE_CHECK",
+      "featureName": "遲到判定",
+      "module": "HR03",
+      "enabled": true,
+      "description": "啟用後系統自動判定員工遲到並記錄",
+      "updatedAt": "2026-01-15T10:00:00Z",
+      "updatedBy": "admin"
+    },
+    {
+      "id": "feat-uuid-002",
+      "featureCode": "LATE_SALARY_DEDUCTION",
+      "featureName": "遲到扣薪",
+      "module": "HR03",
+      "enabled": true,
+      "description": "啟用後遲到自動扣薪計算",
+      "updatedAt": "2026-01-15T10:00:00Z",
+      "updatedBy": "admin"
+    },
+    {
+      "id": "feat-uuid-003",
+      "featureCode": "SHIFT_SCHEDULING",
+      "featureName": "輪班排程",
+      "module": "HR03",
+      "enabled": true,
+      "description": "啟用後支援輪班排程功能",
+      "updatedAt": "2026-01-10T08:30:00Z",
+      "updatedBy": "admin"
+    }
+  ],
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:feature:read 權限 | 聯繫管理員授權 |
+
+---
+
+### 7.2 查詢功能開關詳情
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/iam/system/features/{featureId}` |
+| Controller | `HR01SystemFeatureQryController` |
+| Service | `GetFeatureDetailServiceImpl` |
+| 權限 | `system:feature:read` |
+| 版本 | v1 |
+
+**用途說明**
+
+查詢單一功能開關的詳細資訊。
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| featureId | String | ✅ | 功能開關ID | `"feat-uuid-001"` |
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "查詢成功",
+  "data": {
+    "id": "feat-uuid-001",
+    "featureCode": "LATE_CHECK",
+    "featureName": "遲到判定",
+    "module": "HR03",
+    "enabled": true,
+    "description": "啟用後系統自動判定員工遲到並記錄",
+    "tenantId": "550e8400-e29b-41d4-a716-446655440000",
+    "updatedAt": "2026-01-15T10:00:00Z",
+    "updatedBy": "admin"
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:feature:read 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_FEATURE_NOT_FOUND | 功能開關不存在 | 確認 featureId |
+
+---
+
+### 7.3 更新功能開關
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/iam/system/features/{featureId}` |
+| Controller | `HR01SystemFeatureCmdController` |
+| Service | `UpdateFeatureServiceImpl` |
+| 權限 | `system:feature:write` |
+| 版本 | v1 |
+
+**用途說明**
+
+更新功能開關的啟用/停用狀態，變更即時生效，不需重啟服務。
+
+**業務邏輯**
+
+1. **權限檢查**
+   - 必須擁有 system:feature:write 權限
+   - 僅限 SYSTEM_ADMIN 角色
+
+2. **查詢功能開關**
+   - 功能開關不存在則返回 404
+
+3. **更新狀態**
+   - 呼叫 FeatureToggle.enable() 或 FeatureToggle.disable()
+   - 記錄操作者與更新時間
+
+4. **發布事件**
+   - 發布 FeatureToggleChangedEvent
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+| Content-Type | ✅ | `application/json` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| featureId | String | ✅ | 功能開關ID | `"feat-uuid-001"` |
+
+**Request Body**
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|:---|
+| enabled | Boolean | ✅ | - | 是否啟用 | `false` |
+
+**範例：**
+```json
+{
+  "enabled": false
+}
+```
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "功能開關更新成功",
+  "data": {
+    "id": "feat-uuid-001",
+    "featureCode": "LATE_CHECK",
+    "featureName": "遲到判定",
+    "enabled": false,
+    "updatedAt": "2026-03-05T10:30:00Z",
+    "updatedBy": "admin"
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:feature:write 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_FEATURE_NOT_FOUND | 功能開關不存在 | 確認 featureId |
+
+**領域事件**
+
+| 事件名稱 | Topic | 說明 |
+|:---|:---|:---|
+| FeatureToggleChangedEvent | `iam.feature-toggle.changed` | 功能開關狀態變更 |
+
+---
+
+### 7.4 切換功能開關
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/iam/system/features/{featureId}/toggle` |
+| Controller | `HR01SystemFeatureCmdController` |
+| Service | `ToggleFeatureServiceImpl` |
+| 權限 | `system:feature:write` |
+| 版本 | v1 |
+
+**用途說明**
+
+快速切換功能開關的啟停狀態（toggle），無需指定目標狀態。
+
+**業務邏輯**
+
+1. **權限檢查**
+   - 必須擁有 system:feature:write 權限
+
+2. **查詢功能開關**
+   - 功能開關不存在則返回 404
+
+3. **切換狀態**
+   - 呼叫 FeatureToggle.toggle()，啟用 → 停用 / 停用 → 啟用
+
+4. **發布事件**
+   - 發布 FeatureToggleChangedEvent
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| featureId | String | ✅ | 功能開關ID | `"feat-uuid-001"` |
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "功能開關切換成功",
+  "data": {
+    "id": "feat-uuid-001",
+    "featureCode": "LATE_CHECK",
+    "featureName": "遲到判定",
+    "enabled": false,
+    "updatedAt": "2026-03-05T10:30:00Z",
+    "updatedBy": "admin"
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:feature:write 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_FEATURE_NOT_FOUND | 功能開關不存在 | 確認 featureId |
+
+**領域事件**
+
+| 事件名稱 | Topic | 說明 |
+|:---|:---|:---|
+| FeatureToggleChangedEvent | `iam.feature-toggle.changed` | 功能開關狀態變更 |
+
+---
+
+## 8. 系統管理API — 系統參數
+
+### 8.1 查詢系統參數列表
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/iam/system/configs` |
+| Controller | `HR01SystemConfigQryController` |
+| Service | `GetConfigListServiceImpl` |
+| 權限 | `system:config:read` |
+| 版本 | v1 |
+
+**用途說明**
+
+查詢系統參數列表，支援依模組、分類篩選。系統參數包含安全設定（如密碼策略）、業務規則（如加班上限）、UI 設定等。加密參數的值不會明文回傳。
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Query Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| module | String | ⬚ | 模組代碼篩選（GLOBAL 或 HR01-HR14） | `"GLOBAL"` |
+| category | String | ⬚ | 參數分類（SECURITY/BUSINESS/UI/SYSTEM） | `"SECURITY"` |
+| keyword | String | ⬚ | 模糊搜尋（參數代碼或名稱） | `"PASSWORD"` |
+| page | Integer | ⬚ | 頁碼（從1開始，預設1） | `1` |
+| size | Integer | ⬚ | 每頁筆數（預設20，最大100） | `20` |
+
+**範例：**
+```
+GET /api/v1/iam/system/configs?module=GLOBAL&category=SECURITY&page=1&size=20
+```
+
+**Response**
+
+**成功回應 (200 OK)**
+
+| 欄位 | 類型 | 說明 |
+|:---|:---|:---|
+| id | String | 參數ID |
+| paramCode | String | 參數代碼 |
+| paramName | String | 參數名稱 |
+| paramValue | String | 參數值（加密參數顯示 `"******"`） |
+| paramType | String | 參數型別（STRING/INTEGER/DECIMAL/BOOLEAN/JSON） |
+| module | String | 所屬模組代碼 |
+| category | String | 參數分類 |
+| description | String | 參數說明 |
+| defaultValue | String | 預設值 |
+| isEncrypted | Boolean | 是否加密儲存 |
+| updatedAt | DateTime | 最後更新時間 |
+| updatedBy | String | 最後更新者 |
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "查詢成功",
+  "data": {
+    "content": [
+      {
+        "id": "config-uuid-001",
+        "paramCode": "MAX_FAILED_LOGIN_ATTEMPTS",
+        "paramName": "最大登入失敗次數",
+        "paramValue": "5",
+        "paramType": "INTEGER",
+        "module": "GLOBAL",
+        "category": "SECURITY",
+        "description": "連續登入失敗達此次數後鎖定帳號",
+        "defaultValue": "5",
+        "isEncrypted": false,
+        "updatedAt": "2026-01-10T08:00:00Z",
+        "updatedBy": "admin"
+      },
+      {
+        "id": "config-uuid-002",
+        "paramCode": "ACCOUNT_LOCK_DURATION_MINUTES",
+        "paramName": "帳號鎖定時間（分鐘）",
+        "paramValue": "30",
+        "paramType": "INTEGER",
+        "module": "GLOBAL",
+        "category": "SECURITY",
+        "description": "帳號被鎖定後的自動解鎖時間",
+        "defaultValue": "30",
+        "isEncrypted": false,
+        "updatedAt": "2026-01-10T08:00:00Z",
+        "updatedBy": "admin"
+      },
+      {
+        "id": "config-uuid-003",
+        "paramCode": "PASSWORD_EXPIRY_DAYS",
+        "paramName": "密碼有效天數",
+        "paramValue": "90",
+        "paramType": "INTEGER",
+        "module": "GLOBAL",
+        "category": "SECURITY",
+        "description": "密碼有效天數，超過後強制修改密碼",
+        "defaultValue": "90",
+        "isEncrypted": false,
+        "updatedAt": "2026-01-10T08:00:00Z",
+        "updatedBy": "admin"
+      }
+    ],
+    "page": 1,
+    "size": 20,
+    "totalElements": 3,
+    "totalPages": 1
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:config:read 權限 | 聯繫管理員授權 |
+
+---
+
+### 8.2 查詢系統參數詳情
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/iam/system/configs/{configId}` |
+| Controller | `HR01SystemConfigQryController` |
+| Service | `GetConfigDetailServiceImpl` |
+| 權限 | `system:config:read` |
+| 版本 | v1 |
+
+**用途說明**
+
+查詢單一系統參數的詳細資訊，包含預設值與加密標記。
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| configId | String | ✅ | 系統參數ID | `"config-uuid-001"` |
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "查詢成功",
+  "data": {
+    "id": "config-uuid-001",
+    "paramCode": "MAX_FAILED_LOGIN_ATTEMPTS",
+    "paramName": "最大登入失敗次數",
+    "paramValue": "5",
+    "paramType": "INTEGER",
+    "module": "GLOBAL",
+    "category": "SECURITY",
+    "description": "連續登入失敗達此次數後鎖定帳號",
+    "defaultValue": "5",
+    "isEncrypted": false,
+    "tenantId": "550e8400-e29b-41d4-a716-446655440000",
+    "updatedAt": "2026-01-10T08:00:00Z",
+    "updatedBy": "admin"
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:config:read 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_CONFIG_NOT_FOUND | 系統參數不存在 | 確認 configId |
+
+---
+
+### 8.3 更新系統參數
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/iam/system/configs/{configId}` |
+| Controller | `HR01SystemConfigCmdController` |
+| Service | `UpdateConfigServiceImpl` |
+| 權限 | `system:config:write` |
+| 版本 | v1 |
+
+**用途說明**
+
+更新系統參數的值。系統會自動驗證參數型別，並記錄異動歷史（audit trail），包含舊值與新值。加密參數（如密碼、密鑰）會以加密方式儲存。
+
+**業務邏輯**
+
+1. **權限檢查**
+   - 必須擁有 system:config:write 權限
+   - 僅限 SYSTEM_ADMIN 角色
+
+2. **查詢參數**
+   - 參數不存在則返回 404
+
+3. **驗證新值**
+   - 依據 paramType 驗證值的格式：
+     - INTEGER：必須為有效整數
+     - DECIMAL：必須為有效小數
+     - BOOLEAN：必須為 `true` 或 `false`
+     - JSON：必須為有效 JSON 格式
+
+4. **更新參數**
+   - 呼叫 SystemParameter.updateValue()
+   - 回傳 ParameterChange 記錄（含 oldValue/newValue）
+   - 寫入 parameter_change_logs 表
+
+5. **發布事件**
+   - 發布 SystemParameterChangedEvent
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+| Content-Type | ✅ | `application/json` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| configId | String | ✅ | 系統參數ID | `"config-uuid-001"` |
+
+**Request Body**
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|:---|
+| paramValue | String | ✅ | 必須符合 paramType 格式 | 新參數值 | `"10"` |
+
+**範例：**
+```json
+{
+  "paramValue": "10"
+}
+```
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "系統參數更新成功",
+  "data": {
+    "id": "config-uuid-001",
+    "paramCode": "MAX_FAILED_LOGIN_ATTEMPTS",
+    "paramName": "最大登入失敗次數",
+    "paramValue": "10",
+    "paramType": "INTEGER",
+    "changeLog": {
+      "oldValue": "5",
+      "newValue": "10",
+      "operator": "admin",
+      "changedAt": "2026-03-05T10:30:00Z"
+    },
+    "updatedAt": "2026-03-05T10:30:00Z",
+    "updatedBy": "admin"
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | VALIDATION_PARAM_TYPE_MISMATCH | 參數值與型別不符 | 檢查參數型別，輸入正確格式的值 |
+| 400 | VALIDATION_PARAM_VALUE_INVALID | 參數值無效 | 檢查參數值是否在允許範圍內 |
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:config:write 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_CONFIG_NOT_FOUND | 系統參數不存在 | 確認 configId |
+
+**領域事件**
+
+| 事件名稱 | Topic | 說明 |
+|:---|:---|:---|
+| SystemParameterChangedEvent | `iam.system-parameter.changed` | 系統參數值變更 |
+
+---
+
+### 8.4 重設系統參數為預設值
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/iam/system/configs/{configId}/reset` |
+| Controller | `HR01SystemConfigCmdController` |
+| Service | `ResetConfigServiceImpl` |
+| 權限 | `system:config:write` |
+| 版本 | v1 |
+
+**用途說明**
+
+將系統參數重設為預設值，並記錄異動歷史。
+
+**業務邏輯**
+
+1. **權限檢查**
+   - 必須擁有 system:config:write 權限
+
+2. **查詢參數**
+   - 參數不存在則返回 404
+
+3. **重設為預設值**
+   - 呼叫 SystemParameter.resetToDefault()
+   - 回傳 ParameterChange 記錄
+   - 寫入 parameter_change_logs 表
+
+4. **發布事件**
+   - 發布 SystemParameterChangedEvent
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| configId | String | ✅ | 系統參數ID | `"config-uuid-001"` |
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "系統參數已重設為預設值",
+  "data": {
+    "id": "config-uuid-001",
+    "paramCode": "MAX_FAILED_LOGIN_ATTEMPTS",
+    "paramName": "最大登入失敗次數",
+    "paramValue": "5",
+    "paramType": "INTEGER",
+    "changeLog": {
+      "oldValue": "10",
+      "newValue": "5",
+      "operator": "admin",
+      "changedAt": "2026-03-05T10:30:00Z"
+    },
+    "updatedAt": "2026-03-05T10:30:00Z",
+    "updatedBy": "admin"
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:config:write 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_CONFIG_NOT_FOUND | 系統參數不存在 | 確認 configId |
+
+**領域事件**
+
+| 事件名稱 | Topic | 說明 |
+|:---|:---|:---|
+| SystemParameterChangedEvent | `iam.system-parameter.changed` | 系統參數值變更（重設為預設值） |
+
+---
+
+## 9. 系統管理API — 排程管理
+
+### 9.1 查詢排程列表
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/iam/system/schedulers` |
+| Controller | `HR01SystemSchedulerQryController` |
+| Service | `GetSchedulerListServiceImpl` |
+| 權限 | `system:scheduler:read` |
+| 版本 | v1 |
+
+**用途說明**
+
+查詢系統排程任務列表，支援依模組、狀態篩選。排程任務包含考勤日結、薪資月結、保險申報、特休年結等自動化任務。
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Query Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| module | String | ⬚ | 模組代碼篩選（HR01-HR14） | `"HR03"` |
+| enabled | Boolean | ⬚ | 僅顯示啟用/停用的排程 | `true` |
+| status | String | ⬚ | 最近執行狀態（SUCCESS/FAILED/RUNNING） | `"FAILED"` |
+
+**範例：**
+```
+GET /api/v1/iam/system/schedulers?module=HR03&enabled=true
+```
+
+**Response**
+
+**成功回應 (200 OK)**
+
+| 欄位 | 類型 | 說明 |
+|:---|:---|:---|
+| id | String | 排程ID |
+| jobCode | String | 任務代碼 |
+| jobName | String | 任務名稱 |
+| module | String | 所屬模組代碼 |
+| cronExpression | String | Cron 表達式 |
+| enabled | Boolean | 是否啟用 |
+| description | String | 任務說明 |
+| lastExecutedAt | DateTime | 最近執行時間 |
+| lastExecutionStatus | String | 最近執行狀態（SUCCESS/FAILED/RUNNING） |
+| lastErrorMessage | String | 最近錯誤訊息（僅 FAILED 時有值） |
+| consecutiveFailures | Integer | 連續失敗次數 |
+| updatedAt | DateTime | 最後更新時間 |
+| updatedBy | String | 最後更新者 |
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "查詢成功",
+  "data": [
+    {
+      "id": "sched-uuid-001",
+      "jobCode": "ABSENT_DETECTION",
+      "jobName": "曠職判定",
+      "module": "HR03",
+      "cronExpression": "0 0 19 * * ?",
+      "enabled": true,
+      "description": "每日 19:00 自動判定曠職",
+      "lastExecutedAt": "2026-03-04T19:00:00Z",
+      "lastExecutionStatus": "SUCCESS",
+      "lastErrorMessage": null,
+      "consecutiveFailures": 0,
+      "updatedAt": "2026-01-10T08:00:00Z",
+      "updatedBy": "admin"
+    },
+    {
+      "id": "sched-uuid-002",
+      "jobCode": "ANNUAL_LEAVE_SETTLEMENT",
+      "jobName": "特休年度結算",
+      "module": "HR03",
+      "cronExpression": "0 0 1 1 1 ?",
+      "enabled": true,
+      "description": "每年 1/1 自動結算特休假",
+      "lastExecutedAt": "2026-01-01T01:00:00Z",
+      "lastExecutionStatus": "SUCCESS",
+      "lastErrorMessage": null,
+      "consecutiveFailures": 0,
+      "updatedAt": "2026-01-10T08:00:00Z",
+      "updatedBy": "admin"
+    },
+    {
+      "id": "sched-uuid-003",
+      "jobCode": "INSURANCE_DAILY_REPORT",
+      "jobName": "保險異動報表",
+      "module": "HR05",
+      "cronExpression": "0 30 8 * * ?",
+      "enabled": true,
+      "description": "每日 08:30 產生保險異動報表",
+      "lastExecutedAt": "2026-03-05T08:30:00Z",
+      "lastExecutionStatus": "FAILED",
+      "lastErrorMessage": "連線逾時：保險局 API 無回應",
+      "consecutiveFailures": 2,
+      "updatedAt": "2026-01-10T08:00:00Z",
+      "updatedBy": "admin"
+    },
+    {
+      "id": "sched-uuid-004",
+      "jobCode": "PAYROLL_MONTHLY_CLOSE",
+      "jobName": "薪資月結",
+      "module": "HR04",
+      "cronExpression": "0 0 2 1 * ?",
+      "enabled": true,
+      "description": "每月 1 日 02:00 執行薪資月結",
+      "lastExecutedAt": "2026-03-01T02:00:00Z",
+      "lastExecutionStatus": "SUCCESS",
+      "lastErrorMessage": null,
+      "consecutiveFailures": 0,
+      "updatedAt": "2026-01-10T08:00:00Z",
+      "updatedBy": "admin"
+    }
+  ],
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:read 權限 | 聯繫管理員授權 |
+
+---
+
+### 9.2 查詢排程詳情
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/iam/system/schedulers/{schedulerId}` |
+| Controller | `HR01SystemSchedulerQryController` |
+| Service | `GetSchedulerDetailServiceImpl` |
+| 權限 | `system:scheduler:read` |
+| 版本 | v1 |
+
+**用途說明**
+
+查詢單一排程任務的詳細資訊，包含最近執行狀態與連續失敗次數。
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| schedulerId | String | ✅ | 排程ID | `"sched-uuid-001"` |
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "查詢成功",
+  "data": {
+    "id": "sched-uuid-001",
+    "jobCode": "ABSENT_DETECTION",
+    "jobName": "曠職判定",
+    "module": "HR03",
+    "cronExpression": "0 0 19 * * ?",
+    "enabled": true,
+    "description": "每日 19:00 自動判定曠職",
+    "lastExecutedAt": "2026-03-04T19:00:00Z",
+    "lastExecutionStatus": "SUCCESS",
+    "lastErrorMessage": null,
+    "consecutiveFailures": 0,
+    "tenantId": "550e8400-e29b-41d4-a716-446655440000",
+    "updatedAt": "2026-01-10T08:00:00Z",
+    "updatedBy": "admin"
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:read 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_SCHEDULER_NOT_FOUND | 排程任務不存在 | 確認 schedulerId |
+
+---
+
+### 9.3 更新排程配置
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/iam/system/schedulers/{schedulerId}` |
+| Controller | `HR01SystemSchedulerCmdController` |
+| Service | `UpdateSchedulerServiceImpl` |
+| 權限 | `system:scheduler:write` |
+| 版本 | v1 |
+
+**用途說明**
+
+更新排程任務的 Cron 表達式與啟停狀態。可用於調整排程執行時間或暫停排程任務。
+
+**業務邏輯**
+
+1. **權限檢查**
+   - 必須擁有 system:scheduler:write 權限
+   - 僅限 SYSTEM_ADMIN 角色
+
+2. **查詢排程**
+   - 排程不存在則返回 404
+
+3. **驗證 Cron 表達式**
+   - 若有提供 cronExpression，驗證格式是否為有效的 Cron 表達式
+   - 支援 6 位（秒 分 時 日 月 週）或 7 位（含年）格式
+
+4. **更新排程**
+   - 更新 cronExpression（若有提供）→ 呼叫 ScheduledJobConfig.updateCron()
+   - 更新 enabled（若有提供）→ 呼叫 enable() 或 disable()
+
+5. **發布事件**
+   - 發布 SchedulerConfigChangedEvent
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+| Content-Type | ✅ | `application/json` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| schedulerId | String | ✅ | 排程ID | `"sched-uuid-001"` |
+
+**Request Body**
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|:---|
+| cronExpression | String | ⬚ | 有效的 Cron 表達式 | Cron 表達式 | `"0 0 20 * * ?"` |
+| enabled | Boolean | ⬚ | - | 是否啟用 | `true` |
+
+**範例：**
+```json
+{
+  "cronExpression": "0 0 20 * * ?",
+  "enabled": true
+}
+```
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "排程配置更新成功",
+  "data": {
+    "id": "sched-uuid-001",
+    "jobCode": "ABSENT_DETECTION",
+    "jobName": "曠職判定",
+    "cronExpression": "0 0 20 * * ?",
+    "enabled": true,
+    "updatedAt": "2026-03-05T10:30:00Z",
+    "updatedBy": "admin"
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | VALIDATION_CRON_INVALID | Cron 表達式格式無效 | 檢查 Cron 表達式是否正確 |
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:write 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_SCHEDULER_NOT_FOUND | 排程任務不存在 | 確認 schedulerId |
+
+**領域事件**
+
+| 事件名稱 | Topic | 說明 |
+|:---|:---|:---|
+| SchedulerConfigChangedEvent | `iam.scheduler-config.changed` | 排程配置變更 |
+
+---
+
+### 9.4 手動觸發排程
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `POST /api/v1/iam/system/schedulers/{schedulerId}/trigger` |
+| Controller | `HR01SystemSchedulerCmdController` |
+| Service | `TriggerSchedulerServiceImpl` |
+| 權限 | `system:scheduler:execute` |
+| 版本 | v1 |
+
+**用途說明**
+
+手動觸發排程任務立即執行，不受 Cron 排程時間限制。適用於排程失敗後手動重試或臨時需要執行的場景。
+
+**業務邏輯**
+
+1. **權限檢查**
+   - 必須擁有 system:scheduler:execute 權限
+   - 僅限 SYSTEM_ADMIN 角色
+
+2. **查詢排程**
+   - 排程不存在則返回 404
+   - 若排程正在執行中（lastExecutionStatus = RUNNING），返回 409
+
+3. **觸發執行**
+   - 呼叫 ScheduledJobConfig.recordStart()
+   - 非同步執行排程任務
+   - 執行完成後呼叫 recordSuccess() 或 recordFailure()
+
+4. **告警檢查**
+   - 若 consecutiveFailures >= 3，觸發 SchedulerAlertEvent
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| schedulerId | String | ✅ | 排程ID | `"sched-uuid-003"` |
+
+**Response**
+
+**成功回應 (202 Accepted)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "排程任務已觸發執行",
+  "data": {
+    "id": "sched-uuid-003",
+    "jobCode": "INSURANCE_DAILY_REPORT",
+    "jobName": "保險異動報表",
+    "lastExecutionStatus": "RUNNING",
+    "triggeredAt": "2026-03-05T10:30:00Z",
+    "triggeredBy": "admin"
+  },
+  "timestamp": "2026-03-05T10:30:00Z"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:execute 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_SCHEDULER_NOT_FOUND | 排程任務不存在 | 確認 schedulerId |
+| 409 | BUSINESS_SCHEDULER_ALREADY_RUNNING | 排程任務正在執行中 | 等待目前執行完畢後再觸發 |
+
+**領域事件**
+
+| 事件名稱 | Topic | 說明 |
+|:---|:---|:---|
+| SchedulerTriggeredEvent | `iam.scheduler.triggered` | 排程任務被手動觸發 |
+| SchedulerAlertEvent | `iam.scheduler.alert` | 排程連續失敗告警（consecutiveFailures >= 3） |
+
+---
+
+## 10. 錯誤碼總覽
+
+### 10.1 認證相關 (AUTH_)
 
 | 錯誤碼 | HTTP | 說明 |
 |:---|:---:|:---|
@@ -2369,13 +3524,13 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 | AUTH_RESET_TOKEN_EXPIRED | 400 | 重置Token已過期 |
 | AUTH_CURRENT_PASSWORD_WRONG | 401 | 當前密碼錯誤 |
 
-### 7.2 授權相關 (AUTHZ_)
+### 10.2 授權相關 (AUTHZ_)
 
 | 錯誤碼 | HTTP | 說明 |
 |:---|:---:|:---|
 | AUTHZ_PERMISSION_DENIED | 403 | 無此操作權限 |
 
-### 7.3 驗證相關 (VALIDATION_)
+### 10.3 驗證相關 (VALIDATION_)
 
 | 錯誤碼 | HTTP | 說明 |
 |:---|:---:|:---|
@@ -2389,8 +3544,11 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 | VALIDATION_ROLE_NAME_FORMAT | 400 | 角色代碼格式不正確 |
 | VALIDATION_USER_IDS_REQUIRED | 400 | 至少需選擇一個使用者 |
 | VALIDATION_USER_IDS_TOO_MANY | 400 | 超過批次上限 |
+| VALIDATION_PARAM_TYPE_MISMATCH | 400 | 參數值與型別不符 |
+| VALIDATION_PARAM_VALUE_INVALID | 400 | 參數值無效 |
+| VALIDATION_CRON_INVALID | 400 | Cron 表達式格式無效 |
 
-### 7.4 資源相關 (RESOURCE_)
+### 10.4 資源相關 (RESOURCE_)
 
 | 錯誤碼 | HTTP | 說明 |
 |:---|:---:|:---|
@@ -2401,8 +3559,11 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 | RESOURCE_ROLE_NOT_FOUND | 404 | 角色不存在 |
 | RESOURCE_ROLE_EXISTS | 409 | 角色代碼已存在 |
 | RESOURCE_PERMISSION_NOT_FOUND | 404 | 權限不存在 |
+| RESOURCE_FEATURE_NOT_FOUND | 404 | 功能開關不存在 |
+| RESOURCE_CONFIG_NOT_FOUND | 404 | 系統參數不存在 |
+| RESOURCE_SCHEDULER_NOT_FOUND | 404 | 排程任務不存在 |
 
-### 7.5 業務邏輯相關 (BUSINESS_)
+### 10.5 業務邏輯相關 (BUSINESS_)
 
 | 錯誤碼 | HTTP | 說明 |
 |:---|:---:|:---|
@@ -2410,12 +3571,13 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 | BUSINESS_USER_ALREADY_ACTIVE | 422 | 使用者已啟用 |
 | BUSINESS_SYSTEM_ROLE_READONLY | 422 | 系統預設角色不可修改/刪除 |
 | BUSINESS_ROLE_IN_USE | 422 | 角色仍有使用者使用 |
+| BUSINESS_SCHEDULER_ALREADY_RUNNING | 409 | 排程任務正在執行中 |
 
 ---
 
-## 8. 領域事件總覽
+## 11. 領域事件總覽
 
-### 8.1 事件清單
+### 11.1 事件清單
 
 | 事件名稱 | Topic | 觸發時機 | 訂閱服務 |
 |:---|:---|:---|:---|
@@ -2434,8 +3596,13 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 | RoleDeletedEvent | `iam.role.deleted` | 刪除角色 | - |
 | RolePermissionChangedEvent | `iam.role.permission-changed` | 角色權限變更 | (快取失效) |
 | UserRoleAssignedEvent | `iam.user.role-assigned` | 指派角色給使用者 | (快取失效) |
+| FeatureToggleChangedEvent | `iam.feature-toggle.changed` | 功能開關狀態變更 | 各模組（即時生效） |
+| SystemParameterChangedEvent | `iam.system-parameter.changed` | 系統參數值變更 | 各模組（參數快取失效） |
+| SchedulerConfigChangedEvent | `iam.scheduler-config.changed` | 排程配置變更 | Scheduler Engine |
+| SchedulerTriggeredEvent | `iam.scheduler.triggered` | 排程任務被手動觸發 | Scheduler Engine |
+| SchedulerAlertEvent | `iam.scheduler.alert` | 排程連續失敗告警 | Notification |
 
-### 8.2 事件 Payload 結構
+### 11.2 事件 Payload 結構
 
 所有事件均遵循以下基本結構：
 
@@ -2488,4 +3655,5 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 ---
 
 **文件建立日期:** 2025-12-29
-**版本:** 1.0
+**最後更新日期:** 2026-03-05
+**版本:** 1.1（新增系統管理 API：功能開關、系統參數、排程管理，共 12 個端點）

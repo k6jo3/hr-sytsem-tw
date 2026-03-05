@@ -65,3 +65,383 @@ deactivate PAY
 Emp -> PAY : 輸入驗證密碼\n查看電子薪資單
 
 @enduml
+
+
+@startuml 05_曠職判定流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title 曠職判定流程 (Absent Detection Flow)
+
+|排程系統|
+start
+:每日 19:00 觸發
+**AbsentDetectionJob**;
+note right
+  @Scheduled(cron = "0 0 19 * * ?")
+  Spring 排程自動執行
+end note
+
+|[ATT] 考勤模組|
+:查詢所有在職員工 ID
+(employee_read_models 表);
+
+if (取得員工清單是否成功？) then (失敗)
+  :降級方案：從 leave_balances
+  推導員工清單 (DISTINCT employee_id);
+  if (推導是否成功？) then (失敗)
+    :記錄 WARN 日誌
+    「無法取得在職員工清單，跳過偵測」;
+    stop
+  else (成功)
+  endif
+else (成功)
+endif
+
+:查詢今日已有打卡記錄的員工 ID
+(attendanceRecordRepository
+.findEmployeeIdsWithRecordOnDate);
+
+:查詢今日有核准請假涵蓋該日的員工 ID
+(leaveApplicationRepository
+.findEmployeeIdsWithApprovedLeaveOnDate);
+
+:呼叫 **AbsentDetectionDomainService**
+.detectAbsentEmployees()
+篩選缺勤員工;
+note right
+  **Domain Service 三層過濾：**
+  全部在職員工
+  - 排除已打卡者
+  - 排除已核准請假者
+  = 缺勤員工清單
+end note
+
+while (遍歷每位缺勤員工) is (下一位)
+  :建立 AttendanceRecord
+  (狀態: ABSENT)
+  via createAbsentRecord();
+
+  :attendanceRecordRepository.save()
+  儲存缺勤記錄;
+
+  if (儲存是否成功？) then (失敗)
+    :記錄 ERROR 日誌
+    failCount++;
+  else (成功)
+    :發布 **AttendanceAnomalyDetectedEvent**
+    (recordId, employeeId, date,
+    anomalyType=ABSENT, anomalyMinutes=0);
+    :successCount++;
+  endif
+endwhile (處理完畢)
+
+:記錄統計日誌
+「在職:{n}, 已打卡:{n}, 請假:{n},
+缺勤:{n}, 成功:{n}, 失敗:{n}」;
+
+fork
+  |[NTF] 通知模組|
+  :訂閱 AttendanceAnomalyDetectedEvent;
+  :推送通知給直屬主管
+  「員工 XXX 於 {date} 缺勤」;
+fork again
+  |[ATT] 考勤模組|
+  :缺勤記錄納入月報統計
+  (AggregateMonthlyReportTask);
+end fork
+
+stop
+
+note right
+  **異常處理：**
+  · 排程層 catch 全局 Exception 記錄日誌
+  · 單筆記錄失敗不中斷整體流程
+  · 員工清單降級確保排程可執行
+
+  **Domain Event：**
+  AttendanceAnomalyDetectedEvent
+  (anomalyType: ABSENT)
+end note
+@enduml
+
+
+@startuml 06_薪資預借審核流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title 薪資預借審核流程 (Salary Advance Approval Flow)
+
+|Employee 員工|
+start
+:開啟「薪資預借申請」頁面;
+:填寫申請資料
+(金額、分期月數、事由);
+:送出預借申請;
+
+|[PAY] 薪資模組|
+:接收預借申請;
+
+:驗證輸入參數;
+note right
+  **驗證規則：**
+  · employeeId 不可為空
+  · requestedAmount > 0
+  · installmentMonths >= 1
+end note
+
+if (參數驗證通過？) then (不通過)
+  |Employee 員工|
+  :收到錯誤訊息;
+  stop
+else (通過)
+endif
+
+|[PAY] 薪資模組|
+:計算可預借上限
+**calculateMaxAdvance()**;
+note right
+  **公式：**
+  可預借金額 <=
+  (應發薪資 - 法定扣除 - 法扣款) × 90%
+
+  確保員工扣回後仍有基本薪資保障
+end note
+
+if (申請金額 <= 可預借上限？) then (超過)
+  |Employee 員工|
+  :收到錯誤「超過可預借上限」;
+  stop
+else (通過)
+endif
+
+|[PAY] 薪資模組|
+:建立 **SalaryAdvance** Aggregate
+(狀態: PENDING);
+:儲存至 DB;
+:通知主管審核;
+
+|Manager 主管|
+:收到預借審核通知;
+:檢視申請明細
+(金額、分期、事由);
+
+if (審核決定？) then (駁回)
+  :填寫駁回原因;
+  |[PAY] 薪資模組|
+  :SalaryAdvance.**reject**(approverId, reason)
+  狀態: PENDING → REJECTED;
+  :儲存至 DB;
+
+  |Employee 員工|
+  :收到駁回通知;
+  stop
+else (核准)
+  :核定核准金額
+  (可調低，不可超過申請金額);
+endif
+
+|[PAY] 薪資模組|
+:SalaryAdvance.**approve**(approverId, approvedAmount)
+狀態: PENDING → APPROVED;
+:自動計算 installmentAmount
+= approvedAmount / installmentMonths
+(CEILING 向上取整);
+:儲存至 DB;
+:通知財務部門;
+
+|Finance 財務|
+:收到撥款通知;
+:確認撥款;
+
+|[PAY] 薪資模組|
+:SalaryAdvance.**disburse**(disbursementDate)
+狀態: APPROVED → DISBURSED;
+:記錄撥款日;
+
+|Employee 員工|
+:收到通知「預借已撥款」
+款項入帳;
+
+|[PAY] 薪資模組|
+note right
+  **每月薪資計算觸發扣回**
+  薪資引擎呼叫 repay()
+  扣除 installmentAmount
+end note
+
+while (每月薪資結算) is (扣回)
+  :SalaryAdvance.**repay**(installmentAmount);
+  :實際扣回 = min(installmentAmount, remainingBalance);
+  :repaidAmount += actualRepay;
+  :remainingBalance -= actualRepay;
+
+  if (remainingBalance = 0？) then (是)
+    :狀態: REPAYING → **FULLY_REPAID**
+    預借完全清償;
+    break
+  else (否)
+    :狀態: REPAYING
+    下月繼續扣回;
+  endif
+endwhile (清償完畢)
+
+stop
+
+note right
+  **狀態機：**
+  PENDING → APPROVED → DISBURSED
+  → REPAYING → FULLY_REPAID
+  PENDING → REJECTED
+  PENDING/APPROVED → CANCELLED
+
+  **取消限制：**
+  已撥款/扣回中不可取消
+end note
+@enduml
+
+
+@startuml 07_離職退保連動流程
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title 離職退保連動流程 (Termination Insurance Withdrawal Flow)
+
+|HR 人員|
+start
+:執行員工離職作業
+(填寫離職日期、離職原因);
+
+|[ORG] 組織模組|
+:TerminateEmployeeServiceImpl
+啟動 Business Pipeline;
+
+partition "Pipeline 步驟" {
+  :Step 1: **LoadEmployeeTask**
+  載入員工資料;
+  :Step 2: **TerminateEmployeeTask**
+  呼叫 Employee.terminate()
+  設定離職日期與原因;
+  :Step 3: **SaveEmployeeTask**
+  儲存員工狀態至 DB;
+  :Step 4: **SaveTerminationHistoryTask**
+  記錄離職歷程至 EmployeeHistory;
+  :Step 5: **PublishTerminatedEventTask**
+  發布 EmployeeTerminatedEvent;
+}
+
+note right
+  **EmployeeTerminatedEvent 攜帶：**
+  · employeeId (UUID)
+  · employeeNumber
+  · fullName
+  · companyEmail
+  · organizationId
+  · departmentId
+  · terminationDate
+  · terminationReason
+end note
+
+:Kafka Topic:
+**hrms.employee.terminated**;
+
+fork
+  |[INS] 保險模組|
+  :EmployeeTerminatedEventListener
+  訂閱離職事件;
+  :解析 JSON：
+  employeeId, terminationDate, tenantId;
+
+  :呼叫 AutoWithdrawOnTerminationService
+  .**withdrawAllOnTermination()**;
+
+  :查詢員工所有 ACTIVE 加保記錄
+  findAllActiveByEmployeeId();
+
+  if (有有效加保記錄？) then (無)
+    :記錄日誌「無加保記錄」
+    跳過退保;
+    stop
+  else (有)
+  endif
+
+  while (遍歷每一筆加保記錄) is (下一筆)
+    if (保險類型？) then (LABOR 勞保)
+      :退保日 = 離職日;
+    elseif (HEALTH 健保) then
+      if (離職日為月底？) then (是)
+        :退保日 = 次月 1 日;
+        note right
+          **健保特殊規則：**
+          月底離職者
+          次月 1 日生效退保
+          (EffectiveDateRule)
+        end note
+      else (否)
+        :退保日 = 離職日;
+      endif
+    elseif (PENSION 勞退) then
+      :退保日 = 離職日;
+    elseif (GROUP 團保) then
+      :退保日 = 離職日;
+    endif
+
+    :enrollment.**withdraw**(withdrawDate)
+    狀態: ACTIVE → WITHDRAWN;
+    :enrollmentRepository.**save**()
+    儲存退保記錄;
+
+    if (儲存成功？) then (失敗)
+      :記錄 ERROR 日誌
+      繼續處理下一筆;
+    else (成功)
+      :建立 InsuranceWithdrawalCompletedEvent
+      (employeeId, enrollmentId,
+      insuranceType, withdrawDate,
+      reason="離職自動退保");
+    endif
+  endwhile (全部處理完畢)
+
+  :記錄統計「退保筆數/總加保筆數」;
+  :發布 **InsuranceWithdrawalCompletedEvent**
+  至 Kafka;
+
+fork again
+  |[IAM] 認證模組|
+  :訂閱 EmployeeTerminatedEvent;
+  :停用使用者帳號
+  (狀態: ACTIVE → DISABLED);
+  :撤銷所有存取權杖;
+
+fork again
+  |[PAY] 薪資模組|
+  :訂閱 EmployeeTerminatedEvent;
+  :結算最終薪資
+  (含未休假補償、資遣費);
+
+  :**訂閱 InsuranceWithdrawalCompletedEvent**;
+  :移除保費扣款項目
+  (勞健保自付額歸零);
+end fork
+
+|HR 人員|
+:收到「離職流程完成」通知;
+:確認各模組資料正確;
+stop
+
+note right
+  **跨服務事件鏈：**
+  ORG → EmployeeTerminatedEvent
+  → IAM (停用帳號)
+  → INS (自動退保)
+  → PAY (結算薪資)
+
+  INS → InsuranceWithdrawalCompletedEvent
+  → PAY (移除保費扣款)
+
+  **冪等性保障：**
+  查詢 ACTIVE 記錄，
+  已退保者不重複處理
+
+  **最終一致性：**
+  各服務獨立處理，
+  失敗進 DLQ 重試
+end note
+@enduml

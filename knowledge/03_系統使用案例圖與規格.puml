@@ -45,16 +45,31 @@ rectangle "HRMS 企業人資系統" {
     usecase "UC11\n執行每月薪資結算" as UC11
     usecase "UC12\n權限角色與工作流配置" as UC12
   }
+
+  package "系統管理功能" {
+    usecase "UC-SYS-01\n功能開關管理" as UCSYS01
+    usecase "UC-SYS-02\n系統參數管理" as UCSYS02
+    usecase "UC-SYS-03\n排程任務管理" as UCSYS03
+  }
+
+  package "輪班排程管理" {
+    usecase "UC-ATT-SHIFT-01\n班別定義" as UCSHIFT01
+    usecase "UC-ATT-SHIFT-02\n排班管理" as UCSHIFT02
+    usecase "UC-ATT-SHIFT-03\n換班申請" as UCSHIFT03
+  }
 }
 
 Emp --> UC01
 Emp --> UC02
 Emp --> UC03
 Emp --> UC04
+Emp --> UCSHIFT03 : 發起/回覆換班
 
 Mgr --> UC05
 Mgr --> UC06
 Mgr --> UC07
+Mgr --> UCSHIFT02 : 部門排班
+Mgr --> UCSHIFT03 : 審核換班
 
 Admin --> UC08
 Admin --> UC09
@@ -62,5 +77,10 @@ Admin --> UC10
 Admin --> UC11
 Admin --> UC12
 Admin --> UC04 : 查詢全員薪資
+Admin --> UCSYS01
+Admin --> UCSYS02
+Admin --> UCSYS03
+Admin --> UCSHIFT01
+Admin --> UCSHIFT02
 
 @enduml

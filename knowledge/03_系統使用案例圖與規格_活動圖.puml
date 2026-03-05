@@ -529,3 +529,388 @@ endif
 stop
 
 @enduml
+
+' ---- UC-SYS-01：功能開關管理 ----
+@startuml UC-SYS-01_功能開關管理
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC-SYS-01 - 功能開關管理
+
+start
+:Admin 進入「系統管理 > 功能開關」模組;
+:系統列出所有功能開關項目;
+note right
+  功能代碼 (featureCode)
+  功能名稱、所屬模組
+  目前啟停狀態
+end note
+
+if (操作類型？) then (篩選/搜尋)
+  :依模組篩選或關鍵字搜尋;
+  :系統回傳符合條件的開關列表;
+else (切換開關)
+  :Admin 選擇一筆功能開關;
+
+  if (啟用或停用？) then (啟用)
+    :系統呼叫 FeatureToggle.enable(operator);
+  else (停用)
+    :系統呼叫 FeatureToggle.disable(operator);
+  endif
+
+  :更新異動時間與異動人;
+  :系統儲存變更;
+  :寫入稽核日誌;
+endif
+
+if (批次操作？) then (是)
+  :選擇同一模組所有開關;
+  :逐筆更新並記錄;
+endif
+
+:功能開關狀態即時生效;
+note right
+  不需重啟服務
+  影響對應模組業務邏輯
+  如：ATTENDANCE_LATE_CHECK
+      SALARY_ADVANCE
+end note
+stop
+
+@enduml
+
+' ---- UC-SYS-02：系統參數管理 ----
+@startuml UC-SYS-02_系統參數管理
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC-SYS-02 - 系統參數管理
+
+start
+:Admin 進入「系統管理 > 系統參數」模組;
+:系統列出所有參數項目;
+note right
+  參數代碼 (paramCode)
+  參數名稱、目前值
+  型別: STRING/INTEGER/
+       DECIMAL/BOOLEAN/JSON
+  分類: SECURITY/BUSINESS/
+       UI/SYSTEM
+end note
+
+if (操作類型？) then (修改參數)
+  :Admin 選擇欲修改的參數;
+  :輸入新的參數值;
+
+  :系統驗證新值格式;
+  if (格式是否符合型別定義？) then (是)
+    :呼叫 SystemParameter.updateValue\n(newValue, operator);
+    :回傳 ParameterChange 記錄;
+    note right
+      舊值、新值
+      操作者、時間
+    end note
+  else (否)
+    #pink:回傳 400 Bad Request;
+    stop
+  endif
+
+  if (參數是否為加密型？) then (是)
+    :以密文形式儲存;
+    :異動記錄遮罩舊值;
+  endif
+
+  if (分類是否為 SECURITY？) then (是)
+    :發送通知給所有系統管理員;
+  endif
+
+else (重設為預設值)
+  :Admin 點擊「重設為預設值」;
+  :呼叫 SystemParameter.resetToDefault\n(operator);
+else (新增參數)
+  :填寫參數代碼、名稱、預設值;
+  :設定型別、模組、分類;
+  :設定是否加密儲存;
+
+  if (參數代碼是否已存在？) then (是)
+    #pink:回傳 409 Conflict;
+    stop
+  endif
+endif
+
+:系統儲存變更;
+:異動記錄寫入稽核日誌;
+:參數立即生效;
+stop
+
+@enduml
+
+' ---- UC-SYS-03：排程任務管理 ----
+@startuml UC-SYS-03_排程任務管理
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC-SYS-03 - 排程任務管理
+
+start
+:Admin 進入「系統管理 > 排程任務」模組;
+:系統列出所有排程任務;
+note right
+  任務代碼 (jobCode)
+  Cron 表達式、啟停狀態
+  最近執行時間、執行結果
+  連續失敗次數
+end note
+
+if (是否有告警任務？\n（連續失敗 >= 3 次）) then (是)
+  #orange:系統標示告警圖示;
+  :提醒 Admin 介入處理;
+endif
+
+:Admin 選擇一筆排程任務;
+
+if (操作類型？) then (啟用/停用)
+  if (啟用或停用？) then (啟用)
+    :呼叫 ScheduledJobConfig.enable\n(operator);
+  else (停用)
+    :呼叫 ScheduledJobConfig.disable\n(operator);
+  endif
+else (修改 Cron)
+  :Admin 輸入新 Cron 表達式;
+  if (Cron 格式是否正確？) then (是)
+    :呼叫 ScheduledJobConfig.updateCron\n(newCron, operator);
+  else (否)
+    #pink:回傳 400 Bad Request;
+    stop
+  endif
+else (手動觸發)
+  if (任務是否正在執行中？) then (是)
+    #pink:回傳 409 Conflict\n（防止重複執行）;
+    stop
+  else (否)
+    :呼叫 recordStart();
+    :立即執行排程任務;
+    if (執行成功？) then (是)
+      :呼叫 recordSuccess();
+    else (否)
+      :呼叫 recordFailure(errorMessage);
+      if (連續失敗 >= 3？) then (是)
+        :發送告警通知\n（透過 NTF 模組）;
+      endif
+    endif
+  endif
+else (查看歷史)
+  :顯示執行歷史記錄;
+  note right
+    執行時間、耗時
+    結果、錯誤訊息
+  end note
+endif
+
+:系統儲存變更;
+:寫入稽核日誌;
+stop
+
+@enduml
+
+' ---- UC-ATT-SHIFT-01：班別定義 ----
+@startuml UC-ATT-SHIFT-01_班別定義
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC-ATT-SHIFT-01 - 班別定義
+
+start
+:HR 進入「考勤管理 > 班別管理」模組;
+:系統列出所有已定義的班別;
+note right
+  班別代碼、名稱
+  類型: REGULAR/FLEXIBLE/SHIFT
+  上下班時間、啟停狀態
+end note
+
+if (操作類型？) then (新增班別)
+  :填寫班別代碼與名稱;
+  :選擇班別類型;
+
+  :設定上班時間 (workStartTime);
+  :設定下班時間 (workEndTime);
+
+  if (需設定休息時間？) then (是)
+    :設定休息開始時間;
+    :設定休息結束時間;
+    if (休息開始 > 休息結束？) then (是)
+      #pink:回傳 400 Bad Request\n(Break start time cannot be\nafter break end time);
+      stop
+    endif
+  endif
+
+  :設定遲到容忍分鐘數;
+  :設定早退容忍分鐘數;
+  if (容忍分鐘數 < 0？) then (是)
+    #pink:回傳 400 Bad Request\n(Tolerance minutes cannot\nbe negative);
+    stop
+  endif
+
+  :設定遲到判定開關 (lateCheckEnabled);
+  :設定遲到扣薪開關 (lateSalaryDeduction);
+
+  if (班別代碼已存在？) then (是)
+    #pink:回傳 409 Conflict;
+    stop
+  endif
+
+  :建立 Shift 聚合根;
+  :初始狀態 → isActive = true;
+
+else (修改班別)
+  :選擇現有班別;
+  :修改相關設定;
+  :呼叫 PUT /api/v1/shifts/{shiftId};
+
+else (停用班別)
+  :選擇欲停用的班別;
+  :呼叫 Shift.deactivate();
+  note right
+    已停用的班別
+    不可被排班引用
+  end note
+endif
+
+:系統儲存班別資料;
+:班別可供排班管理模組引用;
+stop
+
+@enduml
+
+' ---- UC-ATT-SHIFT-02：排班管理 ----
+@startuml UC-ATT-SHIFT-02_排班管理
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC-ATT-SHIFT-02 - 排班管理
+
+start
+:操作者進入「考勤管理 > 排班管理」;
+:選擇部門與排班月份;
+:系統展示月曆格式排班表;
+
+if (排班方式？) then (手動排班)
+  :針對特定員工的特定日期指派班別;
+  :建立 ShiftSchedule 聚合根;
+  :狀態 → DRAFT;
+
+  if (需加註備註？) then (是)
+    :填寫排班備註 (note);
+  endif
+
+else (自動排班 - 輪班模式)
+  :進入「輪班模式」設定;
+
+  if (使用既有模式？) then (否)
+    :建立 RotationPattern 聚合根;
+    :設定循環天數 (cycleDays);
+    :設定每天班別序列;
+    note right
+      例：早班→中班→
+      晚班→休息
+      (4天循環)
+    end note
+
+    if (天序數量 == cycleDays？) then (否)
+      #pink:拋出 IllegalArgumentException;
+      stop
+    endif
+  endif
+
+  :選擇適用員工群組;
+  :設定排班日期範圍與輪班起算日;
+
+  :ShiftSchedulingDomainService\n.generateSchedules();
+  :自動產生排班（跳過休息日）;
+  :產生的排班狀態 → DRAFT;
+endif
+
+:操作者預覽排班表;
+
+if (需微調？) then (是)
+  :手動調整個別排班;
+endif
+
+:操作者點擊「發佈排班」;
+:呼叫 ShiftSchedule.publish();
+:狀態 → PUBLISHED;
+:NTF 通知受影響員工;
+
+note right
+  月結後自動鎖定:
+  ShiftSchedule.lock()
+  狀態 → LOCKED
+  不可再修改
+end note
+
+stop
+
+@enduml
+
+' ---- UC-ATT-SHIFT-03：換班申請 ----
+@startuml UC-ATT-SHIFT-03_換班申請
+!theme plain
+skinparam defaultFontName "Microsoft JhengHei"
+title UC-ATT-SHIFT-03 - 換班申請
+
+start
+:員工 A 進入「考勤管理 > 換班申請」;
+:選擇欲換班的日期;
+:選擇交換對象員工 B;
+
+if (申請人 == 交換對象？) then (是)
+  #pink:拋出 IllegalArgumentException\n（不可與自己換班）;
+  stop
+endif
+
+:系統顯示雙方指定日期的班別資訊;
+
+:員工 A 填寫換班原因;
+:提交換班申請;
+:建立 ShiftSwapRequest 聚合根;
+:狀態 → PENDING_COUNTERPART;
+:NTF 通知員工 B;
+
+|員工 B 回應|
+if (員工 A 是否取消？) then (是)
+  :呼叫 ShiftSwapRequest.cancel();
+  :狀態 → CANCELLED;
+  stop
+endif
+
+if (員工 B 同意？) then (同意)
+  :呼叫 acceptByCounterpart();
+  :狀態 → PENDING_APPROVAL;
+  :NTF 通知主管;
+else (拒絕)
+  :呼叫 rejectByCounterpart(reason);
+  :狀態 → REJECTED;
+  :NTF 通知員工 A;
+  stop
+endif
+
+|主管審核|
+if (主管核准？) then (核准)
+  :呼叫 ShiftSwapRequest.approve\n(approverId);
+  :狀態 → APPROVED;
+
+  :ShiftSchedulingDomainService\n.executeSwap();
+  note right
+    交換雙方排班的班別:
+    scheduleA.changeShift(shiftB)
+    scheduleB.changeShift(shiftA)
+  end note
+
+  :NTF 通知雙方員工\n換班已生效;
+
+else (駁回)
+  :呼叫 ShiftSwapRequest.reject\n(approverId, reason);
+  :狀態 → REJECTED;
+  :NTF 通知雙方員工;
+endif
+
+:排班表更新為交換後的班別;
+stop
+
+@enduml
