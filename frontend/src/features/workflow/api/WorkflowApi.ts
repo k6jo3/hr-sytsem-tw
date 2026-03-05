@@ -141,8 +141,7 @@ export const WorkflowApi = {
     params?: GetWorkflowDefinitionsRequest
   ): Promise<GetWorkflowDefinitionsResponse> => {
     if (MockConfig.isEnabled('WORKFLOW')) {
-       const res = await MockWorkflowApi.getWorkflows();
-       return { data: res.workflows, total: res.total, page: 1, page_size: 10 };
+       return MockWorkflowApi.getDefinitions();
     }
     const raw = await apiClient.get<any>(`${BASE_URL}/definitions`, { params: adaptPageParams(params) });
     return adaptPage(raw, adaptDefinition);
@@ -177,7 +176,7 @@ export const WorkflowApi = {
    * 取得流程實例詳情 (歷史)
    */
   getInstance: async (instanceId: string): Promise<GetWorkflowInstanceResponse> => {
-    if (MockConfig.isEnabled('WORKFLOW')) return { instanceId } as any;
+    if (MockConfig.isEnabled('WORKFLOW')) return MockWorkflowApi.getInstance(instanceId);
     const raw = await apiClient.get<any>(`${BASE_URL}/${instanceId}/history`);
     return {
       instance: adaptInstance(raw),
@@ -191,7 +190,7 @@ export const WorkflowApi = {
   getMyApplications: async (
     params?: GetMyApplicationsRequest
   ): Promise<GetMyApplicationsResponse> => {
-    if (MockConfig.isEnabled('WORKFLOW')) return { data: [], total: 0, page: 1, page_size: 10 };
+    if (MockConfig.isEnabled('WORKFLOW')) return MockWorkflowApi.getMyApplications();
     const raw = await apiClient.get<any>(`${BASE_URL}/my/applications`, { params: adaptPageParams(params) });
     return adaptPage(raw, adaptInstance);
   },
@@ -202,7 +201,7 @@ export const WorkflowApi = {
    * 取得待辦任務列表
    */
   getPendingTasks: async (params?: GetPendingTasksRequest): Promise<GetPendingTasksResponse> => {
-    if (MockConfig.isEnabled('WORKFLOW')) return { data: [], total: 0, page: 1, page_size: 10 };
+    if (MockConfig.isEnabled('WORKFLOW')) return MockWorkflowApi.getPendingTasks();
     const raw = await apiClient.get<any>(`${BASE_URL}/pending-tasks`, { params: adaptPageParams(params) });
     return adaptPage(raw, adaptTask);
   },
@@ -211,7 +210,7 @@ export const WorkflowApi = {
    * 核准任務
    */
   approveTask: async (taskId: string, request?: Partial<ApproveTaskRequest>): Promise<ApproveTaskResponse> => {
-    if (MockConfig.isEnabled('WORKFLOW')) return { message: '任務已核准 (Mock)' };
+    if (MockConfig.isEnabled('WORKFLOW')) return MockWorkflowApi.approveTask();
     const body: ApproveTaskRequest = { ...request, task_id: taskId };
     return apiClient.post<ApproveTaskResponse>(`${BASE_URL}/approve`, body);
   },
@@ -220,7 +219,7 @@ export const WorkflowApi = {
    * 駁回任務
    */
   rejectTask: async (taskId: string, request: Partial<RejectTaskRequest>): Promise<RejectTaskResponse> => {
-    if (MockConfig.isEnabled('WORKFLOW')) return { message: '任務已駁回 (Mock)' };
+    if (MockConfig.isEnabled('WORKFLOW')) return MockWorkflowApi.rejectTask();
     const body: RejectTaskRequest = { ...request, task_id: taskId, comments: request.comments || '' };
     return apiClient.post<RejectTaskResponse>(`${BASE_URL}/reject`, body);
   },
@@ -233,7 +232,7 @@ export const WorkflowApi = {
   createDelegation: async (
     request: CreateDelegationRequest
   ): Promise<CreateDelegationResponse> => {
-    if (MockConfig.isEnabled('WORKFLOW')) return { success: true } as any;
+    if (MockConfig.isEnabled('WORKFLOW')) return MockWorkflowApi.createDelegation();
     const response = await apiClient.post<any>(`${BASE_URL}/delegations`, request);
     return { delegation_id: response.delegationId ?? response.delegation_id ?? '', message: response.message ?? '代理人已設定' };
   },
@@ -242,7 +241,7 @@ export const WorkflowApi = {
    * 取得代理人設定列表
    */
   getDelegations: async (params?: GetDelegationsRequest): Promise<GetDelegationsResponse> => {
-    if (MockConfig.isEnabled('WORKFLOW')) return { data: [] };
+    if (MockConfig.isEnabled('WORKFLOW')) return MockWorkflowApi.getDelegations();
     const raw = await apiClient.get<any>(`${BASE_URL}/delegations`, { params });
     const items = raw.content ?? raw.data ?? (Array.isArray(raw) ? raw : []);
     return { data: items.map(adaptDelegation) };
@@ -252,7 +251,7 @@ export const WorkflowApi = {
    * 刪除代理人設定
    */
   deleteDelegation: async (delegationId: string): Promise<DeleteDelegationResponse> => {
-    if (MockConfig.isEnabled('WORKFLOW')) return { message: '代理人設定已刪除 (Mock)' };
+    if (MockConfig.isEnabled('WORKFLOW')) return MockWorkflowApi.deleteDelegation();
     const response = await apiClient.delete<DeleteDelegationResponse>(
       `${BASE_URL}/delegations/${delegationId}`
     );

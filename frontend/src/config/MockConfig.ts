@@ -18,7 +18,7 @@ export const MockConfig = {
     PERFORMANCE: false,
     RECRUITMENT: false,
     TRAINING: false,
-    WORKFLOW: false,
+    WORKFLOW: true,
     NOTIFICATION: false,
     DOCUMENT: false,
     REPORT: false,

@@ -56,25 +56,123 @@ export class MockTrainingApi {
 export class MockWorkflowApi {
   private static mockWorkflows = [
     {
-      id: 'wf-1',
-      name: '請假審批流程',
-      type: 'LEAVE_APPROVAL',
-      status: 'ACTIVE',
-      steps: [
-        { step_id: '1', name: '直屬主管審核', approver_role: 'MANAGER' },
-        { step_id: '2', name: 'HR 審核', approver_role: 'HR' },
+      definition_id: 'wf-1',
+      flow_name: '請假審批流程',
+      flow_type: 'LEAVE',
+      is_active: true,
+      version: 1,
+      nodes: [
+        { node_id: 'start', node_type: 'START', node_name: '開始' },
+        { node_id: 'n1', node_type: 'APPROVAL', node_name: '直屬主管審核', assignee_type: 'ROLE' },
+        { node_id: 'n2', node_type: 'APPROVAL', node_name: 'HR 審核', assignee_type: 'ROLE' },
+        { node_id: 'end', node_type: 'END', node_name: '結束' },
+      ],
+      edges: [
+        { edge_id: 'e1', source_node: 'start', target_node: 'n1' },
+        { edge_id: 'e2', source_node: 'n1', target_node: 'n2' },
+        { edge_id: 'e3', source_node: 'n2', target_node: 'end' },
       ],
       created_at: '2025-01-01T00:00:00Z',
     },
     {
-      id: 'wf-2',
-      name: '加班審批流程',
-      type: 'OVERTIME_APPROVAL',
-      status: 'ACTIVE',
-      steps: [
-        { step_id: '1', name: '直屬主管審核', approver_role: 'MANAGER' },
+      definition_id: 'wf-2',
+      flow_name: '加班審批流程',
+      flow_type: 'OVERTIME',
+      is_active: true,
+      version: 1,
+      nodes: [
+        { node_id: 'start', node_type: 'START', node_name: '開始' },
+        { node_id: 'n1', node_type: 'APPROVAL', node_name: '直屬主管審核', assignee_type: 'ROLE' },
+        { node_id: 'end', node_type: 'END', node_name: '結束' },
+      ],
+      edges: [
+        { edge_id: 'e1', source_node: 'start', target_node: 'n1' },
+        { edge_id: 'e2', source_node: 'n1', target_node: 'end' },
       ],
       created_at: '2025-01-01T00:00:00Z',
+    },
+  ];
+
+  private static mockTasks = [
+    {
+      task_id: 'task-001',
+      instance_id: 'inst-001',
+      flow_name: '請假審批流程',
+      business_type: 'LEAVE',
+      business_id: 'leave-001',
+      business_summary: '王大明 - 特休假2天（03/10~03/11）',
+      node_id: 'n1',
+      node_name: '直屬主管審核',
+      applicant_id: 'emp-001',
+      applicant_name: '王大明',
+      assignee_id: 'mgr-001',
+      assignee_name: '陳志強',
+      status: 'PENDING',
+      is_overdue: false,
+      due_date: '2026-03-08T18:00:00Z',
+      created_at: '2026-03-05T09:00:00Z',
+    },
+    {
+      task_id: 'task-002',
+      instance_id: 'inst-002',
+      flow_name: '加班審批流程',
+      business_type: 'OVERTIME',
+      business_id: 'ot-001',
+      business_summary: '李小美 - 加班3小時（03/06）',
+      node_id: 'n1',
+      node_name: '直屬主管審核',
+      applicant_id: 'emp-002',
+      applicant_name: '李小美',
+      assignee_id: 'mgr-001',
+      assignee_name: '陳志強',
+      status: 'PENDING',
+      is_overdue: true,
+      due_date: '2026-03-04T18:00:00Z',
+      created_at: '2026-03-01T14:00:00Z',
+    },
+  ];
+
+  private static mockApplications = [
+    {
+      instance_id: 'inst-003',
+      definition_id: 'wf-1',
+      flow_name: '請假審批流程',
+      business_type: 'LEAVE',
+      business_id: 'leave-002',
+      applicant_id: 'emp-admin',
+      applicant_name: 'admin',
+      current_node: 'n2',
+      current_node_name: 'HR 審核',
+      status: 'RUNNING',
+      started_at: '2026-02-28T10:00:00Z',
+    },
+    {
+      instance_id: 'inst-004',
+      definition_id: 'wf-2',
+      flow_name: '加班審批流程',
+      business_type: 'OVERTIME',
+      business_id: 'ot-002',
+      applicant_id: 'emp-admin',
+      applicant_name: 'admin',
+      current_node: 'end',
+      current_node_name: '結束',
+      status: 'COMPLETED',
+      started_at: '2026-02-20T09:00:00Z',
+      completed_at: '2026-02-21T15:00:00Z',
+    },
+  ];
+
+  private static mockDelegations = [
+    {
+      delegation_id: 'del-001',
+      delegator_id: 'emp-admin',
+      delegator_name: 'admin',
+      delegatee_id: 'emp-002',
+      delegatee_name: '李小美',
+      start_date: '2026-03-10',
+      end_date: '2026-03-15',
+      is_active: true,
+      created_at: '2026-03-05T10:00:00Z',
     },
   ];
 
@@ -83,9 +181,58 @@ export class MockWorkflowApi {
     return { workflows: this.mockWorkflows, total: this.mockWorkflows.length };
   }
 
+  static async getDefinitions(): Promise<any> {
+    await this.delay(300);
+    return { data: this.mockWorkflows, total: this.mockWorkflows.length, page: 1, page_size: 10 };
+  }
+
+  static async getPendingTasks(): Promise<any> {
+    await this.delay(300);
+    return { data: this.mockTasks, total: this.mockTasks.length, page: 1, page_size: 100 };
+  }
+
+  static async getMyApplications(): Promise<any> {
+    await this.delay(300);
+    return { data: this.mockApplications, total: this.mockApplications.length, page: 1, page_size: 100 };
+  }
+
+  static async getInstance(instanceId: string): Promise<any> {
+    await this.delay(300);
+    const instance = this.mockApplications.find((a) => a.instance_id === instanceId) ?? this.mockApplications[0];
+    return {
+      instance,
+      tasks: this.mockTasks.filter((t) => t.instance_id === instanceId),
+    };
+  }
+
+  static async getDelegations(): Promise<any> {
+    await this.delay(300);
+    return { data: this.mockDelegations };
+  }
+
+  static async approveTask(): Promise<any> {
+    await this.delay(500);
+    return { message: '核准成功' };
+  }
+
+  static async rejectTask(): Promise<any> {
+    await this.delay(500);
+    return { message: '駁回成功' };
+  }
+
   static async createWorkflow(data: any): Promise<any> {
     await this.delay(500);
     return { message: '流程建立成功', workflow_id: `wf-${Date.now()}` };
+  }
+
+  static async createDelegation(): Promise<any> {
+    await this.delay(500);
+    return { delegation_id: `del-${Date.now()}`, message: '代理人設定成功' };
+  }
+
+  static async deleteDelegation(): Promise<any> {
+    await this.delay(500);
+    return { message: '代理人設定已刪除' };
   }
 
   private static delay(ms: number): Promise<void> {

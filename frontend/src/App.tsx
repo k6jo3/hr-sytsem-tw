@@ -47,6 +47,8 @@ import {
     HR08TemplateDesignPage,
     HR09RecruitmentPage,
     HR10TrainingListPage,
+    HR11DelegationPage,
+    HR11WorkflowDefinitionPage,
     HR11WorkflowListPage,
     HR12NotificationPage,
     HR13DocumentListPage,
@@ -90,6 +92,8 @@ const App: React.FC = () => {
         <Route path="/attendance/my-records" element={<ProtectedRoute><HR03MyAttendanceListPage /></ProtectedRoute>} />
         <Route path="/admin/attendance/approvals" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR', 'MANAGER']}><HR03ApprovalListPage /></ProtectedRoute>} />
         <Route path="/admin/workflow" element={<ProtectedRoute><HR11WorkflowListPage /></ProtectedRoute>} />
+        <Route path="/admin/workflow/definitions" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR11WorkflowDefinitionPage /></ProtectedRoute>} />
+        <Route path="/profile/delegation" element={<ProtectedRoute><HR11DelegationPage /></ProtectedRoute>} />
 
         {/* 其他考勤相關路由 */}
         <Route path="/attendance/overtime" element={<ProtectedRoute><HR03OvertimeListPage /></ProtectedRoute>} />

@@ -64,6 +64,8 @@ export { HR10TrainingListPage } from './HR10TrainingListPage';
 
 // Workflow (HR11)
 export { HR11WorkflowListPage } from './HR11WorkflowListPage';
+export { HR11WorkflowDefinitionPage } from './HR11WorkflowDefinitionPage';
+export { HR11DelegationPage } from './HR11DelegationPage';
 
 // Notification (HR12)
 export { HR12NotificationPage } from './HR12NotificationPage';

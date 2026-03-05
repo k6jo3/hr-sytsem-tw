@@ -239,8 +239,8 @@ export const useDelegations = () => {
  * 通用 Workflow Hook (保持向後兼容)
  */
 export const useWorkflow = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading] = useState(false);
+  const [error] = useState<string | null>(null);
 
   return {
     loading,

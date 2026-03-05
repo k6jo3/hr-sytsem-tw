@@ -117,7 +117,16 @@ export const MENU_CONFIG: MenuItemConfig[] = [
   },
   { key: '/admin/recruitment', icon: 'UserAddOutlined', label: '招募管理', roles: ['ADMIN', 'HR'] },
   { key: '/admin/training', icon: 'BookOutlined', label: '教育訓練' },
-  { key: '/admin/workflow', icon: 'AuditOutlined', label: '簽核流程' },
+  {
+    key: 'workflow',
+    icon: 'AuditOutlined',
+    label: '簽核流程',
+    children: [
+      { key: '/admin/workflow', label: '我的待辦與申請' },
+      { key: '/admin/workflow/definitions', label: '流程定義管理', roles: ['ADMIN', 'HR'] },
+      { key: '/profile/delegation', label: '代理人設定' },
+    ],
+  },
   { key: '/admin/notifications', icon: 'BellOutlined', label: '訊息通知' },
   { key: '/admin/documents', icon: 'FileOutlined', label: '文件管理' },
   { key: '/admin/reports', icon: 'BarChartOutlined', label: '報表中心', roles: ['ADMIN', 'HR', 'FINANCE', 'PM'] },
