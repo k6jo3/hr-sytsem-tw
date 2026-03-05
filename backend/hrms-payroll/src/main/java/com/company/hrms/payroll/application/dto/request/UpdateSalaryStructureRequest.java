@@ -13,7 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateSalaryStructureRequest {
     private BigDecimal monthlySalary;
+    private BigDecimal dailyRate;
     private BigDecimal hourlyRate;
+    private String paymentMethod;
     private LocalDate effectiveDate;
     private LocalDate endDate;
     private List<SalaryItemRequest> items;

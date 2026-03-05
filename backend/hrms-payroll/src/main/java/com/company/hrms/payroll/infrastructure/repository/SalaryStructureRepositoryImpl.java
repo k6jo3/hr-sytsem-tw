@@ -20,6 +20,7 @@ import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.payroll.domain.model.aggregate.SalaryStructure;
 import com.company.hrms.payroll.domain.model.entity.SalaryItem;
 import com.company.hrms.payroll.domain.model.valueobject.ItemType;
+import com.company.hrms.payroll.domain.model.valueobject.PaymentMethod;
 import com.company.hrms.payroll.domain.model.valueobject.PayrollCycle;
 import com.company.hrms.payroll.domain.model.valueobject.PayrollSystem;
 import com.company.hrms.payroll.domain.model.valueobject.StructureId;
@@ -115,9 +116,11 @@ public class SalaryStructureRepositoryImpl extends CommandBatchBaseRepository<Sa
                 .employeeId(domain.getEmployeeId())
                 .payrollSystem(domain.getPayrollSystem().name())
                 .payrollCycle(domain.getPayrollCycle().name())
+                .paymentMethod(domain.getPaymentMethod() != null ? domain.getPaymentMethod().name() : "BANK_TRANSFER")
                 .effectiveDate(domain.getEffectiveDate())
                 .endDate(domain.getEndDate())
                 .monthlySalary(domain.getMonthlySalary())
+                .dailyRate(domain.getDailyRate())
                 .hourlyRate(domain.getHourlyRate())
                 .active(domain.isActive())
                 .items(new ArrayList<>())
@@ -154,16 +157,15 @@ public class SalaryStructureRepositoryImpl extends CommandBatchBaseRepository<Sa
                     .collect(Collectors.toList());
         }
 
-        // Correct Argument Order for SalaryStructure.reconstruct:
-        // (id, employeeId, monthlySalary, hourlyRate, payrollSystem, payrollCycle,
-        // items, effectiveDate, endDate, active)
         return SalaryStructure.reconstruct(
                 new StructureId(po.getStructureId()),
                 po.getEmployeeId(),
                 po.getMonthlySalary(),
+                po.getDailyRate(),
                 po.getHourlyRate(),
                 PayrollSystem.valueOf(po.getPayrollSystem()),
                 PayrollCycle.valueOf(po.getPayrollCycle()),
+                po.getPaymentMethod() != null ? PaymentMethod.valueOf(po.getPaymentMethod()) : PaymentMethod.BANK_TRANSFER,
                 items,
                 po.getEffectiveDate(),
                 po.getEndDate(),

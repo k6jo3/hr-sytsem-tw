@@ -12,6 +12,7 @@ import com.company.hrms.payroll.application.service.context.CreateSalaryStructur
 import com.company.hrms.payroll.domain.model.aggregate.SalaryStructure;
 import com.company.hrms.payroll.domain.model.entity.SalaryItem;
 import com.company.hrms.payroll.domain.model.valueobject.ItemType;
+import com.company.hrms.payroll.domain.model.valueobject.PaymentMethod;
 import com.company.hrms.payroll.domain.model.valueobject.PayrollCycle;
 import com.company.hrms.payroll.domain.model.valueobject.PayrollSystem;
 
@@ -40,12 +41,23 @@ public class InitSalaryStructureTask implements PipelineTask<CreateSalaryStructu
                     request.getMonthlySalary(),
                     cycle,
                     effectiveDate);
+        } else if (system == PayrollSystem.DAILY) {
+            structure = SalaryStructure.createDaily(
+                    request.getEmployeeId(),
+                    request.getDailyRate(),
+                    cycle,
+                    effectiveDate);
         } else {
             structure = SalaryStructure.createHourly(
                     request.getEmployeeId(),
                     request.getHourlyRate(),
                     cycle,
                     effectiveDate);
+        }
+
+        // 設定領薪方式
+        if (request.getPaymentMethod() != null) {
+            structure.changePaymentMethod(PaymentMethod.valueOf(request.getPaymentMethod()));
         }
 
         // 新增薪資項目

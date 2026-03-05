@@ -4,11 +4,11 @@
 -- ============================================================================
 
 -- === 薪資結構 (4 名員工) ===
-INSERT INTO hr04_salary_structures (structure_id, employee_id, monthly_salary, hourly_rate, payroll_system, payroll_cycle, effective_date, end_date, is_active, created_at, updated_at) VALUES
-('SAL-001', '00000000-0000-0000-0000-000000000001', 55000.00, 264.42, 'MONTHLY', 'MONTHLY', '2024-01-01', NULL, TRUE, '2024-01-01 08:00:00', '2024-01-01 08:00:00'),
-('SAL-002', '00000000-0000-0000-0000-000000000002', 48000.00, 230.77, 'MONTHLY', 'MONTHLY', '2024-03-01', NULL, TRUE, '2024-03-01 08:00:00', '2024-03-01 08:00:00'),
-('SAL-003', '00000000-0000-0000-0000-000000000003', 52000.00, 250.00, 'MONTHLY', 'MONTHLY', '2024-06-01', NULL, TRUE, '2024-06-01 08:00:00', '2024-06-01 08:00:00'),
-('SAL-004', '00000000-0000-0000-0000-000000000004', 60000.00, 288.46, 'MONTHLY', 'MONTHLY', '2024-01-15', NULL, TRUE, '2024-01-15 08:00:00', '2024-01-15 08:00:00');
+INSERT INTO hr04_salary_structures (structure_id, employee_id, monthly_salary, daily_rate, hourly_rate, payroll_system, payroll_cycle, payment_method, effective_date, end_date, is_active, created_at, updated_at) VALUES
+('SAL-001', '00000000-0000-0000-0000-000000000001', 55000.00, NULL, 264.42, 'MONTHLY', 'MONTHLY', 'BANK_TRANSFER', '2024-01-01', NULL, TRUE, '2024-01-01 08:00:00', '2024-01-01 08:00:00'),
+('SAL-002', '00000000-0000-0000-0000-000000000002', 48000.00, NULL, 230.77, 'MONTHLY', 'MONTHLY', 'BANK_TRANSFER', '2024-03-01', NULL, TRUE, '2024-03-01 08:00:00', '2024-03-01 08:00:00'),
+('SAL-003', '00000000-0000-0000-0000-000000000003', 52000.00, NULL, 250.00, 'MONTHLY', 'MONTHLY', 'BANK_TRANSFER', '2024-06-01', NULL, TRUE, '2024-06-01 08:00:00', '2024-06-01 08:00:00'),
+('SAL-004', '00000000-0000-0000-0000-000000000004', 60000.00, NULL, 288.46, 'MONTHLY', 'MONTHLY', 'BANK_TRANSFER', '2024-01-15', NULL, TRUE, '2024-01-15 08:00:00', '2024-01-15 08:00:00');
 
 -- === 薪資項目 (每人 3 項: 底薪、職務加給、伙食津貼) ===
 INSERT INTO hr04_salary_items (structure_id, item_id, item_code, item_name, item_type, amount, is_fixed_amount, is_taxable, is_insurable) VALUES

@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.payroll.domain.model.entity.SalaryItem;
+import com.company.hrms.payroll.domain.model.valueobject.PaymentMethod;
 import com.company.hrms.payroll.domain.model.valueobject.PayrollCycle;
 import com.company.hrms.payroll.domain.model.valueobject.PayrollSystem;
 import com.company.hrms.payroll.domain.model.valueobject.StructureId;
@@ -56,9 +57,20 @@ public class SalaryStructure {
     private PayrollCycle payrollCycle;
 
     /**
+     * 領薪方式
+     */
+    @Builder.Default
+    private PaymentMethod paymentMethod = PaymentMethod.BANK_TRANSFER;
+
+    /**
      * 時薪 (時薪制)
      */
     private BigDecimal hourlyRate;
+
+    /**
+     * 日薪 (日薪制)
+     */
+    private BigDecimal dailyRate;
 
     /**
      * 月薪 (月薪制)
@@ -164,6 +176,38 @@ public class SalaryStructure {
                 .build();
     }
 
+    /**
+     * 建立日薪制薪資結構
+     *
+     * @param employeeId    員工 ID
+     * @param dailyRate     日薪
+     * @param payrollCycle  領薪週期
+     * @param effectiveDate 生效日期
+     * @return 薪資結構
+     */
+    public static SalaryStructure createDaily(String employeeId, BigDecimal dailyRate,
+            PayrollCycle payrollCycle, LocalDate effectiveDate) {
+        validateEmployeeId(employeeId);
+        validateDailyRate(dailyRate);
+
+        // 計算時薪 = 日薪 ÷ 8
+        BigDecimal calculatedHourlyRate = dailyRate.divide(
+                BigDecimal.valueOf(8), 4, RoundingMode.HALF_UP);
+
+        return SalaryStructure.builder()
+                .id(StructureId.generate())
+                .employeeId(employeeId)
+                .payrollSystem(PayrollSystem.DAILY)
+                .payrollCycle(payrollCycle != null ? payrollCycle : PayrollCycle.MONTHLY)
+                .dailyRate(dailyRate)
+                .calculatedHourlyRate(calculatedHourlyRate)
+                .effectiveDate(effectiveDate)
+                .active(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
     // ==================== 業務方法 ====================
 
     /**
@@ -232,14 +276,49 @@ public class SalaryStructure {
     }
 
     /**
+     * 調整日薪
+     *
+     * @param newRate 新日薪
+     */
+    public void adjustDailyRate(BigDecimal newRate) {
+        if (payrollSystem != PayrollSystem.DAILY) {
+            throw new DomainException("PAY_NOT_DAILY", "非日薪制無法調整日薪");
+        }
+        validateDailyRate(newRate);
+        this.dailyRate = newRate;
+        this.calculatedHourlyRate = newRate.divide(
+                BigDecimal.valueOf(8), 4, RoundingMode.HALF_UP);
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 變更領薪方式
+     *
+     * @param paymentMethod 領薪方式
+     */
+    public void changePaymentMethod(PaymentMethod paymentMethod) {
+        if (paymentMethod == null) {
+            throw new IllegalArgumentException("PaymentMethod cannot be null");
+        }
+        this.paymentMethod = paymentMethod;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
      * 計算月薪資總額 (底薪 + 所有收入項目)
      * 
      * @return 月薪資總額
      */
     public BigDecimal calculateMonthlyGross() {
-        BigDecimal base = (payrollSystem == PayrollSystem.MONTHLY)
-                ? monthlySalary
-                : BigDecimal.ZERO;
+        BigDecimal base;
+        if (payrollSystem == PayrollSystem.MONTHLY) {
+            base = monthlySalary;
+        } else if (payrollSystem == PayrollSystem.DAILY) {
+            // 日薪制以 30 天估算月薪（實際依出勤天數計算）
+            base = dailyRate.multiply(BigDecimal.valueOf(30));
+        } else {
+            base = BigDecimal.ZERO;
+        }
 
         BigDecimal earnings = items.stream()
                 .filter(SalaryItem::isEarning)
@@ -264,9 +343,14 @@ public class SalaryStructure {
      * @return 投保薪資
      */
     public BigDecimal calculateInsurableSalary() {
-        BigDecimal base = (payrollSystem == PayrollSystem.MONTHLY)
-                ? monthlySalary
-                : BigDecimal.ZERO;
+        BigDecimal base;
+        if (payrollSystem == PayrollSystem.MONTHLY) {
+            base = monthlySalary;
+        } else if (payrollSystem == PayrollSystem.DAILY) {
+            base = dailyRate.multiply(BigDecimal.valueOf(30));
+        } else {
+            base = hourlyRate.multiply(BigDecimal.valueOf(240));
+        }
 
         BigDecimal insurableEarnings = items.stream()
                 .filter(SalaryItem::isEarning)
@@ -332,15 +416,23 @@ public class SalaryStructure {
         }
     }
 
+    private static void validateDailyRate(BigDecimal dailyRate) {
+        if (dailyRate == null || dailyRate.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new DomainException("PAY_INVALID_DAILY_RATE", "日薪必須大於 0");
+        }
+    }
+
     /**
      * 重建 Aggregate (Persistence 用)
      */
     public static SalaryStructure reconstruct(StructureId id,
             String employeeId,
             BigDecimal monthlySalary,
+            BigDecimal dailyRate,
             BigDecimal hourlyRate,
             PayrollSystem payrollSystem,
             PayrollCycle payrollCycle,
+            PaymentMethod paymentMethod,
             java.util.List<SalaryItem> items,
             java.time.LocalDate effectiveDate,
             java.time.LocalDate endDate,
@@ -349,9 +441,11 @@ public class SalaryStructure {
                 .id(id)
                 .employeeId(employeeId)
                 .monthlySalary(monthlySalary)
+                .dailyRate(dailyRate)
                 .hourlyRate(hourlyRate)
                 .payrollSystem(payrollSystem)
                 .payrollCycle(payrollCycle)
+                .paymentMethod(paymentMethod != null ? paymentMethod : PaymentMethod.BANK_TRANSFER)
                 .items(new java.util.ArrayList<>(items))
                 .effectiveDate(effectiveDate)
                 .endDate(endDate)

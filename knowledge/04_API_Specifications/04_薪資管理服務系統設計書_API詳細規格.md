@@ -129,7 +129,9 @@ Notification Service → Email 發送
 | 欄位 | 類型 | 必填 | 驗證規則 | 說明 |
 |:---|:---|:---:|:---|:---|
 | `employeeId` | string (UUID) | Y | 有效 UUID | 員工 ID |
-| `payrollSystem` | string | Y | `HOURLY` 或 `MONTHLY` | 薪資制度 |
+| `payrollSystem` | string | Y | `HOURLY`、`DAILY` 或 `MONTHLY` | 薪資制度 |
+| `paymentMethod` | string | N | `BANK_TRANSFER` 或 `CASH`，預設 `BANK_TRANSFER` | 領薪方式（匯款需有銀行帳號）|
+| `dailyRate` | number | C | > 0 (日薪制必填) | 日薪 |
 | `payrollCycle` | string | Y | 見列舉值 | 領薪週期 |
 | `hourlyRate` | number | C | > 0 (時薪制必填) | 時薪 |
 | `monthlySalary` | number | C | > 0 (月薪制必填) | 月薪 |
@@ -1449,7 +1451,15 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 | 值 | 說明 |
 |:---|:---|
 | `HOURLY` | 時薪制 - 依實際工時計算 |
+| `DAILY` | 日薪制 - 依實際出勤天數計算 |
 | `MONTHLY` | 月薪制 - 固定月薪 |
+
+### 6.1.1 領薪方式 (PaymentMethod)
+
+| 值 | 說明 | 備註 |
+|:---|:---|:---|
+| `BANK_TRANSFER` | 銀行匯款 | 需確認員工已設定銀行帳號 |
+| `CASH` | 現金領取 | 無需銀行帳號 |
 
 ### 6.2 領薪週期 (PayrollCycle)
 

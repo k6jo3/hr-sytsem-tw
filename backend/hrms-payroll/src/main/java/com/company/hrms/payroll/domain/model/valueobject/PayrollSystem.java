@@ -13,6 +13,12 @@ public enum PayrollSystem {
     HOURLY,
 
     /**
+     * 日薪制
+     * 以出勤天數計算薪資
+     */
+    DAILY,
+
+    /**
      * 月薪制
      * 以固定月薪計算薪資
      */

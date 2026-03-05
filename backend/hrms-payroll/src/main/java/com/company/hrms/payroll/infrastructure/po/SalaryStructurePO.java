@@ -46,14 +46,21 @@ public class SalaryStructurePO {
     @Column(name = "monthly_salary", precision = 10, scale = 2)
     private BigDecimal monthlySalary;
 
+    @Column(name = "daily_rate", precision = 12, scale = 2)
+    private BigDecimal dailyRate;
+
     @Column(name = "hourly_rate", precision = 10, scale = 2)
     private BigDecimal hourlyRate;
 
     @Column(name = "payroll_system", length = 20, nullable = false)
-    private String payrollSystem; // MONTHLY, HOURLY
+    private String payrollSystem; // MONTHLY, DAILY, HOURLY
 
     @Column(name = "payroll_cycle", length = 20, nullable = false)
     private String payrollCycle; // MONTHLY, BI_WEEKLY...
+
+    @Column(name = "payment_method", length = 20, nullable = false)
+    @Builder.Default
+    private String paymentMethod = "BANK_TRANSFER"; // BANK_TRANSFER, CASH
 
     @Column(name = "effective_date", nullable = false)
     @QueryFilter(operator = Operator.GTE)

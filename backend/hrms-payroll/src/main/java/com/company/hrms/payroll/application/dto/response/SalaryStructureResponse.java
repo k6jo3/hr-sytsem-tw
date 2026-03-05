@@ -18,7 +18,9 @@ public class SalaryStructureResponse {
     private String employeeId;
     private String payrollSystem;
     private String payrollCycle;
+    private String paymentMethod;
     private BigDecimal monthlySalary;
+    private BigDecimal dailyRate;
     private BigDecimal hourlyRate;
     private BigDecimal calculatedHourlyRate;
     private LocalDate effectiveDate;
