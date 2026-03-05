@@ -1390,5 +1390,39 @@ HR 依職災發生日期查詢紀錄。
 
 ---
 
+---
+
+## 擴充功能合約（2026-03-05 新增）
+
+### 離職連動自動退保
+
+#### INS_AUTO_001 — 離職自動退保
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | INS_AUTO_001 |
+| **場景名稱** | 員工離職自動退保所有保險 |
+| **前置條件** | 收到 EmployeeResignedEvent, 員工有 ACTIVE 投保記錄 |
+| **輸入** | EmployeeResignedEvent (employeeId, resignDate) |
+| **預期行為** | 查詢所有 ACTIVE 投保記錄 → 逐一退保 → 退保日 = resignDate |
+| **輸出** | 退保結果列表 (退保數量, 退保類型) |
+| **副作用** | insurance_enrollments 表 UPDATE (status→WITHDRAWN, withdrawDate) |
+| **業務規則** | 退保類型包含: LABOR / HEALTH / PENSION, 批次退保需全部成功或全部失敗（事務一致性） |
+
+#### INS_AUTO_002 — 團體保險異動生效時間
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | INS_AUTO_002 |
+| **場景名稱** | 團體保險異動排程生效 |
+| **前置條件** | 異動申請已核准, effectiveDate 未到 |
+| **輸入** | changeRequestId, effectiveDate |
+| **預期行為** | 排程於 effectiveDate 自動執行異動（加保/退保/調整） |
+| **輸出** | 執行結果 |
+| **副作用** | insurance_enrollments 表 UPDATE |
+| **業務規則** | 不可往過去生效, 生效前可取消 |
+
+---
+
 **文件完成日期:** 2026-02-20
-**版本:** 1.0
+**版本:** 1.1（2026-03-05 擴充）

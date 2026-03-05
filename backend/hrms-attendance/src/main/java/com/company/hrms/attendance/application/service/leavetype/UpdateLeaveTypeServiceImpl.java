@@ -10,7 +10,6 @@ import com.company.hrms.attendance.api.request.leavetype.UpdateLeaveTypeRequest;
 import com.company.hrms.attendance.api.response.leavetype.UpdateLeaveTypeResponse;
 import com.company.hrms.attendance.domain.model.aggregate.LeaveType;
 import com.company.hrms.attendance.domain.model.valueobject.LeaveTypeId;
-import com.company.hrms.attendance.domain.model.valueobject.LeaveUnit;
 import com.company.hrms.attendance.domain.repository.ILeaveTypeRepository;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
@@ -21,11 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 更新假別服務實作
  *
- * <p>流程：
+ * <p>
+ * 流程：
  * <ol>
- *   <li>依 ID 查詢假別（必須存在且啟用）</li>
- *   <li>更新假別詳情</li>
- *   <li>儲存假別</li>
+ * <li>依 ID 查詢假別（必須存在且啟用）</li>
+ * <li>更新假別詳情</li>
+ * <li>儲存假別</li>
  * </ol>
  */
 @Service("updateLeaveTypeServiceImpl")
@@ -53,7 +53,8 @@ public class UpdateLeaveTypeServiceImpl implements CommandApiService<UpdateLeave
 
         // 3. 法定假別僅允許修改 proofDescription 與 maxDaysPerYear
         if (leaveType.isStatutoryLeave()) {
-            BigDecimal maxDays = request.getAnnualQuotaDays() != null ? request.getAnnualQuotaDays() : leaveType.getMaxDaysPerYear();
+            BigDecimal maxDays = request.getAnnualQuotaDays() != null ? request.getAnnualQuotaDays()
+                    : leaveType.getMaxDaysPerYear();
 
             leaveType.updateDetails(
                     leaveType.getName(),
@@ -69,9 +70,12 @@ public class UpdateLeaveTypeServiceImpl implements CommandApiService<UpdateLeave
             String name = request.getLeaveTypeName() != null ? request.getLeaveTypeName() : leaveType.getName();
             boolean isPaid = request.getIsPaid() != null ? request.getIsPaid() : leaveType.isPaid();
             BigDecimal payRate = isPaid ? BigDecimal.ONE : BigDecimal.ZERO;
-            boolean requiresProof = request.getRequiresProof() != null ? request.getRequiresProof() : leaveType.isRequiresProof();
-            BigDecimal maxDays = request.getAnnualQuotaDays() != null ? request.getAnnualQuotaDays() : leaveType.getMaxDaysPerYear();
-            boolean canCarryOver = request.getAllowCarryOver() != null ? request.getAllowCarryOver() : leaveType.isCanCarryover();
+            boolean requiresProof = request.getRequiresProof() != null ? request.getRequiresProof()
+                    : leaveType.isRequiresProof();
+            BigDecimal maxDays = request.getAnnualQuotaDays() != null ? request.getAnnualQuotaDays()
+                    : leaveType.getMaxDaysPerYear();
+            boolean canCarryOver = request.getAllowCarryOver() != null ? request.getAllowCarryOver()
+                    : leaveType.isCanCarryover();
 
             leaveType.updateDetails(
                     name,
@@ -91,7 +95,7 @@ public class UpdateLeaveTypeServiceImpl implements CommandApiService<UpdateLeave
 
         return UpdateLeaveTypeResponse.builder()
                 .leaveTypeId(leaveTypeId)
-                .leaveTypeName(name)
+                .leaveTypeName(leaveType.getName())
                 .updatedAt(LocalDateTime.now())
                 .build();
     }

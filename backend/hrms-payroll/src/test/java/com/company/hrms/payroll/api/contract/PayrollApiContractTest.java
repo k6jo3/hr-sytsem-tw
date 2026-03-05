@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.company.hrms.common.model.JWTModel;
+import com.company.hrms.common.query.Condition;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.base.BaseApiContractTest;
 import com.company.hrms.payroll.domain.repository.IPayrollItemDefinitionRepository;
@@ -112,16 +113,16 @@ public class PayrollApiContractTest extends BaseApiContractTest {
         @Test
         @DisplayName("PAY_QRY_S001: 查詢員工薪資結構")
         void getSalaryStructures_ByEmployee_ShouldIncludeFilters() throws Exception {
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(salaryStructureRepository.findAll(queryCaptor.capture(), any(Pageable.class)))
+            ArgumentCaptor<Condition<?>> conditionCaptor = ArgumentCaptor.forClass(Condition.class);
+            when(salaryStructureRepository.findPageByCondition(conditionCaptor.capture()))
                     .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-            mockMvc.perform(get("/api/v1/salary-structures?employeeId=E001")
+            mockMvc.perform(get("/api/v1/salary-structures?employeeId=E001&isActive=true")
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
 
-            QueryGroup query = queryCaptor.getValue();
+            QueryGroup query = conditionCaptor.getValue().toQueryGroup();
             assertContract(query, contractSpec, "PAY_QRY_S001");
         }
     }

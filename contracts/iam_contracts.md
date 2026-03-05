@@ -1575,3 +1575,95 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 - `roles` - 角色主表
 - `role_permissions` - 角色權限關聯表
 - `permissions` - 權限主表
+
+**系統管理相關：**
+- `feature_toggles` - 功能開關表
+- `system_parameters` - 系統參數表
+- `parameter_change_logs` - 參數異動記錄表
+- `scheduled_job_configs` - 排程任務配置表
+
+---
+
+## 擴充功能合約（2026-03-05 新增）
+
+### LDAP/AD 企業登入整合
+
+#### IAM_LDAP_001 — LDAP 登入認證
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | IAM_LDAP_001 |
+| **場景名稱** | LDAP/AD 使用者登入 |
+| **前置條件** | ldap.enabled=true, LDAP Server 可連線 |
+| **輸入** | username, password |
+| **預期行為** | 1. LDAP bind 驗證帳密 → 2. JIT Provisioning（首次自動建立本地帳號）→ 3. 同步角色（groupRoleMapping）→ 4. 發放 JWT Token |
+| **輸出** | accessToken, refreshToken, user info |
+| **副作用** | users 表 INSERT/UPDATE（authSource='LDAP', ldapDn=DN）, user_roles 表 INSERT |
+| **安全規則** | LDAP Filter 需跳脫特殊字元（防 LDAP Injection）, 連線逾時 5 秒, LDAPS 優先 |
+
+#### IAM_LDAP_002 — LDAP 使用者資料同步
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | IAM_LDAP_002 |
+| **場景名稱** | LDAP 使用者每次登入同步資料 |
+| **前置條件** | 使用者已存在且 authSource='LDAP' |
+| **輸入** | LDAP 使用者屬性（displayName, email, employeeId） |
+| **預期行為** | 同步 displayName/email 至本地帳號, 不覆蓋 passwordHash |
+| **輸出** | 更新後的使用者資料 |
+| **副作用** | users 表 UPDATE |
+
+#### IAM_LDAP_003 — LDAP 群組角色對應
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | IAM_LDAP_003 |
+| **場景名稱** | LDAP 群組自動對應本地角色 |
+| **前置條件** | groupRoleMapping 已配置 |
+| **輸入** | LDAP memberOf 群組列表 |
+| **預期行為** | 精確 DN 比對 + CN 模糊比對 → 對應至本地 role_code |
+| **輸出** | 對應的角色代碼清單 |
+| **副作用** | 無直接副作用（由 LdapLoginService 觸發 user_roles 更新） |
+
+---
+
+### 系統管理模組
+
+#### IAM_SYS_001 — 功能開關管理
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | IAM_SYS_001 |
+| **場景名稱** | 啟用/停用功能開關 |
+| **前置條件** | 使用者具 ADMIN 角色 |
+| **輸入** | featureCode, enabled (boolean) |
+| **預期行為** | 切換功能開關狀態, 記錄操作者與時間 |
+| **輸出** | 更新後的 FeatureToggle |
+| **副作用** | feature_toggles 表 UPDATE |
+| **業務規則** | toggle() 切換 enabled 反轉, 更新 updatedAt/updatedBy |
+
+#### IAM_SYS_002 — 系統參數管理
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | IAM_SYS_002 |
+| **場景名稱** | 更新系統參數 |
+| **前置條件** | 使用者具 ADMIN 角色, 參數存在 |
+| **輸入** | paramCode, newValue, operator |
+| **預期行為** | 驗證 paramType 合法性 → 更新值 → 記錄異動軌跡 |
+| **輸出** | ParameterChange（oldValue, newValue） |
+| **副作用** | system_parameters 表 UPDATE, parameter_change_logs 表 INSERT |
+| **業務規則** | paramType: STRING/INTEGER/DECIMAL/BOOLEAN/JSON, category: SECURITY/BUSINESS/UI/SYSTEM |
+
+#### IAM_SYS_003 — 排程任務配置管理
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | IAM_SYS_003 |
+| **場景名稱** | 更新排程任務 Cron 表達式 / 啟停排程 |
+| **前置條件** | 使用者具 ADMIN 角色, 排程任務存在 |
+| **輸入** | jobCode, cronExpression / enabled |
+| **預期行為** | 更新 cronExpression 或 enabled 狀態 |
+| **輸出** | 更新後的 ScheduledJobConfig |
+| **副作用** | scheduled_job_configs 表 UPDATE |
+| **業務規則** | recordSuccess() 清零 consecutiveFailures, recordFailure() 累加, needsAlert() 當 ≥3 次 |

@@ -4,10 +4,6 @@
 -- 清除舊資料
 DELETE FROM insurance_enrollments;
 
--- TODO: insurance_type 欄位值與 InsuranceType enum 不一致
---       SQL 原本使用 LABOR_INSURANCE / HEALTH_INSURANCE，但 enum 定義為 LABOR / HEALTH
---       已修正為正確的 enum 值，使 H2 check constraint 不再報錯
-
 -- 加退保記錄測試資料 (共 12 筆)
 -- 狀態分布: ACTIVE=8, WITHDRAWN=3, PENDING=1
 -- 員工分布: E001=4, E002=4, E003=4
@@ -36,7 +32,7 @@ INSERT INTO insurance_enrollments (enrollment_id, employee_id, insurance_unit_id
 -- 2. findByEmployeeId(E001): 預期 4 筆
 -- 3. findByEmployeeId(E002): 預期 4 筆
 -- 4. findByEmployeeId(E003): 預期 4 筆
--- 5. findActiveByEmployeeIdAndType(E001, LABOR_INSURANCE): 預期 1 筆 (當前有效)
+-- 5. findActiveByEmployeeIdAndType(E001, LABOR): 預期 1 筆 (當前有效)
 -- 6. findAllActiveByEmployeeId(E001): 預期 2 筆 (勞保+健保)
 -- 7. findAllActiveByEmployeeId(E002): 預期 2 筆
 -- 8. findByDateRange(2025-01-01, 2025-01-31): 預期 8 筆 (2025年1月加保)

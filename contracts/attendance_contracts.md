@@ -1393,3 +1393,116 @@ HR 或員工查詢所有啟用中的假別列表。
 | OT004 | E003 | D002 | HOLIDAY | APPROVED |
 | OT005 | E002 | D001 | WORKDAY | APPROVED |
 | OT006 | E003 | D002 | WORKDAY | REJECTED |
+
+---
+
+## 擴充功能合約（2026-03-05 新增）
+
+### 彈性工時判斷
+
+#### ATT_FLEX_001 — 彈性工時遲到判斷
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | ATT_FLEX_001 |
+| **場景名稱** | 彈性班別遲到判定 |
+| **前置條件** | 員工指定班別為 FLEXIBLE 類型, flexStartTime/flexEndTime 已設定 |
+| **輸入** | checkInTime, shift (type=FLEXIBLE) |
+| **預期行為** | flexStartTime ≤ checkInTime ≤ flexEndTime → 正常; 超過 flexEndTime → 遲到 |
+| **輸出** | isLate (boolean), actualCheckIn |
+| **業務規則** | 彈性區間內打卡皆為正常, 工時以實際打卡時間計算（非班別固定起迄） |
+
+#### ATT_FLEX_002 — 彈性班別工時計算
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | ATT_FLEX_002 |
+| **場景名稱** | 彈性班別實際工時計算 |
+| **前置條件** | 員工打卡上下班完成, 班別 type=FLEXIBLE |
+| **輸入** | checkInTime, checkOutTime, shift |
+| **預期行為** | 工時 = checkOutTime - checkInTime - 午休時數 |
+| **輸出** | workingHours (decimal), overtimeHours (decimal) |
+| **業務規則** | 超過 standardHours 部分計為加班, 需減去 breakDuration |
+
+---
+
+### 輪班/值班排程管理
+
+#### ATT_SCHED_001 — 建立排班表
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | ATT_SCHED_001 |
+| **場景名稱** | 建立員工排班記錄 |
+| **前置條件** | 班別已存在, 員工已存在 |
+| **輸入** | employeeId, shiftId, scheduleDate |
+| **預期行為** | 建立 DRAFT 狀態排班記錄 |
+| **輸出** | ShiftSchedule (status=DRAFT) |
+| **副作用** | shift_schedules 表 INSERT |
+| **業務規則** | 初始狀態 DRAFT, LOCKED 狀態不可變更 |
+
+#### ATT_SCHED_002 — 發佈排班表
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | ATT_SCHED_002 |
+| **場景名稱** | 發佈排班表（DRAFT → PUBLISHED） |
+| **前置條件** | 排班記錄存在, 狀態為 DRAFT |
+| **輸入** | scheduleId |
+| **預期行為** | 狀態變更為 PUBLISHED |
+| **輸出** | ShiftSchedule (status=PUBLISHED) |
+| **副作用** | shift_schedules 表 UPDATE |
+
+#### ATT_SCHED_003 — 鎖定排班表
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | ATT_SCHED_003 |
+| **場景名稱** | 鎖定排班表（PUBLISHED → LOCKED） |
+| **前置條件** | 排班記錄存在, 狀態為 PUBLISHED |
+| **輸入** | scheduleId |
+| **預期行為** | 狀態變更為 LOCKED, 之後不可修改班別 |
+| **輸出** | ShiftSchedule (status=LOCKED) |
+| **業務規則** | LOCKED 後 changeShift() 拋出 IllegalStateException |
+
+#### ATT_SCHED_004 — 自動產生輪班排程
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | ATT_SCHED_004 |
+| **場景名稱** | 依輪班模式自動產生排班 |
+| **前置條件** | RotationPattern 已建立, cycleDays/rotationDays 已設定 |
+| **輸入** | employeeId, patternId, startDate, endDate, rotationStartDate |
+| **預期行為** | 依循環天序產生排班記錄, 休息日跳過 |
+| **輸出** | List\<ShiftSchedule\> |
+| **副作用** | shift_schedules 表 INSERT (多筆) |
+| **業務規則** | getDayForIndex 使用 modulo 循環, restDay 不產生排班 |
+
+#### ATT_SCHED_005 — 換班申請
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | ATT_SCHED_005 |
+| **場景名稱** | 員工換班申請（兩階段審核） |
+| **前置條件** | 申請人 ≠ 被換人, 兩人排班存在 |
+| **輸入** | requesterId, counterpartId, requesterScheduleId, counterpartScheduleId, reason |
+| **預期行為** | 建立 PENDING_COUNTERPART 狀態 → 對方接受 → PENDING_APPROVAL → 主管核准 → APPROVED → 自動交換班別 |
+| **輸出** | ShiftSwapRequest |
+| **副作用** | shift_swap_requests 表 INSERT, shift_schedules 表 UPDATE (交換 shiftId) |
+| **業務規則** | 狀態流: PENDING_COUNTERPART → PENDING_APPROVAL → APPROVED/REJECTED/CANCELLED |
+
+---
+
+### 曠職自動判定
+
+#### ATT_ABSENT_001 — 曠職自動判定排程
+
+| 欄位 | 值 |
+|:---|:---|
+| **場景 ID** | ATT_ABSENT_001 |
+| **場景名稱** | 排程自動判定曠職 |
+| **前置條件** | 前一工作日已過, 員工有排班但無出勤記錄 |
+| **輸入** | targetDate (預設: 前一工作日) |
+| **預期行為** | 查詢無出勤記錄的排班員工 → 建立 ABSENT 記錄 |
+| **輸出** | 曠職記錄數量 |
+| **副作用** | attendance_records 表 INSERT (status=ABSENT) |

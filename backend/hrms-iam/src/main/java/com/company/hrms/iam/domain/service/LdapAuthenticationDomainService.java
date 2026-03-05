@@ -2,8 +2,6 @@ package com.company.hrms.iam.domain.service;
 
 import java.util.List;
 
-import com.company.hrms.iam.domain.model.aggregate.User;
-
 /**
  * LDAP 認證 Domain Service 介面
  * 負責 LDAP 伺服器的認證與使用者資訊查詢
@@ -12,6 +10,7 @@ public interface LdapAuthenticationDomainService {
 
     /**
      * 透過 LDAP 認證使用者
+     * 
      * @param username 使用者名稱
      * @param password 密碼
      * @return 認證成功時回傳 LDAP 使用者資訊
@@ -21,6 +20,7 @@ public interface LdapAuthenticationDomainService {
 
     /**
      * 查詢使用者所屬的 LDAP 群組
+     * 
      * @param userDn 使用者 DN
      * @return 群組 DN 清單
      */
@@ -35,8 +35,8 @@ public interface LdapAuthenticationDomainService {
             String displayName,
             String email,
             String employeeId,
-            List<String> groups
-    ) {}
+            List<String> groups) {
+    }
 
     /**
      * LDAP 認證例外

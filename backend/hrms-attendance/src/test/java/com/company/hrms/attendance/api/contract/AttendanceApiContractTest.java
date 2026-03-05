@@ -25,7 +25,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.company.hrms.attendance.domain.model.aggregate.AttendanceRecord;
 import com.company.hrms.attendance.domain.model.aggregate.Shift;
-import com.company.hrms.attendance.domain.model.valueobject.RecordId;
 import com.company.hrms.attendance.domain.model.valueobject.ShiftId;
 import com.company.hrms.attendance.domain.model.valueobject.ShiftType;
 import com.company.hrms.attendance.domain.repository.IAttendanceRecordRepository;
@@ -51,343 +50,344 @@ import com.company.hrms.common.test.base.BaseApiContractTest;
 @DisplayName("HR03 考勤管理服務 API 合約測試")
 public class AttendanceApiContractTest extends BaseApiContractTest {
 
-    private static final String CONTRACT = "attendance";
-    private String contractSpec;
+        private static final String CONTRACT = "attendance";
+        private String contractSpec;
 
-    // === 領域 Repository (Domain Repositories) ===
+        // === 領域 Repository (Domain Repositories) ===
 
-    @MockBean
-    private IAttendanceRecordRepository attendanceRecordRepository;
+        @MockBean
+        private IAttendanceRecordRepository attendanceRecordRepository;
 
-    @MockBean
-    private ILeaveApplicationRepository leaveApplicationRepository;
+        @MockBean
+        private ILeaveApplicationRepository leaveApplicationRepository;
 
-    @MockBean
-    private IOvertimeApplicationRepository overtimeApplicationRepository;
+        @MockBean
+        private IOvertimeApplicationRepository overtimeApplicationRepository;
 
-    @MockBean
-    private IShiftRepository shiftRepository;
+        @MockBean
+        private IShiftRepository shiftRepository;
 
-    @MockBean
-    private ILeaveTypeRepository leaveTypeRepository;
+        @MockBean
+        private ILeaveTypeRepository leaveTypeRepository;
 
-    @MockBean
-    private ILeaveBalanceRepository leaveBalanceRepository;
+        @MockBean
+        private ILeaveBalanceRepository leaveBalanceRepository;
 
-    @MockBean
-    private ICorrectionRepository correctionRepository;
+        @MockBean
+        private ICorrectionRepository correctionRepository;
 
-    @MockBean
-    private EventPublisher eventPublisher;
+        @MockBean
+        private EventPublisher eventPublisher;
 
-    private JWTModel mockUser;
+        private JWTModel mockUser;
 
-    /** 測試用預設班別 (供 CheckIn Pipeline 使用) */
-    private Shift defaultShift;
+        /** 測試用預設班別 (供 CheckIn Pipeline 使用) */
+        private Shift defaultShift;
 
-    @BeforeEach
-    void setUp() throws Exception {
-        contractSpec = loadContractSpec(CONTRACT);
+        @BeforeEach
+        void setUp() throws Exception {
+                contractSpec = loadContractSpec(CONTRACT);
 
-        // 設定測試用模擬使用者
-        mockUser = new JWTModel();
-        mockUser.setUserId("00000000-0000-0000-0000-000000000001");
-        mockUser.setUsername("test-user");
-        mockUser.setRoles(Collections.singletonList("EMPLOYEE"));
+                // 設定測試用模擬使用者
+                mockUser = new JWTModel();
+                mockUser.setUserId("00000000-0000-0000-0000-000000000001");
+                mockUser.setUsername("test-user");
+                mockUser.setRoles(Collections.singletonList("EMPLOYEE"));
 
-        // 建立預設班別 (供 CheckIn 流程使用)
-        defaultShift = new Shift(
-                new ShiftId(java.util.UUID.randomUUID().toString()),
-                "ORG001",
-                "STD-01",
-                "標準班別",
-                ShiftType.STANDARD,
-                LocalTime.of(9, 0),
-                LocalTime.of(18, 0));
+                // 建立預設班別 (供 CheckIn 流程使用)
+                defaultShift = new Shift(
+                                new ShiftId(java.util.UUID.randomUUID().toString()),
+                                "ORG001",
+                                "STD-01",
+                                "標準班別",
+                                ShiftType.REGULAR,
+                                LocalTime.of(9, 0),
+                                LocalTime.of(18, 0));
 
-        // 設定 Repository 的 lenient 預設行為 (允許未被呼叫的 stub)
-        lenient().when(attendanceRecordRepository.findByQuery(any(QueryGroup.class)))
-                .thenReturn(Collections.emptyList());
-        lenient().when(attendanceRecordRepository.findPageByQuery(any(QueryGroup.class), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(Collections.emptyList()));
-        lenient().when(attendanceRecordRepository.findByEmployeeIdAndDate(anyString(), any(LocalDate.class)))
-                .thenReturn(Collections.emptyList());
+                // 設定 Repository 的 lenient 預設行為 (允許未被呼叫的 stub)
+                lenient().when(attendanceRecordRepository.findByQuery(any(QueryGroup.class)))
+                                .thenReturn(Collections.emptyList());
+                lenient().when(attendanceRecordRepository.findPageByQuery(any(QueryGroup.class), any(Pageable.class)))
+                                .thenReturn(new PageImpl<>(Collections.emptyList()));
+                lenient().when(attendanceRecordRepository.findByEmployeeIdAndDate(anyString(), any(LocalDate.class)))
+                                .thenReturn(Collections.emptyList());
 
-        lenient().when(leaveApplicationRepository.findByQuery(any(QueryGroup.class)))
-                .thenReturn(Collections.emptyList());
-        lenient().when(leaveApplicationRepository.searchPage(any(QueryGroup.class), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(Collections.emptyList()));
+                lenient().when(leaveApplicationRepository.findByQuery(any(QueryGroup.class)))
+                                .thenReturn(Collections.emptyList());
+                lenient().when(leaveApplicationRepository.searchPage(any(QueryGroup.class), any(Pageable.class)))
+                                .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-        lenient().when(overtimeApplicationRepository.findByQuery(any(QueryGroup.class)))
-                .thenReturn(Collections.emptyList());
+                lenient().when(overtimeApplicationRepository.findByQuery(any(QueryGroup.class)))
+                                .thenReturn(Collections.emptyList());
 
-        lenient().when(shiftRepository.findByQuery(any(QueryGroup.class)))
-                .thenReturn(Collections.emptyList());
-        lenient().when(shiftRepository.findAll())
-                .thenReturn(List.of(defaultShift));
+                lenient().when(shiftRepository.findByQuery(any(QueryGroup.class)))
+                                .thenReturn(Collections.emptyList());
+                lenient().when(shiftRepository.findAll())
+                                .thenReturn(List.of(defaultShift));
 
-        lenient().when(leaveTypeRepository.findByQuery(any(QueryGroup.class)))
-                .thenReturn(Collections.emptyList());
-        lenient().when(leaveTypeRepository.findAll())
-                .thenReturn(Collections.emptyList());
-    }
-
-    // =========================================================================
-    // 出勤管理 API 合約
-    // =========================================================================
-
-    @Nested
-    @DisplayName("出勤管理 API 合約")
-    class AttendanceRecordApiContractTests {
-
-        @Test
-        @DisplayName("ATT_QRY_A001: 查詢員工當日出勤")
-        void searchAttendanceRecords_ByEmployeeAndDate_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(attendanceRecordRepository.findByQuery(queryCaptor.capture()))
-                    .thenReturn(Collections.emptyList());
-
-            // Act
-            mockMvc.perform(get("/api/v1/attendance/records?employeeId=E001&startDate=2025-01-15&endDate=2025-01-15")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_A001");
+                lenient().when(leaveTypeRepository.findByQuery(any(QueryGroup.class)))
+                                .thenReturn(Collections.emptyList());
+                lenient().when(leaveTypeRepository.findAll())
+                                .thenReturn(Collections.emptyList());
         }
 
-        @Test
-        @DisplayName("ATT_QRY_A002: 查詢部門月出勤")
-        void searchAttendanceRecords_ByDepartmentAndDateRange_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(attendanceRecordRepository.findByQuery(queryCaptor.capture()))
-                    .thenReturn(Collections.emptyList());
+        // =========================================================================
+        // 出勤管理 API 合約
+        // =========================================================================
 
-            // Act
-            mockMvc.perform(
-                    get("/api/v1/attendance/records?departmentId=D001&startDate=2025-01-15&endDate=2025-01-18")
-                            .requestAttr("currentUser", mockUser)
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+        @Nested
+        @DisplayName("出勤管理 API 合約")
+        class AttendanceRecordApiContractTests {
 
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_A002");
+                @Test
+                @DisplayName("ATT_QRY_A001: 查詢員工當日出勤")
+                void searchAttendanceRecords_ByEmployeeAndDate_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(attendanceRecordRepository.findByQuery(queryCaptor.capture()))
+                                        .thenReturn(Collections.emptyList());
+
+                        // Act
+                        mockMvc.perform(get(
+                                        "/api/v1/attendance/records?employeeId=E001&startDate=2025-01-15&endDate=2025-01-15")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_A001");
+                }
+
+                @Test
+                @DisplayName("ATT_QRY_A002: 查詢部門月出勤")
+                void searchAttendanceRecords_ByDepartmentAndDateRange_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(attendanceRecordRepository.findByQuery(queryCaptor.capture()))
+                                        .thenReturn(Collections.emptyList());
+
+                        // Act
+                        mockMvc.perform(
+                                        get("/api/v1/attendance/records?departmentId=D001&startDate=2025-01-15&endDate=2025-01-18")
+                                                        .requestAttr("currentUser", mockUser)
+                                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_A002");
+                }
+
+                @Test
+                @DisplayName("ATT_QRY_A003: 查詢異常出勤")
+                void searchAttendanceRecords_ByAbnormalStatus_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(attendanceRecordRepository.findByQuery(queryCaptor.capture()))
+                                        .thenReturn(Collections.emptyList());
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/attendance/records?status=ABNORMAL")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_A003");
+                }
+
+                @Test
+                @DisplayName("ATT_CMD_A001: 員工打卡上班 - 驗證 IAttendanceRecordRepository.save() 被呼叫")
+                void checkIn_ShouldSaveAttendanceRecord() throws Exception {
+                        // Arrange
+                        String requestBody = """
+                                        {
+                                          "employeeId": "E001",
+                                          "checkInTime": "2025-02-01T09:00:00"
+                                        }
+                                        """;
+
+                        // Act
+                        mockMvc.perform(post("/api/v1/attendance/check-in")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(requestBody))
+                                        .andExpect(status().isOk());
+
+                        // Assert - 驗證出勤記錄被儲存
+                        verify(attendanceRecordRepository).save(any(AttendanceRecord.class));
+                }
         }
 
-        @Test
-        @DisplayName("ATT_QRY_A003: 查詢異常出勤")
-        void searchAttendanceRecords_ByAbnormalStatus_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(attendanceRecordRepository.findByQuery(queryCaptor.capture()))
-                    .thenReturn(Collections.emptyList());
+        // =========================================================================
+        // 請假管理 API 合約
+        // =========================================================================
 
-            // Act
-            mockMvc.perform(get("/api/v1/attendance/records?status=ABNORMAL")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+        @Nested
+        @DisplayName("請假管理 API 合約")
+        class LeaveApiContractTests {
 
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_A003");
+                @Test
+                @DisplayName("ATT_QRY_L001: 查詢待審核請假")
+                void searchLeaveApplications_ByPendingStatus_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(leaveApplicationRepository.searchPage(queryCaptor.capture(), any(Pageable.class)))
+                                        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/leave/applications?status=PENDING")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_L001");
+                }
+
+                @Test
+                @DisplayName("ATT_QRY_L002: 查詢已核准請假")
+                void searchLeaveApplications_ByApprovedStatus_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(leaveApplicationRepository.searchPage(queryCaptor.capture(), any(Pageable.class)))
+                                        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/leave/applications?status=APPROVED")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_L002");
+                }
+
+                @Test
+                @DisplayName("ATT_QRY_L003: 查詢特休假申請")
+                void searchLeaveApplications_ByLeaveType_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(leaveApplicationRepository.searchPage(queryCaptor.capture(), any(Pageable.class)))
+                                        .thenReturn(new PageImpl<>(Collections.emptyList()));
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/leave/applications?leaveTypeId=ANNUAL")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_L003");
+                }
+
+                @Test
+                @DisplayName("ATT_QRY_T001: 查詢假別列表")
+                void searchLeaveTypes_ActiveOnly_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(leaveTypeRepository.findByQuery(queryCaptor.capture()))
+                                        .thenReturn(Collections.emptyList());
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/leave/types?isActive=true")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_T001");
+                }
         }
 
-        @Test
-        @DisplayName("ATT_CMD_A001: 員工打卡上班 - 驗證 IAttendanceRecordRepository.save() 被呼叫")
-        void checkIn_ShouldSaveAttendanceRecord() throws Exception {
-            // Arrange
-            String requestBody = """
-                    {
-                      "employeeId": "E001",
-                      "checkInTime": "2025-02-01T09:00:00"
-                    }
-                    """;
+        // =========================================================================
+        // 加班管理 API 合約
+        // =========================================================================
 
-            // Act
-            mockMvc.perform(post("/api/v1/attendance/check-in")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(requestBody))
-                    .andExpect(status().isOk());
+        @Nested
+        @DisplayName("加班管理 API 合約")
+        class OvertimeApiContractTests {
 
-            // Assert - 驗證出勤記錄被儲存
-            verify(attendanceRecordRepository).save(any(AttendanceRecord.class));
+                @Test
+                @DisplayName("ATT_QRY_O001: 查詢待審核加班")
+                void searchOvertimeApplications_ByPendingStatus_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(overtimeApplicationRepository.findByQuery(queryCaptor.capture()))
+                                        .thenReturn(Collections.emptyList());
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/overtime/applications?status=PENDING")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_O001");
+                }
+
+                @Test
+                @DisplayName("ATT_QRY_O002: 查詢已核准加班")
+                void searchOvertimeApplications_ByApprovedStatus_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(overtimeApplicationRepository.findByQuery(queryCaptor.capture()))
+                                        .thenReturn(Collections.emptyList());
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/overtime/applications?status=APPROVED")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_O002");
+                }
+
+                @Test
+                @DisplayName("ATT_QRY_O003: 查詢平日加班")
+                void searchOvertimeApplications_ByWorkdayType_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(overtimeApplicationRepository.findByQuery(queryCaptor.capture()))
+                                        .thenReturn(Collections.emptyList());
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/overtime/applications?overtimeType=WORKDAY")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_O003");
+                }
+
+                @Test
+                @DisplayName("ATT_QRY_S001: 查詢班別列表")
+                void searchShifts_ActiveOnly_ShouldIncludeFilters() throws Exception {
+                        // Arrange
+                        ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
+                        when(shiftRepository.findByQuery(queryCaptor.capture()))
+                                        .thenReturn(Collections.emptyList());
+
+                        // Act
+                        mockMvc.perform(get("/api/v1/shifts?isActive=true")
+                                        .requestAttr("currentUser", mockUser)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                                        .andExpect(status().isOk());
+
+                        // Assert
+                        QueryGroup query = queryCaptor.getValue();
+                        assertContract(query, contractSpec, "ATT_QRY_S001");
+                }
         }
-    }
-
-    // =========================================================================
-    // 請假管理 API 合約
-    // =========================================================================
-
-    @Nested
-    @DisplayName("請假管理 API 合約")
-    class LeaveApiContractTests {
-
-        @Test
-        @DisplayName("ATT_QRY_L001: 查詢待審核請假")
-        void searchLeaveApplications_ByPendingStatus_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(leaveApplicationRepository.searchPage(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
-
-            // Act
-            mockMvc.perform(get("/api/v1/leave/applications?status=PENDING")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_L001");
-        }
-
-        @Test
-        @DisplayName("ATT_QRY_L002: 查詢已核准請假")
-        void searchLeaveApplications_ByApprovedStatus_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(leaveApplicationRepository.searchPage(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
-
-            // Act
-            mockMvc.perform(get("/api/v1/leave/applications?status=APPROVED")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_L002");
-        }
-
-        @Test
-        @DisplayName("ATT_QRY_L003: 查詢特休假申請")
-        void searchLeaveApplications_ByLeaveType_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(leaveApplicationRepository.searchPage(queryCaptor.capture(), any(Pageable.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
-
-            // Act
-            mockMvc.perform(get("/api/v1/leave/applications?leaveTypeId=ANNUAL")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_L003");
-        }
-
-        @Test
-        @DisplayName("ATT_QRY_T001: 查詢假別列表")
-        void searchLeaveTypes_ActiveOnly_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(leaveTypeRepository.findByQuery(queryCaptor.capture()))
-                    .thenReturn(Collections.emptyList());
-
-            // Act
-            mockMvc.perform(get("/api/v1/leave/types?isActive=true")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_T001");
-        }
-    }
-
-    // =========================================================================
-    // 加班管理 API 合約
-    // =========================================================================
-
-    @Nested
-    @DisplayName("加班管理 API 合約")
-    class OvertimeApiContractTests {
-
-        @Test
-        @DisplayName("ATT_QRY_O001: 查詢待審核加班")
-        void searchOvertimeApplications_ByPendingStatus_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(overtimeApplicationRepository.findByQuery(queryCaptor.capture()))
-                    .thenReturn(Collections.emptyList());
-
-            // Act
-            mockMvc.perform(get("/api/v1/overtime/applications?status=PENDING")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_O001");
-        }
-
-        @Test
-        @DisplayName("ATT_QRY_O002: 查詢已核准加班")
-        void searchOvertimeApplications_ByApprovedStatus_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(overtimeApplicationRepository.findByQuery(queryCaptor.capture()))
-                    .thenReturn(Collections.emptyList());
-
-            // Act
-            mockMvc.perform(get("/api/v1/overtime/applications?status=APPROVED")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_O002");
-        }
-
-        @Test
-        @DisplayName("ATT_QRY_O003: 查詢平日加班")
-        void searchOvertimeApplications_ByWorkdayType_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(overtimeApplicationRepository.findByQuery(queryCaptor.capture()))
-                    .thenReturn(Collections.emptyList());
-
-            // Act
-            mockMvc.perform(get("/api/v1/overtime/applications?overtimeType=WORKDAY")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_O003");
-        }
-
-        @Test
-        @DisplayName("ATT_QRY_S001: 查詢班別列表")
-        void searchShifts_ActiveOnly_ShouldIncludeFilters() throws Exception {
-            // Arrange
-            ArgumentCaptor<QueryGroup> queryCaptor = ArgumentCaptor.forClass(QueryGroup.class);
-            when(shiftRepository.findByQuery(queryCaptor.capture()))
-                    .thenReturn(Collections.emptyList());
-
-            // Act
-            mockMvc.perform(get("/api/v1/shifts?isActive=true")
-                    .requestAttr("currentUser", mockUser)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
-
-            // Assert
-            QueryGroup query = queryCaptor.getValue();
-            assertContract(query, contractSpec, "ATT_QRY_S001");
-        }
-    }
 }
