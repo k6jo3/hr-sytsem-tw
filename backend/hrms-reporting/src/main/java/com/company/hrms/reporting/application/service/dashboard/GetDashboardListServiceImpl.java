@@ -42,9 +42,10 @@ public class GetDashboardListServiceImpl
         // 設定租戶ID (多租戶隔離)
         request.setTenantId(currentUser.getTenantId());
 
-        // 使用 QueryBuilder 自動從 DTO 建立查詢條件
+        // 使用 QueryBuilder 自動從 DTO 建立查詢條件，預設只查啟用的儀表板
         QueryGroup query = QueryBuilder.where()
                 .fromDto(request)
+                .eq("is_active", true)
                 .build();
 
         // 建立分頁參數

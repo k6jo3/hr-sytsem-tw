@@ -7,12 +7,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import com.company.hrms.iam.domain.model.aggregate.User;
-import com.company.hrms.iam.domain.model.valueobject.UserId;
 import com.company.hrms.iam.domain.repository.IUserRepository;
 import com.company.hrms.iam.domain.service.LdapAuthenticationDomainService;
 import com.company.hrms.iam.domain.service.LdapAuthenticationDomainService.LdapUserInfo;
 import com.company.hrms.iam.domain.service.LdapGroupRoleMappingService;
-import com.company.hrms.iam.domain.service.JwtTokenDomainService;
 import com.company.hrms.iam.infrastructure.config.LdapProperties;
 
 import lombok.RequiredArgsConstructor;
@@ -35,7 +33,6 @@ public class LdapLoginService {
 
     private final LdapAuthenticationDomainService ldapAuthService;
     private final IUserRepository userRepository;
-    private final JwtTokenDomainService jwtTokenService;
     private final LdapProperties ldapProperties;
 
     /**

@@ -38,7 +38,8 @@ import com.company.hrms.insurance.domain.repository.IInsuranceUnitRepository;
  * 驗證 Controller -> Service -> Repository 的完整流程
  * 同時涵蓋 Query 方法驗證與 Command 業務流程驗證
  *
- * <p>注意：HR05 Insurance 的 Repository 使用簡單方法 (findByEmployeeId, findAll 等)，
+ * <p>
+ * 注意：HR05 Insurance 的 Repository 使用簡單方法 (findByEmployeeId, findAll 等)，
  * 不使用 QueryGroup 模式。因此本測試以 verify() 驗證正確的 Repository 方法被呼叫，
  * 而非使用 assertContract() 驗證 QueryGroup。
  */
@@ -47,9 +48,6 @@ import com.company.hrms.insurance.domain.repository.IInsuranceUnitRepository;
 @ActiveProfiles("test")
 @DisplayName("HR05 保險管理服務 API 合約測試")
 public class InsuranceApiContractTest extends BaseApiContractTest {
-
-    private static final String CONTRACT = "insurance";
-    private String contractSpec;
 
     // === 領域 Repository ===
 
@@ -72,8 +70,6 @@ public class InsuranceApiContractTest extends BaseApiContractTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        contractSpec = loadContractSpec(CONTRACT);
-
         // 設定測試用模擬使用者
         mockUser = new JWTModel();
         mockUser.setUserId("00000000-0000-0000-0000-000000000001");
@@ -210,7 +206,8 @@ public class InsuranceApiContractTest extends BaseApiContractTest {
             // 2. 驗證是否已有有效加保 (重複檢查)
             verify(enrollmentRepository).findAllActiveByEmployeeId("emp-001");
             // 3. 查詢投保級距
-            verify(levelRepository, atLeastOnce()).findByTypeAndActiveOn(any(InsuranceType.class), any(LocalDate.class));
+            verify(levelRepository, atLeastOnce()).findByTypeAndActiveOn(any(InsuranceType.class),
+                    any(LocalDate.class));
             // 4. 儲存加保記錄 (勞保 + 健保 + 勞退 = 3 筆)
             verify(enrollmentRepository, times(3)).save(any(InsuranceEnrollment.class));
         }

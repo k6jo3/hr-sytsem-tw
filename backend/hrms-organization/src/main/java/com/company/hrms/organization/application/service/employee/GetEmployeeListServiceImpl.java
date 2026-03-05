@@ -40,7 +40,8 @@ public class GetEmployeeListServiceImpl
     protected QueryGroup buildQuery(GetEmployeeListRequest request, JWTModel currentUser) {
         log.info("Building query for employee list: {}", request);
         QueryBuilder builder = QueryBuilder.where()
-                .fromDto(request);
+                .fromDto(request)
+                .eq("is_deleted", false);
 
         // 如果沒有指定狀態，預設排除離職人員 (符合 HR02 v2 合約規範)
         if (request.getEmploymentStatus() == null || request.getEmploymentStatus().isEmpty()) {

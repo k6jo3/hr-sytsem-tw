@@ -36,7 +36,8 @@ public class GetDepartmentListServiceImpl
         @Override
         protected QueryGroup buildQuery(GetDepartmentListRequest request, JWTModel currentUser) {
                 log.info("Building query for department list: {}", request);
-                QueryBuilder builder = QueryBuilder.where();
+                QueryBuilder builder = QueryBuilder.where()
+                                .eq("is_deleted", false);
 
                 if (request != null) {
                         builder.fromDto(request);
