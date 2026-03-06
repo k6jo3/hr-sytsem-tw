@@ -3,6 +3,7 @@ export { HR01LoginPage } from './HR01LoginPage';
 export { default as HR01PasswordChangePage } from './HR01PasswordChangePage';
 export { HR01ProfilePage } from './HR01ProfilePage';
 export { default as HR01RoleManagementPage } from './HR01RoleManagementPage';
+export { default as HR01SystemManagementPage } from './HR01SystemManagementPage';
 export { default as HR01UserManagementPage } from './HR01UserManagementPage';
 
 // Organization (HR02)

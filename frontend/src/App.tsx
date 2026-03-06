@@ -7,6 +7,7 @@ import {
     HR01PasswordChangePage,
     HR01ProfilePage,
     HR01RoleManagementPage,
+    HR01SystemManagementPage,
     HR01UserManagementPage,
     HR02EmployeeDetailPage,
     HR02EmployeeListPage,
@@ -87,6 +88,7 @@ const App: React.FC = () => {
         <Route path="/profile" element={<ProtectedRoute><HR01ProfilePage /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute requiredRoles={['ADMIN']}><HR01UserManagementPage /></ProtectedRoute>} />
         <Route path="/admin/roles" element={<ProtectedRoute requiredRoles={['ADMIN']}><HR01RoleManagementPage /></ProtectedRoute>} />
+        <Route path="/admin/system" element={<ProtectedRoute requiredRoles={['ADMIN']}><HR01SystemManagementPage /></ProtectedRoute>} />
         <Route path="/profile/password" element={<ProtectedRoute><HR01PasswordChangePage /></ProtectedRoute>} />
 
         {/* ========== 組織與員工管理 (HR02) ========== */}

@@ -8,20 +8,20 @@
 export const MockConfig = {
   // 各模組 Mock 開關（false = 使用真實後端 API）
   modules: {
-    AUTH: false,
-    ORGANIZATION: false,
-    ATTENDANCE: false,
+    AUTH: true,
+    ORGANIZATION: true,
+    ATTENDANCE: true,
     PAYROLL: true,
-    INSURANCE: false,
-    PROJECT: false,
-    TIMESHEET: false,
-    PERFORMANCE: false,
-    RECRUITMENT: false,
-    TRAINING: false,
+    INSURANCE: true,
+    PROJECT: true,
+    TIMESHEET: true,
+    PERFORMANCE: true,
+    RECRUITMENT: true,
+    TRAINING: true,
     WORKFLOW: true,
-    NOTIFICATION: false,
-    DOCUMENT: false,
-    REPORT: false,
+    NOTIFICATION: true,
+    DOCUMENT: true,
+    REPORT: true,
   } as Record<string, boolean>,
 
   /**

@@ -332,6 +332,12 @@ MERGE INTO system_parameters (id, param_code, param_name, param_value, param_typ
     ('sp-0005', 'GARNISHMENT_ONE_THIRD_RULE', '法扣三分之一規則', 'true', 'BOOLEAN', 'HR04', 'BUSINESS', 'true', '是否啟用強制執行法§115-1 三分之一扣薪上限');
 MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
     ('sp-0006', 'ABSENT_DETECTION_CRON', '曠職判定排程', '0 0 19 * * ?', 'STRING', 'HR03', 'SYSTEM', '0 0 19 * * ?', '曠職自動判定排程的 Cron 表達式');
+MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
+    ('sp-0007', 'EMPLOYEE_NUMBER_PREFIX', '員工編號前綴', 'EMP', 'STRING', 'HR02', 'BUSINESS', 'EMP', '員工編號的前綴字串（如 EMP, E, HR）');
+MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
+    ('sp-0008', 'EMPLOYEE_NUMBER_FORMAT', '員工編號格式', 'YYYYMM-NNNN', 'STRING', 'HR02', 'BUSINESS', 'YYYYMM-NNNN', '員工編號格式：YYYYMM-NNNN 或 NNNN');
+MERGE INTO system_parameters (id, param_code, param_name, param_value, param_type, module, category, default_value, description) KEY (id) VALUES
+    ('sp-0009', 'EMPLOYEE_NUMBER_SEQ_DIGITS', '員工編號流水號位數', '4', 'INTEGER', 'HR02', 'BUSINESS', '4', '流水號補零位數');
 
 -- =====================================================
 -- 13. 排程任務配置

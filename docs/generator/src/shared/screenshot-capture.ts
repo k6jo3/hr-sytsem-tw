@@ -30,6 +30,54 @@ export interface RouteCapture {
   fullPage?: boolean;
 }
 
+/** 模擬使用者資料（匹配 MockAuthApi + UserProfile 格式） */
+interface MockUserProfile {
+  id: string;
+  username: string;
+  email: string;
+  fullName: string;
+  employeeId?: string;
+  roles: string[];
+  displayRoles: string;
+  isAdmin: boolean;
+  statusLabel: string;
+  statusColor: string;
+  displayStatus: string;
+}
+
+const MOCK_USERS: Record<string, MockUserProfile> = {
+  admin: {
+    id: 'u001', username: 'admin', email: 'admin@company.com',
+    fullName: 'System Admin', employeeId: '00000000-0000-0000-0000-000000000001',
+    roles: ['ADMIN'], displayRoles: '系統管理員', isAdmin: true,
+    statusLabel: '啟用', statusColor: 'success', displayStatus: '啟用',
+  },
+  hr_admin: {
+    id: 'u003', username: 'hr_admin', email: 'hr_admin@company.com',
+    fullName: '李小美', employeeId: '00000000-0000-0000-0000-000000000002',
+    roles: ['HR'], displayRoles: 'HR管理員', isAdmin: false,
+    statusLabel: '啟用', statusColor: 'success', displayStatus: '啟用',
+  },
+  employee: {
+    id: 'u004', username: 'employee', email: 'employee@company.com',
+    fullName: '陳志強', employeeId: '00000000-0000-0000-0000-000000000003',
+    roles: ['EMPLOYEE'], displayRoles: '一般員工', isAdmin: false,
+    statusLabel: '啟用', statusColor: 'success', displayStatus: '啟用',
+  },
+  manager: {
+    id: 'u005', username: 'manager', email: 'manager@company.com',
+    fullName: '陳志強', employeeId: '00000000-0000-0000-0000-000000000003',
+    roles: ['MANAGER'], displayRoles: '部門主管', isAdmin: false,
+    statusLabel: '啟用', statusColor: 'success', displayStatus: '啟用',
+  },
+  pm: {
+    id: 'u006', username: 'pm', email: 'pm@company.com',
+    fullName: '林雅婷', employeeId: '00000000-0000-0000-0000-000000000004',
+    roles: ['PM'], displayRoles: '專案經理', isAdmin: false,
+    statusLabel: '啟用', statusColor: 'success', displayStatus: '啟用',
+  },
+};
+
 /**
  * 前端截圖工具
  * 使用 puppeteer 自動登入並截圖前端頁面
@@ -70,42 +118,36 @@ export class ScreenshotCapture {
     }
   }
 
-  /** 登入前端系統 */
-  async login(username: string, password: string = 'Admin@123'): Promise<void> {
+  /**
+   * 登入前端系統（直接注入 localStorage 認證狀態）
+   * 繞過 Ant Design 表單互動問題，直接設定 Redux authSlice 所需的 localStorage 資料
+   */
+  async login(username: string, _password: string = 'Admin@123'): Promise<void> {
     if (!this.page) throw new Error('瀏覽器未啟動');
     if (this.currentUser === username) return;
 
-    // 前往登入頁
+    const mockUser = MOCK_USERS[username];
+    if (!mockUser) {
+      console.warn(`[Screenshot] 未知帳號: ${username}，跳過登入`);
+      return;
+    }
+
+    // 導航到前端頁面（確保在正確 origin 才能存取 localStorage）
     await this.page.goto(`${this.config.baseUrl}/login`, {
       waitUntil: 'networkidle2',
       timeout: 30000,
     });
 
-    // 等待登入表單
-    await this.page.waitForSelector('input[type="text"], input[id="username"]', { timeout: 10000 });
-
-    // 清除並填入帳號密碼
-    const usernameInput = await this.page.$('input[type="text"], input[id="username"]');
-    const passwordInput = await this.page.$('input[type="password"], input[id="password"]');
-
-    if (usernameInput && passwordInput) {
-      await usernameInput.click({ clickCount: 3 });
-      await usernameInput.type(username);
-      await passwordInput.click({ clickCount: 3 });
-      await passwordInput.type(password);
-
-      // 點擊登入按鈕
-      const submitBtn = await this.page.$('button[type="submit"]');
-      if (submitBtn) {
-        await submitBtn.click();
-      }
-
-      // 等待頁面跳轉
-      await this.page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
-      await new Promise(r => setTimeout(r, 2000));
-    }
+    // 直接注入 localStorage 認證狀態
+    await this.page.evaluate((profile: MockUserProfile) => {
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem('accessToken', 'mock-screenshot-token-' + profile.username);
+      localStorage.setItem('user', JSON.stringify(profile));
+    }, mockUser);
 
     this.currentUser = username;
+    console.log(`[Screenshot] 已注入登入狀態: ${username} (${mockUser.fullName})`);
   }
 
   /** 截圖單一路由 */
@@ -115,6 +157,15 @@ export class ScreenshotCapture {
     // 登入（如需切換帳號）
     if (route.loginAs && route.loginAs !== this.currentUser) {
       await this.login(route.loginAs);
+    }
+
+    // 登入頁特殊處理：清除認證讓 React 顯示登入表單
+    if (route.path === '/login') {
+      await this.page.evaluate(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+      });
+      this.currentUser = null;
     }
 
     // 導航到目標頁面

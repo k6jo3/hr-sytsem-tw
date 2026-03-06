@@ -33,6 +33,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     children: [
       { key: '/admin/users', label: '使用者管理', roles: ['ADMIN'] },
       { key: '/admin/roles', label: '角色權限分配', roles: ['ADMIN'] },
+      { key: '/admin/system', label: '系統管理', roles: ['ADMIN'] },
     ],
   },
   {

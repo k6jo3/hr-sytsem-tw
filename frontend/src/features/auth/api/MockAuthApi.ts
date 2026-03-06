@@ -72,6 +72,66 @@ export class MockAuthApi {
       must_change_password: false,
       created_at: '2023-02-01T00:00:00Z',
       updated_at: '2023-02-01T00:00:00Z'
+    },
+    {
+      id: 'u003',
+      username: 'hr_admin',
+      email: 'hr_admin@company.com',
+      display_name: '李小美',
+      first_name: '小美',
+      last_name: '李',
+      employee_id: '00000000-0000-0000-0000-000000000002',
+      status: 'ACTIVE' as UserStatus,
+      role_list: ['HR'],
+      role_ids: ['r003'],
+      must_change_password: false,
+      created_at: '2023-01-15T00:00:00Z',
+      updated_at: '2023-01-15T00:00:00Z'
+    },
+    {
+      id: 'u004',
+      username: 'employee',
+      email: 'employee@company.com',
+      display_name: '陳志強',
+      first_name: '志強',
+      last_name: '陳',
+      employee_id: '00000000-0000-0000-0000-000000000003',
+      status: 'ACTIVE' as UserStatus,
+      role_list: ['EMPLOYEE'],
+      role_ids: ['r004'],
+      must_change_password: false,
+      created_at: '2023-03-01T00:00:00Z',
+      updated_at: '2023-03-01T00:00:00Z'
+    },
+    {
+      id: 'u005',
+      username: 'manager',
+      email: 'manager@company.com',
+      display_name: '陳志強',
+      first_name: '志強',
+      last_name: '陳',
+      employee_id: '00000000-0000-0000-0000-000000000003',
+      status: 'ACTIVE' as UserStatus,
+      role_list: ['MANAGER'],
+      role_ids: ['r005'],
+      must_change_password: false,
+      created_at: '2023-03-01T00:00:00Z',
+      updated_at: '2023-03-01T00:00:00Z'
+    },
+    {
+      id: 'u006',
+      username: 'pm',
+      email: 'pm@company.com',
+      display_name: '林雅婷',
+      first_name: '雅婷',
+      last_name: '林',
+      employee_id: '00000000-0000-0000-0000-000000000004',
+      status: 'ACTIVE' as UserStatus,
+      role_list: ['PM'],
+      role_ids: ['r006'],
+      must_change_password: false,
+      created_at: '2023-04-01T00:00:00Z',
+      updated_at: '2023-04-01T00:00:00Z'
     }
   ];
 
@@ -109,6 +169,42 @@ export class MockAuthApi {
       is_active: true,
       permission_ids: ['p001', 'p002'],
       user_count: 2,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z'
+    },
+    {
+      id: 'r004',
+      role_code: 'EMPLOYEE',
+      role_name: 'Employee',
+      description: 'Standard employee access',
+      is_system: true,
+      is_active: true,
+      permission_ids: ['p001'],
+      user_count: 50,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z'
+    },
+    {
+      id: 'r005',
+      role_code: 'MANAGER',
+      role_name: 'Manager',
+      description: 'Team manager access',
+      is_system: false,
+      is_active: true,
+      permission_ids: ['p001', 'p002'],
+      user_count: 5,
+      created_at: '2023-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z'
+    },
+    {
+      id: 'r006',
+      role_code: 'PM',
+      role_name: 'Project Manager',
+      description: 'Project management access',
+      is_system: false,
+      is_active: true,
+      permission_ids: ['p001', 'p004'],
+      user_count: 3,
       created_at: '2023-01-01T00:00:00Z',
       updated_at: '2023-01-01T00:00:00Z'
     }
