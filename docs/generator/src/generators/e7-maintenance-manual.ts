@@ -184,14 +184,43 @@ async function generateChapter6(): Promise<string> {
   return `<h1>6. 開發流程（TDD）</h1><p>請參考 framework/development/01_開發流程.md</p>`;
 }
 
-/** 生成第 7 章：測試規範 */
+/** 生成第 7 章：測試規範（分段引用最新文件） */
 async function generateChapter7(): Promise<string> {
-  const testSpec = await tryReadMd(path.join(FRAMEWORK_DIR, 'testing', '測試架構規範.md'));
-  if (testSpec) {
-    const parsed = await markdownParser.parse(testSpec);
-    return `<h1>7. 測試規範</h1>\n${parsed.html}`;
+  let html = `<h1>7. 測試規範</h1>`;
+
+  // 7.1 測試架構總覽
+  const overview = await tryReadMd(path.join(FRAMEWORK_DIR, 'testing', '01_測試架構總覽.md'));
+  if (overview) {
+    const parsed = await markdownParser.parse(overview);
+    html += `<h2>7.1 測試架構總覽</h2>\n${parsed.html}`;
   }
-  return `<h1>7. 測試規範</h1><p>請參考 framework/testing/測試架構規範.md</p>`;
+
+  // 7.2 三階測試法
+  const threePhase = await tryReadMd(path.join(FRAMEWORK_DIR, 'testing', '02_三階測試法.md'));
+  if (threePhase) {
+    const parsed = await markdownParser.parse(threePhase);
+    html += `<h2>7.2 三階測試法</h2>\n${parsed.html}`;
+  }
+
+  // 7.3 合約驅動測試（使用專項文件，非舊版總覽）
+  const contractTest = await tryReadMd(path.join(FRAMEWORK_DIR, 'testing', '04_合約驅動測試.md'));
+  if (contractTest) {
+    const parsed = await markdownParser.parse(contractTest);
+    html += `<h2>7.3 合約驅動測試</h2>\n${parsed.html}`;
+  }
+
+  // 7.4 測試基類設計
+  const baseClass = await tryReadMd(path.join(FRAMEWORK_DIR, 'testing', '05_測試基類設計.md'));
+  if (baseClass) {
+    const parsed = await markdownParser.parse(baseClass);
+    html += `<h2>7.4 測試基類設計</h2>\n${parsed.html}`;
+  }
+
+  if (html === `<h1>7. 測試規範</h1>`) {
+    html += `<p>請參考 framework/testing/ 目錄下的測試規範文件</p>`;
+  }
+
+  return html;
 }
 
 /** 生成第 8 章：CI/CD 與部署 */
@@ -204,23 +233,109 @@ async function generateChapter8(): Promise<string> {
   return `<h1>8. CI/CD 與部署</h1><p>請參考 knowledge/06_CICD與系統部署指南.md</p>`;
 }
 
-/** 生成附錄 A：後端 Java 檔案清單 */
+/** 從 Java 檔案中擷取功能說明（Javadoc 第一行或 getName() 回傳值） */
+async function extractDescription(filePath: string): Promise<string> {
+  try {
+    const content = await fs.readFile(filePath, 'utf-8');
+
+    // 優先取 Javadoc 第一行描述
+    const javadocMatch = content.match(/\/\*\*\s*\n\s*\*\s*(.+?)(?:\n|\*\/)/);
+    if (javadocMatch) {
+      return javadocMatch[1].trim().replace(/\s*\*\s*$/, '');
+    }
+
+    // 其次取 getName() 回傳值
+    const getNameMatch = content.match(/getName\(\)\s*\{[\s\S]*?return\s*"(.+?)"/);
+    if (getNameMatch) {
+      return getNameMatch[1];
+    }
+
+    // 從類別名推導（駝峰轉中文動詞提示）
+    const classMatch = content.match(/public class (\w+)/);
+    if (classMatch) {
+      return classMatch[1]
+        .replace(/ServiceImpl$/, '')
+        .replace(/Task$/, '')
+        .replace(/([A-Z])/g, ' $1')
+        .trim();
+    }
+  } catch { /* 讀取失敗 */ }
+  return '—';
+}
+
+/** 遞迴找出符合條件的 Java 檔案 */
+async function findJavaFilesByPattern(dir: string, pattern: RegExp): Promise<{ relativePath: string; fullPath: string }[]> {
+  const results: { relativePath: string; fullPath: string }[] = [];
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'target' && entry.name !== 'node_modules') {
+        results.push(...await findJavaFilesByPattern(fullPath, pattern));
+      } else if (entry.isFile() && pattern.test(entry.name)) {
+        results.push({ relativePath: entry.name, fullPath });
+      }
+    }
+  } catch { /* 目錄不存在 */ }
+  return results;
+}
+
+/** 生成附錄 A：後端程式清冊（僅 ServiceImpl + Task） */
 async function generateAppendixA(): Promise<string> {
-  let html = `<h1>附錄 A：後端 Java 檔案清單</h1>`;
+  let html = `<h1>附錄 A：後端程式清冊（Service / Task）</h1>`;
+  html += `<p>僅列出 Application 層的 ServiceImpl 與 Pipeline Task，含功能說明。</p>`;
+
+  let totalServices = 0;
+  let totalTasks = 0;
 
   for (const svc of SERVICES) {
     const svcDir = path.join(BACKEND_DIR, `hrms-${svc.id}`);
-    const files = await listFiles(svcDir, '.java');
-    html += `<h2>HR${svc.code} ${svc.name}（${files.length} 檔案）</h2>`;
 
-    if (files.length > 0) {
-      html += `<pre class="hljs"><code>`;
-      html += files.join('\n');
-      html += `</code></pre>`;
-    } else {
-      html += `<p>（未找到 Java 檔案）</p>`;
+    // 找 ServiceImpl
+    const serviceFiles = await findJavaFilesByPattern(svcDir, /ServiceImpl\.java$/);
+    // 找 Task
+    const taskFiles = await findJavaFilesByPattern(svcDir, /Task\.java$/);
+
+    const svcCount = serviceFiles.length;
+    const taskCount = taskFiles.length;
+    totalServices += svcCount;
+    totalTasks += taskCount;
+
+    html += `<h2>HR${svc.code} ${svc.name}（${svcCount} Service, ${taskCount} Task）</h2>`;
+
+    if (svcCount > 0) {
+      html += `<h3>Application Service</h3>`;
+      html += `<table>
+        <thead><tr><th>類別名稱</th><th>功能說明</th></tr></thead>
+        <tbody>`;
+      for (const f of serviceFiles.sort((a, b) => a.relativePath.localeCompare(b.relativePath))) {
+        const desc = await extractDescription(f.fullPath);
+        const name = f.relativePath.replace('.java', '');
+        html += `<tr><td><code>${name}</code></td><td>${desc}</td></tr>`;
+      }
+      html += `</tbody></table>`;
+    }
+
+    if (taskCount > 0) {
+      html += `<h3>Pipeline Task</h3>`;
+      html += `<table>
+        <thead><tr><th>類別名稱</th><th>功能說明</th></tr></thead>
+        <tbody>`;
+      for (const f of taskFiles.sort((a, b) => a.relativePath.localeCompare(b.relativePath))) {
+        const desc = await extractDescription(f.fullPath);
+        const name = f.relativePath.replace('.java', '');
+        html += `<tr><td><code>${name}</code></td><td>${desc}</td></tr>`;
+      }
+      html += `</tbody></table>`;
+    }
+
+    if (svcCount === 0 && taskCount === 0) {
+      html += `<p>（無 ServiceImpl 或 Task 檔案）</p>`;
     }
   }
+
+  html += `<h2>統計</h2>`;
+  html += `<p>ServiceImpl 合計：${totalServices} 個 | Task 合計：${totalTasks} 個 | 共 ${totalServices + totalTasks} 個程式</p>`;
 
   return html;
 }

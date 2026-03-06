@@ -219,22 +219,103 @@ async function generatePpt(): Promise<string> {
     });
   } catch { /* 跳過 */ }
 
-  // 業務流程
+  // 業務流程（7 個核心流程）
   slides.push({
     layout: 'section',
     title: '5. 核心業務流程圖',
-    subtitle: '考勤結算至薪資發放',
+    subtitle: '7 大核心業務流程',
   });
 
+  slides.push({
+    layout: 'content',
+    title: '核心業務流程一覽',
+    bullets: [
+      '5.1 考勤結算至薪資發放流程',
+      '5.2 員工入職流程',
+      '5.3 請假簽核流程',
+      '5.4 績效考核流程',
+      '5.5 曠職判定流程',
+      '5.6 薪資預借審核流程',
+      '5.7 離職退保連動流程',
+    ],
+  });
+
+  // 已有 PNG 的流程圖
   const flowDiagram = path.join(DIAGRAMS_DIR, '04_考勤結算至薪資發放流程.png');
   try {
     await fs.access(flowDiagram);
     slides.push({
       layout: 'image',
-      title: '考勤結算至薪資發放流程',
+      title: '5.1 考勤結算至薪資發放流程',
       imagePath: flowDiagram,
     });
   } catch { /* 跳過 */ }
+
+  // 其餘 6 個流程以文字摘要呈現（mermaid 圖在 PDF 中渲染）
+  const flowSummaries: { title: string; bullets: string[] }[] = [
+    {
+      title: '5.2 員工入職流程',
+      bullets: [
+        'HR 建立員工基本資料 → Organization 服務',
+        '觸發 EmployeeCreatedEvent → IAM 自動建立帳號',
+        '→ Insurance 自動加保（勞保/健保）',
+        '→ Notification 發送歡迎通知',
+      ],
+    },
+    {
+      title: '5.3 請假簽核流程',
+      bullets: [
+        '員工提交請假申請 → 驗證假別餘額',
+        '→ Workflow 引擎啟動多層簽核',
+        '→ 主管/HR 逐層審核',
+        '→ 核准後扣除假別餘額 → 通知申請人',
+      ],
+    },
+    {
+      title: '5.4 績效考核流程',
+      bullets: [
+        'HR 建立考核週期 → 設定考核模板',
+        '→ 員工自評 → 主管評分',
+        '→ HR 校準 → 最終確認',
+        '→ 績效結果影響薪資調整',
+      ],
+    },
+    {
+      title: '5.5 曠職判定流程',
+      bullets: [
+        '月結排程掃描出勤紀錄',
+        '→ 無打卡且無請假 → 標記異常',
+        '→ 超過寬限期未補正 → 判定曠職',
+        '→ 通知主管與 HR',
+      ],
+    },
+    {
+      title: '5.6 薪資預借審核流程',
+      bullets: [
+        '員工申請薪資預借 → 驗證資格與額度',
+        '→ 主管審核 → HR/財務審核',
+        '→ 核准後建立扣款排程',
+        '→ 後續薪資自動扣回',
+      ],
+    },
+    {
+      title: '5.7 離職退保連動流程',
+      bullets: [
+        'HR 執行離職作業 → Organization 更新狀態',
+        '→ Insurance 自動退保（勞保/健保）',
+        '→ IAM 停用帳號 → Payroll 計算離職結算',
+        '→ 產生離職證明文件',
+      ],
+    },
+  ];
+
+  for (const flow of flowSummaries) {
+    slides.push({
+      layout: 'content',
+      title: flow.title,
+      bullets: flow.bullets,
+    });
+  }
 
   // 結尾
   slides.push({
