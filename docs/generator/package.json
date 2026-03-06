@@ -1,0 +1,31 @@
+{
+  "name": "hrms-doc-generator",
+  "version": "1.0.0",
+  "description": "HRMS 文件生成系統 - Markdown → PPT/PDF",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "generate:e1": "tsx src/generators/e1-system-analysis.ts",
+    "generate:e2": "tsx src/generators/e2-requirements.ts",
+    "generate:e3": "tsx src/generators/e3-system-design.ts",
+    "generate:e4": "tsx src/generators/e4-api-specs.ts",
+    "generate:e5": "tsx src/generators/e5-operation-manual.ts",
+    "generate:e6": "tsx src/generators/e6-system-overview.ts",
+    "generate:e7": "tsx src/generators/e7-maintenance-manual.ts",
+    "generate:all": "tsx src/index.ts --all",
+    "generate": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "highlight.js": "^11.10.0",
+    "markdown-it": "^14.1.0",
+    "pptxgenjs": "^3.12.0",
+    "puppeteer": "^23.7.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
