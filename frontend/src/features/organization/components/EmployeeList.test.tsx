@@ -1,7 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { EmployeeList } from './EmployeeList';
 import type { EmployeeViewModel } from '../model/EmployeeViewModel';
+
+const renderWithRouter = (ui: React.ReactElement) =>
+  render(<MemoryRouter>{ui}</MemoryRouter>);
 
 describe('EmployeeList', () => {
   const mockEmployees: EmployeeViewModel[] = [
@@ -32,7 +36,7 @@ describe('EmployeeList', () => {
 
   describe('表格渲染', () => {
     it('應該顯示所有員工資料', () => {
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={mockEmployees}
           loading={false}
@@ -62,7 +66,7 @@ describe('EmployeeList', () => {
     });
 
     it('應該顯示新增按鈕', () => {
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={mockEmployees}
           loading={false}
@@ -77,7 +81,7 @@ describe('EmployeeList', () => {
     });
 
     it('應該顯示重新整理按鈕', () => {
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={mockEmployees}
           loading={false}
@@ -94,7 +98,7 @@ describe('EmployeeList', () => {
 
   describe('載入狀態', () => {
     it('載入中時應該顯示載入狀態', () => {
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={[]}
           loading={true}
@@ -114,7 +118,7 @@ describe('EmployeeList', () => {
     it('點擊新增按鈕應該呼叫onAdd', () => {
       const handleAdd = vi.fn();
 
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={mockEmployees}
           loading={false}
@@ -133,7 +137,7 @@ describe('EmployeeList', () => {
     it('點擊重新整理按鈕應該呼叫onRefresh', () => {
       const handleRefresh = vi.fn();
 
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={mockEmployees}
           loading={false}
@@ -152,7 +156,7 @@ describe('EmployeeList', () => {
 
   describe('分頁', () => {
     it('應該顯示分頁控制項', () => {
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={mockEmployees}
           loading={false}
@@ -162,15 +166,14 @@ describe('EmployeeList', () => {
         />
       );
 
-      // Ant Design 的 Pagination 會顯示頁碼
-      const pagination = screen.getByRole('list', { name: /pagination/i });
-      expect(pagination).toBeInTheDocument();
+      // Ant Design Table 的分頁會顯示「共 50 筆」
+      expect(screen.getByText(/共 50 筆/)).toBeInTheDocument();
     });
 
     it('應該支援變更頁面大小', () => {
       const handlePageChange = vi.fn();
 
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={mockEmployees}
           loading={false}
@@ -189,7 +192,7 @@ describe('EmployeeList', () => {
 
   describe('空狀態', () => {
     it('沒有員工時應該顯示空狀態', () => {
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={[]}
           loading={false}
@@ -220,7 +223,7 @@ describe('EmployeeList', () => {
         },
       ];
 
-      render(
+      renderWithRouter(
         <EmployeeList
           employees={employeesWithDifferentStatus}
           loading={false}

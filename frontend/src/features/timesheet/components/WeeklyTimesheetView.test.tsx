@@ -85,7 +85,7 @@ describe('WeeklyTimesheetView', () => {
         />
       );
 
-      const submitButton = screen.getByText('提交工時');
+      const submitButton = screen.getByText('送出審核');
       expect(submitButton).toBeInTheDocument();
       expect(submitButton.closest('button')).not.toBeDisabled();
     });
@@ -106,7 +106,7 @@ describe('WeeklyTimesheetView', () => {
         />
       );
 
-      const submitButton = screen.getByText('提交工時');
+      const submitButton = screen.getByText('送出審核');
       expect(submitButton.closest('button')).toBeDisabled();
     });
 
@@ -122,7 +122,7 @@ describe('WeeklyTimesheetView', () => {
         />
       );
 
-      fireEvent.click(screen.getByText('提交工時'));
+      fireEvent.click(screen.getByText('送出審核'));
 
       expect(handleSubmit).toHaveBeenCalledTimes(1);
     });

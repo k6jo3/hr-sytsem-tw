@@ -32,7 +32,7 @@ describe('UserViewModelFactory', () => {
     expect(viewModel.email).toBe('john.doe@example.com');
     expect(viewModel.isAdmin).toBe(true);
     expect(viewModel.roles).toEqual(['ADMIN', 'HR_MANAGER']);
-    expect(viewModel.displayStatus).toBe('在職');
+    expect(viewModel.displayStatus).toBe('啟用');
     expect(viewModel.avatarUrl).toBe('https://example.com/avatar.jpg');
   });
 
@@ -59,7 +59,7 @@ describe('UserViewModelFactory', () => {
 
   it('should map status correctly', () => {
     const testCases: Array<{ status: UserDto['status']; expected: string }> = [
-      { status: 'ACTIVE', expected: '在職' },
+      { status: 'ACTIVE', expected: '啟用' },
       { status: 'INACTIVE', expected: '停用' },
       { status: 'LOCKED', expected: '鎖定' },
       { status: 'DELETED', expected: '已刪除' },

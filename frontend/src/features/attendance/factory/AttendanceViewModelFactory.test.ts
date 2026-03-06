@@ -5,16 +5,16 @@ import type { AttendanceRecordDto } from '../api/AttendanceTypes';
 describe('AttendanceViewModelFactory', () => {
   const mockAttendanceDto: AttendanceRecordDto = {
     id: '1',
-    employee_id: 'emp-1',
-    employee_name: '王小明',
-    check_type: 'CHECK_IN',
-    check_time: '2024-12-08T09:00:00Z',
+    employeeId: 'emp-1',
+    employeeName: '王小明',
+    checkType: 'CHECK_IN',
+    checkTime: '2024-12-08T09:00:00Z',
     status: 'NORMAL',
     latitude: 25.033,
     longitude: 121.5654,
     address: '台北市信義區信義路五段7號',
-    device_info: 'iPhone 13',
-    created_at: '2024-12-08T09:00:00Z',
+    deviceInfo: 'iPhone 13',
+    createdAt: '2024-12-08T09:00:00Z',
   };
 
   describe('createFromDTO', () => {
@@ -37,7 +37,7 @@ describe('AttendanceViewModelFactory', () => {
     it('應該正確對應下班打卡類型', () => {
       const checkOutDto: AttendanceRecordDto = {
         ...mockAttendanceDto,
-        check_type: 'CHECK_OUT',
+        checkType: 'CHECK_OUT',
       };
 
       const viewModel = AttendanceViewModelFactory.createFromDTO(checkOutDto);
@@ -49,7 +49,7 @@ describe('AttendanceViewModelFactory', () => {
     it('應該正確對應外出類型', () => {
       const breakOutDto: AttendanceRecordDto = {
         ...mockAttendanceDto,
-        check_type: 'BREAK_OUT',
+        checkType: 'BREAK_OUT',
       };
 
       const viewModel = AttendanceViewModelFactory.createFromDTO(breakOutDto);
@@ -61,7 +61,7 @@ describe('AttendanceViewModelFactory', () => {
     it('應該正確對應返回類型', () => {
       const breakInDto: AttendanceRecordDto = {
         ...mockAttendanceDto,
-        check_type: 'BREAK_IN',
+        checkType: 'BREAK_IN',
       };
 
       const viewModel = AttendanceViewModelFactory.createFromDTO(breakInDto);
@@ -143,8 +143,8 @@ describe('AttendanceViewModelFactory', () => {
         {
           ...mockAttendanceDto,
           id: '2',
-          check_type: 'CHECK_OUT',
-          check_time: '2024-12-08T18:00:00Z',
+          checkType: 'CHECK_OUT',
+          checkTime: '2024-12-08T18:00:00Z',
         },
       ];
 

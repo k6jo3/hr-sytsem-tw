@@ -1,24 +1,51 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from '@store/authSlice';
 import { useAttendance } from './useAttendance';
-import * as AttendanceApi from '../api/AttendanceApi';
+import { AttendanceApi } from '../api/AttendanceApi';
 import type { AttendanceRecordDto } from '../api/AttendanceTypes';
 
-// Mock AttendanceApi
+// Mock AttendanceApi class
 vi.mock('../api/AttendanceApi', () => ({
-  getTodayAttendance: vi.fn(),
-  checkIn: vi.fn(),
+  AttendanceApi: {
+    getTodayAttendance: vi.fn(),
+    checkIn: vi.fn(),
+    checkOut: vi.fn(),
+  },
 }));
+
+/**
+ * 建立帶 Redux store 的 wrapper（含 mock user）
+ */
+const createWrapper = () => {
+  const store = configureStore({
+    reducer: { auth: authReducer },
+    preloadedState: {
+      auth: {
+        user: { id: 'user-1', employeeId: 'emp-1', username: 'test', fullName: '王小明' } as any,
+        token: 'mock-token',
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      },
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(Provider, { store }, children);
+};
 
 describe('useAttendance', () => {
   const mockRecord: AttendanceRecordDto = {
     id: '1',
-    employee_id: 'emp-1',
-    employee_name: '王小明',
-    check_type: 'CHECK_IN',
-    check_time: '2024-12-08T09:00:00Z',
+    employeeId: 'emp-1',
+    employeeName: '王小明',
+    checkType: 'CHECK_IN',
+    checkTime: '2024-12-08T09:00:00Z',
     status: 'NORMAL',
-    created_at: '2024-12-08T09:00:00Z',
+    createdAt: '2024-12-08T09:00:00Z',
   };
 
   beforeEach(() => {
@@ -29,11 +56,11 @@ describe('useAttendance', () => {
     it('應該有正確的初始狀態', () => {
       vi.mocked(AttendanceApi.getTodayAttendance).mockResolvedValue({
         records: [],
-        has_checked_in: false,
-        has_checked_out: false,
+        hasCheckedIn: false,
+        hasCheckedOut: false,
       });
 
-      const { result } = renderHook(() => useAttendance());
+      const { result } = renderHook(() => useAttendance(), { wrapper: createWrapper() });
 
       expect(result.current.loading).toBe(true);
       expect(result.current.summary).toBeNull();
@@ -46,12 +73,12 @@ describe('useAttendance', () => {
     it('應該成功取得今日考勤資料', async () => {
       vi.mocked(AttendanceApi.getTodayAttendance).mockResolvedValue({
         records: [mockRecord],
-        has_checked_in: true,
-        has_checked_out: false,
-        total_work_hours: 8.5,
+        hasCheckedIn: true,
+        hasCheckedOut: false,
+        totalWorkHours: 8.5,
       });
 
-      const { result } = renderHook(() => useAttendance());
+      const { result } = renderHook(() => useAttendance(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -71,7 +98,7 @@ describe('useAttendance', () => {
         new Error(errorMessage)
       );
 
-      const { result } = renderHook(() => useAttendance());
+      const { result } = renderHook(() => useAttendance(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -86,28 +113,30 @@ describe('useAttendance', () => {
     it('應該成功執行上班打卡', async () => {
       vi.mocked(AttendanceApi.getTodayAttendance).mockResolvedValue({
         records: [],
-        has_checked_in: false,
-        has_checked_out: false,
+        hasCheckedIn: false,
+        hasCheckedOut: false,
       });
 
       vi.mocked(AttendanceApi.checkIn).mockResolvedValue({
         record: mockRecord,
         message: '打卡成功',
-      });
+      } as any);
 
-      const { result } = renderHook(() => useAttendance());
+      const { result } = renderHook(() => useAttendance(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
-      // 執行打卡
       await act(async () => {
         await result.current.handleCheckIn('CHECK_IN');
       });
 
       expect(AttendanceApi.checkIn).toHaveBeenCalledWith({
-        check_type: 'CHECK_IN',
+        employeeId: 'emp-1',
+        latitude: undefined,
+        longitude: undefined,
+        address: undefined,
       });
       expect(result.current.checkingIn).toBe(false);
     });
@@ -115,8 +144,8 @@ describe('useAttendance', () => {
     it('打卡過程中checkingIn應該為true', async () => {
       vi.mocked(AttendanceApi.getTodayAttendance).mockResolvedValue({
         records: [],
-        has_checked_in: false,
-        has_checked_out: false,
+        hasCheckedIn: false,
+        hasCheckedOut: false,
       });
 
       let resolveCheckIn: (value: any) => void;
@@ -126,24 +155,30 @@ describe('useAttendance', () => {
 
       vi.mocked(AttendanceApi.checkIn).mockReturnValue(checkInPromise as any);
 
-      const { result } = renderHook(() => useAttendance());
+      const { result } = renderHook(() => useAttendance(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
-      // 開始打卡
       act(() => {
         result.current.handleCheckIn('CHECK_IN');
       });
 
-      // 打卡中
       expect(result.current.checkingIn).toBe(true);
 
-      // 完成打卡
-      resolveCheckIn!({
-        record: mockRecord,
-        message: '打卡成功',
+      // 完成打卡（包含後續 refresh 呼叫）
+      vi.mocked(AttendanceApi.getTodayAttendance).mockResolvedValue({
+        records: [mockRecord],
+        hasCheckedIn: true,
+        hasCheckedOut: false,
+      });
+
+      await act(async () => {
+        resolveCheckIn!({
+          record: mockRecord,
+          message: '打卡成功',
+        });
       });
 
       await waitFor(() => {
@@ -154,14 +189,14 @@ describe('useAttendance', () => {
     it('應該正確處理打卡錯誤', async () => {
       vi.mocked(AttendanceApi.getTodayAttendance).mockResolvedValue({
         records: [],
-        has_checked_in: false,
-        has_checked_out: false,
+        hasCheckedIn: false,
+        hasCheckedOut: false,
       });
 
       const errorMessage = '打卡失敗';
       vi.mocked(AttendanceApi.checkIn).mockRejectedValue(new Error(errorMessage));
 
-      const { result } = renderHook(() => useAttendance());
+      const { result } = renderHook(() => useAttendance(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -181,16 +216,16 @@ describe('useAttendance', () => {
     it('應該支援帶地理位置的打卡', async () => {
       vi.mocked(AttendanceApi.getTodayAttendance).mockResolvedValue({
         records: [],
-        has_checked_in: false,
-        has_checked_out: false,
+        hasCheckedIn: false,
+        hasCheckedOut: false,
       });
 
       vi.mocked(AttendanceApi.checkIn).mockResolvedValue({
         record: mockRecord,
         message: '打卡成功',
-      });
+      } as any);
 
-      const { result } = renderHook(() => useAttendance());
+      const { result } = renderHook(() => useAttendance(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -205,7 +240,7 @@ describe('useAttendance', () => {
       });
 
       expect(AttendanceApi.checkIn).toHaveBeenCalledWith({
-        check_type: 'CHECK_IN',
+        employeeId: 'emp-1',
         latitude: 25.033,
         longitude: 121.5654,
         address: '台北市信義區',
@@ -217,11 +252,11 @@ describe('useAttendance', () => {
     it('應該能重新取得今日考勤資料', async () => {
       vi.mocked(AttendanceApi.getTodayAttendance).mockResolvedValue({
         records: [mockRecord],
-        has_checked_in: true,
-        has_checked_out: false,
+        hasCheckedIn: true,
+        hasCheckedOut: false,
       });
 
-      const { result } = renderHook(() => useAttendance());
+      const { result } = renderHook(() => useAttendance(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
@@ -229,7 +264,6 @@ describe('useAttendance', () => {
 
       expect(AttendanceApi.getTodayAttendance).toHaveBeenCalledTimes(1);
 
-      // 呼叫 refresh
       act(() => {
         result.current.refresh();
       });
@@ -245,32 +279,30 @@ describe('useAttendance', () => {
       vi.mocked(AttendanceApi.getTodayAttendance)
         .mockResolvedValueOnce({
           records: [],
-          has_checked_in: false,
-          has_checked_out: false,
+          hasCheckedIn: false,
+          hasCheckedOut: false,
         })
         .mockResolvedValueOnce({
           records: [mockRecord],
-          has_checked_in: true,
-          has_checked_out: false,
+          hasCheckedIn: true,
+          hasCheckedOut: false,
         });
 
       vi.mocked(AttendanceApi.checkIn).mockResolvedValue({
         record: mockRecord,
         message: '打卡成功',
-      });
+      } as any);
 
-      const { result } = renderHook(() => useAttendance());
+      const { result } = renderHook(() => useAttendance(), { wrapper: createWrapper() });
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
 
-      // 執行打卡
       await act(async () => {
         await result.current.handleCheckIn('CHECK_IN');
       });
 
-      // 應該自動刷新並更新狀態
       await waitFor(() => {
         expect(result.current.summary?.hasCheckedIn).toBe(true);
       });

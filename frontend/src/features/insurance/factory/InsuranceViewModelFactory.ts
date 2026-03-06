@@ -4,13 +4,17 @@ import type {
     EnrollmentHistoryDto,
     EnrollmentStatus,
     InsuranceFeesDto,
+    InsuranceLevelDto,
     InsuranceType,
+    InsuranceUnitDto,
     MyInsuranceInfoDto
 } from '../api/InsuranceTypes';
 import type {
     EnrollmentHistoryViewModel,
     EnrollmentViewModel,
     InsuranceFeesViewModel,
+    InsuranceLevelViewModel,
+    InsuranceUnitViewModel,
     MyInsuranceInfoViewModel
 } from '../model/InsuranceViewModel';
 
@@ -18,15 +22,7 @@ import type {
  * Insurance ViewModel Factory
  * 負責將 DTO 轉換為前端使用的 ViewModel
  *
- * TODO: 以下項目需修正以通過合約測試：
- * 1. mapInsuranceType: 標籤改為簡稱 LABOR='勞保', HEALTH='健保', PENSION='勞退'
- * 2. enrollDateDisplay/changeDateDisplay: 保留 '-' 分隔格式，移除 replace(/-/g, '/')
- * 3. levelDisplay: 移除空格，改為 `第${number}級`
- * 4. mapStatusLabel: ACTIVE='已加保', PENDING='待處理' (WITHDRAWN='已退保' 已正確)
- * 5. mapStatusColor: PENDING 改為 'warning' (非 'processing')
- * 6. mapChangeTypeColor: ENROLL='success', WITHDRAW='error', ADJUST_LEVEL='warning'
- * 7. createMyInsuranceInfoViewModel.statusMessage: 加上 emoji 前綴 '✅ 正常投保中' / '⚠️ 目前無投保記錄'
- * 8. 新增缺少的方法: createLevelViewModel, createUnitViewModel, createListFromDTOs
+ * 合約測試已修正完成
  */
 export class InsuranceViewModelFactory {
   /**
@@ -42,13 +38,13 @@ export class InsuranceViewModelFactory {
       insuranceTypeLabel: this.mapInsuranceType(dto.insurance_type),
       insuranceTypeColor: this.mapInsuranceTypeColor(dto.insurance_type),
       enrollDate: dto.enroll_date,
-      enrollDateDisplay: dto.enroll_date.replace(/-/g, '/'),
+      enrollDateDisplay: dto.enroll_date,
       withdrawDate: dto.withdraw_date,
-      withdrawDateDisplay: dto.withdraw_date?.replace(/-/g, '/'),
+      withdrawDateDisplay: dto.withdraw_date,
       monthlySalary: dto.monthly_salary,
       monthlySalaryDisplay: `$${dto.monthly_salary.toLocaleString()}`,
       levelNumber: dto.level_number,
-      levelDisplay: `第 ${dto.level_number} 級`,
+      levelDisplay: `第${dto.level_number}級`,
       status: dto.status,
       statusLabel: this.mapStatusLabel(dto.status),
       statusColor: this.mapStatusColor(dto.status),
@@ -97,13 +93,13 @@ export class InsuranceViewModelFactory {
     return {
       historyId: dto.history_id,
       changeDate: dto.change_date,
-      changeDateDisplay: dto.change_date.replace(/-/g, '/'),
+      changeDateDisplay: dto.change_date,
       changeType: dto.change_type,
       changeTypeLabel: this.mapChangeTypeLabel(dto.change_type),
       changeTypeColor: this.mapChangeTypeColor(dto.change_type),
       insuranceTypeLabel: this.mapInsuranceType(dto.insurance_type),
       monthlySalaryDisplay: `$${dto.monthly_salary.toLocaleString()}`,
-      levelDisplay: `第 ${dto.level_number} 級`,
+      levelDisplay: `第${dto.level_number}級`,
       reason: dto.reason,
       operatorName: dto.operator_name
     };
@@ -124,7 +120,7 @@ export class InsuranceViewModelFactory {
       fees: this.createFeesViewModel(dto.fees),
       history: (dto.history || []).map(h => this.createHistoryViewModel(h)),
       hasActiveEnrollment: dto.has_active_enrollment,
-      statusMessage: dto.has_active_enrollment ? '正常投保中' : '目前無有效投保項目',
+      statusMessage: dto.has_active_enrollment ? '✅ 正常投保中' : '⚠️ 目前無投保記錄',
       statusType: dto.has_active_enrollment ? 'success' : 'warning',
       currentEnrollDate: activeEnrollment?.enrollDateDisplay,
       currentSalaryDisplay: activeEnrollment?.monthlySalaryDisplay,
@@ -139,11 +135,59 @@ export class InsuranceViewModelFactory {
     return (dtos || []).map(dto => this.createEnrollmentViewModel(dto));
   }
 
+  /**
+   * 轉換列表（別名）
+   */
+  static createListFromDTOs(dtos: EnrollmentDto[]): EnrollmentViewModel[] {
+    return this.createEnrollmentList(dtos);
+  }
+
+  /**
+   * 轉換投保級距
+   */
+  static createLevelViewModel(dto: InsuranceLevelDto): InsuranceLevelViewModel {
+    const formatRate = (rate?: number): string | undefined => {
+      if (rate === undefined || rate === null) return undefined;
+      return `${(rate * 100).toFixed(2)}%`;
+    };
+
+    return {
+      levelId: dto.level_id,
+      insuranceTypeLabel: this.mapInsuranceType(dto.insurance_type),
+      levelNumber: dto.level_number,
+      monthlySalaryDisplay: `$${dto.monthly_salary.toLocaleString()}`,
+      effectiveDateDisplay: dto.effective_date,
+      endDateDisplay: dto.end_date,
+      isActive: dto.is_active,
+      laborEmployeeRateDisplay: formatRate(dto.labor_employee_rate),
+      laborEmployerRateDisplay: formatRate(dto.labor_employer_rate),
+      healthEmployeeRateDisplay: formatRate(dto.health_employee_rate),
+      healthEmployerRateDisplay: formatRate(dto.health_employer_rate),
+      pensionEmployerRateDisplay: formatRate(dto.pension_employer_rate),
+    };
+  }
+
+  /**
+   * 轉換投保單位
+   */
+  static createUnitViewModel(dto: InsuranceUnitDto): InsuranceUnitViewModel {
+    return {
+      unitId: dto.unit_id,
+      unitCode: dto.unit_code,
+      unitName: dto.unit_name,
+      laborInsuranceNumber: dto.labor_insurance_number,
+      healthInsuranceNumber: dto.health_insurance_number,
+      pensionNumber: dto.pension_number,
+      isActive: dto.is_active,
+      displayName: `${dto.unit_code} - ${dto.unit_name}`,
+    };
+  }
+
   private static mapInsuranceType(type: InsuranceType): string {
     const map: Record<InsuranceType, string> = {
-      LABOR: '勞工保險',
-      HEALTH: '全民健保',
-      PENSION: '勞退提撥'
+      LABOR: '勞保',
+      HEALTH: '健保',
+      PENSION: '勞退'
     };
     return map[type] || type;
   }
@@ -159,8 +203,8 @@ export class InsuranceViewModelFactory {
 
   private static mapStatusLabel(status: EnrollmentStatus): string {
     const map: Record<EnrollmentStatus, string> = {
-      PENDING: '審核中',
-      ACTIVE: '投保中',
+      PENDING: '待處理',
+      ACTIVE: '已加保',
       WITHDRAWN: '已退保'
     };
     return map[status] || status;
@@ -168,7 +212,7 @@ export class InsuranceViewModelFactory {
 
   private static mapStatusColor(status: EnrollmentStatus): string {
     const map: Record<EnrollmentStatus, string> = {
-      PENDING: 'processing',
+      PENDING: 'warning',
       ACTIVE: 'success',
       WITHDRAWN: 'default'
     };
@@ -186,9 +230,9 @@ export class InsuranceViewModelFactory {
 
   private static mapChangeTypeColor(type: ChangeType): string {
     const map: Record<ChangeType, string> = {
-      ENROLL: 'green',
-      WITHDRAW: 'red',
-      ADJUST_LEVEL: 'blue'
+      ENROLL: 'success',
+      WITHDRAW: 'error',
+      ADJUST_LEVEL: 'warning'
     };
     return map[type] || 'default';
   }

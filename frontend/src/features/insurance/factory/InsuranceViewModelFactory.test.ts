@@ -31,8 +31,7 @@ describe('InsuranceViewModelFactory', () => {
 
       const viewModel = InsuranceViewModelFactory.createEnrollmentViewModel(dto);
 
-      // TODO: 測試修正 - ViewModel 介面定義的欄位名稱是 'id' 而非 'enrollmentId'
-      expect(viewModel.enrollmentId).toBe('enroll-001');
+      expect(viewModel.id).toBe('enroll-001');
       expect(viewModel.employeeName).toBe('王小明');
       expect(viewModel.insuranceTypeLabel).toBe('勞保');
       expect(viewModel.insuranceTypeColor).toBe('blue');

@@ -1,17 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useTimesheet } from './useTimesheet';
-import * as TimesheetApi from '../api/TimesheetApi';
+import { TimesheetApi } from '../api/TimesheetApi';
 import type { WeeklyTimesheetDto } from '../api/TimesheetTypes';
 
 // Mock TimesheetApi
 vi.mock('../api/TimesheetApi', () => ({
-  getWeeklyTimesheet: vi.fn(),
-  submitTimesheet: vi.fn(),
+  TimesheetApi: {
+    getWeeklyTimesheet: vi.fn(),
+    submitTimesheet: vi.fn(),
+  },
 }));
 
 describe('useTimesheet', () => {
   const mockWeeklyData: WeeklyTimesheetDto = {
+    id: 'ts-1',
+    employee_id: 'emp-1',
+    employee_name: '王小明',
     week_start_date: '2024-12-02',
     week_end_date: '2024-12-08',
     entries: [

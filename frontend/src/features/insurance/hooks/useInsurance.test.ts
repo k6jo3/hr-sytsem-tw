@@ -128,8 +128,8 @@ describe('useInsuranceEnrollments', () => {
 
     await waitFor(() => {
       expect(result.current.enrollments).toHaveLength(1);
-      expect(result.current.enrollments[0].insuranceTypeLabel).toBe('勞工保險');
-      expect(result.current.enrollments[0].statusLabel).toBe('投保中');
+      expect(result.current.enrollments[0].insuranceTypeLabel).toBe('勞保');
+      expect(result.current.enrollments[0].statusLabel).toBe('已加保');
       expect(result.current.total).toBe(1);
     });
   });

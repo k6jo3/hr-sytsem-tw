@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PayrollApi } from '../api/PayrollApi';
 import { usePayslips } from './usePayslips';
@@ -78,7 +78,7 @@ describe('usePayslips', () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('初始狀態', () => {
@@ -235,13 +235,15 @@ describe('usePayslips', () => {
         download: '',
         click: vi.fn(),
       };
-      vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
 
       const { result } = renderHook(() => usePayslips());
 
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       });
+
+      // 在 renderHook 之後才設 spy，避免攔截 React 內部 createElement
+      const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
 
       await result.current.downloadPdf('ps-1');
 
@@ -250,6 +252,8 @@ describe('usePayslips', () => {
       expect(mockLink.download).toBe('payslip_ps-1.pdf');
       expect(mockLink.click).toHaveBeenCalled();
       expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+
+      createElementSpy.mockRestore();
     });
 
     it('應該正確處理下載錯誤', async () => {
@@ -268,7 +272,9 @@ describe('usePayslips', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      await result.current.downloadPdf('ps-1');
+      await act(async () => {
+        await result.current.downloadPdf('ps-1');
+      });
 
       expect(result.current.error).toBe(errorMessage);
     });
