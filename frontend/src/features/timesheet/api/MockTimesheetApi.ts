@@ -116,17 +116,17 @@ export class MockTimesheetApi {
       // Create a new empty timesheet
       timesheet = {
         id: uuidv4(),
-        employee_id: params.employee_id || 'emp001',
+        employee_id: params.employee_id ?? 'emp001',
         employee_name: 'Mock Employee',
-        week_start_date: params.week_start_date || new Date().toISOString().split('T')[0],
-        week_end_date: params.week_start_date || new Date().toISOString().split('T')[0],
+        week_start_date: params.week_start_date ?? new Date().toISOString().split('T')[0]!,
+        week_end_date: params.week_start_date ?? new Date().toISOString().split('T')[0]!,
         entries: [],
         total_hours: 0,
         status: 'DRAFT'
       };
     }
     
-    return { timesheet };
+    return { timesheet: timesheet! };
   }
 
   static async saveTimesheetEntry(request: SaveTimesheetEntryRequest): Promise<TimesheetEntryDto> {
@@ -227,7 +227,7 @@ export class MockTimesheetApi {
     }
   }
 
-  static async getTimesheetReport(params: { start_date: string; end_date: string }): Promise<TimesheetReportSummaryDto> {
+  static async getTimesheetReport(_params: { start_date: string; end_date: string }): Promise<TimesheetReportSummaryDto> {
     await delay(600);
     
     return {

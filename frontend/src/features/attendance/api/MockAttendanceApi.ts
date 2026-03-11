@@ -138,7 +138,7 @@ export class MockAttendanceApi {
     };
   }
 
-  static async getTodayAttendance(params?: GetTodayAttendanceRequest): Promise<GetTodayAttendanceResponse> {
+  static async getTodayAttendance(_params?: GetTodayAttendanceRequest): Promise<GetTodayAttendanceResponse> {
     await delay(400);
     return {
       records: this.attendanceRecords.slice(0, 2),

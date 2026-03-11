@@ -13,12 +13,12 @@ import {
   Space,
 } from 'antd';
 import type { RoleDto, CreateUserRequest, UpdateUserRequest } from '../api/AuthTypes';
-import type { UserViewModel } from '../hooks/useUsers';
+import type { UserListViewModel } from '../model/UserProfile';
 
 export interface UserFormModalProps {
   open: boolean;
   loading: boolean;
-  user: UserViewModel | null;
+  user: UserListViewModel | null;
   roles: RoleDto[];
   onSubmit: (values: CreateUserRequest | UpdateUserRequest) => void;
   onCancel: () => void;

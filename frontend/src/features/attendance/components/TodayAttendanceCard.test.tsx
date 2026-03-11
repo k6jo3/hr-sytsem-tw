@@ -112,7 +112,7 @@ describe('TodayAttendanceCard', () => {
         ...mockSummary,
         records: [
           {
-            ...mockSummary.records[0],
+            ...mockSummary.records[0]!,
             statusLabel: '遲到',
             statusColor: 'warning',
             isNormal: false,

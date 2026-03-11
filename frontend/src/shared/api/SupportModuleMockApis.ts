@@ -220,7 +220,7 @@ export class MockWorkflowApi {
     return { message: '駁回成功' };
   }
 
-  static async createWorkflow(data: any): Promise<any> {
+  static async createWorkflow(_data: any): Promise<any> {
     await this.delay(500);
     return { message: '流程建立成功', workflow_id: `wf-${Date.now()}` };
   }
@@ -347,7 +347,7 @@ export class MockDocumentApi {
     };
   }
 
-  static async downloadDocument(documentId: string): Promise<Blob> {
+  static async downloadDocument(_documentId: string): Promise<Blob> {
     await this.delay(500);
     // 返回一個模擬的 Blob
     return new Blob(['Mock document content'], { type: 'application/pdf' });
@@ -390,7 +390,7 @@ export class MockReportingApi {
     return { dashboard: this.mockDashboardData };
   }
 
-  static async getReport(reportType: string, params: any): Promise<any> {
+  static async getReport(reportType: string, _params: any): Promise<any> {
     await this.delay(800);
     return {
       report_type: reportType,
@@ -400,7 +400,7 @@ export class MockReportingApi {
     };
   }
 
-  static async exportReport(reportType: string, format: string): Promise<Blob> {
+  static async exportReport(_reportType: string, format: string): Promise<Blob> {
     await this.delay(1000);
     return new Blob(['Mock report data'], {
       type: format === 'excel' ? 'application/vnd.ms-excel' : 'application/pdf',

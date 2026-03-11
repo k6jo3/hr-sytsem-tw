@@ -406,7 +406,7 @@ export class RecruitmentViewModelFactory {
     }));
 
     const topSource =
-      sourceDistribution.length > 0 ? sourceDistribution[0].sourceLabel : '-';
+      sourceDistribution.length > 0 ? sourceDistribution[0]!.sourceLabel : '-';
 
     const conversionFunnel: ConversionFunnelViewModel = {
       applicationToInterviewRate: dto.conversion_funnel.application_to_interview_rate,

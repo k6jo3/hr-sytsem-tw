@@ -34,7 +34,7 @@ const createWrapper = () => {
     },
   });
   return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(Provider, { store }, children);
+    React.createElement(Provider, { store } as any, children);
 };
 
 describe('useAttendance', () => {

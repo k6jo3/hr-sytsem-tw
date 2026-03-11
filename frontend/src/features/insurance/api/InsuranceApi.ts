@@ -140,7 +140,7 @@ export class InsuranceApi {
           total_employer: 0,
         },
         history,
-        has_active_enrollment: enrollments.some(e => e.status === 'ACTIVE'),
+        has_active_enrollment: enrollments.some((e: any) => e.status === 'ACTIVE'),
       },
     };
   }

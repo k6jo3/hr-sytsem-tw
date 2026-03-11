@@ -214,7 +214,7 @@ export class MockInsuranceApi {
    */
   static async withdrawEnrollment(
     id: string,
-    request: any
+    _request: any
   ): Promise<WithdrawEnrollmentResponse> {
     await this.delay(500);
 

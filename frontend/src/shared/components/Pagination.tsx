@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pagination as AntPagination, Select } from 'antd';
+import { Pagination as AntPagination } from 'antd';
 import type { PageResponse, PageRequest } from '../types';
 
 /**

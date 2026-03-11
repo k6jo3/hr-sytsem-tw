@@ -30,8 +30,8 @@ export const useLogin = () => {
         localStorage.setItem('refreshToken', response.refresh_token);
       }
 
-      // 使用 Factory 轉換 DTO 為 ViewModel
-      const userViewModel = UserViewModelFactory.createProfileFromDTO(response.user);
+      // 使用 Factory 轉換 DTO 為 ViewModel（需符合 AuthState 中 UserViewModel 型別）
+      const userViewModel = UserViewModelFactory.createUserViewModelFromDTO(response.user);
 
       // 更新 Redux state（會自動儲存 access token 到 localStorage）
       dispatch(loginSuccess({

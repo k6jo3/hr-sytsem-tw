@@ -38,7 +38,7 @@ export const HR08TeamPerformancePage: React.FC = () => {
     }
   }, [selectedCycleId, statusFilter, fetchReviews]);
 
-  const handleReview = (record: TeamReviewItemViewModel) => {
+  const handleReview = (_record: TeamReviewItemViewModel) => {
     message.info('開啟主管評核視窗 (待實作)');
     // Open ManagerReviewModal here
   };

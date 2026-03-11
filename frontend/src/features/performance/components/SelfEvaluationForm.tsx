@@ -30,7 +30,7 @@ export const SelfEvaluationForm: React.FC<SelfEvaluationFormProps> = ({
   onSubmit,
   canEdit,
   canSubmit,
-  loading = false,
+  loading: _loading = false,
 }) => {
   const [items, setItems] = useState<EditableItem[]>(evaluationItems);
   const [comments, setComments] = useState(initialComments || '');

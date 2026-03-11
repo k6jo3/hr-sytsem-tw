@@ -125,7 +125,7 @@ export class MockPerformanceApi {
 
   // --- API Methods ---
 
-  static async getCycles(params: GetCyclesRequest): Promise<GetCyclesResponse> {
+  static async getCycles(_params: GetCyclesRequest): Promise<GetCyclesResponse> {
     await delay(500);
     return {
       cycles: this.cycles,
@@ -175,8 +175,8 @@ export class MockPerformanceApi {
             current_cycle: this.cycles[0],
             self_review: {
                 review_id: 'rev-self-01',
-                cycle_id: this.cycles[0].cycle_id,
-                cycle_name: this.cycles[0].cycle_name,
+                cycle_id: this.cycles[0]!.cycle_id,
+                cycle_name: this.cycles[0]!.cycle_name,
                 employee_id: 'current-user',
                 employee_name: '目前使用者',
                 reviewer_id: 'current-user',
@@ -220,17 +220,17 @@ export class MockPerformanceApi {
     };
   }
 
-  static async updateTemplate(cycleId: string, request: UpdateTemplateRequest): Promise<void> {
+  static async updateTemplate(_cycleId: string, request: UpdateTemplateRequest): Promise<void> {
     await delay(800);
     this.template = { ...this.template, ...request };
   }
 
-  static async publishTemplate(cycleId: string): Promise<void> {
+  static async publishTemplate(_cycleId: string): Promise<void> {
     await delay(500);
     // In a real app this would lock the template
   }
 
-  static async getDistribution(params: GetDistributionRequest): Promise<GetDistributionResponse> {
+  static async getDistribution(_params: GetDistributionRequest): Promise<GetDistributionResponse> {
     await delay(1000);
     return {
       distribution: [

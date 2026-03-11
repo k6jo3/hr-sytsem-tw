@@ -16,10 +16,6 @@ import {
   Button,
   Row,
   Col,
-  List,
-  Progress,
-  Tag,
-  Tooltip,
 } from 'antd';
 import {
   DashboardOutlined,
@@ -32,7 +28,7 @@ import { useDashboard } from '@features/report/hooks';
 import { DashboardKPICards, ReportChart, ReportCatalog, ReportDataTable } from '@features/report/components';
 import type { ReportPeriod } from '@features/report/api/ReportTypes';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { TabPane } = Tabs;
 const { Option } = Select;
 

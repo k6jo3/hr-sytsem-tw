@@ -153,8 +153,8 @@ export const useNotificationPreference = () => {
  * 通用 Notification Hook (保持向後兼容)
  */
 export const useNotification = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, _setLoading] = useState(false);
+  const [error, _setError] = useState<string | null>(null);
 
   return {
     loading,

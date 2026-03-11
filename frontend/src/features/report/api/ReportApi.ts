@@ -63,13 +63,13 @@ export const ReportApi = {
    * 取得儀表板資料
    * 後端無統一 KPI endpoint，從多個報表 API 組合資料
    */
-  getDashboard: async (params?: GetDashboardRequest): Promise<GetDashboardResponse> => {
+  getDashboard: async (_params?: GetDashboardRequest): Promise<GetDashboardResponse> => {
     if (MockConfig.isEnabled('REPORT')) {
       const res = await MockReportingApi.getDashboardData();
       return res as any;
     }
     try {
-      const [rosterRaw, attendanceRaw, payrollRaw] = await Promise.all([
+      const [rosterRaw, attendanceRaw, _payrollRaw] = await Promise.all([
         apiClient.get<any>(`${BASE_URL}/hr/employee-roster`).catch(() => ({ content: [] })),
         apiClient.get<any>(`${BASE_URL}/hr/attendance-statistics`).catch(() => ({ content: [] })),
         apiClient.get<any>(`${BASE_URL}/finance/payroll-summary`).catch(() => ({ content: [] })),
@@ -175,7 +175,7 @@ export const ReportApi = {
    * 建立排程報表
    */
   createScheduledReport: async (
-    request: CreateScheduledReportRequest
+    _request: CreateScheduledReportRequest
   ): Promise<{ message: string }> => {
     if (MockConfig.isEnabled('REPORT')) return { message: '排程已建立 (Mock)' };
     return { message: '後端尚未實作排程報表 API' };
@@ -184,7 +184,7 @@ export const ReportApi = {
   /**
    * 刪除排程報表
    */
-  deleteScheduledReport: async (scheduleId: string): Promise<{ message: string }> => {
+  deleteScheduledReport: async (_scheduleId: string): Promise<{ message: string }> => {
     if (MockConfig.isEnabled('REPORT')) return { message: '排程已刪除 (Mock)' };
     return { message: '後端尚未實作排程報表 API' };
   },
@@ -193,8 +193,8 @@ export const ReportApi = {
    * 切換排程報表狀態
    */
   toggleScheduledReport: async (
-    scheduleId: string,
-    isActive: boolean
+    _scheduleId: string,
+    _isActive: boolean
   ): Promise<{ message: string }> => {
     if (MockConfig.isEnabled('REPORT')) return { message: '狀態已切換 (Mock)' };
     return { message: '後端尚未實作排程報表 API' };

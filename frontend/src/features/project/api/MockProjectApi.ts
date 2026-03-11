@@ -161,8 +161,6 @@ export class MockProjectApi {
     return {
       customers: filtered.slice(start, end),
       total: filtered.length,
-      page,
-      size
     };
   }
 

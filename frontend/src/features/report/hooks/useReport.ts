@@ -63,12 +63,7 @@ export const useReportDefinitions = (params?: {
   return useQuery({
     queryKey: REPORT_KEYS.definitions(params),
     queryFn: async () => {
-      const response = await ReportApi.getReportDefinitions({
-        report_type: params?.reportType,
-        keyword: params?.keyword,
-        page: params?.page,
-        page_size: params?.pageSize,
-      });
+      const response = await ReportApi.getReportDefinitions();
       return {
         definitions: ReportViewModelFactory.createDefinitionListFromDTOs(response.definitions),
         pagination: response.pagination,
@@ -91,12 +86,7 @@ export const useReports = (params?: {
   return useQuery({
     queryKey: REPORT_KEYS.reports(params),
     queryFn: async () => {
-      const response = await ReportApi.getReports({
-        report_type: params?.reportType,
-        status: params?.status,
-        page: params?.page,
-        page_size: params?.pageSize,
-      });
+      const response = await ReportApi.getReports();
       return {
         reports: ReportViewModelFactory.createReportListFromDTOs(response.reports),
         pagination: response.pagination,

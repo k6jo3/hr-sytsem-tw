@@ -128,7 +128,7 @@ export class MockPayrollApi {
     return payslip;
   }
 
-  static async downloadPayslip(id: string): Promise<Blob> {
+  static async downloadPayslip(_id: string): Promise<Blob> {
     await delay(500);
     // Return a mock PDF blob
     return new Blob(['Mock PDF content'], { type: 'application/pdf' });

@@ -151,8 +151,8 @@ describe('AttendanceViewModelFactory', () => {
       const viewModels = AttendanceViewModelFactory.createListFromDTOs(dtoList);
 
       expect(viewModels).toHaveLength(2);
-      expect(viewModels[0].checkTypeLabel).toBe('上班打卡');
-      expect(viewModels[1].checkTypeLabel).toBe('下班打卡');
+      expect(viewModels[0]!.checkTypeLabel).toBe('上班打卡');
+      expect(viewModels[1]!.checkTypeLabel).toBe('下班打卡');
     });
 
     it('應該正確處理空列表', () => {

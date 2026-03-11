@@ -26,6 +26,21 @@ vi.mock('../factory/UserViewModelFactory', () => ({
       isAdmin: (dto.role_list || []).includes('ADMIN'),
       employeeId: dto.id,
     })),
+    createUserViewModelFromDTO: vi.fn((dto: any) => ({
+      userId: dto.id,
+      username: dto.username,
+      displayName: `${dto.first_name} ${dto.last_name}`,
+      fullName: `${dto.first_name} ${dto.last_name}`,
+      email: dto.email,
+      roles: dto.role_list || [],
+      roleIds: dto.role_ids || [],
+      isAdmin: (dto.role_list || []).includes('ADMIN'),
+      employeeId: dto.id,
+      status: dto.status || 'ACTIVE',
+      mustChangePassword: dto.must_change_password || false,
+      createdAt: dto.created_at || '',
+      updatedAt: dto.updated_at || '',
+    })),
   },
 }));
 

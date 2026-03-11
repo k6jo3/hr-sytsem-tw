@@ -190,7 +190,7 @@ export class NotificationViewModelFactory {
   // ========== Notification Summary ==========
 
   static createSummary(notifications: NotificationDto[]): NotificationSummaryViewModel {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0] ?? '';
 
     return {
       totalCount: notifications.length,
