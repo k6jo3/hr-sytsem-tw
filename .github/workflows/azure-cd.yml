@@ -3,10 +3,11 @@
 name: Azure CI/CD
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:  # 手動觸發（Azure 環境就緒後再啟用自動部署）
+  # push:
+  #   branches: [main]
+  # pull_request:
+  #   branches: [main]
 
 env:
   ACR_LOGIN_SERVER: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}
