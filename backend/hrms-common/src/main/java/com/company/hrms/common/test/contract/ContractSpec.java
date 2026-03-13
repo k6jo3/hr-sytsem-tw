@@ -2,9 +2,13 @@ package com.company.hrms.common.test.contract;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * 合約規格物件 - 從 JSON 解析而來
+ * 允許忽略文件層級的額外欄位（如 errorScenarios、frontendAdapterMapping 等）
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ContractSpec {
     private String scenarioId;
     private String apiEndpoint;

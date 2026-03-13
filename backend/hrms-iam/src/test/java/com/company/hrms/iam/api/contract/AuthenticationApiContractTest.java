@@ -122,6 +122,32 @@ public class AuthenticationApiContractTest extends BaseContractTest {
     }
 
     @Test
+    void login_WrongPassword_AUTH_CMD_001_ERR() throws Exception {
+        // 登入失敗 — 密碼錯誤應返回 401（合約 errorScenarios: LOGIN_FAILED）
+        Map<String, Object> request = new HashMap<>();
+        request.put("username", IamTestData.TEST_USER_USERNAME);
+        request.put("password", "WrongPassword@999");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void login_UserNotFound_AUTH_CMD_001_ERR2() throws Exception {
+        // 登入失敗 — 使用者不存在應返回 401（合約 errorScenarios: LOGIN_FAILED）
+        Map<String, Object> request = new HashMap<>();
+        request.put("username", "nonexistent_user");
+        request.put("password", "SomePassword@123");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void logout_AUTH_CMD_002() throws Exception {
         // 載入合約
         ContractSpec contract = loadContractFromMarkdown(this.contractSpec, "AUTH_CMD_002");

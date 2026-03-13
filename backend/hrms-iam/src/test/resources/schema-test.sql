@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255),
     display_name VARCHAR(200),
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
     status VARCHAR(20) DEFAULT 'ACTIVE',
     tenant_id VARCHAR(50),
     employee_id UUID,

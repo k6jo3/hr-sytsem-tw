@@ -609,6 +609,49 @@ public class OrganizationContractTest extends BaseContractTest {
         verifyCommandContract(beforeSnapshot, afterSnapshot, capturedEvents, contract);
     }
 
+    @Test
+    @DisplayName("ORG_CMD_O001_ERR: 建立組織 — 組織代碼重複應返回 409")
+    void createOrganization_DuplicateCode_ORG_CMD_O001_ERR() throws Exception {
+        // 使用已存在的組織代碼 COMPANY（來自 organization_base_data.sql）
+        Map<String, Object> request = new HashMap<>();
+        request.put("code", "COMPANY");
+        request.put("name", "重複代碼公司");
+        request.put("type", "PARENT");
+
+        mockMvc.perform(post("/api/v1/organizations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    // ==================== Organization Query 測試 ====================
+
+    @Test
+    @DisplayName("ORG_QRY_O001: 查詢組織列表")
+    void getOrganizations_ORG_QRY_O001() throws Exception {
+        ContractSpec contract = loadContractFromMarkdown(contractSpec, "ORG_QRY_O001");
+
+        var result = mockMvc.perform(get("/api/v1/organizations"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        verifyQueryContract(null, responseJson, contract);
+    }
+
+    @Test
+    @DisplayName("ORG_QRY_O002: 查詢組織樹")
+    void getOrganizationTree_ORG_QRY_O002() throws Exception {
+        ContractSpec contract = loadContractFromMarkdown(contractSpec, "ORG_QRY_O002");
+
+        var result = mockMvc.perform(get("/api/v1/organizations/" + OrganizationTestData.ORG_HEAD_OFFICE_ID + "/tree"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseJson = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        verifyQueryContract(null, responseJson, contract);
+    }
+
     // ==================== 事件轉換工具方法 ====================
 
     /**

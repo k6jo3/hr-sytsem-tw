@@ -1331,7 +1331,7 @@ HR 人員查詢所有啟用中的部門。
     "dataPath": "items",
     "minRecords": 0,
     "requiredFields": [
-      {"name": "id", "type": "uuid", "notNull": true},
+      {"name": "organizationId", "type": "uuid", "notNull": true},
       {"name": "code", "type": "string", "notNull": true},
       {"name": "name", "type": "string", "notNull": true},
       {"name": "type", "type": "string", "notNull": true},
@@ -1340,7 +1340,7 @@ HR 人員查詢所有啟用中的部門。
     ]
   },
   "frontendAdapterMapping": {
-    "id → organizationId": "後端欄位 → 前端 ViewModel 欄位",
+    "organizationId → organizationId": "後端欄位 → 前端 ViewModel 欄位（同名）",
     "code → organizationCode": "後端欄位 → 前端 ViewModel 欄位",
     "name → organizationName": "後端欄位 → 前端 ViewModel 欄位",
     "type → organizationType": "後端欄位 → 前端 ViewModel 欄位",

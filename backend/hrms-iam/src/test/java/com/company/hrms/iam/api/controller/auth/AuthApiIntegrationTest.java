@@ -151,9 +151,9 @@ class AuthApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setUsername("admin");
 			request.setPassword("WrongPassword");
 
-			// When & Then
+			// When & Then — LOGIN_FAILED 經 GlobalExceptionHandler 返回 401
 			performPost("/api/v1/auth/login", request)
-					.andExpect(status().isBadRequest());
+					.andExpect(status().isUnauthorized());
 		}
 
 		@Test
@@ -164,20 +164,20 @@ class AuthApiIntegrationTest extends BaseApiIntegrationTest {
 			request.setUsername("nonexistent");
 			request.setPassword("Password@123");
 
-			// When & Then
+			// When & Then — LOGIN_FAILED 經 GlobalExceptionHandler 返回 401
 			performPost("/api/v1/auth/login", request)
-					.andExpect(status().isBadRequest());
+					.andExpect(status().isUnauthorized());
 		}
 
 		@Test
-		@DisplayName("IAM_AUTH_API_004: 登入失敗 - 帳號停用應返回 423")
-		void IAM_AUTH_API_004_login_DeactivatedUser_ShouldReturn423() throws Exception {
+		@DisplayName("IAM_AUTH_API_004: 登入失敗 - 帳號停用應返回 400")
+		void IAM_AUTH_API_004_login_DeactivatedUser_ShouldReturn400() throws Exception {
 			// Given
 			LoginRequest request = new LoginRequest();
 			request.setUsername("deactivated_user");
 			request.setPassword("User@123");
 
-			// When & Then
+			// When & Then — USER_INACTIVE DomainException 返回 400（非 ACCOUNT_LOCKED）
 			performPost("/api/v1/auth/login", request)
 					.andExpect(status().isBadRequest());
 		}
@@ -214,7 +214,7 @@ class AuthApiIntegrationTest extends BaseApiIntegrationTest {
 			RefreshTokenRequest request = new RefreshTokenRequest();
 			request.setRefreshToken("invalid-token");
 
-			// When & Then
+			// When & Then — 無效 Token 返回 400
 			performPost("/api/v1/auth/refresh-token", request)
 					.andExpect(status().isBadRequest());
 		}

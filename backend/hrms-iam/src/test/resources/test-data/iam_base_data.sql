@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) NOT NULL,
     password_hash VARCHAR(255),
     display_name VARCHAR(100) NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
     employee_id VARCHAR(36),
     tenant_id VARCHAR(36),
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
