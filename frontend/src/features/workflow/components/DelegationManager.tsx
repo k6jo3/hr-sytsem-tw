@@ -51,7 +51,7 @@ export const DelegationManager: React.FC = () => {
         message.error(result.message);
       }
     } catch {
-      // 表單驗證失敗
+      // 表單驗證失敗，由 Ant Design 表單元件自行顯示錯誤
     }
   };
 

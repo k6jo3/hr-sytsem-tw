@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import { MockTimesheetApi } from './MockTimesheetApi';
 import type {
     BatchApprovalRequest,
@@ -25,8 +26,9 @@ import type {
  * 後端用 PENDING，前端用 SUBMITTED
  */
 function adaptStatus(backendStatus: string): TimesheetStatus {
-  if (backendStatus === 'PENDING') return 'SUBMITTED';
-  return backendStatus as TimesheetStatus;
+  // 後端 PENDING → 前端 SUBMITTED 的特殊映射
+  const mapped = backendStatus === 'PENDING' ? 'SUBMITTED' : backendStatus;
+  return guardEnum('timesheet.status', mapped, ['DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'LOCKED'] as const, 'DRAFT');
 }
 
 /**

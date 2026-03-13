@@ -110,6 +110,79 @@ mvn test
 
 ---
 
+## 前後端串接問題診斷（測試通過但手動測試失敗）
+
+### 6. MockConfig 導致假陽性
+
+**症狀**: 前端測試通過、CI 綠燈，但手動操作時功能異常或資料為空
+
+**診斷步驟**:
+1. 檢查 `frontend/src/config/MockConfig.ts`
+2. 確認目標模組是否設為 `false`（使用真實 API）
+3. 檢查 MockConfig 預設值是否為 `true`（會導致未定義模組自動用 Mock）
+
+**修復方法**:
+- 將目標模組明確設為 `false`
+- 所有已完成串接的模組都應設為 `false`
+
+### 7. 前端 Adapter 靜默 Fallback
+
+**症狀**: 頁面顯示資料但值不正確（如 status 永遠顯示 ACTIVE）
+
+**診斷步驟**:
+1. 搜尋 Adapter 函式中的 `|| '` 或 `?? '` 或 `|| "` 模式
+2. 確認是否存在 `dto.status || 'ACTIVE'` 等靜默 fallback
+3. 檢查後端實際回傳的 enum 值是否被前端處理
+
+**修復方法**:
+- 移除靜默 fallback，改為明確檢查 + `console.warn`
+- 補齊 Adapter 測試，覆蓋未知 enum 值
+
+### 8. 前後端欄位名不一致
+
+**症狀**: API 回傳有資料但前端顯示為空或 undefined
+
+**診斷步驟**:
+1. 瀏覽器 Network tab 檢查 API 回應的欄位名
+2. 對照前端 DTO type 定義的欄位名
+3. 對照合約 `requiredFields` 的欄位名
+
+**修復方法**:
+- 修正合約 `requiredFields` 使其與後端 Response DTO 一致
+- 修正前端 Adapter 映射或 DTO type 定義
+- 如需欄位重命名，在合約 `frontendAdapterMapping` 中明確記錄
+
+### 9. H2 與 PostgreSQL 差異
+
+**症狀**: 本地 H2 測試通過，部署到 PostgreSQL 後 SQL 報錯
+
+**常見差異**:
+| H2 行為 | PostgreSQL 行為 | 修復方式 |
+|:---|:---|:---|
+| 自動型別轉換 | 嚴格型別檢查 | 加上明確 `CAST()` |
+| 無 JSON 函式 | 支援 `jsonb_*` 函式 | 標記 TODO |
+| `::` 不支援 | 支援 `::text` 型別轉換 | 用 `CAST()` 替代 |
+| 大小寫不敏感 | 預設大小寫敏感 | 注意表名/欄位名 |
+
+**修復方法**:
+- 涉及 PostgreSQL 專有語法時，在測試中標記 `// TODO: H2 不支援，需 Testcontainers 驗證`
+- 長期方案：導入 Testcontainers 替代 H2
+
+### 10. 錯誤處理覆蓋不足
+
+**症狀**: 特定錯誤情境（403/409/500）前端無法正確顯示錯誤訊息
+
+**診斷步驟**:
+1. 檢查 `GlobalExceptionHandler` 的 ErrorCode → HTTP Status 映射
+2. 確認每個映射是否有整合測試覆蓋
+3. 檢查前端 API 層是否處理了所有 HTTP 狀態碼
+
+**修復方法**:
+- 後端：補齊 `GlobalExceptionHandler` 測試
+- 前端：在 API 層補齊 `.catch()` 處理所有狀態碼
+
+---
+
 ## 關鍵經驗
 
 ### 合約測試的變數替換機制

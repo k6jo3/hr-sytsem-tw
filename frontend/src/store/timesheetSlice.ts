@@ -7,7 +7,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 export interface TimesheetState {
   loading: boolean;
   error: string | null;
-  // TODO: Add state properties
+
 }
 
 const initialState: TimesheetState = {

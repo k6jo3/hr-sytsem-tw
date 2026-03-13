@@ -100,7 +100,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         onSubmit(createData);
       }
     } catch {
-      // Form validation failed
+      // 表單驗證失敗，由 Ant Design 表單元件自行顯示錯誤
     }
   };
 

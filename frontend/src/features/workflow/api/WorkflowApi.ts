@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import { MockWorkflowApi } from '../../../shared/api/SupportModuleMockApis';
 import type {
     ApproveTaskRequest,
@@ -84,7 +85,7 @@ function adaptInstance(raw: any): WorkflowInstanceDto {
     applicant_name: raw.applicantName ?? raw.applicant_name ?? '',
     current_node: raw.currentNodeId ?? raw.current_node ?? '',
     current_node_name: raw.currentNodeName ?? raw.current_node_name ?? '',
-    status: raw.status ?? 'RUNNING',
+    status: guardEnum('workflowInstance.status', raw.status, ['RUNNING', 'COMPLETED', 'REJECTED', 'CANCELLED'] as const, 'RUNNING'),
     started_at: raw.startedAt ?? raw.started_at ?? '',
     completed_at: raw.completedAt ?? raw.completed_at,
   };
@@ -107,7 +108,7 @@ function adaptTask(raw: any): ApprovalTaskDto {
     assignee_name: raw.assigneeName ?? raw.assignee_name ?? '',
     delegated_to: raw.delegatedToId ?? raw.delegated_to ?? '',
     delegated_to_name: raw.delegatedToName ?? raw.delegated_to_name ?? '',
-    status: raw.status ?? 'PENDING',
+    status: guardEnum('approvalTask.status', raw.status, ['PENDING', 'APPROVED', 'REJECTED'] as const, 'PENDING'),
     comments: raw.comments ?? '',
     due_date: raw.dueDate ?? raw.due_date ?? '',
     is_overdue: raw.isOverdue ?? raw.is_overdue ?? false,

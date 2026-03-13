@@ -1,5 +1,6 @@
 // 匯出格式化工具
 export * from './formatters';
+export * from './adapterGuard';
 
 /**
  * 數字格式化 (加入千分位)

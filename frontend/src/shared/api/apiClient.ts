@@ -57,7 +57,11 @@ class ApiClient {
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error) => {
-        if (error.response?.status === 401) {
+        const status = error.response?.status;
+        const serverMessage = error.response?.data?.message;
+        const errorCode = error.response?.data?.errorCode;
+
+        if (status === 401) {
           // 登入 API 本身的 401 不跳轉，讓呼叫端自行處理
           const isLoginApi = error.config?.url?.includes('/auth/login');
           if (!isLoginApi) {
@@ -65,14 +69,29 @@ class ApiClient {
             window.location.href = '/login';
           }
         }
-        // 將後端錯誤訊息包裝為 Error，方便前端顯示
-        const serverMessage = error.response?.data?.message;
-        if (serverMessage) {
-          return Promise.reject(new Error(serverMessage));
-        }
-        return Promise.reject(error);
+
+        // 建立結構化錯誤，包含 HTTP 狀態碼和後端錯誤碼
+        const apiError = new Error(serverMessage || this.getDefaultMessage(status));
+        (apiError as any).status = status;
+        (apiError as any).errorCode = errorCode;
+        return Promise.reject(apiError);
       }
     );
+  }
+
+  /**
+   * 根據 HTTP 狀態碼回傳預設錯誤訊息
+   */
+  private getDefaultMessage(status: number | undefined): string {
+    switch (status) {
+      case 400: return '請求資料驗證失敗';
+      case 401: return '未授權，請重新登入';
+      case 403: return '權限不足，無法執行此操作';
+      case 404: return '找不到請求的資源';
+      case 409: return '資源衝突，資料可能已存在';
+      case 500: return '伺服器內部錯誤，請稍後再試';
+      default: return '網路錯誤，請檢查連線狀態';
+    }
   }
 
   /**

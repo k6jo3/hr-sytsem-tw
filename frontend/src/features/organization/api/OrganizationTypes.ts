@@ -16,7 +16,7 @@ export interface EmployeeDto {
   department_id: string;
   department_name: string;
   position: string;
-  status: 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE' | 'TERMINATED';
+  status: 'ACTIVE' | 'INACTIVE' | 'ON_LEAVE' | 'TERMINATED' | 'PROBATION';
   hire_date: string;
   termination_date?: string;
   created_at: string;

@@ -11,7 +11,7 @@ export type CycleType = 'PROBATION' | 'QUARTERLY' | 'ANNUAL';
 /**
  * 考核週期狀態
  */
-export type CycleStatus = 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED';
+export type CycleStatus = 'DRAFT' | 'ACTIVE' | 'IN_PROGRESS' | 'COMPLETED' | 'CLOSED';
 
 /**
  * 考核類型

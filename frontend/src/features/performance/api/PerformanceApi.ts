@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import { MockPerformanceApi } from './MockPerformanceApi';
 import type {
     CreateCycleRequest,
@@ -70,7 +71,7 @@ function adaptCycleDto(raw: any): PerformanceCycleDto {
     end_date: raw.endDate ?? raw.end_date ?? '',
     self_eval_deadline: raw.selfEvalDeadline ?? raw.self_eval_deadline,
     manager_eval_deadline: raw.managerEvalDeadline ?? raw.manager_eval_deadline,
-    status: raw.status ?? 'DRAFT',
+    status: guardEnum('cycle.status', raw.status, ['DRAFT', 'ACTIVE', 'IN_PROGRESS', 'COMPLETED', 'CLOSED'] as const, 'DRAFT'),
     created_at: raw.createdAt ?? raw.created_at ?? '',
   };
 }

@@ -18,6 +18,21 @@ export default defineConfig({
       '@store': path.resolve(__dirname, './src/store'),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1300,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // 第三方核心庫
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-antd': ['antd', '@ant-design/icons'],
+          'vendor-redux': ['@reduxjs/toolkit', 'react-redux'],
+          'vendor-echarts': ['echarts'],
+          'vendor-utils': ['axios', 'dayjs'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     // 統一透過 API Gateway 路由（port 8080）

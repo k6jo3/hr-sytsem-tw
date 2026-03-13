@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import type {
     CreateShiftRequest,
     ShiftDto,
@@ -19,7 +20,7 @@ const SHIFT_TYPE_MAP: Record<string, ShiftDto['shiftType']> = {
 function adaptShiftDto(raw: any): ShiftDto {
   return {
     ...raw,
-    shiftType: SHIFT_TYPE_MAP[raw.shiftType] ?? raw.shiftType,
+    shiftType: guardEnum('shift.shiftType', SHIFT_TYPE_MAP[raw.shiftType] ?? raw.shiftType, ['STANDARD', 'FLEXIBLE', 'ROTATING'] as const, 'STANDARD'),
   };
 }
 

@@ -51,6 +51,7 @@ export class EmployeeViewModelFactory {
       INACTIVE: '停用',
       ON_LEAVE: '留職停薪',
       TERMINATED: '離職',
+      PROBATION: '試用期',
     };
     return statusMap[status];
   }
@@ -64,6 +65,7 @@ export class EmployeeViewModelFactory {
       INACTIVE: 'default',
       ON_LEAVE: 'warning',
       TERMINATED: 'error',
+      PROBATION: 'processing',
     };
     return colorMap[status];
   }

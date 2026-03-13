@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import type { LoginRequest, LoginResponse, UserDto } from './AuthTypes';
 import { MockAuthApi } from './MockAuthApi';
 
@@ -48,15 +49,15 @@ function adaptUserDto(raw: any): UserDto {
     last_name: raw.lastName ?? raw.last_name,
     employee_id: raw.employeeId ?? raw.employee_id,
     tenant_id: raw.tenantId ?? raw.tenant_id,
-    status: raw.status ?? 'ACTIVE',
+    status: guardEnum('user.status', raw.status, ['ACTIVE', 'INACTIVE', 'PENDING', 'LOCKED'] as const, 'ACTIVE'),
     role_list: adaptRoles(rawRoles),
     role_ids: raw.roleIds ?? raw.role_ids ?? [],
     avatar_url: raw.avatarUrl ?? raw.avatar_url,
     must_change_password: raw.mustChangePassword ?? raw.must_change_password ?? false,
     last_login_at: raw.lastLoginAt ?? raw.last_login_at,
     password_changed_at: raw.passwordChangedAt ?? raw.password_changed_at,
-    created_at: raw.createdAt ?? raw.created_at ?? new Date().toISOString(),
-    updated_at: raw.updatedAt ?? raw.updated_at ?? new Date().toISOString(),
+    created_at: raw.createdAt ?? raw.created_at ?? '',
+    updated_at: raw.updatedAt ?? raw.updated_at ?? '',
   };
 }
 

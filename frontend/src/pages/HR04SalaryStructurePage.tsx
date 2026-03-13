@@ -229,7 +229,7 @@ export const HR04SalaryStructurePage: React.FC = () => {
           <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
             這裡可以設定員工每月的固定加給或扣額，如伙食津貼、職務加給等。
           </Text>
-          {/* TODO: Implement dynamic item list if needed */}
+          {/* 固定薪資項目列表由薪資項目定義管理（HR04PayrollItemPage）維護 */}
         </Form>
       </Modal>
     </div>

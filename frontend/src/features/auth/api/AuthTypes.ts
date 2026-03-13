@@ -8,7 +8,7 @@
 /**
  * 使用者狀態
  */
-export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'LOCKED' | 'DELETED';
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'LOCKED' | 'PENDING' | 'DELETED';
 
 /**
  * SSO 提供者

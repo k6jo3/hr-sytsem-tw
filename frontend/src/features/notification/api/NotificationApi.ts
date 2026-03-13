@@ -5,6 +5,7 @@
 
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import { MockNotificationApi } from '../../../shared/api/SupportModuleMockApis';
 import type {
     AnnouncementDto,
@@ -73,7 +74,7 @@ function adaptNotification(raw: any): NotificationDto {
     notification_type: raw.notificationType ?? raw.notification_type ?? 'REMINDER',
     channels: raw.channels ?? raw.channel ? [raw.channel] : ['IN_APP'],
     priority: raw.priority ?? 'NORMAL',
-    status: raw.status ?? 'SENT',
+    status: guardEnum('notification.status', raw.status, ['PENDING', 'SENT', 'FAILED', 'READ'] as const, 'SENT'),
     sent_at: raw.sentAt ?? raw.sent_at ?? '',
     read_at: raw.readAt ?? raw.read_at ?? '',
     related_business_type: raw.relatedBusinessType ?? raw.related_business_type ?? '',
@@ -106,7 +107,7 @@ function adaptAnnouncement(raw: any): AnnouncementDto {
     target_roles: raw.targetRoles ?? raw.target_roles ?? [],
     published_at: raw.publishedAt ?? raw.published_at ?? '',
     expires_at: raw.expiresAt ?? raw.expires_at ?? '',
-    status: raw.status ?? 'DRAFT',
+    status: guardEnum('announcement.status', raw.status, ['DRAFT', 'PUBLISHED', 'EXPIRED', 'REVOKED'] as const, 'DRAFT'),
     created_by: raw.createdBy ?? raw.created_by ?? '',
     created_at: raw.createdAt ?? raw.created_at ?? '',
   };

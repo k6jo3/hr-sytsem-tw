@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import type {
     AdjustLevelRequest,
     AdjustLevelResponse,
@@ -40,7 +41,7 @@ function adaptEnrollmentDto(raw: any): EnrollmentDto {
     withdraw_date: raw.withdrawDate ?? raw.withdraw_date,
     monthly_salary: raw.monthlySalary ?? raw.monthly_salary ?? 0,
     level_number: raw.levelNumber ?? raw.level_number ?? 0,
-    status: raw.status ?? 'ACTIVE',
+    status: guardEnum('enrollment.status', raw.status, ['ACTIVE', 'WITHDRAWN', 'PENDING'] as const, 'ACTIVE'),
     is_reported: raw.isReported ?? raw.is_reported ?? false,
     reported_at: raw.reportedAt ?? raw.reported_at,
     created_at: raw.createdAt ?? raw.created_at ?? '',

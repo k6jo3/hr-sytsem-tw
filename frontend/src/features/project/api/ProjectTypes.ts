@@ -182,7 +182,7 @@ export interface UpdateCustomerRequest {
 /**
  * 工項狀態
  */
-export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'BLOCKED';
+export type TaskStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'ON_HOLD' | 'BLOCKED';
 
 /**
  * 工項 DTO

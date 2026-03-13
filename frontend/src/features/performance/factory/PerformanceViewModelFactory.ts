@@ -219,8 +219,10 @@ export class PerformanceViewModelFactory {
   private static mapCycleStatusLabel(status: CycleStatus): string {
     const labelMap: Record<CycleStatus, string> = {
       DRAFT: '草稿',
+      ACTIVE: '進行中',
       IN_PROGRESS: '進行中',
       COMPLETED: '已完成',
+      CLOSED: '已結案',
     };
     return labelMap[status];
   }
@@ -228,8 +230,10 @@ export class PerformanceViewModelFactory {
   private static mapCycleStatusColor(status: CycleStatus): string {
     const colorMap: Record<CycleStatus, string> = {
       DRAFT: 'default',
+      ACTIVE: 'processing',
       IN_PROGRESS: 'processing',
       COMPLETED: 'success',
+      CLOSED: 'default',
     };
     return colorMap[status];
   }

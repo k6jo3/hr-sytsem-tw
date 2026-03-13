@@ -21,6 +21,7 @@ const STATUS_LABELS: Record<UserStatus, string> = {
   ACTIVE: '啟用',
   INACTIVE: '停用',
   LOCKED: '鎖定',
+  PENDING: '待啟用',
   DELETED: '已刪除',
 };
 
@@ -28,6 +29,7 @@ const STATUS_COLORS: Record<UserStatus, string> = {
   ACTIVE: 'success',
   INACTIVE: 'default',
   LOCKED: 'error',
+  PENDING: 'warning',
   DELETED: 'default',
 };
 

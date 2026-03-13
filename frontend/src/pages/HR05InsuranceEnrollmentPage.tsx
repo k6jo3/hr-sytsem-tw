@@ -62,7 +62,11 @@ export const HR05InsuranceEnrollmentPage: React.FC = () => {
         message.success('已送出加保申請');
         setModalVisible(false);
       }
-    } catch (error) {}
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message || '加保失敗，請稍後再試');
+      }
+    }
   };
 
   const handleWithdraw = async () => {
@@ -78,7 +82,11 @@ export const HR05InsuranceEnrollmentPage: React.FC = () => {
         message.success('已完成退保');
         setWithdrawModalVisible(false);
       }
-    } catch (error) {}
+    } catch (error) {
+      if (error instanceof Error) {
+        message.error(error.message || '退保失敗，請稍後再試');
+      }
+    }
   };
 
   const columns = [

@@ -45,7 +45,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
       const values = await form.validateFields();
       onSubmit(userId, values.new_password, values.force_change);
     } catch {
-      // Form validation failed
+      // 表單驗證失敗，由 Ant Design 表單元件自行顯示錯誤
     }
   };
 

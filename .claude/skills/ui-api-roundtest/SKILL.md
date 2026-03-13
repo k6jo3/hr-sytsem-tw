@@ -80,14 +80,31 @@
    - 檢查 Console Messages（`browser_console_messages`）是否有錯誤
    - 確認頁面資料來自真實 API（非 Mock）
 
-4. **記錄格式不匹配**
-   - 若發現前端 DTO (snake_case) 與後端回應 (camelCase) 不匹配
-   - 在對應的 API 檔案中建立 Response Adapter
-   - 更新 Factory 和測試
+4. **Adapter 品質驗證（必做）**
+   - 檢查 Adapter 函式是否有靜默 fallback（`|| 'DEFAULT'`、`?? 'ACTIVE'`）
+   - 確認 Adapter 處理所有後端可能的 enum 值（如 PROBATION、LOCKED、PENDING）
+   - 確認 Adapter 對 null/undefined 欄位有明確處理（非靜默忽略）
+   - 搜尋模式：`grep -r "|| '" features/{feature}/api/`
 
-5. **確認 MockConfig**
+5. **欄位名一致性驗證（必做）**
+   - 比對 Network tab 中 API 回應的實際欄位名
+   - 與前端 DTO type 定義的欄位名逐一對照
+   - 與合約 `requiredFields` 的欄位名逐一對照
+   - 發現不一致時：修正合約 → 修正 Adapter → 修正測試
+
+6. **錯誤場景驗證**
+   - 測試各種錯誤情境的前端表現：
+     - 401（未授權）→ 應跳轉登入頁
+     - 403（無權限）→ 應顯示權限不足提示
+     - 400（驗證失敗）→ 應顯示欄位錯誤訊息
+     - 409（資源衝突）→ 應顯示重複提示
+     - 500（伺服器錯誤）→ 應顯示通用錯誤訊息
+   - 確認前端 API 層的 `.catch()` 處理了上述所有狀態碼
+
+7. **確認 MockConfig**
    - 驗證完成後確認 MockConfig 目標模組為 `false`（使用真實 API）
-   - 截至 2026-03-04，全部 14 模組均已設為 `false`
+   - **MockConfig 預設值應為 `false`**，只有開發中的模組才設為 `true`
+   - 截至 2026-03-13，全部 14 模組均應為 `false`
 
 ---
 
@@ -126,3 +143,19 @@
 - 在 API 檔案中建立 `adapt*Response()` 函數
 - 將後端 camelCase 轉換為前端 snake_case DTO
 - 更新對應的 Factory 測試
+
+### 頁面顯示正常但資料值異常
+- 檢查 Adapter 是否有靜默 fallback（如 `status || 'ACTIVE'`）
+- 確認後端實際回傳的 enum 值
+- 修正 Adapter 使其明確處理所有可能值
+
+### 錯誤情境無回饋
+- 檢查前端 API 層的 error handling
+- 確認 `GlobalExceptionHandler` 的 ErrorCode → HTTP Status 映射
+- 確認前端 `.catch()` 覆蓋所有 HTTP 狀態碼
+
+### 測試通過但手動操作失敗
+- 優先檢查 MockConfig 是否為 `false`
+- 檢查 Adapter 靜默 fallback
+- 檢查前後端欄位名是否一致
+- 參考 `/test-fix` skill 的「前後端串接問題診斷」章節

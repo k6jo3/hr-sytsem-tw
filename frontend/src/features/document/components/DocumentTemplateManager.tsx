@@ -113,7 +113,7 @@ export const DocumentTemplateManager: React.FC = () => {
       setModalVisible(false);
       refetch();
     } catch {
-      // 表單驗證失敗或 API 錯誤
+      // 表單驗證失敗，由 Ant Design 表單元件自行顯示錯誤
     } finally {
       setSaving(false);
     }

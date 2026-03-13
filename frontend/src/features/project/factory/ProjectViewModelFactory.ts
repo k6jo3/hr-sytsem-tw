@@ -169,6 +169,7 @@ export class ProjectViewModelFactory {
       NOT_STARTED: '未開始',
       IN_PROGRESS: '進行中',
       COMPLETED: '已完成',
+      ON_HOLD: '暫停',
       BLOCKED: '阻塞中',
     };
     return statusMap[status];
@@ -182,6 +183,7 @@ export class ProjectViewModelFactory {
       NOT_STARTED: 'default',
       IN_PROGRESS: 'processing',
       COMPLETED: 'success',
+      ON_HOLD: 'warning',
       BLOCKED: 'error',
     };
     return colorMap[status];

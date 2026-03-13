@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import { MockPayrollApi } from './MockPayrollApi';
 import type {
     CreateSalaryStructureRequest,
@@ -41,7 +42,7 @@ function adaptPayslipDto(raw: any): PayslipDto {
     pay_period_start: raw.periodStartDate,
     pay_period_end: raw.periodEndDate,
     payment_date: raw.payDate,
-    status: PAYSLIP_STATUS_MAP[raw.status] ?? raw.status,
+    status: guardEnum('payslip.status', PAYSLIP_STATUS_MAP[raw.status] ?? raw.status, ['DRAFT', 'APPROVED', 'PAID'] as const, 'DRAFT'),
     items: [], // 後端列表查詢不含 items 明細
     gross_pay: raw.grossWage ?? 0,
     total_deductions: raw.totalDeductions ?? 0,
@@ -65,7 +66,7 @@ function adaptPayslipSummary(raw: any): PayslipSummaryDto {
     payment_date: raw.payDate ?? '',
     gross_pay: raw.grossWage ?? 0,
     net_pay: raw.netWage ?? 0,
-    status: PAYSLIP_STATUS_MAP[raw.status] ?? raw.status,
+    status: guardEnum('payslipSummary.status', PAYSLIP_STATUS_MAP[raw.status] ?? raw.status, ['DRAFT', 'APPROVED', 'PAID'] as const, 'DRAFT'),
   };
 }
 

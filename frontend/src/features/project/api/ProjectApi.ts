@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import { MockProjectApi } from './MockProjectApi';
 import type {
     AddProjectMemberRequest,
@@ -44,7 +45,7 @@ function adaptProjectListItem(raw: any): ProjectDto {
     actual_cost: raw.actualCost ?? 0,
     actual_hours: raw.actualHours ?? 0,
     progress: raw.progress ?? 0,
-    status: raw.status ?? 'PLANNING',
+    status: guardEnum('project.status', raw.status, ['PLANNING', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED', 'CANCELLED'] as const, 'PLANNING'),
     planned_start_date: raw.startDate ?? raw.plannedStartDate ?? '',
     planned_end_date: raw.endDate ?? raw.plannedEndDate ?? '',
     actual_start_date: raw.actualStartDate,
@@ -73,7 +74,7 @@ function adaptProjectDetail(raw: any): ProjectDto {
     actual_cost: raw.actualCost ?? 0,
     actual_hours: raw.actualHours ?? 0,
     progress: raw.progress ?? 0,
-    status: raw.status ?? 'PLANNING',
+    status: guardEnum('project.status', raw.status, ['PLANNING', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED', 'CANCELLED'] as const, 'PLANNING'),
     planned_start_date: raw.plannedStartDate ?? '',
     planned_end_date: raw.plannedEndDate ?? '',
     actual_start_date: raw.actualStartDate,
@@ -111,7 +112,7 @@ function adaptCustomerItem(raw: any): CustomerDto {
     industry: raw.industry,
     email: raw.email,
     phone_number: raw.phoneNumber,
-    status: raw.status ?? 'ACTIVE',
+    status: guardEnum('customer.status', raw.status, ['ACTIVE', 'INACTIVE'] as const, 'ACTIVE'),
     created_at: raw.createdAt ?? '',
   };
 }
@@ -131,7 +132,7 @@ function adaptTaskItem(raw: any): TaskDto {
     actual_hours: raw.actualHours ?? 0,
     assignee_id: raw.assigneeId,
     assignee_name: raw.assigneeName,
-    status: raw.status ?? 'NOT_STARTED',
+    status: guardEnum('task.status', raw.status, ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD'] as const, 'NOT_STARTED'),
     progress: raw.progress ?? 0,
     display_order: raw.displayOrder ?? 0,
     children: raw.children?.map(adaptTaskItem),

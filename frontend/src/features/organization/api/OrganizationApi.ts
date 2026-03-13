@@ -1,5 +1,6 @@
 import { MockConfig } from '../../../config/MockConfig';
 import { apiClient } from '../../../shared/api/apiClient';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import { MockOrganizationApi } from './MockOrganizationApi';
 import type {
     DepartmentDto,
@@ -15,15 +16,11 @@ import type {
 /**
  * 將後端 camelCase 員工項目轉換為前端 snake_case EmployeeDto
  */
+/** 員工狀態允許值 */
+const EMPLOYEE_STATUS_VALUES = ['ACTIVE', 'PROBATION', 'TERMINATED', 'ON_LEAVE', 'INACTIVE'] as const;
+
 function adaptEmployeeItem(raw: any): EmployeeDto {
-  const statusMap: Record<string, EmployeeDto['status']> = {
-    ACTIVE: 'ACTIVE',
-    PROBATION: 'ACTIVE',
-    TERMINATED: 'TERMINATED',
-    ON_LEAVE: 'ON_LEAVE',
-    INACTIVE: 'INACTIVE',
-  };
-  const backendStatus = raw.employmentStatus ?? raw.status ?? 'ACTIVE';
+  const backendStatus = raw.employmentStatus ?? raw.status;
 
   return {
     id: raw.employeeId ?? raw.id,
@@ -35,7 +32,7 @@ function adaptEmployeeItem(raw: any): EmployeeDto {
     department_id: raw.departmentId ?? raw.department_id ?? '',
     department_name: raw.departmentName ?? raw.department_name ?? '',
     position: raw.jobTitle ?? raw.position ?? '',
-    status: statusMap[backendStatus] ?? 'INACTIVE',
+    status: guardEnum('employee.status', backendStatus, EMPLOYEE_STATUS_VALUES, 'ACTIVE'),
     hire_date: raw.hireDate ?? raw.hire_date ?? '',
     termination_date: raw.terminationDate ?? raw.termination_date,
     created_at: raw.createdAt ?? raw.created_at ?? '',
@@ -119,7 +116,7 @@ export const OrganizationApi = {
       organizationName: o.name ?? o.organizationName ?? '',
       organizationType: (o.type ?? o.organizationType) === 'PARENT' ? 'PARENT' : 'SUBSIDIARY',
       parentOrganizationId: o.parentId ?? o.parentOrganizationId,
-      status: o.status ?? 'ACTIVE',
+      status: guardEnum('organization.status', o.status, ['ACTIVE', 'INACTIVE'] as const, 'ACTIVE'),
       employeeCount: o.employeeCount ?? 0,
       createdAt: o.createdAt ?? '',
     }));
@@ -171,7 +168,7 @@ export const OrganizationApi = {
       organizationCode: raw.code ?? raw.organizationCode ?? '',
       organizationName: raw.name ?? raw.organizationName ?? '',
       organizationType: raw.type === 'PARENT' ? 'PARENT' : 'SUBSIDIARY',
-      status: raw.status ?? 'ACTIVE',
+      status: guardEnum('organization.status', raw.status, ['ACTIVE', 'INACTIVE'] as const, 'ACTIVE'),
       employeeCount: raw.employeeCount ?? 0,
       createdAt: raw.createdAt ?? '',
     };
@@ -185,7 +182,7 @@ export const OrganizationApi = {
       parentId: d.parentId ?? d.parentDepartmentId,
       managerId: d.managerId,
       managerName: d.managerName,
-      status: d.status ?? 'ACTIVE',
+      status: guardEnum('department.status', d.status, ['ACTIVE', 'INACTIVE'] as const, 'ACTIVE'),
       employeeCount: d.employeeCount ?? 0,
       subDepartments: d.subDepartments ?? d.children,
     }));

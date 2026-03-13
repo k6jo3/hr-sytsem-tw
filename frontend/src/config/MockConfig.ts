@@ -26,8 +26,13 @@ export const MockConfig = {
 
   /**
    * 檢查指定模組是否使用 Mock API
+   * 預設為 false（使用真實 API），避免未定義的模組名稱靜默啟用 Mock
    */
   isEnabled(moduleName: string): boolean {
-    return this.modules[moduleName] ?? true;
+    const value = this.modules[moduleName];
+    if (value === undefined) {
+      console.warn(`[MockConfig] 未知模組名稱: "${moduleName}"，預設使用真實 API`);
+    }
+    return value ?? false;
   }
 };
