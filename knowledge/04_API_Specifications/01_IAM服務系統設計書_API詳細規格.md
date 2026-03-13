@@ -1,7 +1,7 @@
 # HR01 IAM服務 API詳細規格
 
-**版本:** 1.1
-**日期:** 2025-12-29（最後更新：2026-03-05）
+**版本:** 1.2
+**日期:** 2025-12-29（最後更新：2026-03-13）
 **服務代碼:** HR01
 **服務名稱:** IAM服務 (Identity & Access Management)
 
@@ -20,6 +20,24 @@
 9. [系統管理API — 排程管理](#9-系統管理api--排程管理)
 10. [錯誤碼總覽](#10-錯誤碼總覽)
 11. [領域事件總覽](#11-領域事件總覽)
+
+---
+
+## 0. Gateway 路由配置
+
+IAM 服務在 Spring Cloud Gateway 中註冊以下路由 predicates：
+
+| 路由路徑 | 目標服務 | 說明 |
+|:---|:---|:---|
+| `/api/v1/auth/**` | IAM Service | 認證相關 API |
+| `/api/v1/users/**` | IAM Service | 使用者管理 API |
+| `/api/v1/roles/**` | IAM Service | 角色管理 API |
+| `/api/v1/permissions/**` | IAM Service | 權限管理 API |
+| `/api/v1/profile/**` | IAM Service | 個人資料 API |
+| `/api/v1/iam/system/**` | IAM Service | 系統管理 API（功能開關、系統參數、排程管理） |
+| `/api/v1/system/**` | IAM Service | 系統管理 API（新增路由，與 `/api/v1/iam/system/**` 並行） |
+
+> **備註：** `/api/v1/system/**` 為新增的 Gateway route predicate，將系統管理相關請求路由至 IAM 服務，方便其他模組或前端透過統一路徑存取系統管理功能。
 
 ---
 
@@ -44,7 +62,7 @@
 | `HR01SystemSchedulerCmdController` | 排程管理Command操作 | HR01-P05 系統管理 |
 | `HR01SystemSchedulerQryController` | 排程管理Query操作 | HR01-P05 系統管理 |
 
-### 1.2 API總覽 (41個端點)
+### 1.2 API總覽 (42個端點)
 
 | 端點 | 方法 | Controller | 說明 | 權限 |
 |:---|:---:|:---|:---|:---|
@@ -89,6 +107,7 @@
 | `/api/v1/iam/system/schedulers/{schedulerId}` | GET | HR01SystemSchedulerQryController | 查詢排程詳情 | system:scheduler:read |
 | `/api/v1/iam/system/schedulers/{schedulerId}` | PUT | HR01SystemSchedulerCmdController | 更新排程配置 | system:scheduler:write |
 | `/api/v1/iam/system/schedulers/{schedulerId}/trigger` | POST | HR01SystemSchedulerCmdController | 手動觸發排程 | system:scheduler:execute |
+| `/api/v1/iam/system/schedulers/{schedulerId}/toggle` | PUT | HR01SystemSchedulerCmdController | 啟用/停用排程 | system:scheduler:write |
 
 ---
 
@@ -215,7 +234,9 @@
 | 400 | VALIDATION_PASSWORD_REQUIRED | 密碼為必填 | 輸入密碼 |
 | 401 | AUTH_INVALID_CREDENTIALS | 使用者名稱或密碼錯誤 | 確認帳號密碼 |
 | 403 | AUTH_ACCOUNT_DISABLED | 帳號已停用 | 聯繫管理員啟用帳號 |
-| 423 | AUTH_ACCOUNT_LOCKED | 帳號已被鎖定 | 等待30分鐘後重試或聯繫管理員 |
+| 401 | AUTH_ACCOUNT_LOCKED | 帳號已被鎖定（LOGIN_FAILED / ACCOUNT_LOCKED DomainException 統一返回 401） | 等待30分鐘後重試或聯繫管理員 |
+
+> **備註：** `LOGIN_FAILED` 與 `ACCOUNT_LOCKED` 類型的 DomainException 經由 `GlobalExceptionHandler` 及 `PipelineExecutionException` 處理後，統一返回 HTTP 401（原為 400/423），以便前端 `apiClient` 的 401 攔截器統一處理認證失敗流程。登入 API (`/auth/login`) 的 401 回應不會觸發前端自動導向登入頁的邏輯，前端會直接提取 `error.response.data.message` 作為錯誤訊息顯示。
 
 **領域事件**
 
@@ -3507,6 +3528,92 @@ GET /api/v1/iam/system/schedulers?module=HR03&enabled=true
 
 ---
 
+### 9.5 啟用/停用排程（Toggle）
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/iam/system/schedulers/{schedulerId}/toggle` |
+| Controller | `HR01SystemSchedulerCmdController` |
+| Service | `ToggleSchedulerServiceImpl` |
+| 權限 | `system:scheduler:write` |
+| 版本 | v1 |
+
+**用途說明**
+
+切換排程任務的啟用/停用狀態。前端 ScheduledJobTab 透過 Popconfirm 確認後呼叫此端點進行啟停操作。停用後的排程不會依據 Cron 表達式自動執行，但仍可手動觸發。
+
+**業務邏輯**
+
+1. **權限檢查**
+   - 必須擁有 system:scheduler:write 權限
+   - 僅限 SYSTEM_ADMIN 角色
+
+2. **查詢排程**
+   - 排程不存在則返回 404
+
+3. **切換狀態**
+   - 若目前 enabled = true，則呼叫 disable()
+   - 若目前 enabled = false，則呼叫 enable()
+
+4. **發布事件**
+   - 發布 SchedulerConfigChangedEvent
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| schedulerId | String | ✅ | 排程ID | `"sched-uuid-001"` |
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "排程狀態已切換",
+  "data": {
+    "id": "sched-uuid-001",
+    "jobCode": "ABSENT_DETECTION",
+    "jobName": "曠職判定",
+    "enabled": false,
+    "consecutiveFailures": 0,
+    "lastErrorMessage": null,
+    "updatedAt": "2026-03-13T10:30:00Z",
+    "updatedBy": "admin"
+  },
+  "timestamp": "2026-03-13T10:30:00Z"
+}
+```
+
+> **前端行為：** ScheduledJobTab 元件在切換開關前會顯示 Popconfirm 確認對話框。排程詳情可展開 error detail Modal，顯示 `consecutiveFailures`（連續失敗次數）與 `lastErrorMessage`（最近錯誤訊息）。
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:write 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_SCHEDULER_NOT_FOUND | 排程任務不存在 | 確認 schedulerId |
+
+**領域事件**
+
+| 事件名稱 | Topic | 說明 |
+|:---|:---|:---|
+| SchedulerConfigChangedEvent | `iam.scheduler-config.changed` | 排程啟停狀態變更 |
+
+---
+
 ## 10. 錯誤碼總覽
 
 ### 10.1 認證相關 (AUTH_)
@@ -3519,7 +3626,7 @@ GET /api/v1/iam/system/schedulers?module=HR03&enabled=true
 | AUTH_REFRESH_TOKEN_INVALID | 401 | Refresh Token無效 |
 | AUTH_REFRESH_TOKEN_EXPIRED | 401 | Refresh Token已過期 |
 | AUTH_ACCOUNT_DISABLED | 403 | 帳號已停用 |
-| AUTH_ACCOUNT_LOCKED | 423 | 帳號已被鎖定 |
+| AUTH_ACCOUNT_LOCKED | 401 | 帳號已被鎖定（LOGIN_FAILED / ACCOUNT_LOCKED 統一返回 401） |
 | AUTH_RESET_TOKEN_INVALID | 400 | 重置Token無效 |
 | AUTH_RESET_TOKEN_EXPIRED | 400 | 重置Token已過期 |
 | AUTH_CURRENT_PASSWORD_WRONG | 401 | 當前密碼錯誤 |
@@ -3655,5 +3762,5 @@ GET /api/v1/iam/system/schedulers?module=HR03&enabled=true
 ---
 
 **文件建立日期:** 2025-12-29
-**最後更新日期:** 2026-03-05
-**版本:** 1.1（新增系統管理 API：功能開關、系統參數、排程管理，共 12 個端點）
+**最後更新日期:** 2026-03-13
+**版本:** 1.2（新增 Gateway 路由配置、AUTH_ACCOUNT_LOCKED 改為 401、排程啟停 Toggle 端點，共 13 個端點）

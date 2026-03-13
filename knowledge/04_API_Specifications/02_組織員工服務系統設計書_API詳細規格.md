@@ -103,7 +103,8 @@
 **業務邏輯**
 
 1. **驗證請求資料**
-   - organizationCode 必須唯一，不可與現有公司代號重複
+   - organizationCode 必須唯一，不可與現有公司代號重複（由 `CheckOrgCodeExistenceTask` 驗證，重複時拋出 `ResourceAlreadyExistsException` → 409 Conflict，錯誤訊息格式：`"組織代碼已存在: {code}"`）
+   - organizationName 允許重複（不做唯一性檢查）
    - 若為子公司 (SUBSIDIARY)，parentOrganizationId 必須存在且為有效母公司
    - taxId（統一編號）格式驗證（8位數字）
 
@@ -151,6 +152,32 @@
 }
 ```
 
+> **前端 Adapter 欄位對照：** 前端 `OrganizationRequest` 使用簡短欄位名，由 adapter 層轉換為後端欄位：
+> | 前端欄位 | 後端欄位 |
+> |:---|:---|
+> | `code` | `organizationCode` |
+> | `name` | `organizationName` |
+> | `type` | `organizationType` |
+> | `parentId` | `parentOrganizationId` |
+> | `taxId` | `taxId` |
+> | `phone` | `phoneNumber` |
+> | `address` | `address` |
+> | `establishedDate` | `establishedDate` |
+
+**前端送出範例（adapter 轉換前）：**
+```json
+{
+  "code": "SUB_A",
+  "name": "子公司A",
+  "type": "SUBSIDIARY",
+  "parentId": "550e8400-e29b-41d4-a716-446655440000",
+  "taxId": "12345678",
+  "phone": "02-12345678",
+  "address": "台北市信義區信義路五段7號",
+  "establishedDate": "2020-01-01"
+}
+```
+
 **Response**
 
 **成功回應 (201 Created)**
@@ -185,7 +212,7 @@
 |:---:|:---|:---|:---|
 | 400 | VALIDATION_ORG_CODE_REQUIRED | 公司代號為必填 | 提供公司代號 |
 | 400 | VALIDATION_ORG_CODE_FORMAT | 公司代號格式不正確 | 檢查格式（1-50字元） |
-| 409 | RESOURCE_ORG_CODE_EXISTS | 公司代號已存在 | 使用其他公司代號 |
+| 409 | RESOURCE_ORG_CODE_EXISTS | 公司代號已存在（`CheckOrgCodeExistenceTask` → `ResourceAlreadyExistsException`，訊息：`"組織代碼已存在: {code}"`）| 使用其他公司代號 |
 | 404 | RESOURCE_PARENT_ORG_NOT_FOUND | 母公司不存在 | 確認母公司ID正確性 |
 | 400 | BUSINESS_SUBSIDIARY_REQUIRES_PARENT | 子公司必須指定母公司 | 提供 parentOrganizationId |
 
@@ -240,41 +267,44 @@
 
 **成功回應 (200 OK)**
 
+後端回傳使用 `items` 陣列（非 `content`），每筆紀錄使用簡短欄位名：
+
 ```json
 {
   "code": "SUCCESS",
   "message": "查詢成功",
   "data": {
-    "content": [
+    "items": [
       {
-        "organizationId": "550e8400-e29b-41d4-a716-446655440000",
-        "organizationCode": "PARENT",
-        "organizationName": "母公司",
-        "organizationType": "PARENT",
-        "taxId": "12345678",
-        "employeeCount": 200,
-        "status": "ACTIVE",
-        "createdAt": "2020-01-01T00:00:00Z"
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "code": "PARENT",
+        "name": "母公司",
+        "type": "PARENT",
+        "parentId": null,
+        "status": "ACTIVE"
       },
       {
-        "organizationId": "550e8400-e29b-41d4-a716-446655440001",
-        "organizationCode": "SUB_A",
-        "organizationName": "子公司A",
-        "organizationType": "SUBSIDIARY",
-        "parentOrganizationId": "550e8400-e29b-41d4-a716-446655440000",
-        "parentOrganizationName": "母公司",
-        "taxId": "87654321",
-        "employeeCount": 50,
-        "status": "ACTIVE",
-        "createdAt": "2022-06-01T00:00:00Z"
+        "id": "550e8400-e29b-41d4-a716-446655440001",
+        "code": "SUB_A",
+        "name": "子公司A",
+        "type": "SUBSIDIARY",
+        "parentId": "550e8400-e29b-41d4-a716-446655440000",
+        "status": "ACTIVE"
       }
-    ],
-    "page": 1,
-    "size": 10,
-    "totalElements": 2,
-    "totalPages": 1
+    ]
   }
 }
+```
+
+> **前端 Adapter 欄位對照：** 前端 `getOrganizations` adapter 將後端簡短欄位映射為完整語義欄位：
+> | 後端欄位 | 前端 ViewModel 欄位 |
+> |:---|:---|
+> | `id` | `organizationId` |
+> | `code` | `organizationCode` |
+> | `name` | `organizationName` |
+> | `type` | `organizationType` |
+> | `parentId` | `parentOrganizationId` |
+> | `status` | `status` |
 ```
 
 **錯誤碼**
@@ -499,15 +529,18 @@
 
 **成功回應 (200 OK)**
 
+後端回傳為扁平物件，包含組織資訊與 `departments` 陣列：
+
 ```json
 {
   "code": "SUCCESS",
   "message": "查詢成功",
   "data": {
     "organizationId": "550e8400-e29b-41d4-a716-446655440000",
-    "organizationName": "母公司",
-    "organizationType": "PARENT",
-    "employeeCount": 200,
+    "code": "PARENT",
+    "name": "母公司",
+    "type": "PARENT",
+    "status": "ACTIVE",
     "departments": [
       {
         "departmentId": "dept-001",
@@ -559,11 +592,26 @@
 }
 ```
 
+> **前端 Adapter 重組：** `getOrganizationTree` adapter 將後端扁平回應重組為結構化物件：
+> ```typescript
+> // 後端回傳: { organizationId, code, name, type, status, departments: [...] }
+> // 前端重組為: { data: OrganizationDto, departments: DepartmentDto[] }
+> // OrganizationDto 包含: organizationId, organizationCode, organizationName, organizationType, status
+> ```
+
 **錯誤碼**
 
 | HTTP | 錯誤碼 | 說明 | 處理建議 |
 |:---:|:---|:---|:---|
 | 404 | RESOURCE_ORG_NOT_FOUND | 公司不存在 | 確認公司ID正確性 |
+
+### 2.6 前端 OrganizationTreeView UI 行為
+
+> **組織選擇器：** 下拉選單使用 `OptGroup` 分組，母公司與子公司分組顯示。子公司在其母公司下方以 `└` 前綴縮排顯示。
+>
+> **建立組織 Modal：** 當 `type=SUBSIDIARY` 時，顯示必填的「所屬母公司」選擇器。
+>
+> **錯誤訊息：** 建立組織失敗時，前端顯示後端實際錯誤訊息（例如：`"組織代碼已存在: WU"`），而非通用的「組織建立失敗」。
 
 ---
 

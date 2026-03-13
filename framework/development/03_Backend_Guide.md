@@ -371,7 +371,64 @@ public ResponseEntity<CreateUserResponse> createUser(...) { }
 
 ---
 
-## 12. 持久層技術選擇指引
+## 12. 全域例外處理 (GlobalExceptionHandler)
+
+### 12.1 DomainException 對應 HTTP 狀態碼
+
+`GlobalExceptionHandler` 會根據 `DomainException` 的錯誤代碼決定回傳的 HTTP 狀態碼。特別注意，與身份驗證相關的領域錯誤應回傳 **401 (Unauthorized)** 而非 400：
+
+| DomainException 錯誤代碼 | HTTP 狀態碼 | 說明 |
+|:---|:---:|:---|
+| `LOGIN_FAILED` | 401 | 帳號或密碼錯誤 |
+| `ACCOUNT_LOCKED` | 401 | 帳號已被鎖定 |
+| 其他 | 400 | 一般業務規則違反 |
+
+### 12.2 PipelineExecutionException 處理
+
+當 `PipelineExecutionException` 內包裝的是 `DomainException` 時，需拆封 (unwrap) 內部例外並依照上述規則處理。亦即 Pipeline 中拋出的 `LOGIN_FAILED` / `ACCOUNT_LOCKED` 同樣回傳 **401**。
+
+```java
+@ExceptionHandler(DomainException.class)
+public ResponseEntity<ErrorResponse> handleDomainException(DomainException ex) {
+    if ("LOGIN_FAILED".equals(ex.getCode()) || "ACCOUNT_LOCKED".equals(ex.getCode())) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+    return ResponseEntity.badRequest().body(errorResponse);
+}
+
+@ExceptionHandler(PipelineExecutionException.class)
+public ResponseEntity<ErrorResponse> handlePipelineException(PipelineExecutionException ex) {
+    if (ex.getCause() instanceof DomainException domainEx) {
+        return handleDomainException(domainEx); // 委派給 DomainException 處理器
+    }
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+}
+```
+
+---
+
+## 13. Gateway 路由配置
+
+### 13.1 系統管理 API 路由
+
+系統管理相關的 API（如系統參數、代碼維護等）路徑為 `/api/v1/system/**`，必須納入 **IAM 服務** 的 Gateway 路由斷言 (Route Predicates)：
+
+```yaml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: iam-service
+          uri: lb://iam-service
+          predicates:
+            - Path=/api/v1/users/**,/api/v1/roles/**,/api/v1/auth/**,/api/v1/system/**
+```
+
+> **注意：** 若遺漏 `/api/v1/system/**`，前端呼叫系統管理 API 時會收到 404 錯誤。
+
+---
+
+## 14. 持久層技術選擇指引
 
 本專案採用 **MyBatis + Fluent-Query-Engine (Querydsl)** 雙軌並行策略。
 
@@ -408,5 +465,5 @@ infrastructure/
 
 ---
 
-**文件版本:** 3.0
-**最後更新:** 2025-12-18
+**文件版本:** 3.1
+**最後更新:** 2026-03-13

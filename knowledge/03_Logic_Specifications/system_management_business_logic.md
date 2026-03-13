@@ -1,7 +1,7 @@
 # 系統管理模組 - 業務邏輯規格書
 
-**版本:** 1.0
-**日期:** 2026-03-05
+**版本:** 1.1
+**日期:** 2026-03-13
 **文件定位:** 補充 `01_IAM服務系統設計書` 第 13 章，深入描述系統管理模組的領域模型、業務規則、驗證邏輯與領域事件。
 **所屬服務:** HR01 IAM（整合於 IAM 服務）
 
@@ -379,7 +379,34 @@ public boolean needsAlert() {
 4. 告警接收人為具 ADMIN 角色的使用者
 5. `recordSuccess()` 會重置 `consecutiveFailures`，解除告警狀態
 
-### 4.6 資料表結構
+### 4.6 前端排程管理 Tab 顯示規則
+
+排程管理 Tab（ScheduledJobTab）的前端顯示邏輯與後端 Domain Model 欄位對應如下：
+
+**「需關注」標籤顯示規則：**
+
+| 條件 | 顯示 | 說明 |
+|:---|:---|:---|
+| `consecutiveFailures > 0` | `Tag color="warning"` 顯示「需關注」 | 任何連續失敗皆標示警告 |
+| `consecutiveFailures == 0` | 不顯示標籤 | 無連續失敗時隱藏 |
+
+> **備註：** 此處前端的「需關注」標籤門檻（`> 0`）與後端 `needsAlert()` 的告警門檻（`>= 3`）不同。前端標籤用於視覺提醒管理員留意，後端告警用於觸發 `ScheduledJobAlertEvent` 通知。
+
+**「查看錯誤」標籤顯示規則：**
+
+| 條件 | 顯示 | 說明 |
+|:---|:---|:---|
+| `lastErrorMessage` 存在且非空 | `Tag` 顯示「查看錯誤」，可點擊 | 點擊後開啟 Modal 顯示錯誤詳情 |
+| `lastErrorMessage` 為 null 或空 | 不顯示標籤 | 無錯誤時隱藏 |
+
+**操作欄位（啟用/停用 Toggle）規則：**
+
+| 操作 | 對應 API | 前端行為 |
+|:---|:---|:---|
+| 啟用排程 | `PUT /api/v1/admin/scheduled-jobs/{code}/enable` | Popconfirm 確認後執行，成功後重新載入列表 |
+| 停用排程 | `PUT /api/v1/admin/scheduled-jobs/{code}/disable` | Popconfirm 確認後執行，成功後重新載入列表 |
+
+### 4.7 資料表結構
 
 ```sql
 CREATE TABLE IF NOT EXISTS scheduled_job_configs (

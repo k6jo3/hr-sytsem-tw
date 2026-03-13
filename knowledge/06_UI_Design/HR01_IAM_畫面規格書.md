@@ -1,8 +1,8 @@
 # HR01 IAM 服務畫面規格書
 
 **文件編號：** UI-HR01
-**版本：** 1.0
-**更新日期：** 2026-03-02
+**版本：** 1.1
+**更新日期：** 2026-03-13
 **參照文件：**
 - `knowledge/02_System_Design/01_IAM服務系統設計書.md`
 - `knowledge/04_API_Specifications/01_IAM服務系統設計書_API詳細規格.md`
@@ -440,7 +440,90 @@
 
 ---
 
-## 9. API 端點對照表
+## 9. 系統管理 - 排程管理 Tab（ScheduledJobTab）
+
+### 9.1 Tab 概述
+
+| 項目 | 說明 |
+|:---|:---|
+| **用途** | 管理排程任務的啟停控制、查看執行狀態與錯誤詳情 |
+| **使用角色** | ADMIN |
+| **進入方式** | 側邊選單 → 系統管理 → 排程管理 Tab |
+| **頁面類型** | 列表頁（Table + Modal） |
+
+### 9.2 資料欄位規格
+
+| 欄位 | API 來源 | 顯示格式 | 說明 |
+|:---|:---|:---|:---|
+| 任務代碼 | `jobCode` | 原始值 | — |
+| 任務名稱 | `jobName` | 原始值 | — |
+| 所屬模組 | `module` | Tag | — |
+| Cron 表達式 | `cronExpression` | 原始值 | — |
+| 啟用狀態 | `enabled` | `StatusTag` | — |
+| 最近執行時間 | `lastExecutedAt` | `YYYY-MM-DD HH:mm:ss` | — |
+| 執行狀態 | `lastExecutionStatus` | Tag（SUCCESS=綠/FAILED=紅/RUNNING=藍） | — |
+| 需關注 | `consecutiveFailures` | `Tag color="warning"`：顯示「需關注」 | 當 `consecutiveFailures > 0` 時顯示警告標籤 |
+| 查看錯誤 | `lastErrorMessage` | `Tag` 可點擊：顯示「查看錯誤」 | 當 `lastErrorMessage` 存在時顯示，點擊開啟錯誤詳情 Modal |
+| **操作** | — | 啟用/停用 Toggle | 見下方操作欄位規格 |
+
+### 9.3 操作欄位規格
+
+「操作」欄位提供排程任務的啟用/停用切換功能：
+
+| 項目 | 說明 |
+|:---|:---|
+| **元件** | `Switch` 或 `Button`，搭配 `Popconfirm` 二次確認 |
+| **啟用 → 停用** | Popconfirm 提示：`確定要停用此排程嗎？`，確認後呼叫 `PUT /api/v1/admin/scheduled-jobs/{code}/disable` |
+| **停用 → 啟用** | Popconfirm 提示：`確定要啟用此排程嗎？`，確認後呼叫 `PUT /api/v1/admin/scheduled-jobs/{code}/enable` |
+| **操作完成後** | 重新載入排程列表，顯示 `message.success` |
+
+### 9.4 錯誤詳情 Modal
+
+當使用者點擊「查看錯誤」標籤時，彈出錯誤詳情 Modal：
+
+```
+┌──────────────────────────────────────┐
+│ 排程錯誤詳情                      [✕]  │
+├──────────────────────────────────────┤
+│                                      │
+│  任務名稱：曠職自動判定              │
+│  任務代碼：ABSENT_DETECTION          │
+│                                      │
+│  連續失敗次數：3                      │
+│  ┌──────────────────────────────┐    │
+│  │  3                           │    │
+│  └──────────────────────────────┘    │
+│                                      │
+│  最近錯誤訊息：                      │
+│  ┌──────────────────────────────┐    │
+│  │ Connection refused: HR03     │    │
+│  │ Attendance Service           │    │
+│  │ unavailable                  │    │
+│  └──────────────────────────────┘    │
+│                                      │
+├──────────────────────────────────────┤
+│                           [關閉]     │
+└──────────────────────────────────────┘
+```
+
+| 欄位 | 來源 | 說明 |
+|:---|:---|:---|
+| 任務名稱 | `jobName` | 排程任務顯示名稱 |
+| 任務代碼 | `jobCode` | 排程任務唯一識別碼 |
+| 連續失敗次數 | `consecutiveFailures` | 目前累計連續失敗次數 |
+| 最近錯誤訊息 | `lastErrorMessage` | 最後一次執行失敗的完整錯誤訊息 |
+
+### 9.5 操作事件規格
+
+| 事件 ID | 觸發元素 | 行為 | 對應 API | UI 反應 |
+|:---|:---|:---|:---|:---|
+| E-SJOB-01 | 啟用/停用 Toggle | 切換排程啟停狀態 | `PUT /api/v1/admin/scheduled-jobs/{code}/enable` 或 `disable` | Popconfirm 確認 → 成功 → 重新載入列表 |
+| E-SJOB-02 | 「需關注」Tag | 視覺提示 | — | 當 `consecutiveFailures > 0` 時以 warning 色標籤提示 |
+| E-SJOB-03 | 「查看錯誤」Tag 點擊 | 開啟錯誤詳情 Modal | — | 彈出 Modal 顯示 `consecutiveFailures` 與 `lastErrorMessage` |
+
+---
+
+## 10. API 端點對照表
 
 | 方法 | 端點 | 用途 | 對應畫面事件 |
 |:---|:---|:---|:---|

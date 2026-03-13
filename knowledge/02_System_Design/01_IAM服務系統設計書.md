@@ -405,15 +405,22 @@ const handleLogin = async (values: LoginFormData) => {
     navigate('/dashboard');
 
   } catch (error) {
-    // 顯示錯誤訊息
+    // 顯示伺服器回傳的錯誤訊息
+    const serverMessage = error?.response?.data?.message;
     if (error.code === 'ACCOUNT_LOCKED') {
-      message.error('帳號已被鎖定，請聯絡系統管理員');
+      message.error(serverMessage || '帳號已被鎖定，請聯絡系統管理員');
     } else if (error.code === 'INVALID_CREDENTIALS') {
-      message.error('使用者名稱或密碼錯誤');
+      message.error(serverMessage || '使用者名稱或密碼錯誤');
     }
   }
 };
 ```
+
+**前端 apiClient 401 攔截器行為：**
+- 全域 Axios response interceptor 攔截 HTTP 401 回應
+- **登入 API（`/api/v1/auth/login`）除外：** 401 攔截器跳過登入端點，不觸發自動跳轉至登入頁，改由登入頁面自行處理錯誤訊息顯示
+- 其餘 API 收到 401 時自動清除 Token 並導向登入頁
+- 攔截器優先提取伺服器回傳的 `response.data.message` 作為錯誤提示，若無則使用前端預設訊息
 
 ### 4.2 使用者管理頁面事件 (IAM-P02)
 
@@ -493,6 +500,22 @@ const handleSavePermissions = async () => {
   }
 };
 ```
+
+---
+
+### 4.x API Gateway 路由設定
+
+IAM 服務在 API Gateway（`application.yml` / `application-local.yml`）中的 Route Predicates 包含以下路徑：
+
+| 路徑模式 | 說明 |
+|:---|:---|
+| `/api/v1/auth/**` | 認證相關 API（登入、登出、Token 刷新、OAuth） |
+| `/api/v1/users/**` | 使用者管理 API |
+| `/api/v1/roles/**` | 角色管理 API |
+| `/api/v1/permissions/**` | 權限管理 API |
+| `/api/v1/system/**` | 系統管理 API（功能開關、系統參數、排程任務配置） |
+
+> **注意：** `/api/v1/system/**` 路由已新增，將系統管理模組（第 13 章）的 API 請求正確路由至 IAM 服務。
 
 ---
 
@@ -624,6 +647,8 @@ flowchart TB
         E --> F[User Repository]
         F --> G[(PostgreSQL)]
     end
+
+    %% Gateway 路由：/api/v1/auth/**, /api/v1/users/**, /api/v1/system/** → IAM Service
 
     subgraph Event Bus
         H[Kafka]
@@ -1902,7 +1927,10 @@ Content-Type: application/json
 }
 ```
 
-**錯誤回應:**
+**錯誤回應（HTTP 401）：**
+
+> `LOGIN_FAILED`（INVALID_CREDENTIALS）與 `ACCOUNT_LOCKED` 統一回傳 HTTP 401，由 `GlobalExceptionHandler` 處理。
+
 ```json
 {
   "code": "INVALID_CREDENTIALS",
@@ -2234,6 +2262,10 @@ ldap:
 | ANNUAL_LEAVE_SETTLEMENT | 特休年度結算 | 0 0 1 1 1 ? | 每年 1/1 |
 | INSURANCE_DAILY_REPORT | 保險異動報表 | 0 30 8 * * ? | 每日 08:30 |
 | PAYROLL_MONTHLY_CLOSE | 薪資月結 | 0 0 2 1 * ? | 每月 1 日 02:00 |
+
+**前端 ScheduledJobTab 操作：**
+- **啟用/停用切換（Toggle）：** 每筆排程任務提供 Switch 開關，切換前彈出 Popconfirm 二次確認（「確定要啟用/停用此排程？」），防止誤操作
+- **錯誤詳情（Error Detail Modal）：** 當排程任務執行失敗時，可點擊錯誤次數開啟 Modal 檢視最近一次錯誤的詳細訊息（錯誤時間、例外類別、堆疊摘要）
 
 **連續失敗告警：** consecutiveFailures >= 3 時觸發告警
 

@@ -2,14 +2,18 @@
 
 > **服務代碼:** HR01
 > **服務名稱:** IAM 服務 (Identity & Access Management)
-> **版本:** 2.0
-> **更新日期:** 2026-02-11
+> **版本:** 2.1
+> **更新日期:** 2026-03-13
 
 ---
 
 ## 📋 概述
 
 IAM 服務負責系統的身份認證與授權管理，包含使用者管理、角色管理、權限管理及個人資料管理等功能。
+
+### Gateway 路由合約
+
+IAM 服務在 Spring Cloud Gateway 中註冊的路由 predicates 包含 `/api/v1/system/**`，使系統管理相關請求（功能開關、系統參數、排程管理）可透過此路徑路由至 IAM 服務，與既有的 `/api/v1/iam/system/**` 路徑並行運作。
 
 ---
 
@@ -687,9 +691,37 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
       {"name": "expiresIn", "type": "integer", "notNull": true},
       {"name": "tokenType", "type": "string", "value": "Bearer"}
     ]
-  }
+  },
+  "errorScenarios": [
+    {
+      "scenario": "LOGIN_FAILED - 帳號密碼錯誤",
+      "errorCode": "AUTH_INVALID_CREDENTIALS",
+      "expectedStatusCode": 401,
+      "description": "LOGIN_FAILED DomainException 經 GlobalExceptionHandler 處理後返回 HTTP 401"
+    },
+    {
+      "scenario": "ACCOUNT_LOCKED - 帳號已被鎖定",
+      "errorCode": "AUTH_ACCOUNT_LOCKED",
+      "expectedStatusCode": 401,
+      "description": "ACCOUNT_LOCKED DomainException 經 GlobalExceptionHandler 處理後返回 HTTP 401（原為 423）"
+    },
+    {
+      "scenario": "PipelineExecutionException 包裝 LOGIN_FAILED",
+      "errorCode": "AUTH_INVALID_CREDENTIALS",
+      "expectedStatusCode": 401,
+      "description": "Business Pipeline 內拋出 LOGIN_FAILED 時，PipelineExecutionException handler 同樣返回 HTTP 401"
+    },
+    {
+      "scenario": "PipelineExecutionException 包裝 ACCOUNT_LOCKED",
+      "errorCode": "AUTH_ACCOUNT_LOCKED",
+      "expectedStatusCode": 401,
+      "description": "Business Pipeline 內拋出 ACCOUNT_LOCKED 時，PipelineExecutionException handler 同樣返回 HTTP 401"
+    }
+  ]
 }
 ```
+
+> **前端 apiClient 行為：** 401 攔截器會跳過登入 API（`/auth/login`）的自動導向登入頁邏輯，改為提取 `error.response.data.message` 作為 Error message 直接顯示給使用者。
 
 ---
 

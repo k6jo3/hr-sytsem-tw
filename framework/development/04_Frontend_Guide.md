@@ -177,16 +177,113 @@ export class UserViewModelFactory {
 
 ---
 
-## 8. 測試規範
+## 8. API Client 規範 (apiClient / Axios)
 
-### 8.1 測試類型
+### 8.1 401 攔截器
+
+Axios 回應攔截器在收到 **401 Unauthorized** 時應自動導向登入頁，但登入 API 本身必須排除此行為，以便前端正確顯示「帳號或密碼錯誤」等伺服器端訊息：
+
+```typescript
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // 登入 API 本身不做重導向，讓呼叫端處理錯誤訊息
+      if (!error.config.url?.includes('/auth/login')) {
+        store.dispatch(logout());
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+### 8.2 伺服器錯誤訊息擷取
+
+後端回傳的錯誤訊息統一放在 `error.response.data.message`，前端應從此路徑擷取並顯示給使用者：
+
+```typescript
+try {
+  await AuthApi.login(credentials);
+} catch (error) {
+  if (axios.isAxiosError(error)) {
+    const serverMessage = error.response?.data?.message || '系統錯誤，請稍後再試';
+    message.error(serverMessage);
+  }
+}
+```
+
+---
+
+## 9. API 轉接層模式 (Adapter Pattern)
+
+### 9.1 後端短欄位名 vs 前端語義化欄位名
+
+後端 API 回傳的欄位通常使用短名稱（如 `code`、`name`、`type`），而前端 ViewModel 則使用帶有前綴的語義化名稱（如 `organizationCode`、`organizationName`、`organizationType`）。**必須** 透過 Adapter 函式進行雙向映射：
+
+```typescript
+// API DTO（後端格式）
+interface OrganizationDTO {
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+}
+
+// 前端 ViewModel（語義化格式）
+interface OrganizationViewModel {
+  id: string;
+  organizationCode: string;
+  organizationName: string;
+  organizationType: string;
+}
+
+// Adapter：DTO → ViewModel
+function toOrganizationViewModel(dto: OrganizationDTO): OrganizationViewModel {
+  return {
+    id: dto.id,
+    organizationCode: dto.code,
+    organizationName: dto.name,
+    organizationType: dto.type,
+  };
+}
+
+// Adapter：ViewModel → Request DTO（送回後端時）
+function toOrganizationRequest(vm: OrganizationViewModel): Partial<OrganizationDTO> {
+  return {
+    code: vm.organizationCode,
+    name: vm.organizationName,
+    type: vm.organizationType,
+  };
+}
+```
+
+### 9.2 Adapter 放置位置
+
+Adapter 函式應放在各 Feature 的 `factory/` 目錄或 `api/` 目錄中，與 Factory 模式搭配使用：
+
+```
+features/{domain}/
+├── api/
+│   ├── {Feature}Api.ts         # API 呼叫
+│   └── {Feature}Adapter.ts     # ★ 欄位映射 Adapter
+├── factory/
+│   └── {Name}ViewModelFactory.ts  # 可在此整合 Adapter
+```
+
+---
+
+## 10. 測試規範
+
+### 10.1 測試類型
 
 | 類型 | 工具 | 強制測試範圍 |
 |:---|:---|:---|
 | **Unit Test** | Vitest | `factory/`, `utils/`, `hooks/` |
 | **Component Test** | RTL | 關鍵 UI 互動 |
 
-### 8.2 TDD 範例
+### 10.2 TDD 範例
 
 **1. 測試 (UserViewModelFactory.test.ts):**
 ```typescript
@@ -224,9 +321,9 @@ export class UserViewModelFactory {
 
 ---
 
-## 9. 狀態管理 (Redux)
+## 11. 狀態管理 (Redux)
 
-### 9.1 State 結構
+### 11.1 State 結構
 
 ```typescript
 interface RootState {
@@ -238,7 +335,7 @@ interface RootState {
 }
 ```
 
-### 9.2 Slice 命名
+### 11.2 Slice 命名
 
 ```
 src/store/
@@ -250,9 +347,9 @@ src/store/
 
 ---
 
-## 10. TypeScript 規範
+## 12. TypeScript 規範
 
-### 10.1 Type 定義
+### 12.1 Type 定義
 
 ```typescript
 // ✅ 正確：明確定義 Interface
@@ -266,7 +363,7 @@ interface EmployeeCardProps {
 const EmployeeCard = (props: any) => { ... }
 ```
 
-### 10.2 TSDoc 規範
+### 12.2 TSDoc 規範
 
 所有 Export 的 Function、Factory、Interface **必須** 包含 TSDoc：
 
@@ -283,5 +380,5 @@ export function createUserViewModel(dto: UserDto): UserViewModel {
 
 ---
 
-**文件版本:** 2.0  
-**最後更新:** 2025-12-07
+**文件版本:** 2.1
+**最後更新:** 2026-03-13
