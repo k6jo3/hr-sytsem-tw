@@ -115,6 +115,9 @@ export const OrganizationApi = {
       organizationName: o.name ?? o.organizationName ?? '',
       organizationType: (o.type ?? o.organizationType) === 'PARENT' ? 'PARENT' : 'SUBSIDIARY',
       parentOrganizationId: o.parentId ?? o.parentOrganizationId,
+      taxId: o.taxId,
+      address: o.address,
+      phoneNumber: o.phone ?? o.phoneNumber,
       status: guardEnum('organization.status', o.status, ['ACTIVE', 'INACTIVE'] as const, 'ACTIVE'),
       employeeCount: o.employeeCount ?? 0,
       createdAt: o.createdAt ?? '',
@@ -152,7 +155,20 @@ export const OrganizationApi = {
    */
   updateOrganization: (id: string, data: Partial<OrganizationRequest>): Promise<OrganizationDto> => {
     if (MockConfig.isEnabled('ORGANIZATION')) return MockOrganizationApi.updateOrganization(id, data);
-    return apiClient.put<OrganizationDto>(`/organizations/${id}`, data);
+    return apiClient.put<OrganizationDto>(`/organizations/${id}`, {
+      name: data.organizationName,
+      address: data.address,
+      phone: data.phoneNumber,
+      taxId: data.taxId,
+    });
+  },
+
+  /**
+   * 停用組織
+   */
+  deactivateOrganization: (id: string): Promise<void> => {
+    if (MockConfig.isEnabled('ORGANIZATION')) return Promise.resolve();
+    return apiClient.put(`/organizations/${id}/deactivate`);
   },
 
   /**
@@ -167,6 +183,10 @@ export const OrganizationApi = {
       organizationCode: raw.code ?? raw.organizationCode ?? '',
       organizationName: raw.name ?? raw.organizationName ?? '',
       organizationType: raw.type === 'PARENT' ? 'PARENT' : 'SUBSIDIARY',
+      parentOrganizationId: raw.parentId ?? raw.parentOrganizationId,
+      taxId: raw.taxId,
+      address: raw.address,
+      phoneNumber: raw.phone ?? raw.phoneNumber,
       status: guardEnum('organization.status', raw.status, ['ACTIVE', 'INACTIVE'] as const, 'ACTIVE'),
       employeeCount: raw.employeeCount ?? 0,
       createdAt: raw.createdAt ?? '',

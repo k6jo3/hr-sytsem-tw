@@ -5,7 +5,7 @@
  * Displays organization structure in a tree format
  */
 
-import { BankOutlined, DeleteOutlined, DownOutlined, EditOutlined, PlusOutlined, ReloadOutlined, TeamOutlined } from '@ant-design/icons';
+import { BankOutlined, DeleteOutlined, DownOutlined, EditOutlined, PlusOutlined, ReloadOutlined, StopOutlined, TeamOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Dropdown, Empty, Form, Input, message, Modal, Row, Select, Spin, Statistic, Tree } from 'antd';
 import { DataNode } from 'antd/es/tree';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -38,11 +38,12 @@ export const OrganizationTreeView: React.FC = () => {
     const [editingDept, setEditingDept] = useState<DepartmentDto | null>(null);
     const [targetParentId, setTargetParentId] = useState<string | undefined>(undefined);
 
-    // 新增組織 Modal
+    // 新增/編輯組織 Modal
     const [orgModalVisible, setOrgModalVisible] = useState(false);
     const [orgModalLoading, setOrgModalLoading] = useState(false);
     const [orgForm] = Form.useForm();
     const orgTypeValue = Form.useWatch('organizationType', orgForm);
+    const [editingOrg, setEditingOrg] = useState<OrganizationDto | null>(null);
 
     /** 母公司列表（建立子公司時選用） */
     const parentOrgOptions = useMemo(
@@ -168,21 +169,65 @@ export const OrganizationTreeView: React.FC = () => {
         }
     };
 
-    /** 新增組織 */
-    const handleCreateOrganization = async (values: OrganizationRequest) => {
+    /** 新增/編輯組織 */
+    const handleSubmitOrganization = async (values: OrganizationRequest) => {
         setOrgModalLoading(true);
         try {
-            await OrganizationApi.createOrganization(values);
-            message.success('組織建立成功');
+            if (editingOrg) {
+                await OrganizationApi.updateOrganization(editingOrg.organizationId, values);
+                message.success('組織更新成功');
+            } else {
+                await OrganizationApi.createOrganization(values);
+                message.success('組織建立成功');
+            }
             setOrgModalVisible(false);
+            setEditingOrg(null);
             orgForm.resetFields();
             loadOrganizationData();
         } catch (err: any) {
-            const serverMsg = err?.message || '組織建立失敗';
+            const serverMsg = err?.message || (editingOrg ? '組織更新失敗' : '組織建立失敗');
             message.error(serverMsg);
         } finally {
             setOrgModalLoading(false);
         }
+    };
+
+    /** 開啟編輯組織 Modal */
+    const handleEditOrganization = () => {
+        if (!selectedOrg) return;
+        setEditingOrg(selectedOrg);
+        orgForm.setFieldsValue({
+            organizationCode: selectedOrg.organizationCode,
+            organizationName: selectedOrg.organizationName,
+            organizationType: selectedOrg.organizationType,
+            parentOrganizationId: selectedOrg.parentOrganizationId,
+            taxId: selectedOrg.taxId,
+            address: selectedOrg.address,
+            phoneNumber: selectedOrg.phoneNumber,
+        });
+        setOrgModalVisible(true);
+    };
+
+    /** 停用組織 */
+    const handleDeactivateOrganization = () => {
+        if (!selectedOrg) return;
+        Modal.confirm({
+            title: `確認停用「${selectedOrg.organizationName}」？`,
+            content: '停用後該組織將無法使用。若該組織下仍有在職員工，將無法停用。',
+            okType: 'danger',
+            okText: '確認停用',
+            cancelText: '取消',
+            onOk: async () => {
+                try {
+                    await OrganizationApi.deactivateOrganization(selectedOrg.organizationId);
+                    message.success('組織已停用');
+                    loadOrganizationData();
+                } catch (err: any) {
+                    const serverMsg = err?.message || '停用失敗，該組織可能仍有在職員工';
+                    message.error(serverMsg);
+                }
+            },
+        });
     };
 
     // Node Context Menu
@@ -353,12 +398,48 @@ export const OrganizationTreeView: React.FC = () => {
                     </Col>
                     <Col span={8}>
                         {selectedOrg && (
-                            <Card title="組織概況" bordered={false}>
+                            <Card
+                                title="組織概況"
+                                bordered={false}
+                                extra={
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                        <Button
+                                            size="small"
+                                            icon={<EditOutlined />}
+                                            onClick={handleEditOrganization}
+                                        >
+                                            編輯
+                                        </Button>
+                                        {selectedOrg.status === 'ACTIVE' && (
+                                            <Button
+                                                size="small"
+                                                danger
+                                                icon={<StopOutlined />}
+                                                onClick={handleDeactivateOrganization}
+                                            >
+                                                停用
+                                            </Button>
+                                        )}
+                                    </div>
+                                }
+                            >
                                 <Statistic
                                     title="組織名稱"
                                     value={selectedOrg.organizationName}
                                     prefix={<BankOutlined />}
                                 />
+                                <div style={{ marginTop: 16 }}>
+                                    <Statistic
+                                        title="組織代碼"
+                                        value={selectedOrg.organizationCode}
+                                    />
+                                </div>
+                                <div style={{ marginTop: 16 }}>
+                                    <Statistic
+                                        title="組織類型"
+                                        value={selectedOrg.organizationType === 'PARENT' ? '母公司' : '子公司'}
+                                    />
+                                </div>
                                 <div style={{ marginTop: 16 }}>
                                     <Statistic
                                         title="總員工數"
@@ -367,6 +448,21 @@ export const OrganizationTreeView: React.FC = () => {
                                         suffix="人"
                                     />
                                 </div>
+                                {selectedOrg.taxId && (
+                                    <div style={{ marginTop: 16 }}>
+                                        <Statistic title="統一編號" value={selectedOrg.taxId} />
+                                    </div>
+                                )}
+                                {selectedOrg.address && (
+                                    <div style={{ marginTop: 16 }}>
+                                        <Statistic title="地址" value={selectedOrg.address} />
+                                    </div>
+                                )}
+                                {selectedOrg.phoneNumber && (
+                                    <div style={{ marginTop: 16 }}>
+                                        <Statistic title="電話" value={selectedOrg.phoneNumber} />
+                                    </div>
+                                )}
                                 <div style={{ marginTop: 16 }}>
                                     <Statistic
                                         title="狀態"
@@ -401,30 +497,33 @@ export const OrganizationTreeView: React.FC = () => {
                     initialValues={editingDept}
                 />
             )}
-            {/* 新增組織 Modal */}
+            {/* 新增/編輯組織 Modal */}
             <Modal
-                title="建立組織"
+                title={editingOrg ? '編輯組織' : '建立組織'}
                 open={orgModalVisible}
-                onCancel={() => { setOrgModalVisible(false); orgForm.resetFields(); }}
+                onCancel={() => { setOrgModalVisible(false); setEditingOrg(null); orgForm.resetFields(); }}
                 onOk={() => orgForm.submit()}
                 confirmLoading={orgModalLoading}
-                okText="建立"
+                okText={editingOrg ? '儲存' : '建立'}
                 cancelText="取消"
             >
                 <Form
                     form={orgForm}
                     layout="vertical"
-                    onFinish={handleCreateOrganization}
+                    onFinish={handleSubmitOrganization}
                     initialValues={{ organizationType: 'PARENT' }}
                 >
                     <Form.Item name="organizationCode" label="組織代碼" rules={[{ required: true, message: '請輸入組織代碼' }]}>
-                        <Input placeholder="例如：HQ" />
+                        <Input placeholder="例如：HQ" disabled={!!editingOrg} />
                     </Form.Item>
                     <Form.Item name="organizationName" label="組織名稱" rules={[{ required: true, message: '請輸入組織名稱' }]}>
                         <Input placeholder="例如：總公司" />
                     </Form.Item>
                     <Form.Item name="organizationType" label="組織類型" rules={[{ required: true }]}>
-                        <Select onChange={() => orgForm.setFieldValue('parentOrganizationId', undefined)}>
+                        <Select
+                            onChange={() => orgForm.setFieldValue('parentOrganizationId', undefined)}
+                            disabled={!!editingOrg}
+                        >
                             <Select.Option value="PARENT">母公司</Select.Option>
                             <Select.Option value="SUBSIDIARY">子公司</Select.Option>
                         </Select>
@@ -435,7 +534,7 @@ export const OrganizationTreeView: React.FC = () => {
                             label="所屬母公司"
                             rules={[{ required: true, message: '請選擇所屬母公司' }]}
                         >
-                            <Select placeholder="選擇母公司">
+                            <Select placeholder="選擇母公司" disabled={!!editingOrg}>
                                 {parentOrgOptions.map((p) => (
                                     <Select.Option key={p.organizationId} value={p.organizationId}>
                                         {p.organizationName}
