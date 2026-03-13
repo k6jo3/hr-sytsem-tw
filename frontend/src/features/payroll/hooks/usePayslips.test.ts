@@ -104,7 +104,7 @@ describe('usePayslips', () => {
   describe('取得薪資單列表', () => {
     it('應該成功取得薪資單列表', async () => {
       vi.mocked(PayrollApi.getMyPayslips).mockResolvedValue({
-        payslips: mockPayslips,
+        payslips: mockPayslips as any,
         total: 2,
         page: 1,
         page_size: 10,
@@ -141,7 +141,7 @@ describe('usePayslips', () => {
     it('取得資料過程中 loading 應該為 true', async () => {
       vi.mocked(PayrollApi.getMyPayslips).mockImplementation(
         () => new Promise((resolve) => setTimeout(() => resolve({
-          payslips: mockPayslips,
+          payslips: mockPayslips as any,
           total: 2,
           page: 1,
           page_size: 10,
@@ -167,7 +167,7 @@ describe('usePayslips', () => {
         page_size: 10,
       });
       vi.mocked(PayrollApi.getPayslipDetail).mockResolvedValue({
-        payslip: mockPayslipDetail,
+        payslip: mockPayslipDetail as any,
       });
 
       const { result } = renderHook(() => usePayslips());
@@ -283,7 +283,7 @@ describe('usePayslips', () => {
   describe('重新整理', () => {
     it('應該能重新取得薪資單列表', async () => {
       vi.mocked(PayrollApi.getMyPayslips).mockResolvedValue({
-        payslips: mockPayslips,
+        payslips: mockPayslips as any,
         total: 2,
         page: 1,
         page_size: 10,
@@ -310,7 +310,7 @@ describe('usePayslips', () => {
   describe('年度篩選', () => {
     it('應該支援年度參數', async () => {
       vi.mocked(PayrollApi.getMyPayslips).mockResolvedValue({
-        payslips: mockPayslips,
+        payslips: mockPayslips as any,
         total: 2,
         page: 1,
         page_size: 10,

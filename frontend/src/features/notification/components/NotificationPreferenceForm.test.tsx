@@ -32,6 +32,7 @@ describe('NotificationPreferenceForm', () => {
         loading: false,
         error: null,
         saving: false,
+        refresh: vi.fn(),
         updatePreference: mockUpdatePreference,
       });
 
@@ -49,6 +50,7 @@ describe('NotificationPreferenceForm', () => {
         loading: false,
         error: null,
         saving: false,
+        refresh: vi.fn(),
         updatePreference: mockUpdatePreference,
       });
 
@@ -64,6 +66,7 @@ describe('NotificationPreferenceForm', () => {
         loading: false,
         error: null,
         saving: false,
+        refresh: vi.fn(),
         updatePreference: mockUpdatePreference,
       });
 
@@ -78,6 +81,7 @@ describe('NotificationPreferenceForm', () => {
         loading: false,
         error: null,
         saving: false,
+        refresh: vi.fn(),
         updatePreference: mockUpdatePreference,
       });
 
@@ -94,6 +98,7 @@ describe('NotificationPreferenceForm', () => {
         loading: true,
         error: null,
         saving: false,
+        refresh: vi.fn(),
         updatePreference: mockUpdatePreference,
       });
 
@@ -110,6 +115,7 @@ describe('NotificationPreferenceForm', () => {
         loading: false,
         error: '載入偏好設定失敗',
         saving: false,
+        refresh: vi.fn(),
         updatePreference: mockUpdatePreference,
       });
 

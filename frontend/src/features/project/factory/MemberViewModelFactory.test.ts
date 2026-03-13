@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { ProjectMemberDto } from '../api/ProjectTypes';
 import { MemberViewModelFactory } from './MemberViewModelFactory';
 

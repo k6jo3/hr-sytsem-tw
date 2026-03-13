@@ -104,7 +104,7 @@ describe('usePayrollRuns', () => {
 
   describe('建立薪資批次', () => {
     it('應該成功建立薪資批次', async () => {
-      vi.mocked(PayrollApi.startPayrollRun).mockResolvedValue(mockRuns[0]);
+      vi.mocked(PayrollApi.startPayrollRun).mockResolvedValue(mockRuns[0] as any);
       vi.mocked(PayrollApi.getPayrollRuns).mockResolvedValue({
         items: mockRuns,
         total: 1,
@@ -129,9 +129,9 @@ describe('usePayrollRuns', () => {
 
   describe('執行薪資計算', () => {
     it('應該成功執行薪資計算', async () => {
-      vi.mocked(PayrollApi.calculatePayroll).mockResolvedValue(mockRuns[0]);
+      vi.mocked(PayrollApi.calculatePayroll).mockResolvedValue(mockRuns[0] as any);
       vi.mocked(PayrollApi.getPayrollRunDetail).mockResolvedValue({
-        run: mockRuns[0],
+        run: mockRuns[0] as any,
       });
 
       const { result } = renderHook(() => usePayrollRuns());
@@ -147,9 +147,9 @@ describe('usePayrollRuns', () => {
 
   describe('核准薪資批次', () => {
     it('應該成功核准薪資批次', async () => {
-      vi.mocked(PayrollApi.approvePayrollRun).mockResolvedValue(mockRuns[0]);
+      vi.mocked(PayrollApi.approvePayrollRun).mockResolvedValue(mockRuns[0] as any);
       vi.mocked(PayrollApi.getPayrollRunDetail).mockResolvedValue({
-        run: mockRuns[0],
+        run: mockRuns[0] as any,
       });
 
       const { result } = renderHook(() => usePayrollRuns());

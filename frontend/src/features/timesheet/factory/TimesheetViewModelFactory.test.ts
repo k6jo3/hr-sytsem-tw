@@ -129,10 +129,10 @@ describe('TimesheetViewModelFactory', () => {
       const viewModels = TimesheetViewModelFactory.createListFromDTOs(dtoList);
 
       expect(viewModels).toHaveLength(2);
-      expect(viewModels[0].hours).toBe(8);
-      expect(viewModels[0].statusLabel).toBe('已提交');
-      expect(viewModels[1].hours).toBe(4);
-      expect(viewModels[1].statusLabel).toBe('草稿');
+      expect(viewModels[0]!.hours).toBe(8);
+      expect(viewModels[0]!.statusLabel).toBe('已提交');
+      expect(viewModels[1]!.hours).toBe(4);
+      expect(viewModels[1]!.statusLabel).toBe('草稿');
     });
 
     it('應該正確處理空列表', () => {
@@ -144,6 +144,9 @@ describe('TimesheetViewModelFactory', () => {
 
   describe('createWeeklySummary', () => {
     const mockWeeklyDto: WeeklyTimesheetDto = {
+      id: 'weekly-1',
+      employee_id: 'emp-1',
+      employee_name: '王小明',
       week_start_date: '2024-12-02',
       week_end_date: '2024-12-08',
       entries: [mockEntryDto],
@@ -223,12 +226,12 @@ describe('TimesheetViewModelFactory', () => {
       const grouped = TimesheetViewModelFactory.groupByDate(entries);
 
       expect(grouped).toHaveLength(2);
-      expect(grouped[0].date).toBe('2024-12-08');
-      expect(grouped[0].totalHours).toBe(10);
-      expect(grouped[0].entries).toHaveLength(2);
-      expect(grouped[1].date).toBe('2024-12-09');
-      expect(grouped[1].totalHours).toBe(8);
-      expect(grouped[1].entries).toHaveLength(1);
+      expect(grouped[0]!.date).toBe('2024-12-08');
+      expect(grouped[0]!.totalHours).toBe(10);
+      expect(grouped[0]!.entries).toHaveLength(2);
+      expect(grouped[1]!.date).toBe('2024-12-09');
+      expect(grouped[1]!.totalHours).toBe(8);
+      expect(grouped[1]!.entries).toHaveLength(1);
     });
 
     it('應該正確處理空列表', () => {

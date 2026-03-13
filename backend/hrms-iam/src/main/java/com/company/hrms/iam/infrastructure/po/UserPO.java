@@ -49,6 +49,16 @@ public class UserPO {
     private String displayName;
 
     /**
+     * 姓
+     */
+    private String firstName;
+
+    /**
+     * 名
+     */
+    private String lastName;
+
+    /**
      * 員工 ID (關聯組織服務的員工)
      */
     private String employeeId;

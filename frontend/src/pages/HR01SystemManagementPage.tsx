@@ -26,6 +26,7 @@ export const HR01SystemManagementPage: React.FC = () => {
     refreshJobs,
     updateParameter,
     toggleFeature,
+    updateJob,
   } = useSystemManagement();
 
   if (loading && parameters.length === 0) {
@@ -88,6 +89,7 @@ export const HR01SystemManagementPage: React.FC = () => {
                 jobs={jobs}
                 loading={loading}
                 onRefresh={refreshJobs}
+                onToggleEnabled={updateJob}
               />
             ),
           },

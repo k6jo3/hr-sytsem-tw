@@ -416,8 +416,8 @@ describe('InsuranceViewModelFactory', () => {
       const viewModels = InsuranceViewModelFactory.createListFromDTOs(dtos);
 
       expect(viewModels).toHaveLength(2);
-      expect(viewModels[0].insuranceTypeLabel).toBe('勞保');
-      expect(viewModels[1].insuranceTypeLabel).toBe('健保');
+      expect(viewModels[0]!.insuranceTypeLabel).toBe('勞保');
+      expect(viewModels[1]!.insuranceTypeLabel).toBe('健保');
     });
 
     it('should handle empty list', () => {

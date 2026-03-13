@@ -113,8 +113,8 @@ describe('NotificationViewModelFactory', () => {
       const vms = NotificationViewModelFactory.createNotificationList(dtos);
 
       expect(vms).toHaveLength(2);
-      expect(vms[0].notificationId).toBe('n-001');
-      expect(vms[1].notificationId).toBe('n-002');
+      expect(vms[0]!.notificationId).toBe('n-001');
+      expect(vms[1]!.notificationId).toBe('n-002');
     });
   });
 

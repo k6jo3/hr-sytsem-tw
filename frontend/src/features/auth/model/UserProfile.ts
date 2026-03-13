@@ -66,6 +66,8 @@ export interface UserListViewModel {
   email: string;
   displayName: string;
   fullName: string;
+  firstName?: string;
+  lastName?: string;
   employeeId?: string;
   status: UserStatus;
   statusLabel: string;

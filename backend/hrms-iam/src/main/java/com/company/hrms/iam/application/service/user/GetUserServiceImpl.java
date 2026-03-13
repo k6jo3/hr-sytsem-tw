@@ -78,6 +78,8 @@ public class GetUserServiceImpl
                 .username(user.getUsername())
                 .email(user.getEmail().getValue())
                 .displayName(user.getDisplayName())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .status(user.getStatus().name())
                 .tenantId(user.getTenantId())
                 .employeeId(user.getEmployeeId())

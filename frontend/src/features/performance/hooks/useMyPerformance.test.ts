@@ -64,7 +64,7 @@ describe('useMyPerformance', () => {
     it('應該有正確的初始狀態', () => {
       vi.mocked(PerformanceApi.getMyPerformance).mockResolvedValue({
         performance: mockPerformance,
-      });
+      } as any);
 
       const { result } = renderHook(() => useMyPerformance());
 
@@ -79,7 +79,7 @@ describe('useMyPerformance', () => {
     it('應該成功取得績效資訊', async () => {
       vi.mocked(PerformanceApi.getMyPerformance).mockResolvedValue({
         performance: mockPerformance,
-      });
+      } as any);
 
       const { result } = renderHook(() => useMyPerformance());
 
@@ -111,8 +111,8 @@ describe('useMyPerformance', () => {
     it('應該成功儲存評估', async () => {
       vi.mocked(PerformanceApi.getMyPerformance).mockResolvedValue({
         performance: mockPerformance,
-      });
-      vi.mocked(PerformanceApi.saveReview).mockResolvedValue(undefined);
+      } as any);
+      vi.mocked(PerformanceApi.saveReview).mockResolvedValue(undefined as any);
 
       const { result } = renderHook(() => useMyPerformance());
 
@@ -127,7 +127,7 @@ describe('useMyPerformance', () => {
         ]);
       });
 
-      expect(response.success).toBe(true);
+      expect(response!.success).toBe(true);
       expect(PerformanceApi.saveReview).toHaveBeenCalled();
     });
   });
@@ -136,11 +136,11 @@ describe('useMyPerformance', () => {
     it('應該成功提交評估', async () => {
       vi.mocked(PerformanceApi.getMyPerformance).mockResolvedValue({
         performance: mockPerformance,
-      });
+      } as any);
       vi.mocked(PerformanceApi.submitReview).mockResolvedValue({
         overall_score: 4.1,
         overall_rating: 'A',
-      });
+      } as any);
 
       const { result } = renderHook(() => useMyPerformance());
 
@@ -153,8 +153,8 @@ describe('useMyPerformance', () => {
         response = await result.current.submitReview('review-001');
       });
 
-      expect(response.success).toBe(true);
-      expect(response.score).toBe(4.1);
+      expect(response!.success).toBe(true);
+      expect(response!.score).toBe(4.1);
       expect(PerformanceApi.submitReview).toHaveBeenCalledWith('review-001', {});
     });
   });

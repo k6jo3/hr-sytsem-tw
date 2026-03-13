@@ -3,6 +3,7 @@ import zhTW from 'antd/locale/zh_TW';
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import {
+    HR01DashboardPage,
     HR01LoginPage,
     HR01PasswordChangePage,
     HR01ProfilePage,
@@ -84,7 +85,7 @@ const App: React.FC = () => {
       <Routes>
         {/* ========== 身分認證與權限 (HR01) ========== */}
         <Route path="/login" element={<HR01LoginPage />} />
-        <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
+        <Route path="/dashboard" element={<ProtectedRoute><HR01DashboardPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><HR01ProfilePage /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute requiredRoles={['ADMIN']}><HR01UserManagementPage /></ProtectedRoute>} />
         <Route path="/admin/roles" element={<ProtectedRoute requiredRoles={['ADMIN']}><HR01RoleManagementPage /></ProtectedRoute>} />

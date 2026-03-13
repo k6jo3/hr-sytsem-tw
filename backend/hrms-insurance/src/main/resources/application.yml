@@ -3,14 +3,14 @@ spring:
     name: hrms-insurance
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/hrms_insurance
+    url: jdbc:postgresql://localhost:5433/hrms_insurance
     username: hrms_user
     password: hrms_password
     driver-class-name: org.postgresql.Driver
   
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:

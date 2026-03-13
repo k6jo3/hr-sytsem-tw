@@ -17,8 +17,8 @@ const mockPayslip: PayslipDetailViewModel = {
   statusLabel: '已發放',
   statusColor: 'green',
   incomeItems: [
-    { itemCode: 'BASE', itemName: '底薪', itemType: 'FIXED', amount: 50000, amountDisplay: '$50,000' },
-    { itemCode: 'OT', itemName: '加班費', itemType: 'VARIABLE', amount: 5000, amountDisplay: '$5,000' },
+    { itemCode: 'BASE', itemName: '底薪', itemType: 'FIXED' as any, amount: 50000, amountDisplay: '$50,000' },
+    { itemCode: 'OT', itemName: '加班費', itemType: 'VARIABLE' as any, amount: 5000, amountDisplay: '$5,000' },
   ],
   deductionItems: [
     { itemCode: 'LABOR', itemName: '勞保費', itemType: 'DEDUCTION', amount: 1053, amountDisplay: '$1,053' },

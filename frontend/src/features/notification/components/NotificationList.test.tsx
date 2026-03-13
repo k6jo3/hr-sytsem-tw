@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { NotificationList } from './NotificationList';
-import type { NotificationViewModel, NotificationSummaryViewModel } from '../model/NotificationViewModel';
+import type { NotificationSummaryViewModel } from '../model/NotificationViewModel';
 
 // Mock hooks
 const mockRefresh = vi.fn();
@@ -15,7 +15,7 @@ vi.mock('../hooks', () => ({
 
 import { useMyNotifications } from '../hooks';
 
-const mockNotifications: NotificationViewModel[] = [
+const mockNotifications = [
   {
     notificationId: 'notif-001',
     title: '請假審核通知',
@@ -62,7 +62,7 @@ describe('NotificationList', () => {
   describe('正常渲染', () => {
     it('應顯示通知列表與統計卡片', () => {
       vi.mocked(useMyNotifications).mockReturnValue({
-        notifications: mockNotifications,
+        notifications: mockNotifications as any,
         summary: mockSummary,
         unreadCount: 3,
         loading: false,
@@ -88,7 +88,7 @@ describe('NotificationList', () => {
 
     it('有未讀通知時應顯示全部標為已讀按鈕', () => {
       vi.mocked(useMyNotifications).mockReturnValue({
-        notifications: mockNotifications,
+        notifications: mockNotifications as any,
         summary: mockSummary,
         unreadCount: 3,
         loading: false,
@@ -106,7 +106,7 @@ describe('NotificationList', () => {
 
     it('未讀通知應顯示標記已讀按鈕', () => {
       vi.mocked(useMyNotifications).mockReturnValue({
-        notifications: mockNotifications,
+        notifications: mockNotifications as any,
         summary: mockSummary,
         unreadCount: 3,
         loading: false,

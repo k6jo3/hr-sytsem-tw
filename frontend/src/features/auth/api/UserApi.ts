@@ -79,6 +79,34 @@ function adaptGetUsersResponse(raw: any): GetUsersResponse {
   };
 }
 
+/**
+ * 將前端 snake_case 請求轉換為後端 camelCase 格式
+ */
+function adaptCreateRequest(request: CreateUserRequest): Record<string, unknown> {
+  return {
+    username: request.username,
+    email: request.email,
+    password: request.password,
+    displayName: request.display_name,
+    firstName: request.first_name,
+    lastName: request.last_name,
+    employeeId: request.employee_id,
+    roleIds: request.role_ids,
+    mustChangePassword: request.must_change_password,
+  };
+}
+
+function adaptUpdateRequest(request: UpdateUserRequest): Record<string, unknown> {
+  return {
+    email: request.email,
+    displayName: request.display_name,
+    firstName: request.first_name,
+    lastName: request.last_name,
+    roles: request.role_ids,
+    mustChangePassword: undefined,
+  };
+}
+
 export const UserApi = {
   // ========== Query ==========
 
@@ -107,7 +135,7 @@ export const UserApi = {
    */
   createUser: async (request: CreateUserRequest): Promise<UserDto> => {
     if (MockConfig.isEnabled('AUTH')) return MockAuthApi.createUser(request);
-    const raw = await apiClient.post(BASE_URL, request);
+    const raw = await apiClient.post(BASE_URL, adaptCreateRequest(request));
     return adaptUserItem(raw);
   },
 
@@ -116,7 +144,7 @@ export const UserApi = {
    */
   updateUser: async (userId: string, request: UpdateUserRequest): Promise<UserDto> => {
     if (MockConfig.isEnabled('AUTH')) return MockAuthApi.updateUser(userId, request);
-    const raw = await apiClient.put(`${BASE_URL}/${userId}`, request);
+    const raw = await apiClient.put(`${BASE_URL}/${userId}`, adaptUpdateRequest(request));
     return adaptUserItem(raw);
   },
 

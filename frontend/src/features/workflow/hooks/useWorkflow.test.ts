@@ -56,8 +56,8 @@ describe('usePendingTasks', () => {
     });
 
     expect(result.current.tasks).toHaveLength(1);
-    expect(result.current.tasks[0].taskId).toBe('task-001');
-    expect(result.current.tasks[0].businessTypeLabel).toBe('請假申請');
+    expect(result.current.tasks[0]!.taskId).toBe('task-001');
+    expect(result.current.tasks[0]!.businessTypeLabel).toBe('請假申請');
     expect(result.current.summary).toBeTruthy();
     expect(result.current.summary?.totalPending).toBe(1);
   });
@@ -149,8 +149,8 @@ describe('useMyApplications', () => {
     });
 
     expect(result.current.applications).toHaveLength(1);
-    expect(result.current.applications[0].statusLabel).toBe('審核中');
-    expect(result.current.applications[0].isRunning).toBe(true);
+    expect(result.current.applications[0]!.statusLabel).toBe('審核中');
+    expect(result.current.applications[0]!.isRunning).toBe(true);
   });
 });
 
@@ -185,7 +185,7 @@ describe('useWorkflowDefinitions', () => {
     });
 
     expect(result.current.definitions).toHaveLength(1);
-    expect(result.current.definitions[0].flowTypeLabel).toBe('請假流程');
+    expect(result.current.definitions[0]!.flowTypeLabel).toBe('請假流程');
   });
 });
 
@@ -218,7 +218,7 @@ describe('useDelegations', () => {
     });
 
     expect(result.current.delegations).toHaveLength(1);
-    expect(result.current.delegations[0].delegateeName).toBe('李小美');
+    expect(result.current.delegations[0]!.delegateeName).toBe('李小美');
   });
 
   it('應成功新增代理人', async () => {

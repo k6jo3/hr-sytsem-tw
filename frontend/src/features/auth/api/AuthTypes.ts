@@ -112,8 +112,8 @@ export interface CreateUserRequest {
   email: string;
   password: string;
   display_name: string;
-  first_name?: string;
-  last_name?: string;
+  first_name: string;
+  last_name: string;
   employee_id?: string;
   role_ids: string[];
   must_change_password?: boolean;
@@ -125,8 +125,8 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   email?: string;
   display_name?: string;
-  first_name?: string;
-  last_name?: string;
+  first_name: string;
+  last_name: string;
   employee_id?: string;
   role_ids?: string[];
 }

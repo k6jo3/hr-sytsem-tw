@@ -42,7 +42,7 @@ vi.mock('../factory/RecruitmentViewModelFactory', () => ({
 }));
 
 describe('useCandidatesKanban', () => {
-  const mockCandidates = [
+  const mockCandidates: any[] = [
     {
       candidate_id: '1',
       opening_id: 'job-1',
@@ -90,7 +90,7 @@ describe('useCandidatesKanban', () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
+      } as any);
 
       const { result } = renderHook(() => useCandidatesKanban());
 
@@ -106,7 +106,7 @@ describe('useCandidatesKanban', () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
+      } as any);
 
       const { result } = renderHook(() => useCandidatesKanban());
 
@@ -124,7 +124,7 @@ describe('useCandidatesKanban', () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
+      } as any);
 
       const { result } = renderHook(() => useCandidatesKanban());
 
@@ -160,7 +160,7 @@ describe('useCandidatesKanban', () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
+      } as any);
 
       renderHook(() => useCandidatesKanban());
 
@@ -178,8 +178,8 @@ describe('useCandidatesKanban', () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
-      vi.mocked(RecruitmentApi.updateCandidateStatus).mockResolvedValue(undefined);
+      } as any);
+      vi.mocked(RecruitmentApi.updateCandidateStatus).mockResolvedValue(undefined as any);
 
       const { result } = renderHook(() => useCandidatesKanban());
 
@@ -192,8 +192,8 @@ describe('useCandidatesKanban', () => {
         response = await result.current.updateCandidateStatus('1', 'SCREENING');
       });
 
-      expect(response.success).toBe(true);
-      expect(response.message).toBe('狀態更新成功');
+      expect(response!.success).toBe(true);
+      expect(response!.message).toBe('狀態更新成功');
       expect(RecruitmentApi.updateCandidateStatus).toHaveBeenCalledWith('1', {
         status: 'SCREENING',
       });
@@ -204,7 +204,7 @@ describe('useCandidatesKanban', () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
+      } as any);
       const errorMessage = '更新狀態失敗';
       vi.mocked(RecruitmentApi.updateCandidateStatus).mockRejectedValue(new Error(errorMessage));
 
@@ -219,15 +219,15 @@ describe('useCandidatesKanban', () => {
         response = await result.current.updateCandidateStatus('1', 'SCREENING');
       });
 
-      expect(response.success).toBe(false);
-      expect(response.message).toBe(errorMessage);
+      expect(response!.success).toBe(false);
+      expect(response!.message).toBe(errorMessage);
     });
 
     it('更新過程中 updating 應該為 true', async () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
+      } as any);
       vi.mocked(RecruitmentApi.updateCandidateStatus).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 50))
       );
@@ -255,8 +255,8 @@ describe('useCandidatesKanban', () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
-      vi.mocked(RecruitmentApi.hireCandidate).mockResolvedValue(undefined);
+      } as any);
+      vi.mocked(RecruitmentApi.hireCandidate).mockResolvedValue(undefined as any);
 
       const { result } = renderHook(() => useCandidatesKanban());
 
@@ -269,8 +269,8 @@ describe('useCandidatesKanban', () => {
         response = await result.current.hireCandidate('3');
       });
 
-      expect(response.success).toBe(true);
-      expect(response.message).toBe('錄取成功');
+      expect(response!.success).toBe(true);
+      expect(response!.message).toBe('錄取成功');
       expect(RecruitmentApi.hireCandidate).toHaveBeenCalledWith('3');
       expect(RecruitmentApi.getCandidates).toHaveBeenCalledTimes(2); // Initial + refresh
     });
@@ -279,7 +279,7 @@ describe('useCandidatesKanban', () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
+      } as any);
       const errorMessage = '錄取失敗';
       vi.mocked(RecruitmentApi.hireCandidate).mockRejectedValue(new Error(errorMessage));
 
@@ -294,8 +294,8 @@ describe('useCandidatesKanban', () => {
         response = await result.current.hireCandidate('3');
       });
 
-      expect(response.success).toBe(false);
-      expect(response.message).toBe(errorMessage);
+      expect(response!.success).toBe(false);
+      expect(response!.message).toBe(errorMessage);
     });
   });
 
@@ -304,7 +304,7 @@ describe('useCandidatesKanban', () => {
       vi.mocked(RecruitmentApi.getCandidates).mockResolvedValue({
         data: mockCandidates,
         total: 3,
-      });
+      } as any);
 
       const { result } = renderHook(() => useCandidatesKanban());
 
@@ -332,7 +332,7 @@ describe('useCandidatesKanban', () => {
                 resolve({
                   data: mockCandidates,
                   total: 3,
-                }),
+                } as any),
               50
             )
           )

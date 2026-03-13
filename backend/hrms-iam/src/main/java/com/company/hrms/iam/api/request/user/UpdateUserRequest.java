@@ -31,6 +31,18 @@ public class UpdateUserRequest {
     private String displayName;
 
     /**
+     * 姓 (可選)
+     */
+    @Size(max = 50, message = "姓的長度不可超過 50 字元")
+    private String firstName;
+
+    /**
+     * 名 (可選)
+     */
+    @Size(max = 50, message = "名的長度不可超過 50 字元")
+    private String lastName;
+
+    /**
      * 角色列表 (可選)
      */
     private List<String> roles;

@@ -38,6 +38,16 @@ public class UserDetailResponse {
     private String displayName;
 
     /**
+     * 姓
+     */
+    private String firstName;
+
+    /**
+     * 名
+     */
+    private String lastName;
+
+    /**
      * 關聯員工 ID
      */
     private String employeeId;

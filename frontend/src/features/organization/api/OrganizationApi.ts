@@ -109,9 +109,21 @@ export const OrganizationApi = {
   /**
    * 取得組織列表
    */
-  getOrganizations: (): Promise<{ content: OrganizationDto[] }> => {
+  getOrganizations: async (): Promise<{ content: OrganizationDto[] }> => {
     if (MockConfig.isEnabled('ORGANIZATION')) return MockOrganizationApi.getOrganizations();
-    return apiClient.get<{ content: OrganizationDto[] }>('/organizations');
+    const raw = await apiClient.get<any>('/organizations');
+    const items = raw.content ?? raw.items ?? [];
+    const content: OrganizationDto[] = items.map((o: any) => ({
+      organizationId: o.organizationId ?? o.id,
+      organizationCode: o.code ?? o.organizationCode ?? '',
+      organizationName: o.name ?? o.organizationName ?? '',
+      organizationType: (o.type ?? o.organizationType) === 'PARENT' ? 'PARENT' : 'SUBSIDIARY',
+      parentOrganizationId: o.parentId ?? o.parentOrganizationId,
+      status: o.status ?? 'ACTIVE',
+      employeeCount: o.employeeCount ?? 0,
+      createdAt: o.createdAt ?? '',
+    }));
+    return { content };
   },
 
   /**
@@ -127,7 +139,16 @@ export const OrganizationApi = {
    */
   createOrganization: (data: OrganizationRequest): Promise<OrganizationDto> => {
     if (MockConfig.isEnabled('ORGANIZATION')) return MockOrganizationApi.createOrganization(data);
-    return apiClient.post<OrganizationDto>('/organizations', data);
+    return apiClient.post<OrganizationDto>('/organizations', {
+      code: data.organizationCode,
+      name: data.organizationName,
+      type: data.organizationType,
+      parentId: data.parentOrganizationId,
+      taxId: data.taxId,
+      phone: data.phoneNumber,
+      address: data.address,
+      establishedDate: data.establishedDate,
+    });
   },
 
   /**
@@ -141,9 +162,34 @@ export const OrganizationApi = {
   /**
    * 取得組織結構樹
    */
-  getOrganizationTree: (id: string): Promise<{ data: OrganizationDto; departments: DepartmentDto[] }> => {
+  getOrganizationTree: async (id: string): Promise<{ data: OrganizationDto; departments: DepartmentDto[] }> => {
     if (MockConfig.isEnabled('ORGANIZATION')) return MockOrganizationApi.getOrganizationTree(id);
-    return apiClient.get(`/organizations/${id}/tree`);
+    const raw = await apiClient.get<any>(`/organizations/${id}/tree`);
+    // 後端回傳扁平結構，需適配為 { data, departments }
+    const orgData: OrganizationDto = {
+      organizationId: raw.organizationId ?? raw.id,
+      organizationCode: raw.code ?? raw.organizationCode ?? '',
+      organizationName: raw.name ?? raw.organizationName ?? '',
+      organizationType: raw.type === 'PARENT' ? 'PARENT' : 'SUBSIDIARY',
+      status: raw.status ?? 'ACTIVE',
+      employeeCount: raw.employeeCount ?? 0,
+      createdAt: raw.createdAt ?? '',
+    };
+    const departments: DepartmentDto[] = (raw.departments ?? []).map((d: any) => ({
+      departmentId: d.departmentId ?? d.id,
+      code: d.code ?? d.departmentCode ?? '',
+      name: d.name ?? d.departmentName ?? '',
+      level: d.level ?? 1,
+      sortOrder: d.sortOrder ?? d.displayOrder ?? 0,
+      organizationId: d.organizationId ?? id,
+      parentId: d.parentId ?? d.parentDepartmentId,
+      managerId: d.managerId,
+      managerName: d.managerName,
+      status: d.status ?? 'ACTIVE',
+      employeeCount: d.employeeCount ?? 0,
+      subDepartments: d.subDepartments ?? d.children,
+    }));
+    return { data: orgData, departments };
   },
 
   // ========== 部門管理 API ==========

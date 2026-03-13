@@ -14,5 +14,13 @@ public class UpdateProfileTask implements PipelineTask<UserPipelineContext> {
         var user = context.getUser();
 
         user.updateProfile(request.getEmail(), request.getDisplayName(), null, null);
+
+        // 更新姓名
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
     }
 }

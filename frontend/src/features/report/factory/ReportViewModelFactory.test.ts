@@ -68,8 +68,8 @@ describe('ReportViewModelFactory', () => {
       const vms = ReportViewModelFactory.createHeadcountTrendListFromDTOs(dtos);
 
       expect(vms).toHaveLength(2);
-      expect(vms[0].netChange).toBe(3);
-      expect(vms[1].netChange).toBe(3);
+      expect(vms[0]!.netChange).toBe(3);
+      expect(vms[1]!.netChange).toBe(3);
     });
   });
 

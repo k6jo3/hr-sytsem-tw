@@ -3,14 +3,14 @@ spring:
     name: hrms-performance
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/hrms_performance
+    url: jdbc:postgresql://localhost:5433/hrms_performance
     username: hrms_user
     password: hrms_password
     driver-class-name: org.postgresql.Driver
   
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:

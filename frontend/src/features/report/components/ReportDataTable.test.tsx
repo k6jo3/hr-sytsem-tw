@@ -3,7 +3,7 @@
  * Domain Code: HR14
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ReportDataTable } from './ReportDataTable';
 

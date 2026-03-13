@@ -212,12 +212,12 @@ describe('EmployeeList', () => {
     it('應該正確顯示不同狀態的標籤顏色', () => {
       const employeesWithDifferentStatus: EmployeeViewModel[] = [
         {
-          ...mockEmployees[0],
+          ...mockEmployees[0]!,
           statusLabel: '在職',
           statusColor: 'success',
         },
         {
-          ...mockEmployees[1],
+          ...mockEmployees[1]!,
           statusLabel: '離職',
           statusColor: 'error',
         },

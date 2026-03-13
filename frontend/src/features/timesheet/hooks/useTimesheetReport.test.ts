@@ -200,8 +200,8 @@ describe('useTimesheetReport', () => {
 
       const projectHours = result.current.summary?.project_hours;
       expect(projectHours).toBeDefined();
-      expect(projectHours![0].project_name).toBe('ERP專案');
-      expect(projectHours![0].hours).toBe(160);
+      expect(projectHours![0]!.project_name).toBe('ERP專案');
+      expect(projectHours![0]!.hours).toBe(160);
     });
 
     it('應該正確處理部門工時統計', async () => {
@@ -217,8 +217,8 @@ describe('useTimesheetReport', () => {
 
       const deptHours = result.current.summary?.department_hours;
       expect(deptHours).toBeDefined();
-      expect(deptHours![0].department_name).toBe('資訊部');
-      expect(deptHours![0].hours).toBe(240);
+      expect(deptHours![0]!.department_name).toBe('資訊部');
+      expect(deptHours![0]!.hours).toBe(240);
     });
 
     it('應該正確處理未填報員工列表', async () => {
@@ -235,7 +235,7 @@ describe('useTimesheetReport', () => {
       const unreported = result.current.summary?.unreported_employees;
       expect(unreported).toBeDefined();
       expect(unreported).toHaveLength(2);
-      expect(unreported![0].name).toBe('張三');
+      expect(unreported![0]!.name).toBe('張三');
     });
   });
 });

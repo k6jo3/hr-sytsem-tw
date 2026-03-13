@@ -142,10 +142,10 @@ describe('EmployeeViewModelFactory', () => {
       const viewModels = EmployeeViewModelFactory.createListFromDTOs(dtoList);
 
       expect(viewModels).toHaveLength(2);
-      expect(viewModels[0].employeeNumber).toBe('EMP001');
-      expect(viewModels[0].fullName).toBe('王小明');
-      expect(viewModels[1].employeeNumber).toBe('EMP002');
-      expect(viewModels[1].fullName).toBe('李小華');
+      expect(viewModels[0]!.employeeNumber).toBe('EMP001');
+      expect(viewModels[0]!.fullName).toBe('王小明');
+      expect(viewModels[1]!.employeeNumber).toBe('EMP002');
+      expect(viewModels[1]!.fullName).toBe('李小華');
     });
 
     it('應該正確處理空列表', () => {

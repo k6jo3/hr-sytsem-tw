@@ -39,7 +39,7 @@ describe('WorkflowViewModelFactory', () => {
       expect(vm.statusColor).toBe('success');
       expect(vm.version).toBe(2);
       expect(vm.nodes).toHaveLength(3);
-      expect(vm.nodes[1].nodeTypeLabel).toBe('審核');
+      expect(vm.nodes[1]!.nodeTypeLabel).toBe('審核');
       expect(vm.edges).toHaveLength(2);
     });
 
@@ -74,8 +74,8 @@ describe('WorkflowViewModelFactory', () => {
       const vms = WorkflowViewModelFactory.createDefinitionList(dtos);
 
       expect(vms).toHaveLength(2);
-      expect(vms[0].definitionId).toBe('d1');
-      expect(vms[1].flowTypeLabel).toBe('加班流程');
+      expect(vms[0]!.definitionId).toBe('d1');
+      expect(vms[1]!.flowTypeLabel).toBe('加班流程');
     });
   });
 
@@ -265,7 +265,7 @@ describe('WorkflowViewModelFactory', () => {
         delegatee_id: 'emp-002',
         delegatee_name: '李小美',
         start_date: '2026-03-01',
-        end_date: futureDate.toISOString().split('T')[0],
+        end_date: futureDate.toISOString().split('T')[0]!,
         is_active: true,
         created_at: '2026-02-28T10:00:00Z',
       };

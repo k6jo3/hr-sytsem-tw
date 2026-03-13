@@ -239,9 +239,9 @@ describe('DocumentViewModelFactory', () => {
       const types = DocumentViewModelFactory.createAvailableTypesFromTemplates(templates);
 
       expect(types).toHaveLength(2);
-      expect(types[0].templateTypeLabel).toBe('在職證明');
-      expect(types[1].templateTypeLabel).toBe('薪資證明');
-      expect(types[1].requiresApproval).toBe(true);
+      expect(types[0]!.templateTypeLabel).toBe('在職證明');
+      expect(types[1]!.templateTypeLabel).toBe('薪資證明');
+      expect(types[1]!.requiresApproval).toBe(true);
     });
   });
 });

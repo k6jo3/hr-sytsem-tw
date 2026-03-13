@@ -1,0 +1,156 @@
+# HRMS API Gateway Configuration
+server:
+  port: 8080
+
+spring:
+  application:
+    name: hrms-gateway
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+  # Redis（限流用）
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+  cloud:
+    gateway:
+      # 全域 Filter
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+      # 路由配置（正式環境使用 Eureka 服務發現）
+      routes:
+        # HR01 IAM 認證授權服務
+        - id: hrms-iam
+          uri: ${ROUTE_IAM_URI:lb://hrms-iam}
+          predicates:
+            - Path=/api/v1/auth/**, /api/v1/users/**, /api/v1/roles/**, /api/v1/permissions/**, /api/v1/system/**
+
+        # HR02 組織員工服務
+        - id: hrms-organization
+          uri: ${ROUTE_ORG_URI:lb://hrms-organization}
+          predicates:
+            - Path=/api/v1/employees/**, /api/v1/organizations/**, /api/v1/departments/**
+
+        # HR03 考勤管理服務
+        - id: hrms-attendance
+          uri: ${ROUTE_ATT_URI:lb://hrms-attendance}
+          predicates:
+            - Path=/api/v1/attendance/**, /api/v1/leave/**, /api/v1/overtime/**, /api/v1/shifts/**
+
+        # HR04 薪資管理服務
+        - id: hrms-payroll
+          uri: ${ROUTE_PAY_URI:lb://hrms-payroll}
+          predicates:
+            - Path=/api/v1/payslips/**, /api/v1/payroll-runs/**, /api/v1/salary-structures/**, /api/v1/payroll-item-definitions/**
+
+        # HR05 保險管理服務
+        - id: hrms-insurance
+          uri: ${ROUTE_INS_URI:lb://hrms-insurance}
+          predicates:
+            - Path=/api/v1/insurance/**
+
+        # HR06 專案管理服務
+        - id: hrms-project
+          uri: ${ROUTE_PROJ_URI:lb://hrms-project}
+          predicates:
+            - Path=/api/v1/projects/**, /api/v1/customers/**, /api/v1/tasks/**
+
+        # HR07 工時管理服務
+        - id: hrms-timesheet
+          uri: ${ROUTE_TIME_URI:lb://hrms-timesheet}
+          predicates:
+            - Path=/api/v1/timesheets/**
+
+        # HR08 績效管理服務
+        - id: hrms-performance
+          uri: ${ROUTE_PERF_URI:lb://hrms-performance}
+          predicates:
+            - Path=/api/v1/performance/**
+
+        # HR09 招募管理服務
+        - id: hrms-recruitment
+          uri: ${ROUTE_RECRUIT_URI:lb://hrms-recruitment}
+          predicates:
+            - Path=/api/v1/recruitment/**, /api/v1/candidates/**
+
+        # HR10 訓練管理服務
+        - id: hrms-training
+          uri: ${ROUTE_TRAIN_URI:lb://hrms-training}
+          predicates:
+            - Path=/api/v1/training/**
+
+        # HR11 簽核流程服務
+        - id: hrms-workflow
+          uri: ${ROUTE_WF_URI:lb://hrms-workflow}
+          predicates:
+            - Path=/api/v1/workflows/**
+
+        # HR12 通知服務
+        - id: hrms-notification
+          uri: ${ROUTE_NOTI_URI:lb://hrms-notification}
+          predicates:
+            - Path=/api/v1/notifications/**
+
+        # HR13 文件管理服務
+        - id: hrms-document
+          uri: ${ROUTE_DOC_URI:lb://hrms-document}
+          predicates:
+            - Path=/api/v1/documents/**
+
+        # HR14 報表分析服務
+        - id: hrms-reporting
+          uri: ${ROUTE_RPT_URI:lb://hrms-reporting}
+          predicates:
+            - Path=/api/v1/reporting/**
+
+# JWT 配置（必須與 IAM 服務使用相同的 secret）
+jwt:
+  secret: ${JWT_SECRET:your-256-bit-secret-key-for-jwt-token-generation-must-be-at-least-256-bits-long}
+
+# Eureka 配置
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:false}
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+# Resilience4j 熔斷配置
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000
+        permitted-number-of-calls-in-half-open-state: 3
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 5s
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway
+  endpoint:
+    health:
+      show-details: when_authorized
+    gateway:
+      enabled: true
+
+# 日誌配置
+logging:
+  level:
+    root: INFO
+    com.company.hrms.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

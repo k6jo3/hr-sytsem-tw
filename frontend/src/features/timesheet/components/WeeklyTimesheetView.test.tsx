@@ -5,6 +5,10 @@ import type { WeeklyTimesheetSummary } from '../model/TimesheetViewModel';
 
 describe('WeeklyTimesheetView', () => {
   const mockSummary: WeeklyTimesheetSummary = {
+    id: 'ts-1',
+    employeeId: 'emp-1',
+    employeeName: '王小明',
+    status: 'DRAFT',
     weekStartDate: '2024-12-02',
     weekEndDate: '2024-12-08',
     weekDisplay: '12/02 - 12/08',

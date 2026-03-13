@@ -24,6 +24,8 @@ public class User {
     private Email email;
     private String passwordHash;
     private String displayName;
+    private String firstName;
+    private String lastName;
     private String employeeId;
     private String tenantId;
     private UserStatus status;

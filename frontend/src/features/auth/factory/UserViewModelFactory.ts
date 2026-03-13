@@ -72,6 +72,23 @@ const mapRolesToDisplay = (roles: string[]): string => {
   return roles.map((role) => ROLE_LABELS[role] ?? role).join(', ');
 };
 
+/**
+ * 組合姓名（中文慣例：姓在前、名在後）
+ */
+const buildFullName = (dto: { display_name?: string; first_name?: string; last_name?: string }): string => {
+  const fullName = `${dto.last_name ?? ''}${dto.first_name ?? ''}`.trim();
+  return fullName || dto.display_name || '';
+};
+
+/**
+ * 組合顯示標籤：姓名(帳號)
+ */
+const buildDisplayLabel = (dto: { username: string; display_name?: string; first_name?: string; last_name?: string }): string => {
+  const name = buildFullName(dto);
+  if (name) return `${name}(${dto.username})`;
+  return dto.username;
+};
+
 // ========== Factory Class ==========
 
 export class UserViewModelFactory {
@@ -85,7 +102,7 @@ export class UserViewModelFactory {
       id: dto.id,
       username: dto.username,
       email: dto.email,
-      fullName: dto.display_name || `${dto.first_name ?? ''} ${dto.last_name ?? ''}`.trim(),
+      fullName: buildDisplayLabel(dto),
       employeeId: dto.employee_id,
       roles: dto.role_list,
       displayRoles: mapRolesToDisplay(dto.role_list),
@@ -114,7 +131,7 @@ export class UserViewModelFactory {
       userId: dto.id,
       username: dto.username,
       email: dto.email,
-      displayName: dto.display_name || `${dto.first_name ?? ''} ${dto.last_name ?? ''}`.trim(),
+      displayName: buildDisplayLabel(dto),
       firstName: dto.first_name,
       lastName: dto.last_name,
       employeeId: dto.employee_id,
@@ -154,8 +171,10 @@ export class UserViewModelFactory {
       id: dto.id,
       username: dto.username,
       email: dto.email,
-      displayName: dto.display_name || `${dto.first_name ?? ''} ${dto.last_name ?? ''}`.trim(),
-      fullName: dto.display_name || `${dto.first_name ?? ''} ${dto.last_name ?? ''}`.trim(),
+      displayName: buildDisplayLabel(dto),
+      fullName: buildFullName(dto),
+      firstName: dto.first_name,
+      lastName: dto.last_name,
       employeeId: dto.employee_id,
       status: dto.status,
       statusLabel: STATUS_LABELS[dto.status] ?? '未知',

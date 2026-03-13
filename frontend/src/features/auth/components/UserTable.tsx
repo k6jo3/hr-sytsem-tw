@@ -87,14 +87,14 @@ export const UserTable: React.FC<UserTableProps> = ({
             size={40}
           />
           <div>
-            <div style={{ fontWeight: 500 }}>{record.displayName}</div>
+            <div style={{ fontWeight: 500 }}>{record.fullName}</div>
             <div style={{ fontSize: 12, color: '#8c8c8c' }}>{record.email}</div>
           </div>
         </Space>
       ),
     },
     {
-      title: '使用者名稱',
+      title: '登入帳號',
       dataIndex: 'username',
       key: 'username',
       width: 150,

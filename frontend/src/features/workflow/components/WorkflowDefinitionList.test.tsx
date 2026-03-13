@@ -97,7 +97,7 @@ describe('WorkflowDefinitionList', () => {
       render(<WorkflowDefinitionList onDesign={onDesign} />);
 
       const designButtons = screen.getAllByText('編輯設計');
-      fireEvent.click(designButtons[0]);
+      fireEvent.click(designButtons[0]!);
 
       expect(onDesign).toHaveBeenCalledWith('def-001');
     });
@@ -130,7 +130,7 @@ describe('WorkflowDefinitionList', () => {
 
       const { container } = render(<WorkflowDefinitionList />);
 
-      expect(container.querySelector('.ant-spin')).toBeInTheDocument();
+      expect(container.querySelector('.ant-spin')).toBeTruthy();
     });
   });
 

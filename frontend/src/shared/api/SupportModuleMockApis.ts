@@ -245,31 +245,79 @@ export class MockWorkflowApi {
 export class MockNotificationApi {
   private static mockNotifications = [
     {
-      id: 'notif-1',
+      notification_id: 'notif-1',
+      recipient_id: 'demo-u001',
       title: '薪資單已發放',
       content: '您的 2025年11月 薪資單已發放，請至系統查看',
-      type: 'PAYROLL',
+      notification_type: 'REMINDER',
+      channels: ['IN_APP'],
       priority: 'NORMAL',
-      is_read: false,
+      status: 'SENT',
+      sent_at: '2025-12-05T10:00:00Z',
+      read_at: '',
+      related_business_type: 'PAYROLL',
+      related_business_id: '',
       created_at: '2025-12-05T10:00:00Z',
     },
     {
-      id: 'notif-2',
+      notification_id: 'notif-2',
+      recipient_id: 'demo-u001',
       title: '請假申請已核准',
       content: '您的請假申請 (2025-12-10) 已核准',
-      type: 'LEAVE',
+      notification_type: 'APPROVAL_RESULT',
+      channels: ['IN_APP', 'EMAIL'],
       priority: 'HIGH',
-      is_read: false,
+      status: 'SENT',
+      sent_at: '2025-12-04T15:30:00Z',
+      read_at: '',
+      related_business_type: 'LEAVE',
+      related_business_id: 'leave-001',
       created_at: '2025-12-04T15:30:00Z',
     },
     {
-      id: 'notif-3',
+      notification_id: 'notif-3',
+      recipient_id: 'demo-u001',
       title: '系統維護通知',
       content: '系統將於本週六進行維護，屆時將暫停服務',
-      type: 'SYSTEM',
+      notification_type: 'ANNOUNCEMENT',
+      channels: ['IN_APP'],
       priority: 'NORMAL',
-      is_read: true,
+      status: 'READ',
+      sent_at: '2025-12-01T09:00:00Z',
+      read_at: '2025-12-01T10:00:00Z',
+      related_business_type: '',
+      related_business_id: '',
       created_at: '2025-12-01T09:00:00Z',
+    },
+    {
+      notification_id: 'notif-4',
+      recipient_id: 'demo-u001',
+      title: '有 3 筆簽核待您處理',
+      content: '您有 3 筆待審核的請假/加班申請，請儘速處理',
+      notification_type: 'APPROVAL_REQUEST',
+      channels: ['IN_APP'],
+      priority: 'HIGH',
+      status: 'SENT',
+      sent_at: '2025-12-06T08:00:00Z',
+      read_at: '',
+      related_business_type: 'WORKFLOW',
+      related_business_id: '',
+      created_at: '2025-12-06T08:00:00Z',
+    },
+    {
+      notification_id: 'notif-5',
+      recipient_id: 'demo-u001',
+      title: '績效自評截止提醒',
+      content: '本季績效自評將於 2026-03-20 截止，請盡快完成',
+      notification_type: 'REMINDER',
+      channels: ['IN_APP', 'EMAIL'],
+      priority: 'NORMAL',
+      status: 'SENT',
+      sent_at: '2025-12-03T09:00:00Z',
+      read_at: '',
+      related_business_type: 'PERFORMANCE',
+      related_business_id: '',
+      created_at: '2025-12-03T09:00:00Z',
     },
   ];
 
@@ -278,18 +326,28 @@ export class MockNotificationApi {
     return {
       notifications: this.mockNotifications,
       total: this.mockNotifications.length,
-      unread_count: this.mockNotifications.filter((n) => !n.is_read).length,
+      unread_count: this.mockNotifications.filter((n) => n.status !== 'READ').length,
     };
   }
 
   static async markAsRead(notificationId: string): Promise<any> {
     await this.delay(200);
+    const n = this.mockNotifications.find((x) => x.notification_id === notificationId);
+    if (n) {
+      n.status = 'READ';
+      n.read_at = new Date().toISOString();
+    }
     return { message: '已標記為已讀', notification_id: notificationId };
   }
 
   static async markAllAsRead(): Promise<any> {
     await this.delay(300);
-    return { message: '全部標記為已讀', count: this.mockNotifications.length };
+    const unread = this.mockNotifications.filter((n) => n.status !== 'READ');
+    unread.forEach((n) => {
+      n.status = 'READ';
+      n.read_at = new Date().toISOString();
+    });
+    return { message: '全部標記為已讀', count: unread.length };
   }
 
   private static delay(ms: number): Promise<void> {

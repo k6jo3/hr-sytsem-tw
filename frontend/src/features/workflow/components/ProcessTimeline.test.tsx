@@ -115,8 +115,8 @@ describe('ProcessTimeline', () => {
 
     it('instanceId 有值時應開啟 Drawer', async () => {
       vi.mocked(WorkflowApi.getInstance).mockResolvedValue({
-        instance: mockInstance,
-        tasks: mockTasks,
+        instance: mockInstance as any,
+        tasks: mockTasks as any,
       });
       vi.mocked(WorkflowViewModelFactory.createInstanceViewModel).mockReturnValue(mockInstance as any);
       vi.mocked(WorkflowViewModelFactory.createTaskList).mockReturnValue(mockTasks as any);
@@ -130,8 +130,8 @@ describe('ProcessTimeline', () => {
   describe('流程詳情渲染', () => {
     it('應顯示流程資訊', async () => {
       vi.mocked(WorkflowApi.getInstance).mockResolvedValue({
-        instance: mockInstance,
-        tasks: mockTasks,
+        instance: mockInstance as any,
+        tasks: mockTasks as any,
       });
       vi.mocked(WorkflowViewModelFactory.createInstanceViewModel).mockReturnValue(mockInstance as any);
       vi.mocked(WorkflowViewModelFactory.createTaskList).mockReturnValue(mockTasks as any);
@@ -149,8 +149,8 @@ describe('ProcessTimeline', () => {
 
     it('應顯示審核步驟', async () => {
       vi.mocked(WorkflowApi.getInstance).mockResolvedValue({
-        instance: mockInstance,
-        tasks: mockTasks,
+        instance: mockInstance as any,
+        tasks: mockTasks as any,
       });
       vi.mocked(WorkflowViewModelFactory.createInstanceViewModel).mockReturnValue(mockInstance as any);
       vi.mocked(WorkflowViewModelFactory.createTaskList).mockReturnValue(mockTasks as any);

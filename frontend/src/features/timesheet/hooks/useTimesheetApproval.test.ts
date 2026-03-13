@@ -48,7 +48,7 @@ describe('useTimesheetApproval', () => {
       week_end_date: '2024-12-08',
       entries: [],
       total_hours: 40,
-      status: 'SUBMITTED',
+      status: 'SUBMITTED' as const,
       submitted_at: '2024-12-08T18:00:00Z',
     },
     {
@@ -59,7 +59,7 @@ describe('useTimesheetApproval', () => {
       week_end_date: '2024-12-08',
       entries: [],
       total_hours: 38,
-      status: 'SUBMITTED',
+      status: 'SUBMITTED' as const,
       submitted_at: '2024-12-08T18:00:00Z',
     },
   ];

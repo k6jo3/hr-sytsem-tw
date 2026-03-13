@@ -29,8 +29,8 @@ interface UserFormValues {
   email: string;
   password?: string;
   display_name: string;
-  first_name?: string;
-  last_name?: string;
+  first_name: string;
+  last_name: string;
   employee_id?: string;
   role_ids: string[];
   must_change_password?: boolean;
@@ -58,6 +58,8 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
           username: user.username,
           email: user.email,
           display_name: user.displayName,
+          first_name: user.firstName,
+          last_name: user.lastName,
           employee_id: user.employeeId,
           role_ids: user.roles.map((r) => r.id),
         });
@@ -120,16 +122,16 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
         <Space direction="vertical" style={{ width: '100%' }} size="small">
           <Form.Item
             name="username"
-            label="使用者名稱"
+            label="登入帳號"
             rules={[
-              { required: true, message: '請輸入使用者名稱' },
-              { min: 3, message: '使用者名稱至少 3 個字元' },
-              { max: 50, message: '使用者名稱最多 50 個字元' },
+              { required: true, message: '請輸入登入帳號' },
+              { min: 3, message: '登入帳號至少 3 個字元' },
+              { max: 50, message: '登入帳號最多 50 個字元' },
               { pattern: /^[a-zA-Z0-9_]+$/, message: '只能使用英文字母、數字和底線' },
             ]}
           >
             <Input
-              placeholder="請輸入使用者名稱"
+              placeholder="請輸入登入帳號（英文、數字、底線）"
               disabled={isEdit}
             />
           </Form.Item>
@@ -175,18 +177,20 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
           <Space style={{ width: '100%' }} size="middle">
             <Form.Item
-              name="first_name"
-              label="名"
-              style={{ flex: 1, marginBottom: 0 }}
-            >
-              <Input placeholder="名" />
-            </Form.Item>
-            <Form.Item
               name="last_name"
               label="姓"
+              rules={[{ required: true, message: '請輸入姓' }]}
               style={{ flex: 1, marginBottom: 0 }}
             >
               <Input placeholder="姓" />
+            </Form.Item>
+            <Form.Item
+              name="first_name"
+              label="名"
+              rules={[{ required: true, message: '請輸入名' }]}
+              style={{ flex: 1, marginBottom: 0 }}
+            >
+              <Input placeholder="名" />
             </Form.Item>
           </Space>
 

@@ -99,7 +99,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
             <Space style={{ cursor: 'pointer' }}>
               <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#667eea' }} />
-              <span>{user.username}</span>
+              <span>{user.displayName}</span>
             </Space>
           </Dropdown>
         )}

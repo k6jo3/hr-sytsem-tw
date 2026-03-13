@@ -52,7 +52,7 @@ const createWrapper = () => {
     reducer: { auth: authReducer },
   });
   return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(Provider, { store }, children);
+    React.createElement(Provider, { store, children });
 };
 
 describe('useLogin', () => {
@@ -76,6 +76,7 @@ describe('useLogin', () => {
       const mockResponse = {
         access_token: 'mock-token',
         refresh_token: 'mock-refresh-token',
+        expires_in: 3600,
         user: {
           id: 'user-123',
           username: 'testuser',
@@ -114,6 +115,7 @@ describe('useLogin', () => {
       const mockResponse = {
         access_token: 'mock-token',
         refresh_token: 'mock-refresh-token',
+        expires_in: 3600,
         user: {
           id: 'user-123',
           username: 'testuser',
@@ -177,6 +179,7 @@ describe('useLogin', () => {
       const mockResponse = {
         access_token: 'mock-token',
         refresh_token: 'mock-refresh-token',
+        expires_in: 3600,
         user: {
           id: 'user-123',
           username: 'testuser',

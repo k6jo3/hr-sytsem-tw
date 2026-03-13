@@ -108,9 +108,9 @@ describe('TrainingViewModelFactory', () => {
       const vms = TrainingViewModelFactory.createCourseViewModels(dtos);
 
       expect(vms).toHaveLength(2);
-      expect(vms[0].statusLabel).toBe('草稿');
-      expect(vms[1].statusLabel).toBe('已取消');
-      expect(vms[1].categoryLabel).toBe('安全衛生');
+      expect(vms[0]!.statusLabel).toBe('草稿');
+      expect(vms[1]!.statusLabel).toBe('已取消');
+      expect(vms[1]!.categoryLabel).toBe('安全衛生');
     });
   });
 

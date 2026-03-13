@@ -129,7 +129,7 @@ describe('useSalaryStructure', () => {
 
   describe('建立薪資結構', () => {
     it('應該成功建立薪資結構', async () => {
-      vi.mocked(PayrollApi.createSalaryStructure).mockResolvedValue(mockStructures[0]);
+      vi.mocked(PayrollApi.createSalaryStructure).mockResolvedValue(mockStructures[0] as any);
       vi.mocked(PayrollApi.getSalaryStructures).mockResolvedValue({
         items: mockStructures,
         total: 2,
@@ -174,7 +174,7 @@ describe('useSalaryStructure', () => {
 
   describe('更新薪資結構', () => {
     it('應該成功更新薪資結構', async () => {
-      vi.mocked(PayrollApi.updateSalaryStructure).mockResolvedValue(mockStructures[0]);
+      vi.mocked(PayrollApi.updateSalaryStructure).mockResolvedValue(mockStructures[0] as any);
       vi.mocked(PayrollApi.getSalaryStructures).mockResolvedValue({
         items: mockStructures,
         total: 2,

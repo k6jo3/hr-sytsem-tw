@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { CustomerDto } from '../api/ProjectTypes';
 import { CustomerViewModelFactory } from './CustomerViewModelFactory';
 
@@ -57,8 +58,8 @@ describe('CustomerViewModelFactory', () => {
     const viewModels = CustomerViewModelFactory.createListFromDTOs(dtos);
 
     expect(viewModels).toHaveLength(2);
-    expect(viewModels[0].id).toBe('cust-1');
-    expect(viewModels[1].id).toBe('cust-2');
+    expect(viewModels[0]!.id).toBe('cust-1');
+    expect(viewModels[1]!.id).toBe('cust-2');
   });
 
   it('應該正確處理空列表', () => {

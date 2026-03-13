@@ -1,4 +1,5 @@
 // IAM (HR01)
+export { HR01DashboardPage } from './HR01DashboardPage';
 export { HR01LoginPage } from './HR01LoginPage';
 export { default as HR01PasswordChangePage } from './HR01PasswordChangePage';
 export { HR01ProfilePage } from './HR01ProfilePage';

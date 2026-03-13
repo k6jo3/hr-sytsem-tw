@@ -92,6 +92,13 @@ public class GlobalExceptionHandler {
         @ExceptionHandler(DomainException.class)
         public ResponseEntity<ApiResponse<Void>> handleDomainException(DomainException ex) {
                 log.warn("Domain exception: code={}, message={}", ex.getErrorCode(), ex.getMessage());
+                // 登入失敗 / 帳號鎖定 → 401
+                if ("LOGIN_FAILED".equals(ex.getErrorCode()) ||
+                                "ACCOUNT_LOCKED".equals(ex.getErrorCode())) {
+                        return ResponseEntity
+                                        .status(HttpStatus.UNAUTHORIZED)
+                                        .body(ApiResponse.error(ex.getErrorCode(), ex.getMessage()));
+                }
                 return ResponseEntity
                                 .status(HttpStatus.BAD_REQUEST)
                                 .body(ApiResponse.error(ex.getErrorCode(), ex.getMessage()));
@@ -110,6 +117,14 @@ public class GlobalExceptionHandler {
                                 return ResponseEntity
                                                 .status(HttpStatus.NOT_FOUND)
                                                 .body(ApiResponse.notFound(domainEx.getMessage()));
+                        }
+                        if ("LOGIN_FAILED".equals(domainEx.getErrorCode()) ||
+                                        "ACCOUNT_LOCKED".equals(domainEx.getErrorCode())) {
+                                log.warn("Authentication failed: {}", domainEx.getMessage());
+                                return ResponseEntity
+                                                .status(HttpStatus.UNAUTHORIZED)
+                                                .body(ApiResponse.error(domainEx.getErrorCode(),
+                                                                domainEx.getMessage()));
                         }
                         if ("USERNAME_EXISTS".equals(domainEx.getErrorCode()) ||
                                         "EMPLOYEE_ALREADY_EXISTS".equals(domainEx.getErrorCode()) ||

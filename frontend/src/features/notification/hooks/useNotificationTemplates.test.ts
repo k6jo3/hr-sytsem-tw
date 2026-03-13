@@ -55,10 +55,10 @@ describe('useNotificationTemplates', () => {
     });
 
     expect(result.current.templates).toHaveLength(2);
-    expect(result.current.templates[0].templateCode).toBe('LEAVE_APPROVED');
-    expect(result.current.templates[0].templateName).toBe('請假核准通知');
-    expect(result.current.templates[0].isActive).toBe(true);
-    expect(result.current.templates[0].defaultChannelsDisplay).toBe('系統, 郵件');
+    expect(result.current.templates[0]!.templateCode).toBe('LEAVE_APPROVED');
+    expect(result.current.templates[0]!.templateName).toBe('請假核准通知');
+    expect(result.current.templates[0]!.isActive).toBe(true);
+    expect(result.current.templates[0]!.defaultChannelsDisplay).toBe('系統, 郵件');
     expect(result.current.error).toBeNull();
   });
 

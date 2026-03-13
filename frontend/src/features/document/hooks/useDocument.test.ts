@@ -84,7 +84,7 @@ describe('useMyDocuments', () => {
   });
 
   it('應正確載入我的文件列表', async () => {
-    vi.mocked(DocumentApi.getMyDocuments).mockResolvedValue(mockMyDocumentsResponse);
+    vi.mocked(DocumentApi.getMyDocuments).mockResolvedValue(mockMyDocumentsResponse as any);
 
     const { result } = renderHook(() => useMyDocuments(), { wrapper: createWrapper() });
 
@@ -93,8 +93,8 @@ describe('useMyDocuments', () => {
     });
 
     expect(result.current.data?.documents).toHaveLength(1);
-    expect(result.current.data?.documents[0].documentId).toBe('doc-001');
-    expect(result.current.data?.documents[0].documentTypeLabel).toBe('合約');
+    expect(result.current.data?.documents[0]!.documentId).toBe('doc-001');
+    expect(result.current.data?.documents[0]!.documentTypeLabel).toBe('合約');
   });
 
   it('應正確處理錯誤', async () => {
@@ -114,7 +114,7 @@ describe('useTemplates', () => {
   });
 
   it('應正確載入範本列表', async () => {
-    vi.mocked(DocumentApi.getTemplates).mockResolvedValue(mockTemplatesResponse);
+    vi.mocked(DocumentApi.getTemplates).mockResolvedValue(mockTemplatesResponse as any);
 
     const { result } = renderHook(() => useTemplates(), { wrapper: createWrapper() });
 
@@ -123,7 +123,7 @@ describe('useTemplates', () => {
     });
 
     expect(result.current.data?.templates).toHaveLength(1);
-    expect(result.current.data?.templates[0].templateId).toBe('tpl-001');
-    expect(result.current.data?.templates[0].templateTypeLabel).toBe('在職證明');
+    expect(result.current.data?.templates[0]!.templateId).toBe('tpl-001');
+    expect(result.current.data?.templates[0]!.templateTypeLabel).toBe('在職證明');
   });
 });

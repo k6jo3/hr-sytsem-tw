@@ -47,6 +47,18 @@ public class CreateUserRequest {
     private String displayName;
 
     /**
+     * 姓
+     */
+    @Size(max = 50, message = "姓的長度不可超過 50 字元")
+    private String firstName;
+
+    /**
+     * 名
+     */
+    @Size(max = 50, message = "名的長度不可超過 50 字元")
+    private String lastName;
+
+    /**
      * 關聯員工 ID (可選)
      */
     private String employeeId;

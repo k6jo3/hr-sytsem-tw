@@ -82,8 +82,8 @@ describe('useEmployees', () => {
       });
 
       expect(result.current.employees).toHaveLength(2);
-      expect(result.current.employees[0].fullName).toBe('王小明');
-      expect(result.current.employees[1].fullName).toBe('李小華');
+      expect(result.current.employees[0]!.fullName).toBe('王小明');
+      expect(result.current.employees[1]!.fullName).toBe('李小華');
       expect(result.current.total).toBe(2);
       expect(result.current.error).toBeNull();
     });

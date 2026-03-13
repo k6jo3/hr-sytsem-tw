@@ -36,6 +36,7 @@
         <module>hrms-notification</module>
         <module>hrms-document</module>
         <module>hrms-reporting</module>
+        <module>hrms-gateway</module>
     </modules>
 
     <properties>

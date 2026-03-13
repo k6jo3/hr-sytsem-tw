@@ -87,8 +87,8 @@ describe('useTraining', () => {
 
     await waitFor(() => {
       expect(result.current.courses).toHaveLength(1);
-      expect(result.current.courses[0].courseName).toBe('React 進階開發');
-      expect(result.current.courses[0].typeLabel).toBe('內訓');
+      expect(result.current.courses[0]!.courseName).toBe('React 進階開發');
+      expect(result.current.courses[0]!.typeLabel).toBe('內訓');
       expect(result.current.loading).toBe(false);
     });
   });
@@ -104,8 +104,8 @@ describe('useTraining', () => {
 
     await waitFor(() => {
       expect(result.current.myTrainings).toHaveLength(1);
-      expect(result.current.myTrainings[0].statusLabel).toBe('已完成');
-      expect(result.current.myTrainings[0].score).toBe(85);
+      expect(result.current.myTrainings[0]!.statusLabel).toBe('已完成');
+      expect(result.current.myTrainings[0]!.score).toBe(85);
     });
   });
 
@@ -120,8 +120,8 @@ describe('useTraining', () => {
 
     await waitFor(() => {
       expect(result.current.certificates).toHaveLength(1);
-      expect(result.current.certificates[0].certificateName).toBe('PMP');
-      expect(result.current.certificates[0].statusLabel).toBe('有效');
+      expect(result.current.certificates[0]!.certificateName).toBe('PMP');
+      expect(result.current.certificates[0]!.statusLabel).toBe('有效');
     });
   });
 

@@ -30,6 +30,7 @@ const mockAnnouncements: AnnouncementViewModel[] = [
     statusColor: 'success',
     publishedAt: '2026-03-05T09:00:00Z',
     publishedAtDisplay: '2026-03-05 09:00',
+    createdBy: 'admin',
     createdAt: '2026-03-04T15:00:00Z',
     createdAtDisplay: '2026-03-04 15:00',
   },
@@ -45,6 +46,7 @@ const mockAnnouncements: AnnouncementViewModel[] = [
     status: 'REVOKED',
     statusLabel: '已撤銷',
     statusColor: 'error',
+    createdBy: 'admin',
     createdAt: '2026-02-20T10:00:00Z',
     createdAtDisplay: '2026-02-20 10:00',
   },
@@ -108,7 +110,7 @@ describe('AnnouncementManager', () => {
 
       const editButtons = screen.getAllByText('編輯');
       // 第二個是已撤銷的，應該被 disabled
-      expect(editButtons[1].closest('button')).toBeDisabled();
+      expect(editButtons[1]!.closest('button')).toBeDisabled();
     });
   });
 

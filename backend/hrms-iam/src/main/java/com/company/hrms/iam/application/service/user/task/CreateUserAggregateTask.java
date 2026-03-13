@@ -32,6 +32,8 @@ public class CreateUserAggregateTask implements PipelineTask<UserPipelineContext
                 request.getEmployeeId(),
                 tenantId);
 
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
         user.activate();
         context.setUser(user);
     }

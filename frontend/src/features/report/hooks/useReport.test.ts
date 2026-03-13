@@ -148,7 +148,7 @@ describe('useReportDefinitions', () => {
     });
 
     expect(result.current.data?.definitions).toHaveLength(1);
-    expect(result.current.data?.definitions[0].reportTypeLabel).toBe('員工統計報表');
+    expect(result.current.data?.definitions[0]!.reportTypeLabel).toBe('員工統計報表');
   });
 });
 
@@ -169,7 +169,7 @@ describe('useReports', () => {
     });
 
     expect(result.current.data?.reports).toHaveLength(1);
-    expect(result.current.data?.reports[0].statusLabel).toBe('已完成');
-    expect(result.current.data?.reports[0].canDownload).toBe(true);
+    expect(result.current.data?.reports[0]!.statusLabel).toBe('已完成');
+    expect(result.current.data?.reports[0]!.canDownload).toBe(true);
   });
 });

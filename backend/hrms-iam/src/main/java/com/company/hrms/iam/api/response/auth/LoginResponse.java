@@ -66,6 +66,16 @@ public class LoginResponse {
         private String displayName;
 
         /**
+         * 姓
+         */
+        private String firstName;
+
+        /**
+         * 名
+         */
+        private String lastName;
+
+        /**
          * Email
          */
         private String email;

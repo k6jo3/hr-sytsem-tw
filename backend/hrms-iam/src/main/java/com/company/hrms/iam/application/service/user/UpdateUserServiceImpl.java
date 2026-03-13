@@ -52,6 +52,8 @@ public class UpdateUserServiceImpl implements CommandApiService<UpdateUserReques
                 .username(user.getUsername())
                 .email(user.getEmail().getValue())
                 .displayName(user.getDisplayName())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .status(user.getStatus().name())
                 .build();
     }

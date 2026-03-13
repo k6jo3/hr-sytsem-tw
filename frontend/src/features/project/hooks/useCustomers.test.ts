@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ProjectApi } from '../api/ProjectApi';
 import { useCustomers } from './useCustomers';
 
@@ -40,7 +40,7 @@ describe('useCustomers', () => {
     });
 
     expect(result.current.customers).toHaveLength(1);
-    expect(result.current.customers[0].id).toBe('cust-1');
+    expect(result.current.customers[0]!.id).toBe('cust-1');
     expect(result.current.total).toBe(1);
     expect(result.current.loading).toBe(false);
   });

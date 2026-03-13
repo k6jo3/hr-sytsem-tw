@@ -21,7 +21,7 @@ public interface UserMapper {
         /**
          * 根據 ID 查詢使用者
          */
-        @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
+        @Select("SELECT user_id, username, email, password_hash, display_name, first_name, last_name, employee_id, tenant_id," +
                         "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
@@ -31,7 +31,7 @@ public interface UserMapper {
         /**
          * 根據使用者名稱查詢
          */
-        @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
+        @Select("SELECT user_id, username, email, password_hash, display_name, first_name, last_name, employee_id, tenant_id," +
                         "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
@@ -41,7 +41,7 @@ public interface UserMapper {
         /**
          * 根據 Email 查詢
          */
-        @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
+        @Select("SELECT user_id, username, email, password_hash, display_name, first_name, last_name, employee_id, tenant_id," +
                         "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
@@ -51,7 +51,7 @@ public interface UserMapper {
         /**
          * 根據狀態查詢
          */
-        @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
+        @Select("SELECT user_id, username, email, password_hash, display_name, first_name, last_name, employee_id, tenant_id," +
                         "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
@@ -61,7 +61,7 @@ public interface UserMapper {
         /**
          * 查詢所有使用者
          */
-        @Select("SELECT user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
+        @Select("SELECT user_id, username, email, password_hash, display_name, first_name, last_name, employee_id, tenant_id," +
                         "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at " +
@@ -71,11 +71,11 @@ public interface UserMapper {
         /**
          * 新增使用者
          */
-        @Insert("INSERT INTO users (user_id, username, email, password_hash, display_name, employee_id, tenant_id, " +
+        @Insert("INSERT INTO users (user_id, username, email, password_hash, display_name, first_name, last_name, employee_id, tenant_id, " +
                         "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, "
                         +
                         "must_change_password, is_deleted, created_at, updated_at) " +
-                        "VALUES (#{userId}, #{username}, #{email}, #{passwordHash}, #{displayName}, #{employeeId}, #{tenantId}, "
+                        "VALUES (#{userId}, #{username}, #{email}, #{passwordHash}, #{displayName}, #{firstName}, #{lastName}, #{employeeId}, #{tenantId}, "
                         +
                         "#{status}, #{failedLoginAttempts}, #{lockedUntil}, #{lastLoginAt}, #{lastLogoutAt}, #{lastLoginIp}, #{preferredLanguage}, #{timezone}, #{passwordChangedAt}, "
                         +
@@ -86,7 +86,7 @@ public interface UserMapper {
          * 更新使用者
          */
         @Update("UPDATE users SET username = #{username}, email = #{email}, " +
-                        "password_hash = #{passwordHash}, display_name = #{displayName}, employee_id = #{employeeId}, "
+                        "password_hash = #{passwordHash}, display_name = #{displayName}, first_name = #{firstName}, last_name = #{lastName}, employee_id = #{employeeId}, "
                         +
                         "tenant_id = #{tenantId}, status = #{status}, failed_login_attempts = #{failedLoginAttempts}, "
                         +

@@ -269,7 +269,7 @@ const HR01UserManagementPage: React.FC = () => {
           <div style={{ marginBottom: 16 }}>
             <Space wrap>
               <Input.Search
-                placeholder="搜尋使用者名稱、Email"
+                placeholder="搜尋登入帳號、Email"
                 allowClear
                 style={{ width: 250 }}
                 prefix={<SearchOutlined />}

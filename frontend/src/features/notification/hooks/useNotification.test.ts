@@ -68,9 +68,9 @@ describe('useMyNotifications', () => {
     });
 
     expect(result.current.notifications).toHaveLength(2);
-    expect(result.current.notifications[0].notificationId).toBe('n-001');
-    expect(result.current.notifications[0].isUnread).toBe(true);
-    expect(result.current.notifications[1].isRead).toBe(true);
+    expect(result.current.notifications[0]!.notificationId).toBe('n-001');
+    expect(result.current.notifications[0]!.isUnread).toBe(true);
+    expect(result.current.notifications[1]!.isRead).toBe(true);
     expect(result.current.summary?.totalCount).toBe(2);
     expect(result.current.summary?.unreadCount).toBe(1);
     expect(result.current.error).toBeNull();

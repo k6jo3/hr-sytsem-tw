@@ -58,9 +58,17 @@ class ApiClient {
       (response: AxiosResponse) => response,
       (error) => {
         if (error.response?.status === 401) {
-          // Token 過期，清除並跳轉登入頁
-          localStorage.removeItem('accessToken');
-          window.location.href = '/login';
+          // 登入 API 本身的 401 不跳轉，讓呼叫端自行處理
+          const isLoginApi = error.config?.url?.includes('/auth/login');
+          if (!isLoginApi) {
+            localStorage.removeItem('accessToken');
+            window.location.href = '/login';
+          }
+        }
+        // 將後端錯誤訊息包裝為 Error，方便前端顯示
+        const serverMessage = error.response?.data?.message;
+        if (serverMessage) {
+          return Promise.reject(new Error(serverMessage));
         }
         return Promise.reject(error);
       }
