@@ -28,7 +28,7 @@ describe('UserViewModelFactory', () => {
     // Assert
     expect(viewModel.id).toBe('user-001');
     expect(viewModel.username).toBe('john.doe');
-    expect(viewModel.fullName).toBe('John Doe');
+    expect(viewModel.fullName).toBe('DoeJohn(john.doe)');
     expect(viewModel.email).toBe('john.doe@example.com');
     expect(viewModel.isAdmin).toBe(true);
     expect(viewModel.roles).toEqual(['ADMIN', 'HR_MANAGER']);
@@ -121,7 +121,7 @@ describe('UserViewModelFactory', () => {
     const viewModels = UserViewModelFactory.createListFromDTO(dtos);
 
     expect(viewModels).toHaveLength(2);
-    expect(viewModels[0]?.fullName).toBe('User One');
-    expect(viewModels[1]?.fullName).toBe('User Two');
+    expect(viewModels[0]?.fullName).toBe('OneUser(user1)');
+    expect(viewModels[1]?.fullName).toBe('TwoUser(user2)');
   });
 });
