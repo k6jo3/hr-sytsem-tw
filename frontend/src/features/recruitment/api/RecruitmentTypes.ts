@@ -84,6 +84,12 @@ export interface JobOpeningDto {
   department_name?: string;
   number_of_positions: number;
   salary_range?: string;
+  /** 薪資幣別（後端欄位：currency） */
+  currency?: string;
+  /** 僱用類型（後端欄位：employmentType），如 FULL_TIME, PART_TIME, CONTRACT */
+  employment_type?: string;
+  /** 工作地點（後端欄位：workLocation） */
+  work_location?: string;
   requirements?: string;
   responsibilities?: string;
   status: JobOpeningStatus;
@@ -91,6 +97,8 @@ export interface JobOpeningDto {
   close_date?: string;
   created_by: string;
   created_at: string;
+  /** 最後更新時間（後端欄位：updatedAt） */
+  updated_at?: string;
 }
 
 /**
@@ -104,6 +112,12 @@ export interface CandidateDto {
   email: string;
   phone_number?: string;
   resume_url?: string;
+  /** 求職信（後端欄位：coverLetter） */
+  cover_letter?: string;
+  /** 期望薪資（後端欄位：expectedSalary） */
+  expected_salary?: number;
+  /** 可到職日（後端欄位：availableDate） */
+  available_date?: string;
   source: RecruitmentSource;
   referrer_id?: string;
   referrer_name?: string;
@@ -153,6 +167,8 @@ export interface InterviewEvaluationDto {
   comments?: string;
   strengths?: string;
   concerns?: string;
+  /** 評估時間（後端欄位：evaluatedAt，優先使用；降級至 createdAt） */
+  evaluated_at: string;
   created_at: string;
 }
 
@@ -171,7 +187,10 @@ export interface OfferDto {
   status: OfferStatus;
   response_date?: string;
   rejection_reason?: string;
+  /** 建立者（降級來源：offeredBy → createdBy） */
   created_by: string;
+  /** 發 Offer 者（後端欄位：offeredBy，作為 created_by 的替代來源） */
+  offered_by?: string;
   created_at: string;
 }
 

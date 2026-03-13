@@ -60,7 +60,7 @@ function adaptEnrollmentDto(raw: any): TrainingEnrollmentDto {
     remarks: raw.remarks,
     approved_by: raw.approvedBy ?? raw.approved_by,
     approved_at: raw.approvedAt ?? raw.approved_at,
-    reject_reason: raw.rejectReason ?? raw.reject_reason,
+    reject_reason: raw.rejectReason !== undefined ? raw.rejectReason : raw.reject_reason,
     attendance: raw.attendance ?? false,
     attended_hours: raw.attendedHours ?? raw.attended_hours,
     completed_hours: raw.completedHours ?? raw.completed_hours,
@@ -87,6 +87,8 @@ function adaptCertificateDto(raw: any): CertificateDto {
     attachment_url: raw.attachmentUrl ?? raw.attachment_url,
     remarks: raw.remarks,
     is_verified: raw.isVerified ?? raw.is_verified ?? false,
+    verified_by: raw.verifiedBy ?? raw.verified_by,
+    verified_at: raw.verifiedAt ?? raw.verified_at,
     status: raw.status,
     created_at: raw.createdAt ?? raw.created_at,
   };

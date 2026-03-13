@@ -82,6 +82,15 @@ export interface ResetPasswordRequest {
 // ========== User DTOs ==========
 
 /**
+ * 角色詳細資訊 DTO
+ */
+export interface RoleDetailDto {
+  role_id: string;
+  role_name: string;
+  display_name: string;
+}
+
+/**
  * 使用者 DTO
  */
 export interface UserDto {
@@ -92,12 +101,17 @@ export interface UserDto {
   first_name?: string;
   last_name?: string;
   employee_id?: string;
+  employee_name?: string;
+  department?: string;
   tenant_id?: string;
   status: UserStatus;
   role_list: string[];
   role_ids: string[];
+  role_details?: RoleDetailDto[];
   avatar_url?: string;
   must_change_password: boolean;
+  failed_login_attempts?: number;
+  last_login_ip?: string;
   last_login_at?: string;
   password_changed_at?: string;
   created_at: string;
@@ -220,6 +234,7 @@ export interface PermissionDto {
   permission_name: string;
   description?: string;
   module: string;
+  action?: string;
   parent_id?: string;
   children?: PermissionDto[];
   sort_order: number;

@@ -354,8 +354,8 @@ describe('adaptEnrollmentDto（透過 TrainingApi.getEnrollments）', () => {
 
   it('應正確對應 rejectReason → reject_reason', async () => {
     const result = await TrainingApi.getEnrollments();
-    // adapter 使用 raw.rejectReason ?? raw.reject_reason，null 會 fall through 為 undefined
-    expect(result.data[0].reject_reason).toBeUndefined();
+    // adapter 已改用 !== undefined 檢查，保留 null 語義（P2 修正）
+    expect(result.data[0].reject_reason).toBeNull();
   });
 
   it('應正確對應 attendance（boolean）', async () => {
@@ -574,17 +574,15 @@ describe('adaptCertificateDto（透過 TrainingApi.getCertificates）', () => {
    * 需在 TrainingApi.ts 補充 verifiedBy → verified_by 及 verifiedAt → verified_at。
    * 同時需在 TrainingTypes.ts 的 CertificateDto 介面加入這兩個 optional 欄位。
    */
-  describe('[MISMATCH-3] 後端有但 adapter 缺少的欄位', () => {
-    it('TODO: verifiedBy 應對應至 verified_by', async () => {
+  describe('[MISMATCH-3 已修復] 後端欄位已補齊映射', () => {
+    it('verifiedBy 應正確對應至 verified_by', async () => {
       const result = await TrainingApi.getCertificates();
-      // TODO: 待 adaptCertificateDto 補充後改為 expect(result.data[0].verified_by).toBe('hr-uuid-001');
-      expect(result.data[0]).not.toHaveProperty('verified_by'); // 目前預期缺失
+      expect(result.data[0]!.verified_by).toBe('hr-uuid-001');
     });
 
-    it('TODO: verifiedAt 應對應至 verified_at', async () => {
+    it('verifiedAt 應正確對應至 verified_at', async () => {
       const result = await TrainingApi.getCertificates();
-      // TODO: 待修正後改為 expect(result.data[0].verified_at).toBe('2024-01-05T14:30:00');
-      expect(result.data[0]).not.toHaveProperty('verified_at'); // 目前預期缺失
+      expect(result.data[0]!.verified_at).toBe('2024-01-05T14:30:00');
     });
   });
 

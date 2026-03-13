@@ -45,6 +45,8 @@ export interface ProjectDto {
   planned_end_date: string;
   actual_start_date?: string;
   actual_end_date?: string;
+  description?: string;
+  members?: ProjectMemberDto[];
   created_at: string;
   updated_at: string;
 }
@@ -200,6 +202,8 @@ export interface TaskDto {
   assignee_name?: string;
   status: TaskStatus;
   progress: number;
+  start_date?: string;
+  end_date?: string;
   display_order: number;
   children?: TaskDto[];
   created_at: string;

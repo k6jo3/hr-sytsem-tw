@@ -15,6 +15,7 @@ import type {
     HireCandidateRequest,
     HireCandidateResponse,
     InterviewDto,
+    InterviewEvaluationDto,
     JobOpeningDto,
     OfferDto,
     RecruitmentDashboardDto,
@@ -39,6 +40,10 @@ function adaptCandidateDto(raw: any): CandidateDto {
     email: raw.email,
     phone_number: raw.phoneNumber ?? raw.phone_number,
     resume_url: raw.resumeUrl ?? raw.resume_url,
+    // M1: 後端提供但前端原先缺漏的欄位
+    cover_letter: raw.coverLetter ?? raw.cover_letter,
+    expected_salary: raw.expectedSalary ?? raw.expected_salary,
+    available_date: raw.availableDate ?? raw.available_date,
     source: raw.source,
     referrer_id: raw.referrerId ?? raw.referrer_id,
     referrer_name: raw.referrerName ?? raw.referrer_name,
@@ -59,6 +64,10 @@ function adaptJobOpeningDto(raw: any): JobOpeningDto {
     number_of_positions: raw.numberOfPositions ?? raw.number_of_positions ?? 0,
     salary_range: raw.salaryRange ?? raw.salary_range ??
       (raw.minSalary && raw.maxSalary ? `${raw.minSalary}-${raw.maxSalary}` : undefined),
+    // M2: 後端提供但前端原先缺漏的欄位
+    currency: raw.currency,
+    employment_type: raw.employmentType ?? raw.employment_type,
+    work_location: raw.workLocation ?? raw.work_location,
     requirements: raw.requirements,
     responsibilities: raw.responsibilities,
     status: raw.status,
@@ -66,9 +75,15 @@ function adaptJobOpeningDto(raw: any): JobOpeningDto {
     close_date: raw.closeDate ?? raw.close_date,
     created_by: raw.createdBy ?? raw.created_by ?? '',
     created_at: raw.createdAt ?? raw.created_at,
+    updated_at: raw.updatedAt ?? raw.updated_at,
   };
 }
 
+/**
+ * M8 已知限制：後端 interviewerIds 為 UUID 陣列，不包含面試官姓名。
+ * 此 adapter 將每個 UUID 轉為 InterviewerDto，interviewer_name 設為空字串。
+ * 若前端需要顯示姓名，應另行呼叫 IAM/Organization 服務查詢。
+ */
 function adaptInterviewDto(raw: any): InterviewDto {
   return {
     interview_id: raw.id ?? raw.interviewId ?? raw.interview_id,
@@ -78,12 +93,33 @@ function adaptInterviewDto(raw: any): InterviewDto {
     interview_type: raw.interviewType ?? raw.interview_type,
     interview_date: raw.interviewDate ?? raw.interview_date,
     location: raw.location,
+    // M8: 後端 interviewerIds 為 UUID[]，無姓名資訊（見函式 JSDoc）
     interviewers: (raw.interviewerIds ?? raw.interviewer_ids ?? []).map((id: string) => ({
       interviewer_id: id,
       interviewer_name: '',
     })),
     status: raw.status,
     created_at: raw.createdAt ?? raw.created_at,
+  };
+}
+
+/** M4: 後端使用 evaluatedAt 而非 created_at，優先讀取 evaluatedAt */
+function adaptEvaluationDto(raw: any): InterviewEvaluationDto {
+  const evaluatedAt = raw.evaluatedAt ?? raw.evaluated_at ?? raw.createdAt ?? raw.created_at;
+  return {
+    evaluation_id: raw.id ?? raw.evaluationId ?? raw.evaluation_id,
+    interview_id: raw.interviewId ?? raw.interview_id,
+    interviewer_id: raw.interviewerId ?? raw.interviewer_id,
+    interviewer_name: raw.interviewerName ?? raw.interviewer_name,
+    technical_score: raw.technicalScore ?? raw.technical_score ?? 0,
+    communication_score: raw.communicationScore ?? raw.communication_score ?? 0,
+    culture_fit_score: raw.cultureFitScore ?? raw.culture_fit_score ?? 0,
+    overall_rating: raw.overallRating ?? raw.overall_rating,
+    comments: raw.comments,
+    strengths: raw.strengths,
+    concerns: raw.concerns,
+    evaluated_at: evaluatedAt,
+    created_at: raw.createdAt ?? raw.created_at ?? evaluatedAt,
   };
 }
 
@@ -100,7 +136,9 @@ function adaptOfferDto(raw: any): OfferDto {
     status: raw.status,
     response_date: raw.responseDate ?? raw.response_date,
     rejection_reason: raw.rejectionReason ?? raw.rejection_reason,
-    created_by: raw.createdBy ?? raw.created_by ?? '',
+    // M5: 優先使用 offeredBy 作為 created_by 的替代來源
+    created_by: raw.offeredBy ?? raw.offered_by ?? raw.createdBy ?? raw.created_by ?? '',
+    offered_by: raw.offeredBy ?? raw.offered_by,
     created_at: raw.createdAt ?? raw.created_at,
   };
 }
@@ -178,7 +216,7 @@ export class RecruitmentApi {
     return {
       candidate: adaptCandidateDto(raw),
       interviews: (raw.interviews ?? []).map(adaptInterviewDto),
-      evaluations: raw.evaluations ?? [],
+      evaluations: (raw.evaluations ?? []).map(adaptEvaluationDto),
       offer: raw.offer ? adaptOfferDto(raw.offer) : undefined,
     };
   }

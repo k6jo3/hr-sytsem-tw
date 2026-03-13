@@ -189,6 +189,7 @@ describe('RecruitmentViewModelFactory', () => {
         communication_score: 5,
         culture_fit_score: 4,
         overall_rating: 'HIRE',
+        evaluated_at: '2025-12-08T10:00:00Z',
         created_at: '2025-12-08T10:00:00Z',
       };
 
@@ -213,6 +214,7 @@ describe('RecruitmentViewModelFactory', () => {
         communication_score: 3,
         culture_fit_score: 2,
         overall_rating: 'NO_HIRE',
+        evaluated_at: '2025-12-08T10:00:00Z',
         created_at: '2025-12-08T10:00:00Z',
       };
 

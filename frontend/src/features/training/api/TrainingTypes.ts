@@ -83,6 +83,8 @@ export interface CertificateDto {
   attachment_url?: string;
   remarks?: string;
   is_verified: boolean;
+  verified_by?: string;
+  verified_at?: string;
   status: CertificateStatus;
   created_at?: string;
 }

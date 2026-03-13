@@ -1,7 +1,7 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
 import { guardEnum } from '../../../shared/utils/adapterGuard';
-import type { LoginRequest, LoginResponse, UserDto } from './AuthTypes';
+import type { LoginRequest, LoginResponse, RoleDetailDto, UserDto } from './AuthTypes';
 import { MockAuthApi } from './MockAuthApi';
 
 /**
@@ -38,6 +38,18 @@ function adaptLoginResponse(raw: any): LoginResponse {
 /**
  * 將後端 camelCase UserInfo 轉換為前端 snake_case UserDto
  */
+/**
+ * 將後端 roleDetails 陣列轉換為前端 RoleDetailDto[]
+ */
+function adaptRoleDetails(rawDetails: any[] | undefined): RoleDetailDto[] | undefined {
+  if (!Array.isArray(rawDetails) || rawDetails.length === 0) return undefined;
+  return rawDetails.map(d => ({
+    role_id: d.roleId ?? d.role_id ?? '',
+    role_name: d.roleName ?? d.role_name ?? '',
+    display_name: d.displayName ?? d.display_name ?? '',
+  }));
+}
+
 function adaptUserDto(raw: any): UserDto {
   const rawRoles = raw.roles ?? raw.role_list ?? [];
   return {
@@ -48,12 +60,17 @@ function adaptUserDto(raw: any): UserDto {
     first_name: raw.firstName ?? raw.first_name,
     last_name: raw.lastName ?? raw.last_name,
     employee_id: raw.employeeId ?? raw.employee_id,
+    employee_name: raw.employeeName ?? raw.employee_name,
+    department: raw.department,
     tenant_id: raw.tenantId ?? raw.tenant_id,
     status: guardEnum('user.status', raw.status, ['ACTIVE', 'INACTIVE', 'PENDING', 'LOCKED'] as const, 'ACTIVE'),
     role_list: adaptRoles(rawRoles),
     role_ids: raw.roleIds ?? raw.role_ids ?? [],
+    role_details: adaptRoleDetails(raw.roleDetails ?? raw.role_details),
     avatar_url: raw.avatarUrl ?? raw.avatar_url,
     must_change_password: raw.mustChangePassword ?? raw.must_change_password ?? false,
+    failed_login_attempts: raw.failedLoginAttempts ?? raw.failed_login_attempts,
+    last_login_ip: raw.lastLoginIp ?? raw.last_login_ip,
     last_login_at: raw.lastLoginAt ?? raw.last_login_at,
     password_changed_at: raw.passwordChangedAt ?? raw.password_changed_at,
     created_at: raw.createdAt ?? raw.created_at ?? '',

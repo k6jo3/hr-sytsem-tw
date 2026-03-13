@@ -82,6 +82,8 @@ function adaptProjectDetail(raw: any): ProjectDto {
     planned_end_date: raw.plannedEndDate ?? '',
     actual_start_date: raw.actualStartDate,
     actual_end_date: raw.actualEndDate,
+    description: raw.description ?? '',
+    members: raw.members?.map((m: any) => adaptProjectMember(m, raw.projectId)) ?? [],
     created_at: raw.createdAt ?? '',
     updated_at: raw.updatedAt ?? '',
   };
@@ -134,9 +136,11 @@ function adaptTaskItem(raw: any): TaskDto {
     status: guardEnum(
       'task.status',
       raw.status,
-      ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD'] as const,
+      ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD', 'BLOCKED'] as const,
       'NOT_STARTED'
     ),
+    start_date: raw.startDate,
+    end_date: raw.endDate,
     progress: raw.progress ?? 0,
     display_order: raw.displayOrder ?? 0,
     children: raw.children?.map(adaptTaskItem),
@@ -410,9 +414,18 @@ describe('ProjectApi Adapters', () => {
       expect(result.updated_at).toBe('2025-01-15T00:00:00Z');
     });
 
-    it('後端 members 陣列不應被 adaptProjectDetail 對應（ProjectDto 無此欄位）', () => {
+    it('後端 members 陣列應正確對應至 ProjectDto.members', () => {
       const result = adaptProjectDetail(backendDetail);
-      expect((result as any).members).toBeUndefined();
+      expect(result.members).toBeDefined();
+      expect(result.members!.length).toBe(1);
+      expect(result.members![0].employee_id).toBe('emp-001');
+      expect(result.members![0].role).toBe('PM');
+    });
+
+    it('後端 members 缺失時應為空陣列', () => {
+      const raw = { ...backendDetail, members: undefined };
+      const result = adaptProjectDetail(raw);
+      expect(result.members).toEqual([]);
     });
 
     it('後端 version 不應被對應（ProjectDto 無此欄位）', () => {
@@ -420,9 +433,15 @@ describe('ProjectApi Adapters', () => {
       expect((result as any).version).toBeUndefined();
     });
 
-    it('後端 description 不應被對應（ProjectDto 無此欄位）', () => {
+    it('後端 description 應正確對應至 ProjectDto.description', () => {
       const result = adaptProjectDetail(backendDetail);
-      expect((result as any).description).toBeUndefined();
+      expect(result.description).toBe('核心系統升級專案');
+    });
+
+    it('後端 description 缺失時應為空字串', () => {
+      const raw = { ...backendDetail, description: undefined };
+      const result = adaptProjectDetail(raw);
+      expect(result.description).toBe('');
     });
 
     it('詳情 API 使用 plannedStartDate（非 startDate）', () => {
@@ -753,11 +772,10 @@ describe('ProjectApi Adapters', () => {
      * 注意：後端無 taskCode、level、displayOrder、actualHours、
      *       assigneeName、projectId、createdAt、updatedAt
      *
-     * 重要不一致：
+     * TaskStatus 對應：
      *   - 後端 TaskStatus enum: NOT_STARTED, IN_PROGRESS, COMPLETED, BLOCKED
      *   - 前端 TaskDto.status: NOT_STARTED, IN_PROGRESS, COMPLETED, ON_HOLD, BLOCKED
-     *   - guardEnum 允許值 (adapter 中): NOT_STARTED, IN_PROGRESS, COMPLETED, ON_HOLD
-     *   - BLOCKED 存在於後端 enum 但不在 adapter 的 allowedValues 中 → 會觸發 warn
+     *   - guardEnum 允許值 (adapter 中): NOT_STARTED, IN_PROGRESS, COMPLETED, ON_HOLD, BLOCKED
      */
     const backendTask = {
       taskId: 'task-001',
@@ -862,19 +880,22 @@ describe('ProjectApi Adapters', () => {
       });
     });
 
-    describe('後端 startDate / endDate 不被對應（TaskDto 無此欄位）', () => {
-      it('startDate 不應對應到任何 TaskDto 欄位', () => {
+    describe('後端 startDate / endDate 應正確對應至 start_date / end_date', () => {
+      it('startDate 應對應至 start_date', () => {
         const result = adaptTaskItem({ ...backendTask, startDate: '2025-01-15' });
-        expect((result as any).start_date).toBeUndefined();
-        expect((result as any).startDate).toBeUndefined();
-        expect((result as any).planned_start_date).toBeUndefined();
+        expect(result.start_date).toBe('2025-01-15');
       });
 
-      it('endDate 不應對應到任何 TaskDto 欄位', () => {
+      it('endDate 應對應至 end_date', () => {
         const result = adaptTaskItem({ ...backendTask, endDate: '2025-02-28' });
-        expect((result as any).end_date).toBeUndefined();
-        expect((result as any).endDate).toBeUndefined();
-        expect((result as any).planned_end_date).toBeUndefined();
+        expect(result.end_date).toBe('2025-02-28');
+      });
+
+      it('startDate / endDate 缺失時應為 undefined', () => {
+        const { startDate, endDate, ...taskWithoutDates } = backendTask as any;
+        const result = adaptTaskItem(taskWithoutDates);
+        expect(result.start_date).toBeUndefined();
+        expect(result.end_date).toBeUndefined();
       });
     });
 
@@ -897,23 +918,16 @@ describe('ProjectApi Adapters', () => {
         expect(warnSpy).not.toHaveBeenCalled();
       });
 
-      it('已知 status ON_HOLD 應正確對應（前端 allowedValues 包含，但後端 enum 無此值）', () => {
-        // TODO: 不一致點 — 後端 TaskStatus 無 ON_HOLD（有 BLOCKED），
-        //       前端 guardEnum allowedValues 包含 ON_HOLD 但不含 BLOCKED。
-        //       此測試驗證 ON_HOLD 可正常通過，但後端實際不會發此值。
+      it('已知 status ON_HOLD 應正確對應', () => {
         const result = adaptTaskItem({ ...backendTask, status: 'ON_HOLD' });
         expect(result.status).toBe('ON_HOLD');
         expect(warnSpy).not.toHaveBeenCalled();
       });
 
-      it('後端 BLOCKED 狀態應觸發 console.warn（不在 adapter allowedValues 中）', () => {
-        // TODO: 不一致點 — 後端 TaskStatus enum 有 BLOCKED，
-        //       但 adapter guardEnum 的 allowedValues 為
-        //       ['NOT_STARTED','IN_PROGRESS','COMPLETED','ON_HOLD']，
-        //       BLOCKED 不在其中，應修正 adapter 或前端 TaskStatus 型別。
+      it('已知 status BLOCKED 應正確對應', () => {
         const result = adaptTaskItem({ ...backendTask, status: 'BLOCKED' });
-        expect(result.status).toBe('BLOCKED' as any); // guardEnum 回傳原始值
-        expect(warnSpy).toHaveBeenCalled();
+        expect(result.status).toBe('BLOCKED');
+        expect(warnSpy).not.toHaveBeenCalled();
       });
 
       it('完全未知 status 應觸發 console.warn 並回傳原始值', () => {

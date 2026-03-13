@@ -83,6 +83,8 @@ const REQUEST_STATUS_LABELS: Record<DocumentRequestStatus, string> = {
   COMPLETED: '已完成',
   FAILED: '失敗',
   CANCELLED: '已取消',
+  APPROVED: '已核准',
+  REJECTED: '已駁回',
 };
 
 const REQUEST_STATUS_COLORS: Record<DocumentRequestStatus, string> = {
@@ -91,6 +93,8 @@ const REQUEST_STATUS_COLORS: Record<DocumentRequestStatus, string> = {
   COMPLETED: 'success',
   FAILED: 'error',
   CANCELLED: 'warning',
+  APPROVED: 'success',
+  REJECTED: 'error',
 };
 
 // ========== Helper Functions ==========

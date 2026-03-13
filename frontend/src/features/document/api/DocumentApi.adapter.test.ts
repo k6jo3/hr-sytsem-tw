@@ -164,12 +164,8 @@ describe('adaptDocument', () => {
     const result = await DocumentApi.getDocuments();
     const doc = result.documents[0]!;
 
-    // guardEnum 應發出警告（單一字串參數）
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('document.visibility')
-    );
-    // 原始值應被保留（而非 fallback 'PRIVATE'）
-    expect(doc.visibility as string).toBe('SHARED');
+    // SHARED 已被 adapter 映射為 COMPANY（P2 修正），不再觸發 guardEnum 警告
+    expect(doc.visibility).toBe('COMPANY');
 
     consoleSpy.mockRestore();
   });
@@ -268,10 +264,8 @@ describe('adaptTemplate', () => {
     // id：adapter 讀 raw.templateId ?? raw.id
     expect(tpl.id).toBe('tpl-001');
 
-    // template_code：adapter 讀 raw.templateCode ?? raw.template_code
-    // TODO [MISMATCH-6] 後端 domain 欄位是 code，adapter 讀 templateCode → 會得到 undefined，fallback 至 ''
-    //   adapter 需加入 raw.code 備援，或後端改用 Response DTO
-    expect(tpl.template_code).toBe('');  // 目前行為：code 欄位未被 adapter 讀取
+    // template_code：adapter 已加入 raw.code fallback（P2 修正）
+    expect(tpl.template_code).toBe('EMPLOYMENT_CERT');
 
     // template_name：adapter 讀 raw.name ?? raw.templateName
     expect(tpl.template_name).toBe('在職證明'); // raw.name 命中
@@ -501,16 +495,14 @@ describe('adaptRequest', () => {
 
     const result = await DocumentApi.getMyDocumentRequests();
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('documentRequest.status')
-    );
-    expect(result.requests[0]!.status as string).toBe('APPROVED');
+    // APPROVED 已加入前端枚舉（P2 修正），不再觸發 guardEnum 警告
+    expect(result.requests[0]!.status).toBe('APPROVED');
 
     consoleSpy.mockRestore();
   });
 
-  it('應對未知狀態（後端 REJECTED）發出警告並保留原始值', async () => {
-    // TODO [MISMATCH-4] 同上，REJECTED 在後端存在但不在前端枚舉
+  it('後端 REJECTED 狀態應正確映射（已加入枚舉）', async () => {
+    // REJECTED 已加入前端枚舉（P2 修正）
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     vi.mocked(apiClient.get).mockResolvedValueOnce(

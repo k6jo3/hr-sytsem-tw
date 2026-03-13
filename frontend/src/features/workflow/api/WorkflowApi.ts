@@ -99,9 +99,9 @@ function adaptTask(raw: any): ApprovalTaskDto {
     flow_name: raw.flowName ?? raw.flow_name ?? '',
     business_type: raw.businessType ?? raw.business_type ?? '',
     business_id: raw.businessId ?? raw.business_id ?? '',
-    business_summary: raw.businessSummary ?? raw.business_summary ?? '',
+    business_summary: raw.businessSummary ?? raw.summary ?? raw.business_summary ?? '',
     node_id: raw.nodeId ?? raw.node_id ?? '',
-    node_name: raw.nodeName ?? raw.node_name ?? '',
+    node_name: raw.nodeName ?? raw.taskName ?? raw.node_name ?? '',
     applicant_id: raw.applicantId ?? raw.applicant_id ?? '',
     applicant_name: raw.applicantName ?? raw.applicant_name ?? '',
     assignee_id: raw.assigneeId ?? raw.assignee_id ?? '',
@@ -120,14 +120,14 @@ function adaptTask(raw: any): ApprovalTaskDto {
 /** 後端 camelCase → 前端 DelegationDto */
 function adaptDelegation(raw: any): DelegationDto {
   return {
-    delegation_id: raw.delegationId ?? raw.delegation_id ?? '',
+    delegation_id: raw.delegationId ?? raw.id ?? raw.delegation_id ?? '',
     delegator_id: raw.delegatorId ?? raw.delegator_id ?? '',
     delegator_name: raw.delegatorName ?? raw.delegator_name ?? '',
     delegatee_id: raw.delegateId ?? raw.delegateeId ?? raw.delegatee_id ?? '',
     delegatee_name: raw.delegateeName ?? raw.delegatee_name ?? '',
     start_date: raw.startDate ?? raw.start_date ?? '',
     end_date: raw.endDate ?? raw.end_date ?? '',
-    is_active: raw.isActive ?? raw.is_active ?? false,
+    is_active: raw.isActive ?? raw.is_active ?? (raw.status === 'ACTIVE') ?? false,
     created_at: raw.createdAt ?? raw.created_at ?? '',
   };
 }

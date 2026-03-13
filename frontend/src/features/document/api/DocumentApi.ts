@@ -74,7 +74,7 @@ function adaptDocument(raw: any): DocumentDto {
     is_encrypted: raw.encrypted ?? raw.isEncrypted ?? raw.is_encrypted ?? false,
     owner_id: raw.ownerId ?? raw.owner_id ?? '',
     owner_name: raw.ownerName ?? raw.owner_name ?? '',
-    visibility: guardEnum('document.visibility', raw.visibility, ['PRIVATE', 'DEPARTMENT', 'COMPANY', 'PUBLIC'] as const, 'PRIVATE'),
+    visibility: guardEnum('document.visibility', raw.visibility === 'SHARED' ? 'COMPANY' : raw.visibility, ['PRIVATE', 'DEPARTMENT', 'COMPANY', 'PUBLIC'] as const, 'PRIVATE'),
     version: raw.version ?? 1,
     uploaded_by: raw.uploadedBy ?? raw.uploaded_by ?? '',
     uploaded_by_name: raw.uploadedByName ?? raw.uploaded_by_name ?? '',
@@ -88,7 +88,7 @@ function adaptDocument(raw: any): DocumentDto {
 function adaptTemplate(raw: any): DocumentTemplateDto {
   return {
     id: raw.templateId ?? raw.id ?? '',
-    template_code: raw.templateCode ?? raw.template_code ?? '',
+    template_code: raw.templateCode ?? raw.code ?? raw.template_code ?? '',
     template_name: raw.name ?? raw.templateName ?? raw.template_name ?? '',
     template_type: raw.category ?? raw.templateType ?? raw.template_type ?? 'CUSTOM',
     template_content: raw.content ?? raw.templateContent ?? raw.template_content ?? '',
@@ -109,7 +109,7 @@ function adaptRequest(raw: any): DocumentRequestDto {
     template_name: raw.templateName ?? raw.template_name ?? '',
     requester_id: raw.requesterId ?? raw.requester_id ?? '',
     requester_name: raw.requesterName ?? raw.requester_name ?? '',
-    status: guardEnum('documentRequest.status', raw.status, ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED'] as const, 'PENDING'),
+    status: guardEnum('documentRequest.status', raw.status, ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'CANCELLED', 'APPROVED', 'REJECTED'] as const, 'PENDING'),
     document_id: raw.documentId ?? raw.document_id ?? '',
     download_url: raw.downloadUrl ?? raw.download_url ?? '',
     request_date: raw.requestedAt ?? raw.request_date ?? '',

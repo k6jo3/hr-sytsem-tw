@@ -37,7 +37,7 @@ export type TemplateType =
 /**
  * 文件申請狀態
  */
-export type DocumentRequestStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+export type DocumentRequestStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' | 'APPROVED' | 'REJECTED';
 
 // ========== DTOs ==========
 
