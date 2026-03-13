@@ -6,8 +6,7 @@ describe('EmployeeViewModelFactory', () => {
   const mockEmployeeDto: EmployeeDto = {
     id: '1',
     employee_number: 'EMP001',
-    first_name: '小明',
-    last_name: '王',
+    full_name: '王小明',
     email: 'xiaoming.wang@company.com',
     phone: '0912345678',
     department_id: 'dept-1',
@@ -77,11 +76,10 @@ describe('EmployeeViewModelFactory', () => {
       expect(viewModel.statusColor).toBe('error');
     });
 
-    it('應該正確處理英文姓名（加空格）', () => {
+    it('應該正確處理英文姓名', () => {
       const englishDto: EmployeeDto = {
         ...mockEmployeeDto,
-        first_name: 'John',
-        last_name: 'Doe',
+        full_name: 'John Doe',
       };
 
       const viewModel = EmployeeViewModelFactory.createFromDTO(englishDto);
@@ -100,28 +98,15 @@ describe('EmployeeViewModelFactory', () => {
       expect(viewModel.phone).toBeUndefined();
     });
 
-    it('應該正確處理後端格式（fullName 在 first_name，last_name 為空）', () => {
+    it('應該正確處理後端 fullName 直接映射', () => {
       const backendAdaptedDto: EmployeeDto = {
         ...mockEmployeeDto,
-        first_name: '王小明',
-        last_name: '',
+        full_name: '王小明',
       };
 
       const viewModel = EmployeeViewModelFactory.createFromDTO(backendAdaptedDto);
 
       expect(viewModel.fullName).toBe('王小明');
-    });
-
-    it('應該正確處理後端英文 fullName（last_name 為空）', () => {
-      const backendAdaptedDto: EmployeeDto = {
-        ...mockEmployeeDto,
-        first_name: 'John Doe',
-        last_name: '',
-      };
-
-      const viewModel = EmployeeViewModelFactory.createFromDTO(backendAdaptedDto);
-
-      expect(viewModel.fullName).toBe('John Doe');
     });
   });
 
@@ -133,8 +118,7 @@ describe('EmployeeViewModelFactory', () => {
           ...mockEmployeeDto,
           id: '2',
           employee_number: 'EMP002',
-          first_name: '小華',
-          last_name: '李',
+          full_name: '李小華',
           status: 'TERMINATED',
         },
       ];

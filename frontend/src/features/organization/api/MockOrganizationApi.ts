@@ -26,8 +26,7 @@ export class MockOrganizationApi {
     {
       id: 'emp001',
       employee_number: 'E001',
-      first_name: 'John',
-      last_name: 'Doe',
+      full_name: 'John Doe',
       email: 'john.doe@company.com',
       phone: '0912-345-678',
       department_id: 'dept001',
@@ -41,8 +40,7 @@ export class MockOrganizationApi {
     {
       id: 'emp002',
       employee_number: 'E002',
-      first_name: 'Jane',
-      last_name: 'Smith',
+      full_name: 'Jane Smith',
       email: 'jane.smith@company.com',
       phone: '0923-456-789',
       department_id: 'dept002',
@@ -56,8 +54,7 @@ export class MockOrganizationApi {
     {
       id: 'emp003',
       employee_number: 'E003',
-      first_name: 'Bob',
-      last_name: 'Chen',
+      full_name: 'Bob Chen',
       email: 'bob.chen@company.com',
       department_id: 'dept001',
       department_name: '資訊部',
@@ -150,8 +147,7 @@ export class MockOrganizationApi {
     if (params?.search) {
       const search = params.search.toLowerCase();
       filtered = filtered.filter(emp => 
-        emp.first_name.toLowerCase().includes(search) ||
-        emp.last_name.toLowerCase().includes(search) ||
+        emp.full_name.toLowerCase().includes(search) ||
         emp.email.toLowerCase().includes(search) ||
         emp.employee_number.toLowerCase().includes(search)
       );
@@ -190,8 +186,7 @@ export class MockOrganizationApi {
     const newEmployee: EmployeeDto = {
       id: uuidv4(),
       employee_number: data.employee_number || `E${String(this.employees.length + 1).padStart(3, '0')}`,
-      first_name: data.first_name,
-      last_name: data.last_name,
+      full_name: data.full_name,
       email: data.email,
       phone: data.phone,
       department_id: data.department_id,

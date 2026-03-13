@@ -9,8 +9,7 @@
 export interface EmployeeDto {
   id: string;
   employee_number: string;
-  first_name: string;
-  last_name: string;
+  full_name: string;
   email: string;
   phone?: string;
   department_id: string;

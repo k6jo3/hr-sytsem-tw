@@ -5,8 +5,30 @@ import type {
     ApplyOvertimeResponse,
     GetOvertimeApplicationsRequest,
     GetOvertimeApplicationsResponse,
+    OvertimeApplicationDto,
 } from './AttendanceTypes';
+import { adaptOvertimeType } from './AttendanceApi';
 import { MockAttendanceApi } from './MockAttendanceApi';
+
+/**
+ * 將後端加班申請項目的 overtimeType 標準化
+ */
+function adaptOvertimeItem(raw: any): OvertimeApplicationDto {
+  return {
+    ...raw,
+    overtimeType: adaptOvertimeType(raw.overtimeType),
+  };
+}
+
+/**
+ * 將後端加班申請清單的 overtimeType 全部標準化
+ */
+function adaptOvertimeListResponse(raw: any): GetOvertimeApplicationsResponse {
+  return {
+    ...raw,
+    items: (raw.items ?? []).map(adaptOvertimeItem),
+  };
+}
 
 /**
  * Overtime API (加班 API)
@@ -25,12 +47,14 @@ export class OvertimeApi {
 
   /**
    * 查詢加班申請清單
+   * 透過 adapter 標準化後端 overtimeType 枚舉值
    */
   static async getOvertimeApplications(
     params?: GetOvertimeApplicationsRequest
   ): Promise<GetOvertimeApplicationsResponse> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getOvertimeApplications(params);
-    return apiClient.get(`${this.BASE_PATH}/applications`, { params });
+    const raw = await apiClient.get(`${this.BASE_PATH}/applications`, { params });
+    return adaptOvertimeListResponse(raw);
   }
 
   /**

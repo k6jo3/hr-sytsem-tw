@@ -66,10 +66,12 @@ export class PayrollViewModelFactory {
     const map: Record<string, string> = {
       'DRAFT': '草稿',
       'CALCULATING': '計算中',
-      'COMPLETED': '待審核',
+      'COMPLETED': '計算完成',
+      'SUBMITTED': '待審核',
       'APPROVED': '已核准',
       'REJECTED': '已退回',
       'PAID': '已發薪',
+      'CANCELLED': '已取消',
     };
     return map[status] || status;
   }
@@ -82,9 +84,11 @@ export class PayrollViewModelFactory {
       'DRAFT': 'default',
       'CALCULATING': 'processing',
       'COMPLETED': 'warning',
+      'SUBMITTED': 'warning',
       'APPROVED': 'success',
       'REJECTED': 'error',
       'PAID': 'cyan',
+      'CANCELLED': 'default',
     };
     return map[status] || 'default';
   }

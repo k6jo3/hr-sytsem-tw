@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/api';
 import { MockConfig } from '../../../config/MockConfig';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import type {
     ApproveCorrectionResponse,
     AttendanceRecordDto,
@@ -14,7 +15,8 @@ import type {
     GetCorrectionListRequest,
     GetCorrectionListResponse,
     GetTodayAttendanceRequest,
-    GetTodayAttendanceResponse
+    GetTodayAttendanceResponse,
+    OvertimeType,
 } from './AttendanceTypes';
 import { MockAttendanceApi } from './MockAttendanceApi';
 
@@ -65,6 +67,63 @@ function adaptAttendanceHistoryResponse(raw: any): GetAttendanceHistoryResponse 
 }
 
 /**
+ * 後端 OvertimeType 枚舉映射
+ * 後端可能回傳舊值 WEEKDAY/WEEKEND，需映射為新規格 WORKDAY/REST_DAY
+ */
+const OVERTIME_TYPE_MAP: Record<string, OvertimeType> = {
+  WEEKDAY: 'WORKDAY',
+  WEEKEND: 'REST_DAY',
+};
+
+/**
+ * 標準化後端 overtimeType 值
+ */
+export function adaptOvertimeType(raw: string | null | undefined): OvertimeType {
+  if (!raw) return 'WORKDAY';
+  const mapped = OVERTIME_TYPE_MAP[raw];
+  if (mapped) return mapped;
+  return guardEnum(
+    'overtime.overtimeType',
+    raw,
+    ['WORKDAY', 'REST_DAY', 'HOLIDAY'] as const,
+    'WORKDAY'
+  );
+}
+
+/**
+ * 將後端 CreateCorrectionResponse 轉為前端格式
+ * 後端欄位：correctionId, status, workflowInstanceId, createdAt
+ * 前端需要：success, correctionId, status, workflowInstanceId, createdAt, message
+ */
+function adaptCreateCorrectionResponse(raw: any): CreateCorrectionResponse {
+  return {
+    success: !!raw.correctionId,
+    correctionId: raw.correctionId ?? '',
+    status: raw.status ?? 'PENDING',
+    workflowInstanceId: raw.workflowInstanceId,
+    createdAt: raw.createdAt,
+    message: raw.correctionId ? '補卡申請已提交' : '補卡申請失敗',
+  };
+}
+
+/**
+ * 將後端 ApproveCorrectionResponse 轉為前端格式
+ * 後端欄位：correctionId, status, approvedBy, approvedAt
+ * 前端需要：success, correctionId, status, approvedBy, approvedAt, message
+ */
+function adaptApproveCorrectionResponse(raw: any): ApproveCorrectionResponse {
+  const isApproved = raw.status === 'APPROVED';
+  return {
+    success: isApproved,
+    correctionId: raw.correctionId ?? '',
+    status: raw.status ?? '',
+    approvedBy: raw.approvedBy,
+    approvedAt: raw.approvedAt,
+    message: isApproved ? '補卡已核准' : `補卡審核結果: ${raw.status ?? '未知'}`,
+  };
+}
+
+/**
  * Attendance API (考勤 API)
  * Domain Code: HR03
  */
@@ -110,10 +169,12 @@ export class AttendanceApi {
 
   /**
    * 提交補卡申請
+   * 透過 adapter 將後端 correctionId/status 結構轉為前端 success/message 結構
    */
   static async createCorrection(request: CreateCorrectionRequest): Promise<CreateCorrectionResponse> {
-    if (MockConfig.isEnabled('ATTENDANCE')) return { success: true, message: '補卡申請已提交 (Mock)' } as any;
-    return apiClient.post(`${this.BASE_PATH}/corrections`, request);
+    if (MockConfig.isEnabled('ATTENDANCE')) return { success: true, correctionId: 'MOCK-001', status: 'PENDING', message: '補卡申請已提交 (Mock)' };
+    const raw = await apiClient.post(`${this.BASE_PATH}/corrections`, request);
+    return adaptCreateCorrectionResponse(raw);
   }
 
   /**
@@ -126,9 +187,11 @@ export class AttendanceApi {
 
   /**
    * 審核補卡申請 (主管用)
+   * 透過 adapter 將後端 correctionId/status/approvedBy 結構轉為前端格式
    */
   static async approveCorrection(correctionId: string, comment?: string): Promise<ApproveCorrectionResponse> {
-    if (MockConfig.isEnabled('ATTENDANCE')) return { success: true, message: '補卡已核准 (Mock)' } as any;
-    return apiClient.put(`${this.BASE_PATH}/corrections/${correctionId}/approve`, { comment });
+    if (MockConfig.isEnabled('ATTENDANCE')) return { success: true, correctionId, status: 'APPROVED', approvedBy: 'MOCK-MGR', message: '補卡已核准 (Mock)' };
+    const raw = await apiClient.put(`${this.BASE_PATH}/corrections/${correctionId}/approve`, { comment });
+    return adaptApproveCorrectionResponse(raw);
   }
 }

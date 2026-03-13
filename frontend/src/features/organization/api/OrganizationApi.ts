@@ -25,8 +25,7 @@ function adaptEmployeeItem(raw: any): EmployeeDto {
   return {
     id: raw.employeeId ?? raw.id,
     employee_number: raw.employeeNumber ?? raw.employee_number ?? '',
-    first_name: raw.fullName ?? raw.first_name ?? '',
-    last_name: raw.last_name ?? '',
+    full_name: raw.fullName ?? raw.full_name ?? '',
     email: raw.companyEmail ?? raw.email ?? '',
     phone: raw.phone,
     department_id: raw.departmentId ?? raw.department_id ?? '',

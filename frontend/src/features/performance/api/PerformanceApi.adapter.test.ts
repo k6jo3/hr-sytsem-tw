@@ -700,7 +700,7 @@ describe('adaptDistributionData（透過 PerformanceApi.getDistribution）', () 
       },
     });
 
-    const result = await PerformanceApi.getDistribution({ cycle_id: 'CYC001' });
+    const result = await PerformanceApi.getDistribution({ cycle_id: '00000000-0000-0000-0000-000000000001' });
 
     expect(result.distribution).toHaveLength(5);
     expect(result.total_employees).toBe(50);
@@ -724,7 +724,7 @@ describe('adaptDistributionData（透過 PerformanceApi.getDistribution）', () 
       distribution: null,
     });
 
-    const result = await PerformanceApi.getDistribution({ cycle_id: 'CYC002' });
+    const result = await PerformanceApi.getDistribution({ cycle_id: '00000000-0000-0000-0000-000000000002' });
     expect(result.distribution).toHaveLength(0);
   });
 
@@ -736,7 +736,7 @@ describe('adaptDistributionData（透過 PerformanceApi.getDistribution）', () 
       distribution: {},
     });
 
-    const result = await PerformanceApi.getDistribution({ cycle_id: 'CYC003' });
+    const result = await PerformanceApi.getDistribution({ cycle_id: '00000000-0000-0000-0000-000000000003' });
     expect(result.distribution).toHaveLength(0);
   });
 
@@ -750,7 +750,7 @@ describe('adaptDistributionData（透過 PerformanceApi.getDistribution）', () 
       },
     });
 
-    const result = await PerformanceApi.getDistribution({ cycle_id: 'CYC004' });
+    const result = await PerformanceApi.getDistribution({ cycle_id: '00000000-0000-0000-0000-000000000004' });
     // adapter: raw.totalEmployees ?? raw.totalReviews → 80
     expect(result.total_employees).toBe(80);
   });
@@ -763,7 +763,7 @@ describe('adaptDistributionData（透過 PerformanceApi.getDistribution）', () 
       distribution: {},
     });
 
-    const result = await PerformanceApi.getDistribution({ cycle_id: 'CYC005' });
+    const result = await PerformanceApi.getDistribution({ cycle_id: '00000000-0000-0000-0000-000000000005' });
     expect(result.average_score).toBe(0);
   });
 });

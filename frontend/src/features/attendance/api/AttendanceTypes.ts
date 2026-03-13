@@ -230,6 +230,12 @@ export interface LeaveBalanceListResponse {
 export type OvertimeStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 
 /**
+ * 加班類型（對齊後端 OvertimeType 枚舉）
+ * 後端枚舉值：WORKDAY / REST_DAY / HOLIDAY
+ */
+export type OvertimeType = 'WORKDAY' | 'REST_DAY' | 'HOLIDAY';
+
+/**
  * Overtime Application DTO
  */
 export interface OvertimeApplicationDto {
@@ -238,7 +244,7 @@ export interface OvertimeApplicationDto {
   employeeName?: string;
   overtimeDate: string;
   overtimeHours: number;
-  overtimeType: string;
+  overtimeType: OvertimeType;
   status: OvertimeStatus;
   appliedAt: string;
   reason?: string;
@@ -313,10 +319,14 @@ export interface CreateCorrectionRequest {
 
 /**
  * Create Correction Response
+ * 對齊後端 CreateCorrectionResponse DTO 結構
  */
 export interface CreateCorrectionResponse {
   success: boolean;
   correctionId: string;
+  status: string;
+  workflowInstanceId?: string;
+  createdAt?: string;
   message: string;
 }
 /**
@@ -367,9 +377,14 @@ export interface ApproveCorrectionRequest {
 
 /**
  * Approve Correction Response
+ * 對齊後端 ApproveCorrectionResponse DTO 結構
  */
 export interface ApproveCorrectionResponse {
   success: boolean;
+  correctionId: string;
+  status: string;
+  approvedBy?: string;
+  approvedAt?: string;
   message: string;
 }
 

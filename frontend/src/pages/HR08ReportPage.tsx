@@ -20,7 +20,8 @@ export const HR08ReportPage: React.FC = () => {
 
   useEffect(() => {
     if (cycles.length > 0 && !selectedCycleId) {
-      setSelectedCycleId(cycles[0]?.cycleId || '');
+      const firstValidId = cycles.find(c => c.cycleId)?.cycleId ?? '';
+      setSelectedCycleId(firstValidId);
     }
   }, [cycles, selectedCycleId]);
 

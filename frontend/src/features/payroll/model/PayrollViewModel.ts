@@ -82,7 +82,7 @@ export interface PayrollRunViewModel {
   runId: string;
   organizationId: string;
   name: string;
-  status: 'DRAFT' | 'CALCULATING' | 'COMPLETED' | 'APPROVED' | 'REJECTED' | 'PAID';
+  status: 'DRAFT' | 'CALCULATING' | 'COMPLETED' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'PAID' | 'CANCELLED';
   statusLabel: string;
   statusColor: string;
   payrollSystem: string;

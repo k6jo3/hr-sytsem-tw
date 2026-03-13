@@ -31,7 +31,7 @@ export const EmployeeDetailView: React.FC<EmployeeDetailViewProps> = ({ employee
         <Avatar size={80} icon={<UserOutlined />} style={{ backgroundColor: '#87d068', marginRight: 24 }} />
         <div>
           <h2 style={{ marginBottom: 4 }}>
-            {employee.first_name} {employee.last_name}
+            {employee.full_name}
             <Tag color={statusInfo.color} style={{ marginLeft: 12, verticalAlign: 'middle' }}>
               {statusInfo.label}
             </Tag>

@@ -56,10 +56,12 @@ describe('PayrollViewModelFactory', () => {
       const testCases: Array<{ status: PayrollRunDto['status']; expected: string }> = [
         { status: 'DRAFT', expected: '草稿' },
         { status: 'CALCULATING', expected: '計算中' },
-        { status: 'COMPLETED', expected: '待審核' },
+        { status: 'COMPLETED', expected: '計算完成' },
+        { status: 'SUBMITTED', expected: '待審核' },
         { status: 'APPROVED', expected: '已核准' },
         { status: 'REJECTED', expected: '已退回' },
         { status: 'PAID', expected: '已發薪' },
+        { status: 'CANCELLED', expected: '已取消' },
       ];
 
       testCases.forEach(({ status, expected }) => {
@@ -74,9 +76,11 @@ describe('PayrollViewModelFactory', () => {
         { status: 'DRAFT', expected: 'default' },
         { status: 'CALCULATING', expected: 'processing' },
         { status: 'COMPLETED', expected: 'warning' },
+        { status: 'SUBMITTED', expected: 'warning' },
         { status: 'APPROVED', expected: 'success' },
         { status: 'REJECTED', expected: 'error' },
         { status: 'PAID', expected: 'cyan' },
+        { status: 'CANCELLED', expected: 'default' },
       ];
 
       testCases.forEach(({ status, expected }) => {

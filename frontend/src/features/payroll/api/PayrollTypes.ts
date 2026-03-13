@@ -8,7 +8,7 @@
 /**
  * 薪資單狀態
  */
-export type PayslipStatus = 'DRAFT' | 'CALCULATED' | 'APPROVED' | 'PAID' | 'VOID';
+export type PayslipStatus = 'DRAFT' | 'CALCULATED' | 'CONFIRMED' | 'APPROVED' | 'PAID' | 'SENT' | 'VOID' | 'VOIDED';
 
 /**
  * 薪資項目類型
@@ -70,7 +70,7 @@ export interface PayrollRunDto {
   runId: string;
   organizationId: string;
   name: string;
-  status: 'DRAFT' | 'CALCULATING' | 'COMPLETED' | 'APPROVED' | 'REJECTED' | 'PAID';
+  status: 'DRAFT' | 'CALCULATING' | 'COMPLETED' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'PAID' | 'CANCELLED';
   payrollSystem: string;
   start: string;
   end: string;

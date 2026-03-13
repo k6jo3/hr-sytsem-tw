@@ -135,15 +135,13 @@ describe('adaptEmployeeItem — 後端 EmployeeListItemResponse → EmployeeDto'
     expect(emp.hire_date).toBe('2024-01-15');
   });
 
-  it('【欄位映射驗證】first_name 應映射自 fullName（非 firstName）', async () => {
-    // 稽核發現：後端 EmployeeListItemResponse 沒有 firstName 欄位
-    // adapter 將 fullName 映射到 first_name，last_name 則為空字串
-    // 這是已知不一致：EmployeeDto.first_name 語意應為姓氏，但實際承載 fullName
+  it('【欄位映射驗證】full_name 應映射自後端 fullName', async () => {
+    // 後端 EmployeeListItemResponse 只有 fullName 欄位
+    // adapter 將 fullName 語意正確地映射到 full_name
     const result = await OrganizationApi.getEmployeeList();
     const emp = result.employees[0];
 
-    expect(emp.first_name).toBe('王小明'); // 映射自 fullName（已知缺陷）
-    expect(emp.last_name).toBe('');        // 後端列表回應無獨立 lastName，固定為空字串
+    expect(emp.full_name).toBe('王小明'); // 映射自 fullName
   });
 
   it('【email 欄位】應優先讀取 companyEmail，fallback 至 email', async () => {
@@ -200,8 +198,7 @@ describe('adaptEmployeeItem — 後端 EmployeeListItemResponse → EmployeeDto'
 
     expect(emp.id).toBe('e-null-test');
     expect(emp.employee_number).toBe('EMP999');
-    expect(emp.first_name).toBe('測試員工');
-    expect(emp.last_name).toBe('');
+    expect(emp.full_name).toBe('測試員工');
     expect(emp.email).toBe('');
     expect(emp.phone).toBeUndefined();
     expect(emp.department_id).toBe('');
@@ -627,7 +624,7 @@ describe('合約 requiredFields 完整覆蓋', () => {
     // requiredFields: employeeId, employeeNumber, fullName, departmentName, jobTitle, employmentStatus, hireDate
     expect(emp.id).toBeTruthy();          // employeeId → id
     expect(emp.employee_number).toBeTruthy(); // employeeNumber
-    expect(emp.first_name).toBeTruthy();  // fullName → first_name（已知映射問題）
+    expect(emp.full_name).toBeTruthy();   // fullName → full_name（語意正確映射）
     expect(emp.department_name).toBeTruthy(); // departmentName
     expect(emp.position).toBeTruthy();   // jobTitle → position
     expect(emp.status).toBe('ACTIVE');   // employmentStatus → status
@@ -669,13 +666,11 @@ describe('合約 requiredFields 完整覆蓋', () => {
  *
  * 稽核方法：後端 DTO 欄位 ↔ 合約 requiredFields ↔ 前端 adapter 映射
  *
- * ── M1【高】EmployeeDto.first_name 承載 fullName（語意錯誤）──
- *   後端 EmployeeListItemResponse：無 firstName 欄位，只有 fullName
- *   Adapter (第 28 行)：first_name: raw.fullName ?? raw.first_name ?? ''
+ * ── M1【已修復】EmployeeDto.full_name 正確映射自後端 fullName ──
+ *   後端 EmployeeListItemResponse：只有 fullName
+ *   Adapter：full_name: raw.fullName ?? raw.full_name ?? ''
  *   合約 requiredFields：fullName（notNull: true）
- *   問題：前端 EmployeeDto 用 first_name + last_name 模型，但列表 API 只回 fullName
- *         first_name 承載完整姓名，last_name 永遠為空字串
- *   建議：列表 DTO 新增 firstName/lastName，或前端改用 fullName 欄位
+ *   修復：前端 EmployeeDto 移除 first_name/last_name，改用 full_name 欄位，語意正確
  *
  * ── M2【中】getOrganization 無 adapter（單一組織詳情）──
  *   後端 OrganizationDetailResponse：使用 code/name/type/phone

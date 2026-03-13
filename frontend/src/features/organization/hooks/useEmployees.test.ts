@@ -16,8 +16,7 @@ describe('useEmployees', () => {
     {
       id: '1',
       employee_number: 'EMP001',
-      first_name: '小明',
-      last_name: '王',
+      full_name: '王小明',
       email: 'xiaoming.wang@company.com',
       phone: '0912345678',
       department_id: 'dept-1',
@@ -31,8 +30,7 @@ describe('useEmployees', () => {
     {
       id: '2',
       employee_number: 'EMP002',
-      first_name: '小華',
-      last_name: '李',
+      full_name: '李小華',
       email: 'xiaohua.li@company.com',
       department_id: 'dept-2',
       department_name: '研發部',

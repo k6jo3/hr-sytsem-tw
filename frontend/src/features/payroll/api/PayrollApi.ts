@@ -21,32 +21,42 @@ import type {
 // ========== Response Adapters ==========
 // 後端 camelCase → 前端 snake_case
 
-/** 後端薪資單狀態 → 前端狀態映射 */
+/** 後端薪資單狀態 → 前端狀態映射
+ *  後端狀態流轉: DRAFT → CONFIRMED(核准後) → SENT(發薪後) → VOIDED(作廢)
+ *  前端狀態:      DRAFT → APPROVED          → PAID        → VOID
+ */
 const PAYSLIP_STATUS_MAP: Record<string, PayslipDto['status']> = {
   DRAFT: 'DRAFT',
+  CONFIRMED: 'APPROVED',
   FINALIZED: 'APPROVED',
   SENT: 'PAID',
+  PAID: 'PAID',
+  VOIDED: 'VOID',
+  VOID: 'VOID',
+  CALCULATED: 'CALCULATED',
+  APPROVED: 'APPROVED',
 };
 
 /**
  * 後端 PayslipResponse → 前端 PayslipDto
+ * 支援後端欄位名稱變體（periodStartDate / startDate 等）
  */
 function adaptPayslipDto(raw: any): PayslipDto {
   return {
     id: raw.id,
-    payslip_code: raw.employeeNumber ?? '',
+    payslip_code: raw.payslipCode ?? raw.employeeNumber ?? '',
     employee_id: raw.employeeId,
     employee_name: raw.employeeName,
     employee_code: raw.employeeNumber ?? '',
     department_name: raw.departmentName,
-    pay_period_start: raw.periodStartDate,
-    pay_period_end: raw.periodEndDate,
-    payment_date: raw.payDate,
-    status: guardEnum('payslip.status', PAYSLIP_STATUS_MAP[raw.status] ?? raw.status, ['DRAFT', 'APPROVED', 'PAID'] as const, 'DRAFT'),
+    pay_period_start: raw.periodStartDate ?? raw.startDate ?? '',
+    pay_period_end: raw.periodEndDate ?? raw.endDate ?? '',
+    payment_date: raw.payDate ?? raw.paymentDate ?? '',
+    status: guardEnum('payslip.status', PAYSLIP_STATUS_MAP[raw.status] ?? raw.status, ['DRAFT', 'CALCULATED', 'APPROVED', 'PAID', 'VOID'] as const, 'DRAFT'),
     items: [], // 後端列表查詢不含 items 明細
-    gross_pay: raw.grossWage ?? 0,
-    total_deductions: raw.totalDeductions ?? 0,
-    net_pay: raw.netWage ?? 0,
+    gross_pay: raw.grossWage ?? raw.grossPay ?? raw.totalEarnings ?? 0,
+    total_deductions: raw.totalDeductions ?? raw.insuranceDeductions ?? 0,
+    net_pay: raw.netWage ?? raw.netPay ?? 0,
     overtime_hours: raw.overtimeHours,
     created_at: raw.createdAt ?? '',
     updated_at: raw.updatedAt ?? '',
@@ -55,18 +65,60 @@ function adaptPayslipDto(raw: any): PayslipDto {
 
 /**
  * 後端 PayslipResponse → 前端 PayslipSummaryDto（列表摘要）
+ * 支援後端欄位名稱變體（periodStartDate / startDate 等）
  */
 function adaptPayslipSummary(raw: any): PayslipSummaryDto {
-  const start = raw.periodStartDate ?? '';
-  const end = raw.periodEndDate ?? '';
+  const start = raw.periodStartDate ?? raw.startDate ?? '';
+  const end = raw.periodEndDate ?? raw.endDate ?? '';
   return {
     id: raw.id,
-    payslip_code: raw.employeeNumber ?? '',
+    payslip_code: raw.payslipCode ?? raw.employeeNumber ?? '',
     pay_period: start && end ? `${start} ~ ${end}` : '',
-    payment_date: raw.payDate ?? '',
-    gross_pay: raw.grossWage ?? 0,
-    net_pay: raw.netWage ?? 0,
-    status: guardEnum('payslipSummary.status', PAYSLIP_STATUS_MAP[raw.status] ?? raw.status, ['DRAFT', 'APPROVED', 'PAID'] as const, 'DRAFT'),
+    payment_date: raw.payDate ?? raw.paymentDate ?? '',
+    gross_pay: raw.grossWage ?? raw.grossPay ?? raw.totalEarnings ?? 0,
+    net_pay: raw.netWage ?? raw.netPay ?? 0,
+    status: guardEnum('payslipSummary.status', PAYSLIP_STATUS_MAP[raw.status] ?? raw.status, ['DRAFT', 'CALCULATED', 'APPROVED', 'PAID', 'VOID'] as const, 'DRAFT'),
+  };
+}
+
+/** 後端薪資批次狀態 → 前端狀態映射 */
+const PAYROLL_RUN_STATUS_MAP: Record<string, PayrollRunDto['status']> = {
+  DRAFT: 'DRAFT',
+  CALCULATING: 'CALCULATING',
+  COMPLETED: 'COMPLETED',
+  SUBMITTED: 'SUBMITTED',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  PAID: 'PAID',
+  CANCELLED: 'CANCELLED',
+};
+
+/**
+ * 後端 PayrollRunResponse → 前端 PayrollRunDto
+ * 支援後端欄位名稱變體（start / startDate、end / endDate）
+ */
+function adaptPayrollRunDto(raw: any): PayrollRunDto {
+  return {
+    runId: raw.runId ?? raw.id ?? '',
+    organizationId: raw.organizationId ?? '',
+    name: raw.name ?? '',
+    status: guardEnum('payrollRun.status', PAYROLL_RUN_STATUS_MAP[raw.status] ?? raw.status, ['DRAFT', 'CALCULATING', 'COMPLETED', 'SUBMITTED', 'APPROVED', 'REJECTED', 'PAID', 'CANCELLED'] as const, 'DRAFT'),
+    payrollSystem: raw.payrollSystem ?? '',
+    start: raw.start ?? raw.startDate ?? '',
+    end: raw.end ?? raw.endDate ?? '',
+    payDate: raw.payDate ?? raw.paymentDate ?? '',
+    totalDays: raw.totalDays ?? 0,
+    totalEmployees: raw.totalEmployees ?? 0,
+    processedEmployees: raw.processedEmployees ?? 0,
+    successCount: raw.successCount ?? 0,
+    failureCount: raw.failureCount ?? 0,
+    totalGrossPay: raw.totalGrossPay ?? 0,
+    totalNetPay: raw.totalNetPay ?? 0,
+    totalDeductions: raw.totalDeductions ?? 0,
+    executedAt: raw.executedAt,
+    completedAt: raw.completedAt,
+    approvedAt: raw.approvedAt,
+    paidAt: raw.paidAt,
   };
 }
 
@@ -175,7 +227,7 @@ export class PayrollApi {
     if (MockConfig.isEnabled('PAYROLL')) return MockPayrollApi.getPayrollRuns(params);
     const raw: any = await apiClient.get('/payroll-runs', { params });
     return {
-      items: raw.items ?? [],
+      items: (raw.items ?? []).map(adaptPayrollRunDto),
       total: raw.totalElements ?? 0,
     };
   }
@@ -234,8 +286,8 @@ export class PayrollApi {
       const run = await MockPayrollApi.getPayrollRunById(runId);
       return { run };
     }
-    const run = await apiClient.get<PayrollRunDto>(`/payroll-runs/${runId}`);
-    return { run };
+    const raw: any = await apiClient.get(`/payroll-runs/${runId}`);
+    return { run: adaptPayrollRunDto(raw) };
   }
 
   /**

@@ -411,6 +411,10 @@ export class PerformanceApi {
    */
   static async getDistribution(params: GetDistributionRequest): Promise<GetDistributionResponse> {
     if (MockConfig.isEnabled('PERFORMANCE')) return MockPerformanceApi.getDistribution(params);
+    // 防止空字串或非 UUID 格式的 cycleId 送到後端（後端會 UUID.fromString 解析）
+    if (!params.cycle_id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.cycle_id)) {
+      return { distribution: [], total_employees: 0, average_score: 0 };
+    }
     const raw: any = await apiClient.get(`${this.BASE_PATH}/reports/distribution/${params.cycle_id}`);
     // 後端回傳 Map<String, DistributionData>，前端期望 PerformanceDistributionDto[]
     const distribution: PerformanceDistributionDto[] = [];

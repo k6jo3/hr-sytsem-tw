@@ -110,9 +110,12 @@ export class PayslipViewModelFactory {
     const statusMap: Record<PayslipStatus, string> = {
       DRAFT: '草稿',
       CALCULATED: '已計算',
+      CONFIRMED: '已確認',
       APPROVED: '已核准',
       PAID: '已發放',
+      SENT: '已寄送',
       VOID: '作廢',
+      VOIDED: '已作廢',
     };
     return statusMap[status];
   }
@@ -124,9 +127,12 @@ export class PayslipViewModelFactory {
     const colorMap: Record<PayslipStatus, string> = {
       DRAFT: 'default',
       CALCULATED: 'processing',
+      CONFIRMED: 'success',
       APPROVED: 'success',
       PAID: 'success',
+      SENT: 'success',
       VOID: 'error',
+      VOIDED: 'error',
     };
     return colorMap[status];
   }
