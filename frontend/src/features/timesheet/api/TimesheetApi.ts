@@ -136,11 +136,11 @@ export class TimesheetApi {
   }
 
   /**
-   * DELETE /api/v1/timesheets/entries/{id} - 刪除工時明細
+   * DELETE /api/v1/timesheets/{id}/entries/{entryId} - 刪除工時明細
    */
-  static async deleteEntry(entryId: string): Promise<void> {
+  static async deleteEntry(timesheetId: string, entryId: string): Promise<void> {
     if (MockConfig.isEnabled('TIMESHEET')) return MockTimesheetApi.deleteTimesheetEntry(entryId);
-    return apiClient.delete(`${this.BASE_PATH}/entries/${entryId}`);
+    return apiClient.delete(`${this.BASE_PATH}/${timesheetId}/entries/${entryId}`);
   }
 
   /**

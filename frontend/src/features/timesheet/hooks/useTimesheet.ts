@@ -47,7 +47,7 @@ export const useTimesheet = (weekStartDate: string) => {
 
   const handleDeleteEntry = async (entryId: string) => {
     try {
-      await TimesheetApi.deleteEntry(entryId);
+      await TimesheetApi.deleteEntry(summary?.id ?? '', entryId);
       message.success('已刪除工時記錄');
       await fetchWeeklyTimesheet();
     } catch (err) {

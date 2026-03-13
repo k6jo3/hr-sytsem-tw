@@ -148,7 +148,7 @@ export const ReportApi = {
   downloadReport: async (reportId: string): Promise<{ download_url: string }> => {
     if (MockConfig.isEnabled('REPORT')) return { download_url: '#' };
     const response = await apiClient.get<any>(`${BASE_URL}/export/${reportId}/download`);
-    return { download_url: response.downloadUrl ?? response.download_url ?? '#' };
+    return { download_url: response.fileUrl ?? response.downloadUrl ?? response.download_url ?? '#' };
   },
 
   /**

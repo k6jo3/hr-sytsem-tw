@@ -177,6 +177,7 @@ export interface GetTeamReviewsResponse {
 export interface GetCyclesRequest {
   status?: CycleStatus;
   cycle_type?: CycleType;
+  year?: number;
 }
 
 export interface GetCyclesResponse {

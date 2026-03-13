@@ -555,12 +555,11 @@ describe('ReportApi.downloadReport() — 後端欄位映射', () => {
   it('後端 ExportFileResponse 完整欄位模擬', async () => {
     vi.mocked(apiClient.get).mockResolvedValue(backendExportFileResponse);
 
-    // exportId, fileName, fileUrl, status 皆為後端欄位，但 ReportApi 只取 downloadUrl
-    // TODO: 前端未消費 exportId / status — 可補充 adapt 邏輯
+    // adapter 已修正：優先讀取 fileUrl，再 fallback downloadUrl / download_url
     const result = await ReportApi.downloadReport('export-001');
 
-    // fileUrl 不是 downloadUrl → fallback to '#'
-    expect(result.download_url).toBe('#');
+    // fileUrl 正確映射至 download_url
+    expect(result.download_url).toBe('https://storage.example.com/reports/export-001.xlsx');
   });
 });
 

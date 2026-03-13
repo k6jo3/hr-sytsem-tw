@@ -252,6 +252,7 @@ export class PerformanceApi {
     const backendParams: any = {};
     if (params.status) backendParams.status = params.status;
     if (params.cycle_type) backendParams.cycleType = params.cycle_type;
+    if (params.year != null) backendParams.year = params.year;
 
     const raw: any = await apiClient.get(`${this.BASE_PATH}/cycles`, { params: backendParams });
     // 後端 PageResponse 使用 items 欄位

@@ -72,7 +72,7 @@ function adaptNotification(raw: any): NotificationDto {
     title: raw.title ?? '',
     content: raw.content ?? '',
     notification_type: raw.notificationType ?? raw.notification_type ?? 'REMINDER',
-    channels: raw.channels ?? raw.channel ? [raw.channel] : ['IN_APP'],
+    channels: raw.channels ?? (raw.channel ? [raw.channel] : ['IN_APP']),
     priority: raw.priority ?? 'NORMAL',
     status: guardEnum('notification.status', raw.status, ['PENDING', 'SENT', 'FAILED', 'READ'] as const, 'SENT'),
     sent_at: raw.sentAt ?? raw.sent_at ?? '',
@@ -106,9 +106,9 @@ function adaptAnnouncement(raw: any): AnnouncementDto {
     priority: raw.priority ?? 'NORMAL',
     target_roles: raw.targetRoles ?? raw.target_roles ?? [],
     published_at: raw.publishedAt ?? raw.published_at ?? '',
-    expires_at: raw.expiresAt ?? raw.expires_at ?? '',
+    expires_at: raw.expireAt ?? raw.expiresAt ?? raw.expires_at ?? '',
     status: guardEnum('announcement.status', raw.status, ['DRAFT', 'PUBLISHED', 'EXPIRED', 'REVOKED'] as const, 'DRAFT'),
-    created_by: raw.createdBy ?? raw.created_by ?? '',
+    created_by: raw.publishedBy?.fullName ?? raw.publishedBy?.employeeId ?? raw.createdBy ?? raw.created_by ?? '',
     created_at: raw.createdAt ?? raw.created_at ?? '',
   };
 }
@@ -118,11 +118,11 @@ function adaptPreference(raw: any): NotificationPreferenceDto {
   return {
     preference_id: raw.preferenceId ?? raw.preference_id ?? '',
     employee_id: raw.employeeId ?? raw.employee_id ?? '',
-    email_enabled: raw.emailEnabled ?? raw.email_enabled ?? true,
-    push_enabled: raw.pushEnabled ?? raw.push_enabled ?? false,
-    in_app_enabled: raw.inAppEnabled ?? raw.in_app_enabled ?? true,
-    quiet_hours_start: raw.quietHoursStart ?? raw.quiet_hours_start ?? '',
-    quiet_hours_end: raw.quietHoursEnd ?? raw.quiet_hours_end ?? '',
+    email_enabled: raw.channels?.emailEnabled ?? raw.emailEnabled ?? raw.email_enabled ?? true,
+    push_enabled: raw.channels?.pushEnabled ?? raw.pushEnabled ?? raw.push_enabled ?? false,
+    in_app_enabled: raw.channels?.inAppEnabled ?? raw.inAppEnabled ?? raw.in_app_enabled ?? true,
+    quiet_hours_start: raw.quietHours?.startTime ?? raw.quietHoursStart ?? raw.quiet_hours_start ?? '',
+    quiet_hours_end: raw.quietHours?.endTime ?? raw.quietHoursEnd ?? raw.quiet_hours_end ?? '',
     updated_at: raw.updatedAt ?? raw.updated_at ?? '',
   };
 }
