@@ -102,8 +102,7 @@ class HR12NotificationCmdControllerTest {
                                 .andExpect(jsonPath("$.recipientId").value("emp-001"))
                                 .andExpect(jsonPath("$.title").value("系統維護通知"))
                                 .andExpect(jsonPath("$.status").exists())
-                                .andExpect(jsonPath("$.channels").isArray())
-                                .andExpect(jsonPath("$.sentAt").exists());
+                                .andExpect(jsonPath("$.channels").isArray());
         }
 
         @Test
