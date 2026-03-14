@@ -117,7 +117,91 @@ npx vite build     # 建構
 - [ ] Domain Event 正確發布與接收
 - [ ] 跨服務資料一致性
 
-### 五、非功能性驗證
+### 五、前後端串接驗證（E2E）
+
+> 此階段需實際啟動後端服務 + 前端 Dev Server，用瀏覽器或 Playwright 操作驗證。
+> 詳細操作流程參見 `/ui-api-roundtest` 和 `/env-setup`。
+
+#### 5.1 環境準備
+```bash
+# 後端：啟動目標服務（參見 /env-setup 的服務啟動章節）
+cd backend
+export JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot"
+mvn install -pl hrms-common -DskipTests
+mvn spring-boot:run -pl hrms-{service} -Plocal -Dspring-boot.run.profiles=local
+
+# 前端：啟動 Dev Server
+cd frontend && npm run dev
+```
+
+- [ ] 後端服務 health check 回應 200
+- [ ] 前端 http://localhost:5173 可存取
+- [ ] MockConfig 目標模組設為 `false`（使用真實 API）
+- [ ] Vite Proxy 設定正確（指向對應後端 port）
+
+#### 5.2 基本功能驗證
+
+| 操作 | 驗證重點 |
+|:---|:---|
+| 登入 | 帳密驗證、Token 取得、頁面導向 |
+| 列表查詢 | 分頁、排序、篩選、資料正確性 |
+| 新增 | 表單驗證、成功提示、列表刷新 |
+| 編輯 | 帶入現有資料、更新成功、不可改欄位鎖定 |
+| 刪除/停用 | 二次確認、成功提示、列表更新 |
+| 詳情查看 | 欄位完整、格式正確 |
+
+- [ ] CRUD 流程可正常操作
+- [ ] 頁面資料來自真實 API（非 Mock）
+- [ ] 中文顯示正確（含 enum 標籤、日期格式）
+
+#### 5.3 API 回應欄位驗證
+
+使用瀏覽器 Network tab 或 Playwright `browser_network_requests`：
+
+- [ ] API 回應欄位名與前端 Adapter 映射一致
+- [ ] 無 `undefined` 或空值欄位（應有值的欄位）
+- [ ] enum 值在前端 guardEnum 的允許範圍內（無 console.warn）
+- [ ] 分頁 total / page / size 正確
+
+#### 5.4 錯誤場景驗證
+
+| HTTP | 觸發方式 | 預期前端行為 |
+|:---:|:---|:---|
+| 400 | 送出空白必填欄位 | 顯示欄位驗證錯誤 |
+| 401 | Token 過期或無效 | 導向登入頁 |
+| 403 | 無權限操作 | 顯示「權限不足」提示 |
+| 404 | 存取不存在的資源 | 顯示「找不到資源」提示 |
+| 409 | 建立重複資料（如同名組織） | 顯示「已存在」提示 |
+| 500 | 後端未預期錯誤 | 顯示「伺服器錯誤」提示 |
+
+- [ ] 所有錯誤狀態碼都有對應的前端提示
+- [ ] 錯誤訊息為中文（非 raw error message）
+- [ ] 錯誤後頁面不卡死、可繼續操作
+
+#### 5.5 Adapter 品質驗證
+
+```bash
+# 搜尋靜默 fallback（應使用 guardEnum 取代）
+grep -r "|| '" frontend/src/features/{feature}/api/
+grep -r "|| \"" frontend/src/features/{feature}/api/
+```
+
+- [ ] 無 `|| 'DEFAULT'` 靜默 fallback
+- [ ] Adapter 處理所有後端可能的 enum 值
+- [ ] null/undefined 欄位有明確處理
+
+#### 5.6 串接驗證 Round 對照
+
+| Round | 服務 | 前端頁面 |
+|:---:|:---|:---|
+| 1 | IAM + Organization | 登入、員工列表、使用者管理、組織架構 |
+| 2 | Attendance + Payroll | 考勤打卡、請假、薪資 |
+| 3 | Project + Timesheet | 專案管理、工時填報 |
+| 4 | Insurance + Performance | 保險、績效考核 |
+| 5 | Recruitment + Training | 招募、訓練 |
+| 6 | Workflow + Notification + Document + Reporting | 簽核、通知、文件、報表 |
+
+### 六、非功能性驗證
 
 - [ ] **資安**：無 SQL Injection / XSS / CSRF 風險
 - [ ] **效能**：API 回應時間 < 2s（正常場景）
@@ -146,6 +230,7 @@ npx vite build     # 建構
 | 前端 Factory 測試 | | | | |
 | 前端元件測試 | | | | |
 | 前端 Build | ✅ / ❌ | | | |
+| 前後端串接（E2E） | | | | |
 
 ### 發現問題
 
