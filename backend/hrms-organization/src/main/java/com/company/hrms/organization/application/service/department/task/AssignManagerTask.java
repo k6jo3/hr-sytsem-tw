@@ -41,7 +41,7 @@ public class AssignManagerTask implements PipelineTask<DepartmentContext> {
         department.assignManager(UUID.fromString(request.getManagerId()));
 
         context.setManager(manager);
-        context.setManagerName(manager.getFirstName() + " " + manager.getLastName());
+        context.setManagerName(manager.getLastName() + manager.getFirstName());
     }
 
     @Override

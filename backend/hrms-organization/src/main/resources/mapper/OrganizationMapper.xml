@@ -15,14 +15,18 @@
         <result column="email" property="email"/>
         <result column="address" property="address"/>
         <result column="established_date" property="establishedDate"/>
+        <result column="description" property="description"/>
+        <result column="organization_name_en" property="nameEn"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="is_deleted" property="isDeleted"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_by" property="updatedBy"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        organization_id, organization_code, organization_name, organization_type, status, parent_organization_id, tax_id, phone_number, fax_number, email,
-        address, established_date, created_at, updated_at, is_deleted
+        organization_id, organization_code, organization_name, organization_name_en, organization_type, status, parent_organization_id, tax_id, phone_number, fax_number, email,
+        address, established_date, description, created_at, updated_at, is_deleted, created_by, updated_by
     </sql>
 
     <select id="selectById" resultMap="OrganizationResultMap">
@@ -59,12 +63,12 @@
 
     <insert id="insert">
         INSERT INTO organizations (
-            organization_id, organization_code, organization_name, organization_type, status, parent_organization_id, tax_id, phone_number, fax_number, email,
-            address, established_date, created_at, updated_at, is_deleted
+            organization_id, organization_code, organization_name, organization_name_en, organization_type, status, parent_organization_id, tax_id, phone_number, fax_number, email,
+            address, established_date, description, created_at, updated_at, is_deleted, created_by, updated_by
         ) VALUES (
-            #{id}, #{code}, #{name}, #{type}, #{status}, #{parentId}, #{taxId},
+            #{id}, #{code}, #{name}, #{nameEn}, #{type}, #{status}, #{parentId}, #{taxId},
             #{phone}, #{fax}, #{email}, #{address}, #{establishedDate},
-            #{createdAt}, #{updatedAt}, #{isDeleted}
+            #{description}, #{createdAt}, #{updatedAt}, #{isDeleted}, #{createdBy}, #{updatedBy}
         )
     </insert>
 

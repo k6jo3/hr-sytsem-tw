@@ -47,7 +47,7 @@ public class LoadDeptStatsTask implements PipelineTask<DepartmentContext> {
         // 載入主管名稱
         if (department.getManagerId() != null) {
             employeeRepository.findById(department.getManagerId())
-                    .ifPresent(manager -> context.setManagerName(manager.getFirstName() + " " + manager.getLastName()));
+                    .ifPresent(manager -> context.setManagerName(manager.getLastName() + manager.getFirstName()));
         }
     }
 

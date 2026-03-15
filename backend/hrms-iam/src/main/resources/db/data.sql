@@ -190,7 +190,7 @@ INSERT INTO users (
     '00000000-0000-0000-0000-000000000001',
     'admin',
     'admin@company.com',
-    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4x5H5.8qGvhXHHe.', -- Admin@123
+    '$2a$12$ay7Ck9tjsekCgXckaXiVFO4op2tlVz3fLcyxG1DhLtCkqJ68TlPe.', -- Admin@123
     '系統管理員',
     '00000000-0000-0000-0000-000000000001',
     'ACTIVE',

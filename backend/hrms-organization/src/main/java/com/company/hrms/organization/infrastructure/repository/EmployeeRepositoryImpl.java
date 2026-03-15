@@ -169,6 +169,11 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
     }
 
     @Override
+    public int countByDepartmentId(DepartmentId departmentId) {
+        return employeeDAO.countByDepartmentId(departmentId.getValue().toString());
+    }
+
+    @Override
     public int countByOrganizationId(OrganizationId organizationId) {
         return employeeDAO.countByOrganizationId(organizationId.getValue().toString());
     }

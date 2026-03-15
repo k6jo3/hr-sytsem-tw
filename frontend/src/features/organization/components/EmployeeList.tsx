@@ -14,6 +14,8 @@ export interface EmployeeListProps {
   employees: EmployeeViewModel[];
   loading: boolean;
   total: number;
+  currentPage?: number;
+  pageSize?: number;
   onRefresh: () => void;
   onAdd: () => void;
   onPageChange?: (page: number, pageSize: number) => void;
@@ -27,6 +29,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
   employees,
   loading,
   total,
+  currentPage,
+  pageSize: pageSizeProp,
   onRefresh,
   onAdd,
   onPageChange,
@@ -117,7 +121,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
           loading={loading}
           pagination={{
             total,
-            pageSize: 10,
+            current: currentPage,
+            pageSize: pageSizeProp ?? 10,
             showSizeChanger: true,
             showTotal: (total) => `共 ${total} 筆`,
           }}

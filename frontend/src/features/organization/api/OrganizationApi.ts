@@ -64,7 +64,18 @@ export const OrganizationApi = {
    */
   getEmployeeList: async (params?: GetEmployeeListRequest): Promise<GetEmployeeListResponse> => {
     if (MockConfig.isEnabled('ORGANIZATION')) return MockOrganizationApi.getEmployeeList(params);
-    const raw = await apiClient.get('/employees', { params });
+    // 前端 page_size → 後端 size 欄位映射
+    const backendParams: Record<string, any> = {};
+    if (params) {
+      if (params.page != null) backendParams.page = params.page;
+      if (params.page_size != null) backendParams.size = params.page_size;
+      if (params.search) backendParams.search = params.search;
+      if (params.department_id) backendParams.departmentId = params.department_id;
+      if (params.status) backendParams.status = params.status;
+      if (params.sort_by) backendParams.sortBy = params.sort_by;
+      if (params.sort_order) backendParams.sortOrder = params.sort_order;
+    }
+    const raw = await apiClient.get('/employees', { params: backendParams });
     return adaptEmployeeListResponse(raw);
   },
 

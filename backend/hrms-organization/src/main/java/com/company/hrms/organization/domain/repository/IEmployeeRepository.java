@@ -161,8 +161,16 @@ public interface IEmployeeRepository {
     int findMaxSequenceByPrefix(String prefix);
 
     /**
+     * 計算部門下的員工數
+     *
+     * @param departmentId 部門 ID
+     * @return 員工數
+     */
+    int countByDepartmentId(DepartmentId departmentId);
+
+    /**
      * 計算組織下的員工數
-     * 
+     *
      * @param organizationId 組織 ID
      * @return 員工數
      */

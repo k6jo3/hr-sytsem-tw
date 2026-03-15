@@ -1,4 +1,6 @@
 import { EmployeeList } from '@features/organization/components/EmployeeList';
+import { EmployeeFormModal } from '@features/organization/components/EmployeeFormModal';
+import { OrganizationApi } from '@features/organization/api/OrganizationApi';
 import { useEmployees } from '@features/organization/hooks/useEmployees';
 import { Layout, message } from 'antd';
 import React, { useState } from 'react';
@@ -12,6 +14,8 @@ const { Content } = Layout;
 const HR02EmployeeListPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
 
   const { employees, total, loading, error, refresh } = useEmployees({
     page,
@@ -27,7 +31,24 @@ const HR02EmployeeListPage: React.FC = () => {
 
   // 處理新增員工
   const handleAdd = () => {
-    message.info('新增員工功能開發中...');
+    setModalOpen(true);
+  };
+
+  // 處理新增員工提交
+  const handleCreateEmployee = async (values: any) => {
+    setModalLoading(true);
+    try {
+      await OrganizationApi.createEmployee(values);
+      message.success('員工建立成功');
+      setModalOpen(false);
+      refresh();
+    } catch (err: any) {
+      const msg = err?.message || '員工建立失敗';
+      message.error(msg);
+      throw err;
+    } finally {
+      setModalLoading(false);
+    }
   };
 
   // 處理分頁變更
@@ -43,9 +64,17 @@ const HR02EmployeeListPage: React.FC = () => {
           employees={employees}
           loading={loading}
           total={total}
+          currentPage={page}
+          pageSize={pageSize}
           onRefresh={refresh}
           onAdd={handleAdd}
           onPageChange={handlePageChange}
+        />
+        <EmployeeFormModal
+          open={modalOpen}
+          onCancel={() => setModalOpen(false)}
+          onSubmit={handleCreateEmployee}
+          loading={modalLoading}
         />
       </Content>
     </Layout>

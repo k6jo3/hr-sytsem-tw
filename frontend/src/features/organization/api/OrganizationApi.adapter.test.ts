@@ -329,6 +329,36 @@ describe('adaptEmployeeListResponse — 分頁包裝映射', () => {
     expect(result.total).toBe(0);
   });
 
+  it('【請求參數映射】前端 page_size 應映射為後端 size', async () => {
+    mockGet.mockReset();
+    mockGet.mockResolvedValue({ items: [], total: 0, page: 2, size: 10 });
+    await OrganizationApi.getEmployeeList({ page: 2, page_size: 10, search: '王' });
+
+    // 驗證 apiClient.get 收到的 params 使用後端欄位名
+    expect(mockGet).toHaveBeenCalledWith('/employees', {
+      params: expect.objectContaining({
+        page: 2,
+        size: 10,      // page_size → size
+        search: '王',
+      }),
+    });
+    // 確認不會送出 page_size 給後端
+    const actualParams = mockGet.mock.calls[0][1].params;
+    expect(actualParams.page_size).toBeUndefined();
+  });
+
+  it('【請求參數映射】前端 department_id 應映射為後端 departmentId', async () => {
+    mockGet.mockReset();
+    mockGet.mockResolvedValue({ items: [], total: 0, page: 1, size: 10 });
+    await OrganizationApi.getEmployeeList({ department_id: 'dept-001', status: 'ACTIVE' });
+
+    const actualParams = mockGet.mock.calls[0][1].params;
+    expect(actualParams.departmentId).toBe('dept-001');
+    expect(actualParams.status).toBe('ACTIVE');
+    // 確認不會送出 department_id 給後端
+    expect(actualParams.department_id).toBeUndefined();
+  });
+
   it('【缺少包裝】後端直接回傳陣列（employees 欄位）時應正確映射', async () => {
     mockGet.mockResolvedValue({
       employees: [RAW_EMPLOYEE_ITEM],

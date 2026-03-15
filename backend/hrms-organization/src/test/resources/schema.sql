@@ -26,6 +26,8 @@ CREATE TABLE organizations (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    created_by VARCHAR(50),
+    updated_by VARCHAR(50),
     CONSTRAINT chk_org_type CHECK (organization_type IN ('PARENT', 'SUBSIDIARY')),
     CONSTRAINT chk_org_status CHECK (status IN ('ACTIVE', 'INACTIVE'))
 );

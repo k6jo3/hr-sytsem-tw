@@ -58,9 +58,12 @@ public class LoadDepartmentTreeTask implements PipelineTask<OrganizationContext>
         if (dept.getManagerId() != null) {
             Employee manager = employeeRepository.findById(dept.getManagerId()).orElse(null);
             if (manager != null) {
-                managerName = manager.getFirstName() + " " + manager.getLastName();
+                managerName = manager.getLastName() + manager.getFirstName();
             }
         }
+
+        // 查詢部門員工人數
+        int employeeCount = employeeRepository.countByDepartmentId(dept.getId());
 
         return OrganizationTreeResponse.DepartmentTreeNode.builder()
                 .departmentId(dept.getId().getValue().toString())
@@ -69,6 +72,7 @@ public class LoadDepartmentTreeTask implements PipelineTask<OrganizationContext>
                 .level(dept.getLevel())
                 .managerId(dept.getManagerId() != null ? dept.getManagerId().getValue().toString() : null)
                 .managerName(managerName)
+                .employeeCount(employeeCount)
                 .children(children)
                 .build();
     }

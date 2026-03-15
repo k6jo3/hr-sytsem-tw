@@ -3,6 +3,7 @@ package com.company.hrms.organization.infrastructure.po;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -17,6 +18,7 @@ import lombok.Data;
 public class EmployeeHistoryPO {
 
     @Id
+    @Column(name = "history_id")
     private String id;
     private String employeeId;
     private String eventType;

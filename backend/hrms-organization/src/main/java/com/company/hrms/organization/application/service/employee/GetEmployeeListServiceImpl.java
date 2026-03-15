@@ -136,6 +136,7 @@ public class GetEmployeeListServiceImpl
                 .departmentName(departmentName)
                 .positionId(null) // Position 聚合根不存在，佔位
                 .email(employee.getEmail() != null ? employee.getEmail().getValue() : null)
+                .jobTitle(employee.getJobTitle())
                 .status(employee.getEmploymentStatus().name())
                 .statusDisplay(employee.getEmploymentStatus().getDisplayName())
                 .employmentStatus(employee.getEmploymentStatus().name())

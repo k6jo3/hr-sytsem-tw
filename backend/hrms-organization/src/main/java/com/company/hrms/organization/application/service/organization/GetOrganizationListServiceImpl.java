@@ -11,6 +11,8 @@ import com.company.hrms.common.service.QueryApiService;
 import com.company.hrms.organization.api.response.organization.OrganizationListItemResponse;
 import com.company.hrms.organization.api.response.organization.OrganizationListResponse;
 import com.company.hrms.organization.domain.model.aggregate.Organization;
+import com.company.hrms.organization.domain.repository.IDepartmentRepository;
+import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 import com.company.hrms.organization.domain.repository.IOrganizationRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,8 @@ public class GetOrganizationListServiceImpl
                 implements QueryApiService<Void, OrganizationListResponse> {
 
         private final IOrganizationRepository organizationRepository;
+        private final IDepartmentRepository departmentRepository;
+        private final IEmployeeRepository employeeRepository;
 
         @Override
         public OrganizationListResponse getResponse(Void request,
@@ -47,6 +51,10 @@ public class GetOrganizationListServiceImpl
         }
 
         private OrganizationListItemResponse toListItemResponse(Organization organization) {
+                // 計算組織下的部門數與員工數
+                int deptCount = departmentRepository.countByOrganizationId(organization.getId());
+                int empCount = employeeRepository.countByOrganizationId(organization.getId());
+
                 return OrganizationListItemResponse.builder()
                                 .organizationId(organization.getId().getValue().toString())
                                 .code(organization.getCode())
@@ -57,6 +65,8 @@ public class GetOrganizationListServiceImpl
                                 .parentId(organization.getParentId() != null
                                                 ? organization.getParentId().getValue().toString()
                                                 : null)
+                                .departmentCount(deptCount)
+                                .employeeCount(empCount)
                                 .build();
         }
 }

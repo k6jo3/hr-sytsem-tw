@@ -16,7 +16,9 @@ import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.organization.api.request.department.GetDepartmentListRequest;
 import com.company.hrms.organization.api.response.department.DepartmentListItemResponse;
 import com.company.hrms.organization.domain.model.aggregate.Department;
+import com.company.hrms.organization.domain.model.aggregate.Employee;
 import com.company.hrms.organization.domain.repository.IDepartmentRepository;
+import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,7 @@ public class GetSubDepartmentsServiceImpl
                 extends AbstractQueryService<GetDepartmentListRequest, PageResponse<DepartmentListItemResponse>> {
 
         private final IDepartmentRepository departmentRepository;
+        private final IEmployeeRepository employeeRepository;
 
         @Override
         protected QueryGroup buildQuery(GetDepartmentListRequest request, JWTModel currentUser) {
@@ -83,6 +86,19 @@ public class GetSubDepartmentsServiceImpl
         }
 
         private DepartmentListItemResponse toResponse(Department department) {
+                // 計算部門員工數
+                int employeeCount = employeeRepository.countByDepartmentId(department.getId());
+
+                // 取得主管姓名（姓 + 名，中文順序）
+                String managerName = null;
+                if (department.getManagerId() != null) {
+                        var managerOpt = employeeRepository.findById(department.getManagerId());
+                        if (managerOpt.isPresent()) {
+                                Employee manager = managerOpt.get();
+                                managerName = manager.getLastName() + manager.getFirstName();
+                        }
+                }
+
                 return DepartmentListItemResponse.builder()
                                 .departmentId(department.getId().getValue().toString())
                                 .code(department.getCode())
@@ -96,9 +112,10 @@ public class GetSubDepartmentsServiceImpl
                                 .parentId(department.getParentId() != null ? department.getParentId().toString() : null)
                                 .managerId(department.getManagerId() != null ? department.getManagerId().toString()
                                                 : null)
+                                .managerName(managerName)
                                 .status(department.getStatus().name())
                                 .statusDisplay(department.getStatus().getDisplayName())
-                                .employeeCount(0)
+                                .employeeCount(employeeCount)
                                 .build();
         }
 }

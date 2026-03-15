@@ -54,6 +54,10 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
 
+hrms:
+  organization:
+    url: http://localhost:8082
+
 logging:
   level:
     com.company.hrms.recruitment: DEBUG

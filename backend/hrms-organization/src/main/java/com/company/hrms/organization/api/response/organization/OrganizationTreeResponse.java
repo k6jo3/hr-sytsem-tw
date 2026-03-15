@@ -57,6 +57,9 @@ public class OrganizationTreeResponse {
         @Schema(description = "主管姓名")
         private String managerName;
 
+        @Schema(description = "部門員工人數")
+        private int employeeCount;
+
         @Schema(description = "子部門清單")
         private List<DepartmentTreeNode> children;
     }
