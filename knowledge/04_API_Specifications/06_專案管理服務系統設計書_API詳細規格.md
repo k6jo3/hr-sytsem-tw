@@ -1,9 +1,10 @@
 # HR06 專案管理服務 API 詳細規格
 
-**版本:** 1.0
+**版本:** 1.1
 **建立日期:** 2025-12-29
+**最後更新:** 2026-03-16
 **Domain 代號:** 06 (PRJ)
-**API 總數:** 18 個端點
+**API 總數:** 22 個端點
 
 ---
 
@@ -30,10 +31,11 @@
 | `HR06CustomerCmdController` | 客戶 Command 操作 | 2 |
 | `HR06CustomerQryController` | 客戶 Query 操作 | 2 |
 | `HR06ProjectCmdController` | 專案 Command 操作 | 5 |
-| `HR06ProjectQryController` | 專案 Query 操作 | 2 |
+| `HR06ProjectQryController` | 專案 Query 操作 | 3 |
 | `HR06MemberCmdController` | 成員 Command 操作 | 2 |
-| `HR06TaskCmdController` | 工項 Command 操作 | 3 |
-| `HR06TaskQryController` | 工項 Query 操作 | 1 |
+| `HR06MemberQryController` | 成員 Query 操作 | 1 |
+| `HR06TaskCmdController` | 工項 Command 操作 | 4 |
+| `HR06TaskQryController` | 工項 Query 操作 | 2 |
 | `HR06CostQryController` | 成本分析 Query 操作 | 1 |
 
 ### 1.2 API 端點清單
@@ -51,14 +53,17 @@
 | 9 | `/api/v1/projects/{id}/hold` | PUT | 暫停專案 | HR06ProjectCmdController |
 | 10 | `/api/v1/projects` | GET | 查詢專案列表 | HR06ProjectQryController |
 | 11 | `/api/v1/projects/{id}` | GET | 查詢專案詳情 | HR06ProjectQryController |
-| 12 | `/api/v1/projects/{id}/members` | POST | 新增成員 | HR06MemberCmdController |
-| 13 | `/api/v1/projects/{id}/members/{memberId}` | DELETE | 移除成員 | HR06MemberCmdController |
-| 14 | `/api/v1/projects/{id}/tasks` | POST | 建立工項 | HR06TaskCmdController |
-| 15 | `/api/v1/tasks/{id}` | PUT | 更新工項 | HR06TaskCmdController |
-| 16 | `/api/v1/tasks/{id}/progress` | PUT | 更新進度 | HR06TaskCmdController |
-| 17 | `/api/v1/projects/{id}/tasks/tree` | GET | 查詢 WBS 樹 | HR06TaskQryController |
-| 18 | `/api/v1/projects/{id}/cost` | GET | 查詢成本分析 | HR06CostQryController |
-| 19 | `/api/v1/projects/my` | GET | 我參與的專案 | HR06ProjectQryController |
+| 12 | `/api/v1/projects/my` | GET | 我參與的專案 | HR06ProjectQryController |
+| 13 | `/api/v1/projects/{projectId}/members` | POST | 新增成員 | HR06MemberCmdController |
+| 14 | `/api/v1/projects/{projectId}/members/{memberId}` | DELETE | 移除成員 | HR06MemberCmdController |
+| 15 | `/api/v1/projects/{projectId}/members` | GET | 查詢專案成員列表 | HR06MemberQryController |
+| 16 | `/api/v1/projects/{projectId}/tasks` | POST | 建立工項 | HR06TaskCmdController |
+| 17 | `/api/v1/projects/{projectId}/tasks/{taskId}` | PUT | 更新工項 | HR06TaskCmdController |
+| 18 | `/api/v1/projects/{projectId}/tasks/{taskId}/progress` | PUT | 更新進度 | HR06TaskCmdController |
+| 19 | `/api/v1/projects/{projectId}/tasks/{taskId}/assign` | PUT | 指派工項 | HR06TaskCmdController |
+| 20 | `/api/v1/projects/{projectId}/wbs` | GET | 查詢 WBS 樹 | HR06TaskQryController |
+| 21 | `/api/v1/projects/{projectId}/tasks/{taskId}` | GET | 查詢工項詳情 | HR06TaskQryController |
+| 22 | `/api/v1/projects/{projectId}/cost` | GET | 查詢成本分析 | HR06CostQryController |
 
 ### 1.3 專案類型與預算模式
 
@@ -889,7 +894,7 @@
 
 | 項目 | 說明 |
 |:---|:---|
-| 端點 | `POST /api/v1/projects/{id}/members` |
+| 端點 | `POST /api/v1/projects/{projectId}/members` |
 | Controller | `HR06MemberCmdController` |
 | Service | `AddProjectMemberServiceImpl` |
 | 權限 | `project:member:manage` |
@@ -916,7 +921,7 @@
 
 | 參數 | 類型 | 必填 | 說明 |
 |:---|:---:|:---:|:---|
-| id | string | ✅ | 專案 ID |
+| projectId | string | ✅ | 專案 ID |
 
 **Request Body**
 
@@ -970,7 +975,7 @@
 
 | 項目 | 說明 |
 |:---|:---|
-| 端點 | `DELETE /api/v1/projects/{id}/members/{memberId}` |
+| 端點 | `DELETE /api/v1/projects/{projectId}/members/{memberId}` |
 | Controller | `HR06MemberCmdController` |
 | Service | `RemoveProjectMemberServiceImpl` |
 | 權限 | `project:member:manage` |
@@ -998,7 +1003,7 @@
 
 | 參數 | 類型 | 必填 | 說明 |
 |:---|:---:|:---:|:---|
-| id | string | ✅ | 專案 ID |
+| projectId | string | ✅ | 專案 ID |
 | memberId | string | ✅ | 成員 ID |
 
 **Response Body**
@@ -1023,6 +1028,58 @@
 | 400 | `PRJ_CANNOT_REMOVE_PM` | 專案經理不可移除 | 先變更專案經理再移除 |
 | 400 | `PRJ_MEMBER_HAS_PENDING_TIMESHEET` | 成員有未結算的工時 | 先處理工時後再移除 |
 
+### 4.3 查詢專案成員列表
+
+**基本資訊**
+
+| 項目 | 說明 |
+|:---|:---|
+| 端點 | `GET /api/v1/projects/{projectId}/members` |
+| Controller | `HR06MemberQryController` |
+| Service | `GetProjectMembersServiceImpl` |
+| 權限 | `project:member:read` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢專案的成員列表，含角色、分配工時等資訊 |
+| 使用者 | 專案經理、團隊成員 |
+| 頁面 | HR06-P03 專案詳情頁面 (成員分頁) |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| projectId | string | ✅ | 專案 ID |
+
+**Response Body**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "memberId": "mem-001",
+      "employeeId": "emp-002",
+      "employeeName": "李四",
+      "role": "Tech Lead",
+      "allocatedHours": 1000,
+      "actualHours": 200,
+      "hourlyRate": 1200,
+      "joinDate": "2025-01-01",
+      "leaveDate": null
+    }
+  ]
+}
+```
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_NOT_FOUND` | 專案不存在 | 確認專案 ID |
+
 ---
 
 ## 5. 工項管理 API
@@ -1033,7 +1090,7 @@
 
 | 項目 | 說明 |
 |:---|:---|
-| 端點 | `POST /api/v1/projects/{id}/tasks` |
+| 端點 | `POST /api/v1/projects/{projectId}/tasks` |
 | Controller | `HR06TaskCmdController` |
 | Service | `CreateTaskServiceImpl` |
 | 權限 | `project:task:manage` |
@@ -1061,7 +1118,7 @@
 
 | 參數 | 類型 | 必填 | 說明 |
 |:---|:---:|:---:|:---|
-| id | string | ✅ | 專案 ID |
+| projectId | string | ✅ | 專案 ID |
 
 **Request Body**
 
@@ -1122,7 +1179,7 @@
 
 | 項目 | 說明 |
 |:---|:---|
-| 端點 | `PUT /api/v1/tasks/{id}` |
+| 端點 | `PUT /api/v1/projects/{projectId}/tasks/{taskId}` |
 | Controller | `HR06TaskCmdController` |
 | Service | `UpdateTaskServiceImpl` |
 | 權限 | `project:task:manage` |
@@ -1150,7 +1207,8 @@
 
 | 參數 | 類型 | 必填 | 說明 |
 |:---|:---:|:---:|:---|
-| id | string | ✅ | 工項 ID |
+| projectId | string | ✅ | 專案 ID |
+| taskId | string | ✅ | 工項 ID |
 
 **Request Body**
 
@@ -1204,7 +1262,7 @@
 
 | 項目 | 說明 |
 |:---|:---|
-| 端點 | `PUT /api/v1/tasks/{id}/progress` |
+| 端點 | `PUT /api/v1/projects/{projectId}/tasks/{taskId}/progress` |
 | Controller | `HR06TaskCmdController` |
 | Service | `UpdateTaskProgressServiceImpl` |
 | 權限 | `project:task:manage` |
@@ -1230,7 +1288,8 @@
 
 | 參數 | 類型 | 必填 | 說明 |
 |:---|:---:|:---:|:---|
-| id | string | ✅ | 工項 ID |
+| projectId | string | ✅ | 專案 ID |
+| taskId | string | ✅ | 工項 ID |
 
 **Request Body**
 
@@ -1275,9 +1334,9 @@
 
 | 項目 | 說明 |
 |:---|:---|
-| 端點 | `GET /api/v1/projects/{id}/tasks/tree` |
+| 端點 | `GET /api/v1/projects/{projectId}/wbs` |
 | Controller | `HR06TaskQryController` |
-| Service | `GetTaskTreeServiceImpl` |
+| Service | `GetWbsTreeServiceImpl` |
 | 權限 | `project:task:read` |
 
 **用途說明**
@@ -1292,7 +1351,7 @@
 
 | 參數 | 類型 | 必填 | 說明 |
 |:---|:---:|:---:|:---|
-| id | string | ✅ | 專案 ID |
+| projectId | string | ✅ | 專案 ID |
 
 **Response Body**
 
@@ -1369,6 +1428,137 @@
 }
 ```
 
+### 5.5 指派工項
+
+**基本資訊**
+
+| 項目 | 說明 |
+|:---|:---|
+| 端點 | `PUT /api/v1/projects/{projectId}/tasks/{taskId}/assign` |
+| Controller | `HR06TaskCmdController` |
+| Service | `AssignTaskServiceImpl` |
+| 權限 | `project:task:manage` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 將工項指派給專案成員負責 |
+| 使用者 | 專案經理 |
+| 觸發事件 | `TaskAssigned` |
+
+**業務邏輯**
+
+| 步驟 | 處理邏輯 |
+|:---|:---|
+| 1 | 驗證工項存在 |
+| 2 | 驗證負責人為專案成員 |
+| 3 | 更新工項負責人 |
+| 4 | 發布 `TaskAssigned` 事件 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| projectId | string | ✅ | 專案 ID |
+| taskId | string | ✅ | 工項 ID |
+
+**Request Body**
+
+```json
+{
+  "assigneeId": "emp-003"
+}
+```
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 |
+|:---|:---:|:---:|:---|:---|
+| assigneeId | string | ✅ | UUID 格式 | 負責人 ID (專案成員) |
+
+**Response Body**
+
+```json
+{
+  "success": true,
+  "data": {
+    "taskId": "task-001",
+    "assigneeId": "emp-003",
+    "assigneeName": "王五",
+    "updatedAt": "2025-02-01T10:00:00Z"
+  }
+}
+```
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_TASK_NOT_FOUND` | 工項不存在 | 確認工項 ID |
+| 404 | `PRJ_ASSIGNEE_NOT_IN_PROJECT` | 負責人非專案成員 | 先將該員工加入專案 |
+
+---
+
+### 5.6 查詢工項詳情
+
+**基本資訊**
+
+| 項目 | 說明 |
+|:---|:---|
+| 端點 | `GET /api/v1/projects/{projectId}/tasks/{taskId}` |
+| Controller | `HR06TaskQryController` |
+| Service | `GetTaskDetailServiceImpl` |
+| 權限 | `project:task:read` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢工項的詳細資訊，含負責人、進度、工時等 |
+| 使用者 | 專案經理、團隊成員 |
+| 頁面 | HR06-P05 WBS 工項管理頁面 (工項詳情) |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| projectId | string | ✅ | 專案 ID |
+| taskId | string | ✅ | 工項 ID |
+
+**Response Body**
+
+```json
+{
+  "success": true,
+  "data": {
+    "taskId": "task-001",
+    "projectId": "prj-001",
+    "parentTaskId": null,
+    "taskCode": "1",
+    "taskName": "需求分析",
+    "description": "進行客戶需求訪談與分析",
+    "level": 1,
+    "plannedStartDate": "2025-01-15",
+    "plannedEndDate": "2025-02-28",
+    "estimatedHours": 200,
+    "actualHours": 120,
+    "progress": 60,
+    "status": "IN_PROGRESS",
+    "assignee": {
+      "employeeId": "emp-002",
+      "employeeName": "李四"
+    },
+    "createdAt": "2025-01-15T09:00:00Z",
+    "updatedAt": "2025-02-15T14:00:00Z"
+  }
+}
+```
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PRJ_TASK_NOT_FOUND` | 工項不存在 | 確認工項 ID |
+
 ---
 
 ## 6. 成本分析 API
@@ -1379,7 +1569,7 @@
 
 | 項目 | 說明 |
 |:---|:---|
-| 端點 | `GET /api/v1/projects/{id}/cost` |
+| 端點 | `GET /api/v1/projects/{projectId}/cost` |
 | Controller | `HR06CostQryController` |
 | Service | `GetProjectCostServiceImpl` |
 | 權限 | `project:cost:read` |
@@ -1396,7 +1586,7 @@
 
 | 參數 | 類型 | 必填 | 說明 |
 |:---|:---:|:---:|:---|
-| id | string | ✅ | 專案 ID |
+| projectId | string | ✅ | 專案 ID |
 
 **Query Parameters**
 
@@ -1784,4 +1974,7 @@
 ---
 
 **文件完成日期:** 2025-12-29
-**版本:** 1.0
+**最後更新:** 2026-03-16
+**版本:** 1.1
+**API 總數:** 22 個端點
+**變更說明:** v1.1 - 修正工項 API 路徑為巢狀資源格式 (`/projects/{projectId}/tasks/{taskId}`)，統一 Path Parameter 命名，新增指派工項 (5.5)、工項詳情 (5.6)、成員列表查詢 (4.3) 詳細規格

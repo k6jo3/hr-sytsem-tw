@@ -1,7 +1,7 @@
 # 工時管理服務 API 詳細規格
 
-**版本:** 1.0
-**日期:** 2025-12-30
+**版本:** 2.0
+**日期:** 2026-03-16
 **Domain代號:** 07 (TSH)
 **服務名稱:** hrms-timesheet
 
@@ -11,11 +11,12 @@
 
 1. [Controller命名對照](#1-controller命名對照)
 2. [API總覽](#2-api總覽)
-3. [工時表管理 API](#3-工時表管理-api)
-4. [工時明細 API](#4-工時明細-api)
-5. [工時審核 API](#5-工時審核-api)
-6. [工時查詢 API](#6-工時查詢-api)
-7. [工時報表 API](#7-工時報表-api)
+3. [工時條目 Command API](#3-工時條目-command-api)
+4. [工時表 Command API](#4-工時表-command-api)
+5. [工時審核 Command API](#5-工時審核-command-api)
+6. [工時鎖定 Command API](#6-工時鎖定-command-api)
+7. [工時查詢 API](#7-工時查詢-api)
+8. [工時報表 API](#8-工時報表-api)
 
 ---
 
@@ -23,12 +24,11 @@
 
 | Controller | 說明 |
 |:---|:---|
-| `HR07TimesheetCmdController` | 工時表 Command 操作 |
-| `HR07TimesheetQryController` | 工時表 Query 操作 |
-| `HR07EntryCmdController` | 工時明細 Command 操作 |
-| `HR07ApprovalCmdController` | 審核 Command 操作 |
-| `HR07ApprovalQryController` | 審核 Query 操作 |
-| `HR07ReportQryController` | 報表 Query 操作 |
+| `HR07TimesheetCmdController` | 工時表 Command 操作（含條目 CRUD、提交、審核、鎖定） |
+| `HR07TimesheetQryController` | 工時表 Query 操作（我的工時、詳情、待簽核列表） |
+| `HR07TimesheetReportQryController` | 報表 Query 操作（統計、專案工時、未回報） |
+
+> **變更記錄 (v2.0)**：實際程式碼中不存在 `HR07EntryCmdController`、`HR07ApprovalCmdController`、`HR07ApprovalQryController`、`HR07ReportQryController`。所有 Command 操作統一在 `HR07TimesheetCmdController`，審核相關查詢在 `HR07TimesheetQryController`，報表查詢在 `HR07TimesheetReportQryController`。
 
 ---
 
@@ -36,205 +36,51 @@
 
 ### 2.1 端點清單 (14個端點)
 
-| 端點 | 方法 | Controller | 說明 | 權限 |
-|:---|:---:|:---|:---|:---|
-| `/api/v1/timesheets` | POST | HR07TimesheetCmdController | 建立工時表 | - |
-| `/api/v1/timesheets/{id}/submit` | PUT | HR07TimesheetCmdController | 提交審核 | - |
-| `/api/v1/timesheets/{id}/entries` | POST | HR07EntryCmdController | 新增工時明細 | - |
-| `/api/v1/timesheets/{id}/entries/{entryId}` | PUT | HR07EntryCmdController | 更新工時明細 | - |
-| `/api/v1/timesheets/{id}/entries/{entryId}` | DELETE | HR07EntryCmdController | 刪除工時明細 | - |
-| `/api/v1/timesheets/{id}/approve` | PUT | HR07ApprovalCmdController | 核准工時 | timesheet:approve |
-| `/api/v1/timesheets/{id}/reject` | PUT | HR07ApprovalCmdController | 駁回工時 | timesheet:approve |
-| `/api/v1/timesheets/batch-approve` | PUT | HR07ApprovalCmdController | 批次核准 | timesheet:approve |
-| `/api/v1/timesheets/my` | GET | HR07TimesheetQryController | 查詢我的工時 | - |
-| `/api/v1/timesheets/{id}/entries` | GET | HR07TimesheetQryController | 查詢工時明細 | - |
-| `/api/v1/timesheets/pending-approval` | GET | HR07ApprovalQryController | 查詢待審核列表 | timesheet:approve |
-| `/api/v1/timesheets/summary` | GET | HR07ReportQryController | 個人工時統計 | timesheet:report:read |
-| `/api/v1/timesheets/project-summary` | GET | HR07ReportQryController | 專案工時統計 | timesheet:report:read |
-| `/api/v1/timesheets/unreported` | GET | HR07ReportQryController | 未回報員工列表 | timesheet:report:read |
+| 端點 | 方法 | Controller | 方法名稱 | Service | 說明 |
+|:---|:---:|:---|:---|:---|:---|
+| `/api/v1/timesheets/entry` | POST | HR07TimesheetCmdController | `createEntry` | CreateEntryServiceImpl | 新增工時條目 |
+| `/api/v1/timesheets/{id}/entries/{entryId}` | PUT | HR07TimesheetCmdController | `updateTimesheetEntry` | UpdateTimesheetEntryServiceImpl | 更新工時條目 |
+| `/api/v1/timesheets/{id}/entries/{entryId}` | DELETE | HR07TimesheetCmdController | `deleteTimesheetEntry` | DeleteTimesheetEntryServiceImpl | 刪除工時條目 |
+| `/api/v1/timesheets/submit` | POST | HR07TimesheetCmdController | `submitTimesheet` | SubmitTimesheetServiceImpl | 提交工時表審核 |
+| `/api/v1/timesheets/{id}/approve` | POST | HR07TimesheetCmdController | `approveTimesheet` | ApproveTimesheetServiceImpl | 核准工時表 |
+| `/api/v1/timesheets/batch-approve` | PUT | HR07TimesheetCmdController | `batchApproveTimesheet` | BatchApproveTimesheetServiceImpl | 批次核准工時表 |
+| `/api/v1/timesheets/{id}/reject` | POST | HR07TimesheetCmdController | `rejectTimesheet` | RejectTimesheetServiceImpl | 退回工時表 |
+| `/api/v1/timesheets/{id}/lock` | POST | HR07TimesheetCmdController | `lockTimesheet` | LockTimesheetServiceImpl | 鎖定工時表 |
+| `/api/v1/timesheets/my` | GET | HR07TimesheetQryController | `getMyTimesheet` | GetMyTimesheetServiceImpl | 查詢我的工時表 |
+| `/api/v1/timesheets/approvals` | GET | HR07TimesheetQryController | `getPendingApprovals` | GetPendingApprovalsServiceImpl | 查詢待簽核列表 |
+| `/api/v1/timesheets/{id}` | GET | HR07TimesheetQryController | `getTimesheet` | GetTimesheetDetailServiceImpl | 查詢工時表詳情 |
+| `/api/v1/timesheets/summary` | GET | HR07TimesheetReportQryController | `getTimesheetSummary` | GetTimesheetSummaryServiceImpl | 個人/部門工時統計 |
+| `/api/v1/timesheets/project-summary` | GET | HR07TimesheetReportQryController | `getProjectTimesheetSummary` | GetProjectTimesheetSummaryServiceImpl | 專案工時統計 |
+| `/api/v1/timesheets/unreported` | GET | HR07TimesheetReportQryController | `getUnreportedEmployees` | GetUnreportedEmployeesServiceImpl | 未回報員工列表 |
+
+### 2.2 v1.0 → v2.0 端點變更對照
+
+| v1.0 文檔 | v2.0 實際 | 變更說明 |
+|:---|:---|:---|
+| `POST /api/v1/timesheets` | 已移除 | 建立工時表功能不存在於程式碼中 |
+| `PUT /api/v1/timesheets/{id}/submit` | `POST /api/v1/timesheets/submit` | HTTP 方法由 PUT 改 POST；路徑從 path param 改為 request body |
+| `POST /api/v1/timesheets/{id}/entries` | `POST /api/v1/timesheets/entry` | 路徑簡化，timesheetId 改由 request body 傳入 |
+| `PUT /api/v1/timesheets/{id}/approve` | `POST /api/v1/timesheets/{id}/approve` | HTTP 方法由 PUT 改 POST |
+| `PUT /api/v1/timesheets/{id}/reject` | `POST /api/v1/timesheets/{id}/reject` | HTTP 方法由 PUT 改 POST |
+| `GET /api/v1/timesheets/{id}/entries` | `GET /api/v1/timesheets/{id}` | 查詢工時表詳情（含明細） |
+| `GET /api/v1/timesheets/pending-approval` | `GET /api/v1/timesheets/approvals` | 路徑名稱變更 |
+| 不存在 | `POST /api/v1/timesheets/{id}/lock` | 新增鎖定功能 |
 
 ---
 
-## 3. 工時表管理 API
+## 3. 工時條目 Command API
 
-### 3.1 建立工時表
+### 3.1 新增工時條目
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `POST /api/v1/timesheets` |
+| 端點 | `POST /api/v1/timesheets/entry` |
 | Controller | `HR07TimesheetCmdController` |
-| Service | `CreateTimesheetServiceImpl` |
-| 權限 | - (登入即可) |
-| 版本 | v1 |
-
-**用途說明**
-
-| 項目 | 說明 |
-|:---|:---|
-| 業務場景 | 員工建立新的週工時表，作為工時回報的容器 |
-| 使用者 | 所有員工 |
-| 頁面 | HR07-P01 我的工時回報頁面 |
-
-**業務邏輯**
-
-| 步驟 | 處理邏輯 |
-|:---|:---|
-| 1 | 驗證週次是否已有工時表（同一員工同一週期不可重複） |
-| 2 | 計算週期起訖日（週一至週日） |
-| 3 | 建立工時表，狀態為 DRAFT |
-| 4 | 發布 TimesheetCreatedEvent |
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-| Content-Type | ✅ | `application/json` |
-
-**Request Body**
-
-| 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|:---|
-| periodStartDate | Date | ✅ | 必須為週一、不可為未來週次 | 週期開始日 | `"2025-11-25"` |
-
-**範例：**
-```json
-{
-  "periodStartDate": "2025-11-25"
-}
-```
-
-**Response**
-
-**成功回應 (201 Created)**
-
-| 欄位 | 類型 | 說明 |
-|:---|:---|:---|
-| timesheetId | UUID | 工時表 ID |
-| periodStartDate | Date | 週期開始日 |
-| periodEndDate | Date | 週期結束日 |
-| status | Enum | 狀態 (DRAFT) |
-| createdAt | DateTime | 建立時間 |
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "工時表建立成功",
-  "data": {
-    "timesheetId": "550e8400-e29b-41d4-a716-446655440000",
-    "periodStartDate": "2025-11-25",
-    "periodEndDate": "2025-12-01",
-    "status": "DRAFT",
-    "createdAt": "2025-12-02T09:00:00Z"
-  }
-}
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 400 | `TSH_INVALID_PERIOD_START` | 週期開始日必須為週一 | 選擇正確的週一日期 |
-| 400 | `TSH_FUTURE_PERIOD` | 不可建立未來週次的工時表 | 選擇當前或過去週次 |
-| 409 | `TSH_TIMESHEET_EXISTS` | 該週次工時表已存在 | 查詢並編輯既有工時表 |
-
-**領域事件**
-
-| 事件名稱 | Topic | 說明 |
-|:---|:---|:---|
-| TimesheetCreatedEvent | `timesheet.created` | 工時表建立完成 |
-
----
-
-### 3.2 提交審核
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `PUT /api/v1/timesheets/{id}/submit` |
-| Controller | `HR07TimesheetCmdController` |
-| Service | `SubmitTimesheetServiceImpl` |
-| 權限 | - (限本人) |
-| 版本 | v1 |
-
-**用途說明**
-
-| 項目 | 說明 |
-|:---|:---|
-| 業務場景 | 員工完成工時填報後，提交給 PM 審核 |
-| 使用者 | 員工本人 |
-| 頁面 | HR07-P01 我的工時回報頁面 |
-
-**業務邏輯**
-
-| 步驟 | 處理邏輯 |
-|:---|:---|
-| 1 | 驗證工時表存在且為本人所有 |
-| 2 | 驗證狀態為 DRAFT 或 REJECTED |
-| 3 | 驗證至少有一筆工時明細 |
-| 4 | 更新狀態為 SUBMITTED，記錄提交時間 |
-| 5 | 發布 TimesheetSubmittedEvent |
-| 6 | 通知相關專案的 PM |
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
-
-**Response**
-
-**成功回應 (200 OK)**
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "工時已提交審核"
-}
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 404 | `TSH_TIMESHEET_NOT_FOUND` | 工時表不存在 | 確認工時表 ID |
-| 403 | `TSH_NOT_OWNER` | 非工時表擁有者 | 只能提交自己的工時表 |
-| 400 | `TSH_INVALID_STATUS_FOR_SUBMIT` | 目前狀態不允許提交 | 只有 DRAFT 或 REJECTED 可提交 |
-| 400 | `TSH_NO_ENTRIES` | 至少需要一筆工時記錄 | 新增工時明細後再提交 |
-
-**領域事件**
-
-| 事件名稱 | Topic | 說明 |
-|:---|:---|:---|
-| TimesheetSubmittedEvent | `timesheet.submitted` | 工時提交審核，通知 PM |
-
----
-
-## 4. 工時明細 API
-
-### 4.1 新增工時明細
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `POST /api/v1/timesheets/{id}/entries` |
-| Controller | `HR07EntryCmdController` |
+| 方法名稱 | `createEntry` |
 | Service | `CreateEntryServiceImpl` |
-| 權限 | - (限本人) |
+| 權限 | - (登入即可，限本人) |
 | 版本 | v1 |
 
 **用途說明**
@@ -243,7 +89,7 @@
 |:---|:---|
 | 業務場景 | 員工在工時表中新增某日某專案的工時記錄 |
 | 使用者 | 員工本人 |
-| 頁面 | HR07-P01、HR07-M01 工時填報對話框 |
+| 頁面 | HR07-P01 我的工時回報頁面 |
 
 **業務邏輯**
 
@@ -265,28 +111,24 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-| Content-Type | ✅ | `application/json` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
+| Authorization | Y | `Bearer {accessToken}` |
+| Content-Type | Y | `application/json` |
 
 **Request Body**
 
 | 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|:---|
-| projectId | UUID | ✅ | 必須存在且員工為成員 | 專案 ID | `"project-uuid-001"` |
-| taskId | UUID | ⬚ | 若填寫須屬於該專案 | 任務 ID（WBS工項） | `"task-uuid-001"` |
-| workDate | Date | ✅ | 在週期內、不可為未來 | 工作日期 | `"2025-11-25"` |
-| hours | Decimal | ✅ | > 0 且 <= 24 | 工作時數 | `8.0` |
-| description | String | ⬚ | 最長 500 字元 | 工作說明 | `"完成需求分析文件"` |
+| timesheetId | UUID | Y | 必須存在 | 工時表 ID | `"550e8400-e29b-41d4-a716-446655440000"` |
+| projectId | UUID | Y | 必須存在且員工為成員 | 專案 ID | `"project-uuid-001"` |
+| taskId | UUID | N | 若填寫須屬於該專案 | 任務 ID（WBS工項） | `"task-uuid-001"` |
+| workDate | Date | Y | 在週期內、不可為未來 | 工作日期 | `"2025-11-25"` |
+| hours | Decimal | Y | > 0 且 <= 24 | 工作時數 | `8.0` |
+| description | String | N | 最長 500 字元 | 工作說明 | `"完成需求分析文件"` |
 
 **範例：**
 ```json
 {
+  "timesheetId": "550e8400-e29b-41d4-a716-446655440000",
   "projectId": "550e8400-e29b-41d4-a716-446655440001",
   "taskId": "550e8400-e29b-41d4-a716-446655440002",
   "workDate": "2025-11-25",
@@ -339,15 +181,16 @@
 
 ---
 
-### 4.2 更新工時明細
+### 3.2 更新工時條目
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
 | 端點 | `PUT /api/v1/timesheets/{id}/entries/{entryId}` |
-| Controller | `HR07EntryCmdController` |
-| Service | `UpdateEntryServiceImpl` |
+| Controller | `HR07TimesheetCmdController` |
+| 方法名稱 | `updateTimesheetEntry` |
+| Service | `UpdateTimesheetEntryServiceImpl` |
 | 權限 | - (限本人) |
 | 版本 | v1 |
 
@@ -375,23 +218,25 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-| Content-Type | ✅ | `application/json` |
+| Authorization | Y | `Bearer {accessToken}` |
+| Content-Type | Y | `application/json` |
 
 **Path Parameters**
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
-| entryId | UUID | ✅ | 工時明細 ID | `550e8400-e29b-41d4-a716-446655440099` |
+| id | UUID | Y | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
+| entryId | UUID | Y | 工時明細 ID | `550e8400-e29b-41d4-a716-446655440099` |
+
+> **注意**：Controller 會將 path 中的 `id` 和 `entryId` 分別 set 到 request 的 `timesheetId` 和 `entryId` 欄位。
 
 **Request Body**
 
 | 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|:---|
-| taskId | UUID | ⬚ | 若填寫須屬於該專案 | 任務 ID | `"task-uuid-001"` |
-| hours | Decimal | ✅ | > 0 且 <= 24 | 工作時數 | `6.0` |
-| description | String | ⬚ | 最長 500 字元 | 工作說明 | `"修訂需求分析文件"` |
+| taskId | UUID | N | 若填寫須屬於該專案 | 任務 ID | `"task-uuid-001"` |
+| hours | Decimal | Y | > 0 且 <= 24 | 工作時數 | `6.0` |
+| description | String | N | 最長 500 字元 | 工作說明 | `"修訂需求分析文件"` |
 
 **範例：**
 ```json
@@ -432,15 +277,16 @@
 
 ---
 
-### 4.3 刪除工時明細
+### 3.3 刪除工時條目
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
 | 端點 | `DELETE /api/v1/timesheets/{id}/entries/{entryId}` |
-| Controller | `HR07EntryCmdController` |
-| Service | `DeleteEntryServiceImpl` |
+| Controller | `HR07TimesheetCmdController` |
+| 方法名稱 | `deleteTimesheetEntry` |
+| Service | `DeleteTimesheetEntryServiceImpl` |
 | 權限 | - (限本人) |
 | 版本 | v1 |
 
@@ -467,14 +313,16 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
+| Authorization | Y | `Bearer {accessToken}` |
 
 **Path Parameters**
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
-| entryId | UUID | ✅ | 工時明細 ID | `550e8400-e29b-41d4-a716-446655440099` |
+| id | UUID | Y | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
+| entryId | UUID | Y | 工時明細 ID | `550e8400-e29b-41d4-a716-446655440099` |
+
+> **注意**：Controller 不接收 request body，而是以 path parameters 建構 `DeleteTimesheetEntryRequest`（設定 `timesheetId` 和 `entryId`）。
 
 **Response**
 
@@ -499,16 +347,101 @@
 
 ---
 
-## 5. 工時審核 API
+## 4. 工時表 Command API
 
-### 5.1 核准工時
+### 4.1 提交工時表審核
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/timesheets/{id}/approve` |
-| Controller | `HR07ApprovalCmdController` |
+| 端點 | `POST /api/v1/timesheets/submit` |
+| Controller | `HR07TimesheetCmdController` |
+| 方法名稱 | `submitTimesheet` |
+| Service | `SubmitTimesheetServiceImpl` |
+| 權限 | - (限本人) |
+| 版本 | v1 |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 員工完成工時填報後，提交給 PM 審核 |
+| 使用者 | 員工本人 |
+| 頁面 | HR07-P01 我的工時回報頁面 |
+
+**業務邏輯**
+
+| 步驟 | 處理邏輯 |
+|:---|:---|
+| 1 | 驗證工時表存在且為本人所有 |
+| 2 | 驗證狀態為 DRAFT 或 REJECTED |
+| 3 | 驗證至少有一筆工時明細 |
+| 4 | 更新狀態為 SUBMITTED，記錄提交時間 |
+| 5 | 發布 TimesheetSubmittedEvent |
+| 6 | 通知相關專案的 PM |
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | Y | `Bearer {accessToken}` |
+| Content-Type | Y | `application/json` |
+
+**Request Body**
+
+| 欄位 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| timesheetId | UUID | Y | 工時表 ID | `"550e8400-e29b-41d4-a716-446655440000"` |
+
+**範例：**
+```json
+{
+  "timesheetId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "工時已提交審核"
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `TSH_TIMESHEET_NOT_FOUND` | 工時表不存在 | 確認工時表 ID |
+| 403 | `TSH_NOT_OWNER` | 非工時表擁有者 | 只能提交自己的工時表 |
+| 400 | `TSH_INVALID_STATUS_FOR_SUBMIT` | 目前狀態不允許提交 | 只有 DRAFT 或 REJECTED 可提交 |
+| 400 | `TSH_NO_ENTRIES` | 至少需要一筆工時記錄 | 新增工時明細後再提交 |
+
+**領域事件**
+
+| 事件名稱 | Topic | 說明 |
+|:---|:---|:---|
+| TimesheetSubmittedEvent | `timesheet.submitted` | 工時提交審核，通知 PM |
+
+---
+
+## 5. 工時審核 Command API
+
+### 5.1 核准工時表
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `POST /api/v1/timesheets/{id}/approve` |
+| Controller | `HR07TimesheetCmdController` |
+| 方法名稱 | `approveTimesheet` |
 | Service | `ApproveTimesheetServiceImpl` |
 | 權限 | `timesheet:approve` |
 | 版本 | v1 |
@@ -539,13 +472,15 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
+| Authorization | Y | `Bearer {accessToken}` |
 
 **Path Parameters**
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
+| id | UUID | Y | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
+
+> **注意**：Controller 不接收 request body，而是以 path parameter 建構 `ApproveTimesheetRequest`（設定 `timesheetId`）。
 
 **Response**
 
@@ -594,14 +529,111 @@
 
 ---
 
-### 5.2 駁回工時
+### 5.2 批次核准工時表
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/timesheets/{id}/reject` |
-| Controller | `HR07ApprovalCmdController` |
+| 端點 | `PUT /api/v1/timesheets/batch-approve` |
+| Controller | `HR07TimesheetCmdController` |
+| 方法名稱 | `batchApproveTimesheet` |
+| Service | `BatchApproveTimesheetServiceImpl` |
+| 權限 | `timesheet:approve` |
+| 版本 | v1 |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | PM 一次核准多筆工時表，提升審核效率 |
+| 使用者 | 專案經理 (PM)、部門主管 |
+| 頁面 | HR07-P02 工時審核頁面 |
+
+**業務邏輯**
+
+| 步驟 | 處理邏輯 |
+|:---|:---|
+| 1 | 驗證所有工時表存在 |
+| 2 | 驗證所有工時表狀態為 SUBMITTED |
+| 3 | 驗證審核者有權限審核所有工時表 |
+| 4 | 逐一核准並發布事件 |
+| 5 | 回傳成功與失敗的統計 |
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | Y | `Bearer {accessToken}` |
+| Content-Type | Y | `application/json` |
+
+**Request Body**
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|:---|
+| timesheetIds | UUID[] | Y | 1~100 個 | 工時表 ID 列表 | `["uuid-1", "uuid-2"]` |
+
+**範例：**
+```json
+{
+  "timesheetIds": [
+    "550e8400-e29b-41d4-a716-446655440001",
+    "550e8400-e29b-41d4-a716-446655440002",
+    "550e8400-e29b-41d4-a716-446655440003"
+  ]
+}
+```
+
+**Response**
+
+**成功回應 (200 OK)**
+
+| 欄位 | 類型 | 說明 |
+|:---|:---|:---|
+| totalCount | Integer | 總筆數 |
+| successCount | Integer | 成功筆數 |
+| failedCount | Integer | 失敗筆數 |
+| failed | Object[] | 失敗詳情 |
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "批次核准完成",
+  "data": {
+    "totalCount": 3,
+    "successCount": 2,
+    "failedCount": 1,
+    "failed": [
+      {
+        "timesheetId": "550e8400-e29b-41d4-a716-446655440003",
+        "errorCode": "TSH_INVALID_STATUS_FOR_APPROVE",
+        "errorMessage": "只有已提交狀態可核准"
+      }
+    ]
+  }
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `TSH_BATCH_EMPTY` | 至少選擇一筆工時表 | 選擇要核准的工時表 |
+| 400 | `TSH_BATCH_LIMIT_EXCEEDED` | 單次最多 100 筆 | 分批處理 |
+
+---
+
+### 5.3 退回工時表
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `POST /api/v1/timesheets/{id}/reject` |
+| Controller | `HR07TimesheetCmdController` |
+| 方法名稱 | `rejectTimesheet` |
 | Service | `RejectTimesheetServiceImpl` |
 | 權限 | `timesheet:approve` |
 | 版本 | v1 |
@@ -631,20 +663,22 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-| Content-Type | ✅ | `application/json` |
+| Authorization | Y | `Bearer {accessToken}` |
+| Content-Type | Y | `application/json` |
 
 **Path Parameters**
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
+| id | UUID | Y | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
+
+> **注意**：Controller 會將 path 中的 `id` set 到 request 的 `timesheetId` 欄位。
 
 **Request Body**
 
 | 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|:---|
-| reason | String | ✅ | 最長 500 字元 | 駁回原因 | `"工時與差勤記錄不符，請確認11/26是否有請假"` |
+| reason | String | Y | 最長 500 字元 | 駁回原因 | `"工時與差勤記錄不符，請確認11/26是否有請假"` |
 
 **範例：**
 ```json
@@ -698,35 +732,37 @@
 
 ---
 
-### 5.3 批次核准
+## 6. 工時鎖定 Command API
+
+### 6.1 鎖定工時表
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/timesheets/batch-approve` |
-| Controller | `HR07ApprovalCmdController` |
-| Service | `BatchApproveTimesheetServiceImpl` |
-| 權限 | `timesheet:approve` |
+| 端點 | `POST /api/v1/timesheets/{id}/lock` |
+| Controller | `HR07TimesheetCmdController` |
+| 方法名稱 | `lockTimesheet` |
+| Service | `LockTimesheetServiceImpl` |
+| 權限 | 系統/管理員 |
 | 版本 | v1 |
 
 **用途說明**
 
 | 項目 | 說明 |
 |:---|:---|
-| 業務場景 | PM 一次核准多筆工時表，提升審核效率 |
-| 使用者 | 專案經理 (PM)、部門主管 |
-| 頁面 | HR07-P02 工時審核頁面 |
+| 業務場景 | 薪資結算後鎖定工時表，防止事後修改已計入薪資的工時記錄 |
+| 使用者 | 系統自動（薪資結算流程觸發）、管理員手動操作 |
+| 頁面 | 系統排程 / 管理後台 |
 
 **業務邏輯**
 
 | 步驟 | 處理邏輯 |
 |:---|:---|
-| 1 | 驗證所有工時表存在 |
-| 2 | 驗證所有工時表狀態為 SUBMITTED |
-| 3 | 驗證審核者有權限審核所有工時表 |
-| 4 | 逐一核准並發布事件 |
-| 5 | 回傳成功與失敗的統計 |
+| 1 | 驗證工時表存在 |
+| 2 | 驗證工時表狀態為 APPROVED（已核准才可鎖定） |
+| 3 | 更新狀態為 LOCKED |
+| 4 | 發布 TimesheetLockedEvent |
 
 **Request**
 
@@ -734,53 +770,24 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-| Content-Type | ✅ | `application/json` |
+| Authorization | Y | `Bearer {accessToken}` |
 
-**Request Body**
+**Path Parameters**
 
-| 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|:---|
-| timesheetIds | UUID[] | ✅ | 1~100 個 | 工時表 ID 列表 | `["uuid-1", "uuid-2"]` |
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| id | String | Y | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
 
-**範例：**
-```json
-{
-  "timesheetIds": [
-    "550e8400-e29b-41d4-a716-446655440001",
-    "550e8400-e29b-41d4-a716-446655440002",
-    "550e8400-e29b-41d4-a716-446655440003"
-  ]
-}
-```
+> **注意**：Controller 不接收 request body，而是以 path parameter 建構 `LockTimesheetRequest`（設定 `timesheetId`，型別為 String）。
 
 **Response**
 
 **成功回應 (200 OK)**
 
-| 欄位 | 類型 | 說明 |
-|:---|:---|:---|
-| totalCount | Integer | 總筆數 |
-| successCount | Integer | 成功筆數 |
-| failedCount | Integer | 失敗筆數 |
-| failed | Object[] | 失敗詳情 |
-
 ```json
 {
   "code": "SUCCESS",
-  "message": "批次核准完成",
-  "data": {
-    "totalCount": 3,
-    "successCount": 2,
-    "failedCount": 1,
-    "failed": [
-      {
-        "timesheetId": "550e8400-e29b-41d4-a716-446655440003",
-        "errorCode": "TSH_INVALID_STATUS_FOR_APPROVE",
-        "errorMessage": "只有已提交狀態可核准"
-      }
-    ]
-  }
+  "message": "工時表已鎖定"
 }
 ```
 
@@ -788,14 +795,20 @@
 
 | HTTP | 錯誤碼 | 說明 | 處理建議 |
 |:---:|:---|:---|:---|
-| 400 | `TSH_BATCH_EMPTY` | 至少選擇一筆工時表 | 選擇要核准的工時表 |
-| 400 | `TSH_BATCH_LIMIT_EXCEEDED` | 單次最多 100 筆 | 分批處理 |
+| 404 | `TSH_TIMESHEET_NOT_FOUND` | 工時表不存在 | 確認工時表 ID |
+| 400 | `TSH_INVALID_STATUS_FOR_LOCK` | 只有已核准狀態可鎖定 | 確認工時表狀態 |
+
+**領域事件**
+
+| 事件名稱 | Topic | 說明 |
+|:---|:---|:---|
+| TimesheetLockedEvent | `timesheet.locked` | 工時鎖定，薪資結算後觸發 |
 
 ---
 
-## 6. 工時查詢 API
+## 7. 工時查詢 API
 
-### 6.1 查詢我的工時
+### 7.1 查詢我的工時表
 
 **基本資訊**
 
@@ -803,6 +816,7 @@
 |:---|:---|
 | 端點 | `GET /api/v1/timesheets/my` |
 | Controller | `HR07TimesheetQryController` |
+| 方法名稱 | `getMyTimesheet` |
 | Service | `GetMyTimesheetServiceImpl` |
 | 權限 | - (登入即可) |
 | 版本 | v1 |
@@ -830,13 +844,13 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
+| Authorization | Y | `Bearer {accessToken}` |
 
-**Query Parameters**
+**Query Parameters**（透過 `@ModelAttribute GetMyTimesheetRequest` 接收）
 
 | 參數名 | 類型 | 必填 | 預設值 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|:---|
-| week | String | ⬚ | 當前週次 | 週次 (ISO 週格式) | `2025-W48` |
+| week | String | N | 當前週次 | 週次 (ISO 週格式) | `2025-W48` |
 
 **Response**
 
@@ -897,94 +911,16 @@
 
 ---
 
-### 6.2 查詢工時明細
+### 7.2 查詢待簽核列表
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/timesheets/{id}/entries` |
+| 端點 | `GET /api/v1/timesheets/approvals` |
 | Controller | `HR07TimesheetQryController` |
-| Service | `GetEntriesServiceImpl` |
-| 權限 | - (本人) 或 `timesheet:read:all` |
-| 版本 | v1 |
-
-**用途說明**
-
-| 項目 | 說明 |
-|:---|:---|
-| 業務場景 | 查詢指定工時表的所有明細（審核時查看詳情） |
-| 使用者 | 員工本人、專案經理 |
-| 頁面 | HR07-P01、HR07-P02 |
-
-**業務邏輯**
-
-| 步驟 | 處理邏輯 |
-|:---|:---|
-| 1 | 驗證工時表存在 |
-| 2 | 驗證查詢者為本人或有讀取權限 |
-| 3 | 回傳所有工時明細 |
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
-
-**Response**
-
-**成功回應 (200 OK)**
-
-```json
-{
-  "code": "SUCCESS",
-  "data": {
-    "timesheetId": "550e8400-e29b-41d4-a716-446655440000",
-    "employeeId": "employee-uuid",
-    "employeeName": "張三",
-    "entries": [
-      {
-        "entryId": "entry-uuid-001",
-        "projectId": "project-uuid-001",
-        "projectName": "PRJ-001 系統開發專案",
-        "projectCode": "PRJ-001",
-        "taskId": "task-uuid-001",
-        "taskName": "需求分析",
-        "workDate": "2025-11-25",
-        "hours": 8.0,
-        "description": "完成需求分析文件"
-      }
-    ]
-  }
-}
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 404 | `TSH_TIMESHEET_NOT_FOUND` | 工時表不存在 | 確認工時表 ID |
-| 403 | `TSH_ACCESS_DENIED` | 無權限查看此工時表 | 需為本人或有讀取權限 |
-
----
-
-### 6.3 查詢待審核列表
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `GET /api/v1/timesheets/pending-approval` |
-| Controller | `HR07ApprovalQryController` |
-| Service | `GetPendingApprovalServiceImpl` |
+| 方法名稱 | `getPendingApprovals` |
+| Service | `GetPendingApprovalsServiceImpl` |
 | 權限 | `timesheet:approve` |
 | 版本 | v1 |
 
@@ -1011,16 +947,16 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
+| Authorization | Y | `Bearer {accessToken}` |
 
-**Query Parameters**
+**Query Parameters**（透過 `@ModelAttribute GetPendingApprovalsRequest` 接收）
 
 | 參數名 | 類型 | 必填 | 預設值 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|:---|
-| employeeId | UUID | ⬚ | - | 員工 ID 篩選 | `employee-uuid` |
-| projectId | UUID | ⬚ | - | 專案 ID 篩選 | `project-uuid` |
-| page | Integer | ⬚ | 1 | 頁碼 | `1` |
-| size | Integer | ⬚ | 10 | 每頁筆數 | `20` |
+| employeeId | UUID | N | - | 員工 ID 篩選 | `employee-uuid` |
+| projectId | UUID | N | - | 專案 ID 篩選 | `project-uuid` |
+| page | Integer | N | 1 | 頁碼 | `1` |
+| size | Integer | N | 10 | 每頁筆數 | `20` |
 
 **Response**
 
@@ -1075,17 +1011,107 @@
 
 ---
 
-## 7. 工時報表 API
+### 7.3 查詢工時表詳情
 
-### 7.1 個人工時統計
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/timesheets/{id}` |
+| Controller | `HR07TimesheetQryController` |
+| 方法名稱 | `getTimesheet` |
+| Service | `GetTimesheetDetailServiceImpl` |
+| 權限 | - (本人) 或 `timesheet:read:all` |
+| 版本 | v1 |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢指定工時表的完整詳細資訊（含所有明細） |
+| 使用者 | 員工本人、專案經理 |
+| 頁面 | HR07-P01、HR07-P02 |
+
+**業務邏輯**
+
+| 步驟 | 處理邏輯 |
+|:---|:---|
+| 1 | 驗證工時表存在 |
+| 2 | 驗證查詢者為本人或有讀取權限 |
+| 3 | 回傳工時表完整資訊（含所有明細） |
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | Y | `Bearer {accessToken}` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| id | String | Y | 工時表 ID | `550e8400-e29b-41d4-a716-446655440000` |
+
+> **注意**：Controller 以 path parameter 建構 `GetTimesheetDetailRequest`（設定 `timesheetId`，型別為 String）。
+
+**Response**
+
+**成功回應 (200 OK)**
+
+```json
+{
+  "code": "SUCCESS",
+  "data": {
+    "timesheetId": "550e8400-e29b-41d4-a716-446655440000",
+    "employeeId": "employee-uuid",
+    "employeeName": "張三",
+    "periodStartDate": "2025-11-25",
+    "periodEndDate": "2025-12-01",
+    "totalHours": 40.0,
+    "status": "SUBMITTED",
+    "submittedAt": "2025-12-02T09:30:00Z",
+    "approvedAt": null,
+    "rejectionReason": null,
+    "entries": [
+      {
+        "entryId": "entry-uuid-001",
+        "projectId": "project-uuid-001",
+        "projectName": "PRJ-001 系統開發專案",
+        "projectCode": "PRJ-001",
+        "taskId": "task-uuid-001",
+        "taskName": "需求分析",
+        "workDate": "2025-11-25",
+        "hours": 8.0,
+        "description": "完成需求分析文件"
+      }
+    ]
+  }
+}
+```
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `TSH_TIMESHEET_NOT_FOUND` | 工時表不存在 | 確認工時表 ID |
+| 403 | `TSH_ACCESS_DENIED` | 無權限查看此工時表 | 需為本人或有讀取權限 |
+
+---
+
+## 8. 工時報表 API
+
+### 8.1 個人/部門工時統計
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
 | 端點 | `GET /api/v1/timesheets/summary` |
-| Controller | `HR07ReportQryController` |
-| Service | `GetSummaryServiceImpl` |
+| Controller | `HR07TimesheetReportQryController` |
+| 方法名稱 | `getTimesheetSummary` |
+| Service | `GetTimesheetSummaryServiceImpl` |
 | 權限 | `timesheet:report:read` |
 | 版本 | v1 |
 
@@ -1111,16 +1137,16 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
+| Authorization | Y | `Bearer {accessToken}` |
 
-**Query Parameters**
+**Query Parameters**（透過 `@ModelAttribute GetTimesheetSummaryRequest` 接收）
 
 | 參數名 | 類型 | 必填 | 預設值 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|:---|
-| startDate | Date | ✅ | - | 開始日期 | `2025-11-01` |
-| endDate | Date | ✅ | - | 結束日期 | `2025-11-30` |
-| departmentId | UUID | ⬚ | - | 部門篩選 | `dept-uuid` |
-| employeeId | UUID | ⬚ | - | 員工篩選 | `emp-uuid` |
+| startDate | Date | Y | - | 開始日期 | `2025-11-01` |
+| endDate | Date | Y | - | 結束日期 | `2025-11-30` |
+| departmentId | UUID | N | - | 部門篩選 | `dept-uuid` |
+| employeeId | UUID | N | - | 員工篩選 | `emp-uuid` |
 
 **Response**
 
@@ -1176,15 +1202,16 @@
 
 ---
 
-### 7.2 專案工時統計
+### 8.2 專案工時統計
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
 | 端點 | `GET /api/v1/timesheets/project-summary` |
-| Controller | `HR07ReportQryController` |
-| Service | `GetProjectSummaryServiceImpl` |
+| Controller | `HR07TimesheetReportQryController` |
+| 方法名稱 | `getProjectTimesheetSummary` |
+| Service | `GetProjectTimesheetSummaryServiceImpl` |
 | 權限 | `timesheet:report:read` |
 | 版本 | v1 |
 
@@ -1210,15 +1237,15 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
+| Authorization | Y | `Bearer {accessToken}` |
 
-**Query Parameters**
+**Query Parameters**（透過 `@ModelAttribute GetProjectTimesheetSummaryRequest` 接收）
 
 | 參數名 | 類型 | 必填 | 預設值 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|:---|
-| startDate | Date | ✅ | - | 開始日期 | `2025-11-01` |
-| endDate | Date | ✅ | - | 結束日期 | `2025-11-30` |
-| projectId | UUID | ⬚ | - | 專案篩選 | `project-uuid` |
+| startDate | Date | Y | - | 開始日期 | `2025-11-01` |
+| endDate | Date | Y | - | 結束日期 | `2025-11-30` |
+| projectId | UUID | N | - | 專案篩選 | `project-uuid` |
 
 **Response**
 
@@ -1268,15 +1295,16 @@
 
 ---
 
-### 7.3 未回報員工列表
+### 8.3 未回報員工列表
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
 | 端點 | `GET /api/v1/timesheets/unreported` |
-| Controller | `HR07ReportQryController` |
-| Service | `GetUnreportedServiceImpl` |
+| Controller | `HR07TimesheetReportQryController` |
+| 方法名稱 | `getUnreportedEmployees` |
+| Service | `GetUnreportedEmployeesServiceImpl` |
 | 權限 | `timesheet:report:read` |
 | 版本 | v1 |
 
@@ -1302,14 +1330,14 @@
 
 | 名稱 | 必填 | 說明 |
 |:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
+| Authorization | Y | `Bearer {accessToken}` |
 
-**Query Parameters**
+**Query Parameters**（透過 `@ModelAttribute GetUnreportedEmployeesRequest` 接收）
 
 | 參數名 | 類型 | 必填 | 預設值 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|:---|
-| week | String | ⬚ | 上週 | 週次 (ISO 週格式) | `2025-W48` |
-| departmentId | UUID | ⬚ | - | 部門篩選 | `dept-uuid` |
+| week | String | N | 上週 | 週次 (ISO 週格式) | `2025-W48` |
+| departmentId | UUID | N | - | 部門篩選 | `dept-uuid` |
 
 **Response**
 
@@ -1362,28 +1390,28 @@
 ## 附錄 A：工時狀態流轉
 
 ```
-                 ┌──────────────────┐
-                 │                  │
-                 ▼                  │
-┌────────┐    ┌────────┐    ┌──────────┐    ┌────────┐
-│ DRAFT  │───▶│SUBMITTED│───▶│ APPROVED │───▶│ LOCKED │
-└────────┘    └────────┘    └──────────┘    └────────┘
-     ▲              │
-     │              │
-     │        ┌─────┴─────┐
-     │        ▼           │
-     │   ┌────────┐       │
-     └───│REJECTED│───────┘
-         └────────┘
+                 +------------------+
+                 |                  |
+                 v                  |
++--------+    +----------+    +----------+    +--------+
+| DRAFT  |--->|SUBMITTED |--->| APPROVED |--->| LOCKED |
++--------+    +----------+    +----------+    +--------+
+     ^              |
+     |              |
+     |        +-----+-----+
+     |        v           |
+     |   +----------+     |
+     +---|REJECTED  |-----+
+         +----------+
 ```
 
-| 狀態 | 說明 | 可修改 |
-|:---|:---|:---:|
-| DRAFT | 草稿 | ✅ |
-| SUBMITTED | 已提交 | ❌ |
-| APPROVED | 已核准 | ❌ |
-| REJECTED | 已駁回 | ✅ |
-| LOCKED | 已鎖定 | ❌ |
+| 狀態 | 說明 | 可修改 | 狀態轉換觸發端點 |
+|:---|:---|:---:|:---|
+| DRAFT | 草稿 | Y | （初始狀態） |
+| SUBMITTED | 已提交 | N | `POST /api/v1/timesheets/submit` |
+| APPROVED | 已核准 | N | `POST /api/v1/timesheets/{id}/approve` |
+| REJECTED | 已駁回 | Y | `POST /api/v1/timesheets/{id}/reject` |
+| LOCKED | 已鎖定 | N | `POST /api/v1/timesheets/{id}/lock` |
 
 ---
 
@@ -1404,6 +1432,7 @@
 | `TSH_INVALID_STATUS_FOR_SUBMIT` | 400 | 目前狀態不允許提交 |
 | `TSH_INVALID_STATUS_FOR_APPROVE` | 400 | 目前狀態不允許核准 |
 | `TSH_INVALID_STATUS_FOR_REJECT` | 400 | 目前狀態不允許駁回 |
+| `TSH_INVALID_STATUS_FOR_LOCK` | 400 | 目前狀態不允許鎖定 |
 | `TSH_INVALID_PERIOD_START` | 400 | 週期開始日必須為週一 |
 | `TSH_FUTURE_PERIOD` | 400 | 不可建立未來週次 |
 | `TSH_DATE_OUT_OF_RANGE` | 400 | 工作日期不在週期範圍內 |
@@ -1423,15 +1452,15 @@
 
 ## 附錄 C：領域事件總覽
 
-| 事件名稱 | Topic | 觸發時機 | 訂閱服務 |
-|:---|:---|:---|:---|
-| TimesheetCreatedEvent | `timesheet.created` | 建立工時表 | - |
-| TimesheetSubmittedEvent | `timesheet.submitted` | 提交審核 | Workflow, Notification |
-| TimesheetApprovedEvent | `timesheet.approved` | 核准工時 | Project, Payroll, Notification |
-| TimesheetRejectedEvent | `timesheet.rejected` | 駁回工時 | Notification |
-| TimesheetLockedEvent | `timesheet.locked` | 鎖定工時（薪資結算後） | - |
+| 事件名稱 | Topic | 觸發時機 | 觸發端點 | 訂閱服務 |
+|:---|:---|:---|:---|:---|
+| TimesheetSubmittedEvent | `timesheet.submitted` | 提交審核 | `POST /submit` | Workflow, Notification |
+| TimesheetApprovedEvent | `timesheet.approved` | 核准工時 | `POST /{id}/approve` | Project, Payroll, Notification |
+| TimesheetRejectedEvent | `timesheet.rejected` | 駁回工時 | `POST /{id}/reject` | Notification |
+| TimesheetLockedEvent | `timesheet.locked` | 鎖定工時（薪資結算後） | `POST /{id}/lock` | - |
 
 ---
 
 **文件建立日期:** 2025-12-30
-**版本:** 1.0
+**最後更新日期:** 2026-03-16
+**版本:** 2.0

@@ -1,7 +1,8 @@
 # HR11 簽核流程服務 API 詳細規格
 
-**版本:** 1.0
+**版本:** 2.0
 **建立日期:** 2025-12-30
+**最後更新:** 2026-03-16
 **服務代碼:** HR11 (WKF)
 **服務名稱:** 簽核流程服務 (Workflow Service)
 
@@ -14,7 +15,7 @@
 3. [流程實例管理 API](#3-流程實例管理-api)
 4. [審核任務管理 API](#4-審核任務管理-api)
 5. [代理人管理 API](#5-代理人管理-api)
-6. [流程報表 API](#6-流程報表-api)
+6. [流程報表 API](#6-流程報表-api)（尚未實作）
 7. [錯誤碼總覽](#7-錯誤碼總覽)
 8. [領域事件總覽](#8-領域事件總覽)
 
@@ -22,32 +23,59 @@
 
 ## 1. API 總覽
 
-### 1.1 端點清單
+### 1.1 Controller 架構
 
-| 序號 | 端點 | 方法 | 說明 | Controller |
+> **v2.0 更新說明：** 實際程式碼採用統一的 Cmd/Qry 兩支 Controller，未按 domain 拆分。
+> 所有端點共用 `@RequestMapping("/api/v1/workflows")` 基礎路徑。
+
+| Controller | 類型 | 說明 |
+|:---|:---:|:---|
+| `HR11WorkflowCmdController` | Command | 所有寫入操作（啟動流程、核准、駁回、建立/刪除代理、建立/發布定義） |
+| `HR11WorkflowQryController` | Query | 所有查詢操作（待辦任務、流程歷史、代理人、定義列表、我的申請、實例詳情） |
+
+### 1.2 已實作端點清單
+
+| 序號 | 端點 | 方法 | 說明 | Controller | Service Method |
+|:---:|:---|:---:|:---|:---|:---|
+| 1 | `/api/v1/workflows/definitions` | POST | 建立流程定義 | HR11WorkflowCmdController | `createDefinition` |
+| 2 | `/api/v1/workflows/definitions/{definitionId}/publish` | PUT | 發布流程定義 | HR11WorkflowCmdController | `publishDefinition` |
+| 3 | `/api/v1/workflows/start` | POST | 啟動審核流程 | HR11WorkflowCmdController | `startWorkflow` |
+| 4 | `/api/v1/workflows/approve` | POST | 核准任務 | HR11WorkflowCmdController | `approveTask` |
+| 5 | `/api/v1/workflows/reject` | POST | 駁回任務 | HR11WorkflowCmdController | `rejectTask` |
+| 6 | `/api/v1/workflows/delegations` | POST | 建立代理人設定 | HR11WorkflowCmdController | `createDelegation` |
+| 7 | `/api/v1/workflows/delegations/{delegationId}` | DELETE | 刪除代理人設定 | HR11WorkflowCmdController | `deleteDelegation` |
+| 8 | `/api/v1/workflows/pending-tasks` | GET | 查詢待辦任務 | HR11WorkflowQryController | `getPendingTasks` |
+| 9 | `/api/v1/workflows/{instanceId}/history` | GET | 查詢流程歷史 | HR11WorkflowQryController | `getWorkflowHistory` |
+| 10 | `/api/v1/workflows/delegations` | GET | 查詢代理人設定 | HR11WorkflowQryController | `getDelegations` |
+| 11 | `/api/v1/workflows/definitions` | GET | 查詢流程定義列表 | HR11WorkflowQryController | `getDefinitions` |
+| 12 | `/api/v1/workflows/my/applications` | GET | 查詢我的申請 | HR11WorkflowQryController | `getMyApplications` |
+| 13 | `/api/v1/workflows/instances/{instanceId}` | GET | 查詢流程實例詳情 | HR11WorkflowQryController | `getInstanceDetail` |
+
+### 1.3 尚未實作端點（設計規格保留）
+
+| 序號 | 端點 | 方法 | 說明 | 備註 |
 |:---:|:---|:---:|:---|:---|
-| 1 | `/api/v1/workflows/definitions` | POST | 建立流程定義 | HR11DefinitionCmdController |
-| 2 | `/api/v1/workflows/definitions` | GET | 查詢流程定義列表 | HR11DefinitionQryController |
-| 3 | `/api/v1/workflows/definitions/{id}` | GET | 查詢流程定義詳情 | HR11DefinitionQryController |
-| 4 | `/api/v1/workflows/definitions/{id}` | PUT | 更新流程定義 | HR11DefinitionCmdController |
-| 5 | `/api/v1/workflows/definitions/{id}/publish` | PUT | 發布流程定義 | HR11DefinitionCmdController |
-| 6 | `/api/v1/workflows/definitions/{id}/deactivate` | PUT | 停用流程定義 | HR11DefinitionCmdController |
-| 7 | `/api/v1/workflows/start` | POST | 啟動審核流程 | HR11InstanceCmdController |
-| 8 | `/api/v1/workflows/instances` | GET | 查詢流程實例列表 | HR11InstanceQryController |
-| 9 | `/api/v1/workflows/instances/{id}` | GET | 查詢流程實例詳情 | HR11InstanceQryController |
-| 10 | `/api/v1/workflows/instances/{id}/cancel` | PUT | 取消流程實例 | HR11InstanceCmdController |
-| 11 | `/api/v1/workflows/tasks/pending` | GET | 查詢我的待辦任務 | HR11TaskQryController |
-| 12 | `/api/v1/workflows/tasks/{id}` | GET | 查詢任務詳情 | HR11TaskQryController |
-| 13 | `/api/v1/workflows/tasks/{id}/approve` | PUT | 核准任務 | HR11TaskCmdController |
-| 14 | `/api/v1/workflows/tasks/{id}/reject` | PUT | 駁回任務 | HR11TaskCmdController |
-| 15 | `/api/v1/workflows/tasks/{id}/delegate` | PUT | 轉交任務 | HR11TaskCmdController |
-| 16 | `/api/v1/workflows/tasks/{id}/add-approver` | POST | 加簽 | HR11TaskCmdController |
-| 17 | `/api/v1/workflows/my/applications` | GET | 查詢我的申請 | HR11InstanceQryController |
-| 18 | `/api/v1/workflows/delegations` | POST | 建立代理人設定 | HR11DelegationCmdController |
-| 19 | `/api/v1/workflows/delegations` | GET | 查詢代理人設定 | HR11DelegationQryController |
-| 20 | `/api/v1/workflows/delegations/{id}` | DELETE | 刪除代理人設定 | HR11DelegationCmdController |
-| 21 | `/api/v1/workflows/statistics` | GET | 查詢審核統計 | HR11StatisticsQryController |
-| 22 | `/api/v1/workflows/statistics/export` | GET | 匯出審核報表 | HR11StatisticsQryController |
+| N1 | `/api/v1/workflows/definitions/{id}` | GET | 查詢流程定義詳情 | 待實作 |
+| N2 | `/api/v1/workflows/definitions/{id}` | PUT | 更新流程定義 | 待實作 |
+| N3 | `/api/v1/workflows/definitions/{id}/deactivate` | PUT | 停用流程定義 | 待實作 |
+| N4 | `/api/v1/workflows/instances` | GET | 查詢流程實例列表 | 待實作 |
+| N5 | `/api/v1/workflows/instances/{id}/cancel` | PUT | 取消流程實例 | 待實作 |
+| N6 | `/api/v1/workflows/tasks/{id}` | GET | 查詢任務詳情 | 待實作 |
+| N7 | `/api/v1/workflows/tasks/{id}/delegate` | PUT | 轉交任務 | 待實作 |
+| N8 | `/api/v1/workflows/tasks/{id}/add-approver` | POST | 加簽 | 待實作 |
+| N9 | `/api/v1/workflows/statistics` | GET | 查詢審核統計 | 待實作 |
+| N10 | `/api/v1/workflows/statistics/export` | GET | 匯出審核報表 | 待實作 |
+
+### 1.4 v1.0 與 v2.0 差異摘要
+
+| 差異項目 | v1.0 文檔設計 | v2.0 實際實作 |
+|:---|:---|:---|
+| Controller 拆分策略 | 按 domain 拆為 6+ 個 Controller | 統一為 Cmd/Qry 兩支 Controller |
+| 核准任務端點 | `PUT /tasks/{id}/approve` | `POST /approve`（taskId 在 Request Body） |
+| 駁回任務端點 | `PUT /tasks/{id}/reject` | `POST /reject`（taskId 在 Request Body） |
+| 待辦任務端點 | `GET /tasks/pending` | `GET /pending-tasks` |
+| 流程歷史端點 | 無（併入實例詳情） | `GET /{instanceId}/history`（獨立端點） |
+| 端點總數 | 22 個 | 已實作 13 個 + 待實作 10 個 |
 
 ### 1.2 節點類型
 
@@ -89,8 +117,8 @@
 |:---|:---|
 | **端點** | `POST /api/v1/workflows/definitions` |
 | **方法** | POST |
-| **Controller** | HR11DefinitionCmdController |
-| **Service** | CreateWorkflowDefinitionServiceImpl |
+| **Controller** | HR11WorkflowCmdController |
+| **Service** | createDefinitionServiceImpl |
 | **權限** | `WORKFLOW:DEFINITION:CREATE` |
 
 **用途說明**
@@ -222,8 +250,8 @@
 |:---|:---|
 | **端點** | `GET /api/v1/workflows/definitions` |
 | **方法** | GET |
-| **Controller** | HR11DefinitionQryController |
-| **Service** | GetWorkflowDefinitionListServiceImpl |
+| **Controller** | HR11WorkflowQryController |
+| **Service** | getDefinitionsServiceImpl |
 | **權限** | `WORKFLOW:DEFINITION:READ` |
 
 **用途說明**
@@ -290,9 +318,10 @@
 |:---|:---|
 | **端點** | `GET /api/v1/workflows/definitions/{id}` |
 | **方法** | GET |
-| **Controller** | HR11DefinitionQryController |
-| **Service** | GetWorkflowDefinitionDetailServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowQryController） |
+| **Service** | 尚未實作（預定 getDefinitionDetailServiceImpl） |
 | **權限** | `WORKFLOW:DEFINITION:READ` |
+| **狀態** | **尚未實作** |
 
 **用途說明**
 
@@ -363,9 +392,10 @@
 |:---|:---|
 | **端點** | `PUT /api/v1/workflows/definitions/{id}` |
 | **方法** | PUT |
-| **Controller** | HR11DefinitionCmdController |
-| **Service** | UpdateWorkflowDefinitionServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowCmdController） |
+| **Service** | 尚未實作（預定 updateDefinitionServiceImpl） |
 | **權限** | `WORKFLOW:DEFINITION:UPDATE` |
+| **狀態** | **尚未實作** |
 
 **用途說明**
 
@@ -423,10 +453,10 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| **端點** | `PUT /api/v1/workflows/definitions/{id}/publish` |
+| **端點** | `PUT /api/v1/workflows/definitions/{definitionId}/publish` |
 | **方法** | PUT |
-| **Controller** | HR11DefinitionCmdController |
-| **Service** | PublishWorkflowDefinitionServiceImpl |
+| **Controller** | HR11WorkflowCmdController |
+| **Service** | publishDefinitionServiceImpl |
 | **權限** | `WORKFLOW:DEFINITION:PUBLISH` |
 
 **用途說明**
@@ -476,9 +506,10 @@
 |:---|:---|
 | **端點** | `PUT /api/v1/workflows/definitions/{id}/deactivate` |
 | **方法** | PUT |
-| **Controller** | HR11DefinitionCmdController |
-| **Service** | DeactivateWorkflowDefinitionServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowCmdController） |
+| **Service** | 尚未實作（預定 deactivateDefinitionServiceImpl） |
 | **權限** | `WORKFLOW:DEFINITION:DEACTIVATE` |
+| **狀態** | **尚未實作** |
 
 **用途說明**
 
@@ -512,8 +543,8 @@
 |:---|:---|
 | **端點** | `POST /api/v1/workflows/start` |
 | **方法** | POST |
-| **Controller** | HR11InstanceCmdController |
-| **Service** | StartWorkflowServiceImpl |
+| **Controller** | HR11WorkflowCmdController |
+| **Service** | startWorkflowServiceImpl |
 | **權限** | `WORKFLOW:INSTANCE:START` |
 
 **用途說明**
@@ -613,9 +644,10 @@
 |:---|:---|
 | **端點** | `GET /api/v1/workflows/instances` |
 | **方法** | GET |
-| **Controller** | HR11InstanceQryController |
-| **Service** | GetWorkflowInstanceListServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowQryController） |
+| **Service** | 尚未實作（預定 getInstanceListServiceImpl） |
 | **權限** | `WORKFLOW:INSTANCE:READ` |
+| **狀態** | **尚未實作** |
 
 **用途說明**
 
@@ -678,10 +710,10 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| **端點** | `GET /api/v1/workflows/instances/{id}` |
+| **端點** | `GET /api/v1/workflows/instances/{instanceId}` |
 | **方法** | GET |
-| **Controller** | HR11InstanceQryController |
-| **Service** | GetWorkflowInstanceDetailServiceImpl |
+| **Controller** | HR11WorkflowQryController |
+| **Service** | getInstanceDetailServiceImpl |
 | **權限** | `WORKFLOW:INSTANCE:READ` |
 
 **用途說明**
@@ -762,7 +794,69 @@
 
 ---
 
-### 3.4 取消流程實例
+### 3.4 查詢流程歷史
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `GET /api/v1/workflows/{instanceId}/history` |
+| **方法** | GET |
+| **Controller** | HR11WorkflowQryController |
+| **Service** | getWorkflowHistoryServiceImpl |
+| **權限** | 申請人、審核人、管理員 |
+
+**用途說明**
+
+- **業務場景:** 查看特定流程實例的審核歷程記錄
+- **使用者:** 申請人、審核人、管理員
+- **v2.0 新增：** 此端點為獨立的歷程查詢，與實例詳情 (3.3) 分離
+
+**Path Parameters**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| instanceId | String | 流程實例 ID |
+
+**Response Body**
+
+```json
+{
+  "success": true,
+  "data": {
+    "instanceId": "inst-001",
+    "timeline": [
+      {
+        "nodeId": "start",
+        "nodeName": "開始",
+        "action": "STARTED",
+        "timestamp": "2025-12-30T10:00:00Z"
+      },
+      {
+        "nodeId": "node1",
+        "nodeName": "主管審核",
+        "action": "APPROVED",
+        "actor": {
+          "employeeId": "mgr-001",
+          "fullName": "李經理"
+        },
+        "comments": "同意",
+        "timestamp": "2025-12-30T11:30:00Z"
+      }
+    ]
+  }
+}
+```
+
+**錯誤碼**
+
+| HTTP狀態碼 | 錯誤碼 | 說明 |
+|:---:|:---|:---|
+| 404 | WKF_INSTANCE_NOT_FOUND | 流程實例不存在 |
+
+---
+
+### 3.5 取消流程實例
 
 **基本資訊**
 
@@ -770,9 +864,10 @@
 |:---|:---|
 | **端點** | `PUT /api/v1/workflows/instances/{id}/cancel` |
 | **方法** | PUT |
-| **Controller** | HR11InstanceCmdController |
-| **Service** | CancelWorkflowInstanceServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowCmdController） |
+| **Service** | 尚未實作（預定 cancelInstanceServiceImpl） |
 | **權限** | `WORKFLOW:INSTANCE:CANCEL` |
+| **狀態** | **尚未實作** |
 
 **用途說明**
 
@@ -810,7 +905,7 @@
 
 ---
 
-### 3.5 查詢我的申請
+### 3.6 查詢我的申請
 
 **基本資訊**
 
@@ -818,8 +913,8 @@
 |:---|:---|
 | **端點** | `GET /api/v1/workflows/my/applications` |
 | **方法** | GET |
-| **Controller** | HR11InstanceQryController |
-| **Service** | GetMyApplicationsServiceImpl |
+| **Controller** | HR11WorkflowQryController |
+| **Service** | getMyApplicationsServiceImpl |
 | **權限** | 登入使用者 |
 
 **用途說明**
@@ -878,10 +973,10 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| **端點** | `GET /api/v1/workflows/tasks/pending` |
+| **端點** | `GET /api/v1/workflows/pending-tasks` |
 | **方法** | GET |
-| **Controller** | HR11TaskQryController |
-| **Service** | GetPendingTasksServiceImpl |
+| **Controller** | HR11WorkflowQryController |
+| **Service** | getPendingTasksServiceImpl |
 | **權限** | 登入使用者 |
 
 **用途說明**
@@ -969,9 +1064,10 @@
 |:---|:---|
 | **端點** | `GET /api/v1/workflows/tasks/{id}` |
 | **方法** | GET |
-| **Controller** | HR11TaskQryController |
-| **Service** | GetTaskDetailServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowQryController） |
+| **Service** | 尚未實作（預定 getTaskDetailServiceImpl） |
 | **權限** | 任務指派人或管理員 |
+| **狀態** | **尚未實作** |
 
 **Response Body**
 
@@ -1020,11 +1116,13 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| **端點** | `PUT /api/v1/workflows/tasks/{id}/approve` |
-| **方法** | PUT |
-| **Controller** | HR11TaskCmdController |
-| **Service** | ApproveTaskServiceImpl |
+| **端點** | `POST /api/v1/workflows/approve` |
+| **方法** | POST |
+| **Controller** | HR11WorkflowCmdController |
+| **Service** | approveTaskServiceImpl |
 | **權限** | 任務指派人或代理人 |
+
+> **v2.0 變更：** 路徑從 `PUT /tasks/{id}/approve` 改為 `POST /approve`，taskId 改為放在 Request Body 中。
 
 **用途說明**
 
@@ -1117,11 +1215,13 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| **端點** | `PUT /api/v1/workflows/tasks/{id}/reject` |
-| **方法** | PUT |
-| **Controller** | HR11TaskCmdController |
-| **Service** | RejectTaskServiceImpl |
+| **端點** | `POST /api/v1/workflows/reject` |
+| **方法** | POST |
+| **Controller** | HR11WorkflowCmdController |
+| **Service** | rejectTaskServiceImpl |
 | **權限** | 任務指派人或代理人 |
+
+> **v2.0 變更：** 路徑從 `PUT /tasks/{id}/reject` 改為 `POST /reject`，taskId 改為放在 Request Body 中。
 
 **用途說明**
 
@@ -1180,9 +1280,10 @@
 |:---|:---|
 | **端點** | `PUT /api/v1/workflows/tasks/{id}/delegate` |
 | **方法** | PUT |
-| **Controller** | HR11TaskCmdController |
-| **Service** | DelegateTaskServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowCmdController） |
+| **Service** | 尚未實作（預定 delegateTaskServiceImpl） |
 | **權限** | 任務指派人 |
+| **狀態** | **尚未實作** |
 
 **用途說明**
 
@@ -1239,9 +1340,10 @@
 |:---|:---|
 | **端點** | `POST /api/v1/workflows/tasks/{id}/add-approver` |
 | **方法** | POST |
-| **Controller** | HR11TaskCmdController |
-| **Service** | AddApproverServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowCmdController） |
+| **Service** | 尚未實作（預定 addApproverServiceImpl） |
 | **權限** | 任務指派人 |
+| **狀態** | **尚未實作** |
 
 **用途說明**
 
@@ -1293,8 +1395,8 @@
 |:---|:---|
 | **端點** | `POST /api/v1/workflows/delegations` |
 | **方法** | POST |
-| **Controller** | HR11DelegationCmdController |
-| **Service** | CreateDelegationServiceImpl |
+| **Controller** | HR11WorkflowCmdController |
+| **Service** | createDelegationServiceImpl |
 | **權限** | 登入使用者 |
 
 **用途說明**
@@ -1364,8 +1466,8 @@
 |:---|:---|
 | **端點** | `GET /api/v1/workflows/delegations` |
 | **方法** | GET |
-| **Controller** | HR11DelegationQryController |
-| **Service** | GetDelegationsServiceImpl |
+| **Controller** | HR11WorkflowQryController |
+| **Service** | getDelegationsServiceImpl |
 | **權限** | 登入使用者 |
 
 **用途說明**
@@ -1413,10 +1515,10 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| **端點** | `DELETE /api/v1/workflows/delegations/{id}` |
+| **端點** | `DELETE /api/v1/workflows/delegations/{delegationId}` |
 | **方法** | DELETE |
-| **Controller** | HR11DelegationCmdController |
-| **Service** | DeleteDelegationServiceImpl |
+| **Controller** | HR11WorkflowCmdController |
+| **Service** | deleteDelegationServiceImpl |
 | **權限** | 設定者本人 |
 
 **用途說明**
@@ -1445,9 +1547,10 @@
 |:---|:---|
 | **端點** | `GET /api/v1/workflows/statistics` |
 | **方法** | GET |
-| **Controller** | HR11StatisticsQryController |
-| **Service** | GetWorkflowStatisticsServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowQryController） |
+| **Service** | 尚未實作（預定 getStatisticsServiceImpl） |
 | **權限** | `WORKFLOW:STATISTICS:READ` |
+| **狀態** | **尚未實作** |
 
 **用途說明**
 
@@ -1525,9 +1628,10 @@
 |:---|:---|
 | **端點** | `GET /api/v1/workflows/statistics/export` |
 | **方法** | GET |
-| **Controller** | HR11StatisticsQryController |
-| **Service** | ExportWorkflowStatisticsServiceImpl |
+| **Controller** | 尚未實作（預定 HR11WorkflowQryController） |
+| **Service** | 尚未實作（預定 exportStatisticsServiceImpl） |
 | **權限** | `WORKFLOW:STATISTICS:EXPORT` |
+| **狀態** | **尚未實作** |
 
 **用途說明**
 
@@ -1728,4 +1832,5 @@
 ---
 
 **文件完成日期:** 2025-12-30
-**API 端點數量:** 22 個
+**最後更新日期:** 2026-03-16
+**API 端點數量:** 已實作 13 個 + 待實作 10 個（共 23 個，含 v2.0 新增的流程歷史端點）

@@ -1,9 +1,10 @@
 # HR05 保險管理服務 API 詳細規格
 
-**版本:** 1.0
+**版本:** 1.1
 **建立日期:** 2025-12-29
+**最後更新:** 2026-03-16
 **Domain 代號:** 05 (INS)
-**API 總數:** 12 個端點
+**API 總數:** 16 個端點
 
 ---
 
@@ -25,33 +26,38 @@
 
 ### 1.1 Controller 對照表
 
-| Controller | 說明 | API 數量 |
-|:---|:---|:---:|
-| `HR05UnitCmdController` | 投保單位 Command 操作 | 2 |
-| `HR05UnitQryController` | 投保單位 Query 操作 | 1 |
-| `HR05EnrollmentCmdController` | 加退保 Command 操作 | 3 |
-| `HR05EnrollmentQryController` | 加退保 Query 操作 | 1 |
-| `HR05FeeCmdController` | 費用計算 Command 操作 | 2 |
-| `HR05LevelQryController` | 投保級距 Query 操作 | 1 |
-| `HR05ExportCmdController` | 申報檔案匯出 | 1 |
-| `HR05MyInsuranceQryController` | 員工自助查詢 (ESS) | 1 |
+| Controller | 說明 | API 數量 | 實作狀態 |
+|:---|:---|:---:|:---:|
+| `HR05UnitCmdController` | 投保單位 Command 操作 | 2 | **未實現** |
+| `HR05UnitQryController` | 投保單位 Query 操作 | 1 | **未實現** |
+| `HR05EnrollmentCmdController` | 加退保 Command 操作 | 3 | 已實現 |
+| `HR05EnrollmentQryController` | 加退保 Query 操作 | 4 | 已實現 |
+| `HR05FeeCmdController` | 費用計算 Command 操作 | 2 | 已實現 |
+| `HR05LevelCmdController` | 投保級距 Command 操作 | 1 | 已實現 |
+| `HR05LevelQryController` | 投保級距 Query 操作 | 1 | 已實現 |
+| `HR05ExportCmdController` | 申報檔案匯出 | 1 | 已實現 |
+| `HR05MyInsuranceQryController` | 員工自助查詢 (ESS) | 1 | 已實現 |
 
 ### 1.2 API 端點清單
 
-| # | 端點 | 方法 | 說明 | Controller |
-|:---:|:---|:---:|:---|:---|
-| 1 | `/api/v1/insurance/units` | POST | 建立投保單位 | HR05UnitCmdController |
-| 2 | `/api/v1/insurance/units/{id}` | PUT | 更新投保單位 | HR05UnitCmdController |
-| 3 | `/api/v1/insurance/units` | GET | 查詢投保單位列表 | HR05UnitQryController |
-| 4 | `/api/v1/insurance/enrollments` | POST | 手動加保 | HR05EnrollmentCmdController |
-| 5 | `/api/v1/insurance/enrollments/{id}/withdraw` | PUT | 退保 | HR05EnrollmentCmdController |
-| 6 | `/api/v1/insurance/enrollments/{id}/adjust-level` | PUT | 調整投保級距 | HR05EnrollmentCmdController |
-| 7 | `/api/v1/insurance/enrollments` | GET | 查詢加退保記錄 | HR05EnrollmentQryController |
-| 8 | `/api/v1/insurance/fees/calculate` | POST | 計算保費 | HR05FeeCmdController |
-| 9 | `/api/v1/insurance/supplementary-premium/calculate` | POST | 計算補充保費 | HR05FeeCmdController |
-| 10 | `/api/v1/insurance/levels` | GET | 查詢投保級距表 | HR05LevelQryController |
-| 11 | `/api/v1/insurance/export/enrollment-report` | POST | 匯出加退保申報檔 | HR05ExportCmdController |
-| 12 | `/api/v1/insurance/my` | GET | 查詢我的保險資訊 | HR05MyInsuranceQryController |
+| # | 端點 | 方法 | 說明 | Controller | 實作狀態 |
+|:---:|:---|:---:|:---|:---|:---:|
+| 1 | `/api/v1/insurance/units` | POST | 建立投保單位 | HR05UnitCmdController | **未實現** |
+| 2 | `/api/v1/insurance/units/{id}` | PUT | 更新投保單位 | HR05UnitCmdController | **未實現** |
+| 3 | `/api/v1/insurance/units` | GET | 查詢投保單位列表 | HR05UnitQryController | **未實現** |
+| 4 | `/api/v1/insurance/enrollments` | POST | 手動加保 | HR05EnrollmentCmdController | 已實現 |
+| 5 | `/api/v1/insurance/enrollments/{id}/withdraw` | PUT | 退保 | HR05EnrollmentCmdController | 已實現 |
+| 6 | `/api/v1/insurance/enrollments/{id}/adjust-level` | PUT | 調整投保級距 | HR05EnrollmentCmdController | 已實現 |
+| 7 | `/api/v1/insurance/enrollments` | GET | 查詢加退保記錄列表 | HR05EnrollmentQryController | 已實現 |
+| 8 | `/api/v1/insurance/enrollments/{id}` | GET | 查詢加退保記錄詳情 | HR05EnrollmentQryController | 已實現 |
+| 9 | `/api/v1/insurance/enrollments/{id}/history` | GET | 查詢投保歷程 | HR05EnrollmentQryController | 已實現 |
+| 10 | `/api/v1/insurance/enrollments/active` | GET | 查詢員工有效加保記錄 | HR05EnrollmentQryController | 已實現 |
+| 11 | `/api/v1/insurance/fees/calculate` | POST | 計算保費 | HR05FeeCmdController | 已實現 |
+| 12 | `/api/v1/insurance/supplementary-premium/calculate` | POST | 計算補充保費 | HR05FeeCmdController | 已實現 |
+| 13 | `/api/v1/insurance/levels` | GET | 查詢投保級距表 | HR05LevelQryController | 已實現 |
+| 14 | `/api/v1/insurance/levels/batch-adjust` | POST | 批量調整投保級距 | HR05LevelCmdController | 已實現 |
+| 15 | `/api/v1/insurance/export/enrollment-report` | POST | 匯出加退保申報檔 | HR05ExportCmdController | 已實現 |
+| 16 | `/api/v1/insurance/my` | GET | 查詢我的保險資訊 | HR05MyInsuranceQryController | 已實現 |
 
 ### 1.3 2025 年保險費率
 
@@ -66,7 +72,9 @@
 
 ## 2. 投保單位管理 API
 
-### 2.1 建立投保單位
+> **注意：** 投保單位管理 API（2.1 ~ 2.3）目前 Controller 尚未實現（`HR05UnitCmdController` 及 `HR05UnitQryController` 不存在於程式碼中），以下為規格設計，待後續實作。
+
+### 2.1 建立投保單位 (未實現)
 
 **基本資訊**
 
@@ -139,7 +147,7 @@
 
 ---
 
-### 2.2 更新投保單位
+### 2.2 更新投保單位 (未實現)
 
 **基本資訊**
 
@@ -184,7 +192,7 @@
 
 ---
 
-### 2.3 查詢投保單位列表
+### 2.3 查詢投保單位列表 (未實現)
 
 **基本資訊**
 
@@ -587,6 +595,84 @@
 
 ---
 
+### 3.5 查詢加退保記錄詳情
+
+**基本資訊**
+
+| 項目 | 說明 |
+|:---|:---|
+| 端點 | `GET /api/v1/insurance/enrollments/{id}` |
+| Controller | `HR05EnrollmentQryController` |
+| Service | `GetEnrollmentDetailServiceImpl` |
+| 權限 | `insurance:enrollment:read` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢單筆加退保記錄的詳細資訊 |
+| 使用者 | HR 專員 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| id | string | ✅ | 加退保記錄 ID |
+
+---
+
+### 3.6 查詢投保歷程
+
+**基本資訊**
+
+| 項目 | 說明 |
+|:---|:---|
+| 端點 | `GET /api/v1/insurance/enrollments/{id}/history` |
+| Controller | `HR05EnrollmentQryController` |
+| Service | `GetEnrollmentHistoryServiceImpl` |
+| 權限 | `insurance:enrollment:read` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢特定加退保記錄的投保歷程（級距變更紀錄等） |
+| 使用者 | HR 專員 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| id | string | ✅ | 加退保記錄 ID |
+
+---
+
+### 3.7 查詢員工有效加保記錄
+
+**基本資訊**
+
+| 項目 | 說明 |
+|:---|:---|
+| 端點 | `GET /api/v1/insurance/enrollments/active` |
+| Controller | `HR05EnrollmentQryController` |
+| Service | `GetActiveEnrollmentsServiceImpl` |
+| 權限 | `insurance:enrollment:read` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢指定員工或全部員工的有效加保記錄 |
+| 使用者 | HR 專員、系統內部呼叫 |
+
+**Query Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| employeeId | string | 否 | 按員工 ID 篩選 |
+
+---
+
 ## 4. 費用計算 API
 
 ### 4.1 計算保費
@@ -843,6 +929,40 @@
   }
 }
 ```
+
+---
+
+### 5.2 批量調整投保級距
+
+**基本資訊**
+
+| 項目 | 說明 |
+|:---|:---|
+| 端點 | `POST /api/v1/insurance/levels/batch-adjust` |
+| Controller | `HR05LevelCmdController` |
+| Service | `BatchAdjustLevelsServiceImpl` |
+| 權限 | `insurance:level:manage` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 政府公告級距調整時，批量產生新版級距並停用舊版 |
+| 使用者 | HR 管理員 |
+
+**Request Body**
+
+使用 `BatchAdjustLevelsRequest` DTO。
+
+**Response Body**
+
+使用 `BatchAdjustLevelsResponse` DTO，包含調整結果摘要。
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `INVALID_REQUEST` | 請求參數錯誤 | 確認輸入參數正確 |
 
 ---
 
@@ -1205,4 +1325,5 @@
 ---
 
 **文件完成日期:** 2025-12-29
-**版本:** 1.0
+**最後更新:** 2026-03-16
+**版本:** 1.1

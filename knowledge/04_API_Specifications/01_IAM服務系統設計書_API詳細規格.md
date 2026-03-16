@@ -1,7 +1,7 @@
 # HR01 IAM服務 API詳細規格
 
-**版本:** 1.2
-**日期:** 2025-12-29（最後更新：2026-03-13）
+**版本:** 1.3
+**日期:** 2025-12-29（最後更新：2026-03-16）
 **服務代碼:** HR01
 **服務名稱:** IAM服務 (Identity & Access Management)
 
@@ -34,10 +34,9 @@ IAM 服務在 Spring Cloud Gateway 中註冊以下路由 predicates：
 | `/api/v1/roles/**` | IAM Service | 角色管理 API |
 | `/api/v1/permissions/**` | IAM Service | 權限管理 API |
 | `/api/v1/profile/**` | IAM Service | 個人資料 API |
-| `/api/v1/iam/system/**` | IAM Service | 系統管理 API（功能開關、系統參數、排程管理） |
-| `/api/v1/system/**` | IAM Service | 系統管理 API（新增路由，與 `/api/v1/iam/system/**` 並行） |
+| `/api/v1/system/**` | IAM Service | 系統管理 API（功能開關、系統參數、排程管理） |
 
-> **備註：** `/api/v1/system/**` 為新增的 Gateway route predicate，將系統管理相關請求路由至 IAM 服務，方便其他模組或前端透過統一路徑存取系統管理功能。
+> **備註：** 系統管理 API 統一使用 `/api/v1/system/**` 路徑前綴，由 Controller `@RequestMapping("/api/v1/system")` 定義。
 
 ---
 
@@ -55,14 +54,10 @@ IAM 服務在 Spring Cloud Gateway 中註冊以下路由 predicates：
 | `HR01PermissionQryController` | 權限Query操作 | HR01-P03 角色權限管理 |
 | `HR01ProfileCmdController` | 個人資料Command操作 | HR01-P04 密碼修改 |
 | `HR01ProfileQryController` | 個人資料Query操作 | HR01-P04 密碼修改 |
-| `HR01SystemFeatureCmdController` | 功能開關Command操作 | HR01-P05 系統管理 |
-| `HR01SystemFeatureQryController` | 功能開關Query操作 | HR01-P05 系統管理 |
-| `HR01SystemConfigCmdController` | 系統參數Command操作 | HR01-P05 系統管理 |
-| `HR01SystemConfigQryController` | 系統參數Query操作 | HR01-P05 系統管理 |
-| `HR01SystemSchedulerCmdController` | 排程管理Command操作 | HR01-P05 系統管理 |
-| `HR01SystemSchedulerQryController` | 排程管理Query操作 | HR01-P05 系統管理 |
+| `HR01SystemCmdController` | 系統管理Command操作（功能開關、系統參數、排程任務） | HR01-P05 系統管理 |
+| `HR01SystemQryController` | 系統管理Query操作（功能開關、系統參數、排程任務） | HR01-P05 系統管理 |
 
-### 1.2 API總覽 (42個端點)
+### 1.2 API總覽 (34個端點)
 
 | 端點 | 方法 | Controller | 說明 | 權限 |
 |:---|:---:|:---|:---|:---|
@@ -70,44 +65,36 @@ IAM 服務在 Spring Cloud Gateway 中註冊以下路由 predicates：
 | `/api/v1/auth/logout` | POST | HR01AuthCmdController | 登出 | - |
 | `/api/v1/auth/refresh-token` | POST | HR01AuthCmdController | 刷新Token | - |
 | `/api/v1/auth/forgot-password` | POST | HR01AuthCmdController | 忘記密碼 | - |
-| `/api/v1/auth/reset-password` | POST | HR01AuthCmdController | 重置密碼 | - |
-| `/api/v1/auth/oauth/google` | GET | HR01AuthCmdController | Google OAuth | - |
-| `/api/v1/auth/oauth/google/callback` | GET | HR01AuthCmdController | Google回調 | - |
-| `/api/v1/auth/oauth/microsoft` | GET | HR01AuthCmdController | Microsoft OAuth | - |
-| `/api/v1/auth/oauth/microsoft/callback` | GET | HR01AuthCmdController | Microsoft回調 | - |
-| `/api/v1/users` | GET | HR01UserQryController | 查詢使用者列表 | user:read |
-| `/api/v1/users/{id}` | GET | HR01UserQryController | 查詢使用者詳情 | user:read |
+| `/api/v1/auth/reset-password` | POST | HR01AuthCmdController | 使用者自行變更密碼 | 需認證 |
+| `/api/v1/auth/users/{userId}/password/reset` | POST | HR01AuthCmdController | 管理員重設使用者密碼 | user:reset-password |
+| `/api/v1/users` | GET | HR01UserQryController | 查詢使用者列表 | - |
+| `/api/v1/users/{userId}` | GET | HR01UserQryController | 查詢使用者詳情 | - |
 | `/api/v1/users` | POST | HR01UserCmdController | 建立使用者 | user:create |
-| `/api/v1/users/{id}` | PUT | HR01UserCmdController | 更新使用者 | user:write |
-| `/api/v1/users/{id}/deactivate` | PUT | HR01UserCmdController | 停用使用者 | user:deactivate |
-| `/api/v1/users/{id}/activate` | PUT | HR01UserCmdController | 啟用使用者 | user:deactivate |
-| `/api/v1/users/{id}/reset-password` | PUT | HR01UserCmdController | 管理員重置密碼 | user:reset-password |
-| `/api/v1/users/{id}/roles` | PUT | HR01UserCmdController | 指派角色 | user:assign-role |
+| `/api/v1/users/{userId}` | PUT | HR01UserCmdController | 更新使用者 | user:update |
+| `/api/v1/users/{userId}/activate` | PUT | HR01UserCmdController | 啟用使用者 | user:activate |
+| `/api/v1/users/{userId}/deactivate` | PUT | HR01UserCmdController | 停用使用者 | user:deactivate |
+| `/api/v1/users/{userId}/roles` | PUT | HR01UserCmdController | 指派角色 | user:assign-role |
 | `/api/v1/users/batch-deactivate` | PUT | HR01UserCmdController | 批次停用 | user:deactivate |
 | `/api/v1/roles` | GET | HR01RoleQryController | 查詢角色列表 | role:read |
-| `/api/v1/roles/{id}` | GET | HR01RoleQryController | 查詢角色詳情 | role:read |
+| `/api/v1/roles/{roleId}` | GET | HR01RoleQryController | 查詢角色詳情 | role:read |
+| `/api/v1/roles/system` | GET | HR01RoleQryController | 查詢系統角色列表 | role:read |
 | `/api/v1/roles` | POST | HR01RoleCmdController | 建立角色 | role:create |
-| `/api/v1/roles/{id}` | PUT | HR01RoleCmdController | 更新角色 | role:write |
-| `/api/v1/roles/{id}` | DELETE | HR01RoleCmdController | 刪除角色 | role:delete |
-| `/api/v1/roles/{id}/permissions` | PUT | HR01RoleCmdController | 更新角色權限 | role:manage-permission |
+| `/api/v1/roles/{roleId}` | PUT | HR01RoleCmdController | 更新角色 | role:update |
+| `/api/v1/roles/{roleId}` | DELETE | HR01RoleCmdController | 刪除角色 | role:delete |
+| `/api/v1/roles/{roleId}/activate` | PUT | HR01RoleCmdController | 啟用角色 | role:update |
+| `/api/v1/roles/{roleId}/deactivate` | PUT | HR01RoleCmdController | 停用角色 | role:update |
+| `/api/v1/roles/{roleId}/permissions` | PUT | HR01RoleCmdController | 指派權限給角色 | role:assign-permission |
 | `/api/v1/permissions` | GET | HR01PermissionQryController | 查詢權限列表 | permission:read |
 | `/api/v1/permissions/tree` | GET | HR01PermissionQryController | 查詢權限樹 | permission:read |
 | `/api/v1/profile` | GET | HR01ProfileQryController | 查詢個人資料 | - |
 | `/api/v1/profile` | PUT | HR01ProfileCmdController | 更新個人資料 | - |
 | `/api/v1/profile/change-password` | PUT | HR01ProfileCmdController | 修改密碼 | - |
-| `/api/v1/iam/system/features` | GET | HR01SystemFeatureQryController | 查詢功能開關列表 | system:feature:read |
-| `/api/v1/iam/system/features/{featureId}` | GET | HR01SystemFeatureQryController | 查詢功能開關詳情 | system:feature:read |
-| `/api/v1/iam/system/features/{featureId}` | PUT | HR01SystemFeatureCmdController | 更新功能開關 | system:feature:write |
-| `/api/v1/iam/system/features/{featureId}/toggle` | PUT | HR01SystemFeatureCmdController | 切換功能開關 | system:feature:write |
-| `/api/v1/iam/system/configs` | GET | HR01SystemConfigQryController | 查詢系統參數列表 | system:config:read |
-| `/api/v1/iam/system/configs/{configId}` | GET | HR01SystemConfigQryController | 查詢系統參數詳情 | system:config:read |
-| `/api/v1/iam/system/configs/{configId}` | PUT | HR01SystemConfigCmdController | 更新系統參數 | system:config:write |
-| `/api/v1/iam/system/configs/{configId}/reset` | PUT | HR01SystemConfigCmdController | 重設系統參數為預設值 | system:config:write |
-| `/api/v1/iam/system/schedulers` | GET | HR01SystemSchedulerQryController | 查詢排程列表 | system:scheduler:read |
-| `/api/v1/iam/system/schedulers/{schedulerId}` | GET | HR01SystemSchedulerQryController | 查詢排程詳情 | system:scheduler:read |
-| `/api/v1/iam/system/schedulers/{schedulerId}` | PUT | HR01SystemSchedulerCmdController | 更新排程配置 | system:scheduler:write |
-| `/api/v1/iam/system/schedulers/{schedulerId}/trigger` | POST | HR01SystemSchedulerCmdController | 手動觸發排程 | system:scheduler:execute |
-| `/api/v1/iam/system/schedulers/{schedulerId}/toggle` | PUT | HR01SystemSchedulerCmdController | 啟用/停用排程 | system:scheduler:write |
+| `/api/v1/system/features` | GET | HR01SystemQryController | 查詢功能開關列表 | ADMIN |
+| `/api/v1/system/features/{featureCode}/toggle` | PUT | HR01SystemCmdController | 切換功能開關 | ADMIN |
+| `/api/v1/system/parameters` | GET | HR01SystemQryController | 查詢系統參數列表 | ADMIN |
+| `/api/v1/system/parameters/{paramCode}` | PUT | HR01SystemCmdController | 更新系統參數 | ADMIN |
+| `/api/v1/system/jobs` | GET | HR01SystemQryController | 查詢排程任務列表 | ADMIN |
+| `/api/v1/system/jobs/{jobCode}` | PUT | HR01SystemCmdController | 更新排程任務配置 | ADMIN |
 
 ---
 
@@ -219,7 +206,7 @@ IAM 服務在 Spring Cloud Gateway 中註冊以下路由 predicates：
       "displayName": "John Doe",
       "employeeId": "550e8400-e29b-41d4-a716-446655440002",
       "roles": ["HR_ADMIN", "EMPLOYEE"],
-      "permissions": ["user:read", "user:write", "employee:profile:read"]
+      "permissions": ["user:read", "user:update", "employee:profile:read"]
     }
   },
   "timestamp": "2025-12-29T10:30:00Z"
@@ -540,6 +527,8 @@ Access Token 過期時，使用 Refresh Token 取得新的 Access Token。
 
 ### 2.6 Google OAuth 登入
 
+> **[尚未實作]** 以下 OAuth 端點（2.6 ~ 2.9）為設計規格，目前程式碼尚未實作對應的 Controller 端點。
+
 **基本資訊**
 
 | 項目 | 內容 |
@@ -781,7 +770,7 @@ HR管理員查詢系統使用者列表，支援分頁、搜尋與篩選。
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/users/{id}` |
+| 端點 | `GET /api/v1/users/{userId}` |
 | Controller | `HR01UserQryController` |
 | Service | `GetUserDetailServiceImpl` |
 | 權限 | `user:read` |
@@ -812,7 +801,7 @@ HR管理員查詢系統使用者列表，支援分頁、搜尋與篩選。
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 使用者ID | `"550e8400-e29b-41d4-a716-446655440001"` |
+| userId | String | ✅ | 使用者ID | `"550e8400-e29b-41d4-a716-446655440001"` |
 
 **Response**
 
@@ -1019,10 +1008,10 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/users/{id}` |
+| 端點 | `PUT /api/v1/users/{userId}` |
 | Controller | `HR01UserCmdController` |
-| Service | `UpdateUserServiceImpl` |
-| 權限 | `user:write` |
+| Service | `updateUserServiceImpl` |
+| 權限 | `user:update` |
 | 版本 | v1 |
 
 **用途說明**
@@ -1032,7 +1021,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 **業務邏輯**
 
 1. **權限檢查**
-   - 必須擁有 user:write 權限
+   - 必須擁有 user:update 權限
 
 2. **驗證請求資料**
    - email 必須為有效 Email 格式
@@ -1055,7 +1044,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 使用者ID | `"550e8400-..."` |
+| userId | String | ✅ | 使用者ID | `"550e8400-..."` |
 
 **Request Body**
 
@@ -1093,7 +1082,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 |:---:|:---|:---|:---|
 | 400 | VALIDATION_EMAIL_FORMAT | Email格式不正確 | 檢查Email格式 |
 | 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無user:write權限 | 聯繫管理員授權 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無user:update權限 | 聯繫管理員授權 |
 | 404 | RESOURCE_USER_NOT_FOUND | 使用者不存在 | 確認使用者ID |
 
 **領域事件**
@@ -1110,9 +1099,9 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/users/{id}/deactivate` |
+| 端點 | `PUT /api/v1/users/{userId}/deactivate` |
 | Controller | `HR01UserCmdController` |
-| Service | `DeactivateUserServiceImpl` |
+| Service | `deactivateUserServiceImpl` |
 | 權限 | `user:deactivate` |
 | 版本 | v1 |
 
@@ -1142,23 +1131,16 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 使用者ID | `"550e8400-..."` |
+| userId | String | ✅ | 使用者ID | `"550e8400-..."` |
 
 **Response**
 
-**成功回應 (200 OK)**
+**成功回應 (204 No Content)**
 
-```json
-{
-  "code": "SUCCESS",
-  "message": "使用者已停用",
-  "data": {
-    "userId": "550e8400-e29b-41d4-a716-446655440001",
-    "status": "INACTIVE",
-    "deactivatedAt": "2025-12-29T10:30:00Z"
-  },
-  "timestamp": "2025-12-29T10:30:00Z"
-}
+無回應 Body。
+
+```
+HTTP/1.1 204 No Content
 ```
 
 **錯誤碼**
@@ -1184,10 +1166,10 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/users/{id}/activate` |
+| 端點 | `PUT /api/v1/users/{userId}/activate` |
 | Controller | `HR01UserCmdController` |
-| Service | `ActivateUserServiceImpl` |
-| 權限 | `user:deactivate` |
+| Service | `activateUserServiceImpl` |
+| 權限 | `user:activate` |
 | 版本 | v1 |
 
 **用途說明**
@@ -1197,7 +1179,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 **業務邏輯**
 
 1. **權限檢查**
-   - 必須擁有 user:deactivate 權限
+   - 必須擁有 user:activate 權限
 
 2. **啟用使用者**
    - 更新 status = ACTIVE
@@ -1217,23 +1199,16 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 使用者ID | `"550e8400-..."` |
+| userId | String | ✅ | 使用者ID | `"550e8400-..."` |
 
 **Response**
 
-**成功回應 (200 OK)**
+**成功回應 (204 No Content)**
 
-```json
-{
-  "code": "SUCCESS",
-  "message": "使用者已啟用",
-  "data": {
-    "userId": "550e8400-e29b-41d4-a716-446655440001",
-    "status": "ACTIVE",
-    "activatedAt": "2025-12-29T10:30:00Z"
-  },
-  "timestamp": "2025-12-29T10:30:00Z"
-}
+無回應 Body。
+
+```
+HTTP/1.1 204 No Content
 ```
 
 **錯誤碼**
@@ -1241,7 +1216,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 | HTTP | 錯誤碼 | 說明 | 處理建議 |
 |:---:|:---|:---|:---|
 | 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無user:deactivate權限 | 聯繫管理員授權 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無user:activate權限 | 聯繫管理員授權 |
 | 404 | RESOURCE_USER_NOT_FOUND | 使用者不存在 | 確認使用者ID |
 | 422 | BUSINESS_USER_ALREADY_ACTIVE | 使用者已啟用 | 無需再次啟用 |
 
@@ -1253,15 +1228,15 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 ---
 
-### 3.7 管理員重置密碼
+### 3.7 管理員重設使用者密碼
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/users/{id}/reset-password` |
-| Controller | `HR01UserCmdController` |
-| Service | `AdminResetPasswordServiceImpl` |
+| 端點 | `POST /api/v1/auth/users/{userId}/password/reset` |
+| Controller | `HR01AuthCmdController` |
+| Service | `adminResetPasswordServiceImpl` |
 | 權限 | `user:reset-password` |
 | 版本 | v1 |
 
@@ -1295,7 +1270,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 使用者ID | `"550e8400-..."` |
+| userId | String | ✅ | 使用者ID | `"550e8400-..."` |
 
 **Request Body**
 
@@ -1352,7 +1327,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/users/{id}/roles` |
+| 端點 | `PUT /api/v1/users/{userId}/roles` |
 | Controller | `HR01UserCmdController` |
 | Service | `AssignUserRolesServiceImpl` |
 | 權限 | `user:assign-role` |
@@ -1390,7 +1365,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 使用者ID | `"550e8400-..."` |
+| userId | String | ✅ | 使用者ID | `"550e8400-..."` |
 
 **Request Body**
 
@@ -1624,9 +1599,9 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/roles/{id}` |
+| 端點 | `GET /api/v1/roles/{roleId}` |
 | Controller | `HR01RoleQryController` |
-| Service | `GetRoleDetailServiceImpl` |
+| Service | `getRoleServiceImpl` |
 | 權限 | `role:read` |
 | 版本 | v1 |
 
@@ -1646,7 +1621,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 角色ID | `"00000000-0000-0000-0000-000000000002"` |
+| roleId | String | ✅ | 角色ID | `"00000000-0000-0000-0000-000000000002"` |
 
 **Response**
 
@@ -1692,7 +1667,46 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 ---
 
-### 4.3 建立角色
+### 4.3 查詢系統角色列表
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/roles/system` |
+| Controller | `HR01RoleQryController` |
+| Service | `getSystemRolesServiceImpl` |
+| 權限 | `role:read` |
+| 版本 | v1 |
+
+**用途說明**
+
+查詢所有系統預設角色列表（isSystemRole = true）。
+
+**Request**
+
+**Headers**
+
+| 名稱 | 必填 | 說明 |
+|:---|:---:|:---|
+| Authorization | ✅ | `Bearer {accessToken}` |
+
+**Response**
+
+**成功回應 (200 OK)**
+
+回傳系統角色列表（與 4.1 格式相同，僅回傳 isSystemRole = true 的角色）。
+
+**錯誤碼**
+
+| HTTP | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無role:read權限 | 聯繫管理員授權 |
+
+---
+
+### 4.4 建立角色
 
 **基本資訊**
 
@@ -1790,16 +1804,16 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 ---
 
-### 4.4 更新角色
+### 4.5 更新角色
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/roles/{id}` |
+| 端點 | `PUT /api/v1/roles/{roleId}` |
 | Controller | `HR01RoleCmdController` |
-| Service | `UpdateRoleServiceImpl` |
-| 權限 | `role:write` |
+| Service | `updateRoleServiceImpl` |
+| 權限 | `role:update` |
 | 版本 | v1 |
 
 **用途說明**
@@ -1809,7 +1823,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 **業務邏輯**
 
 1. **權限檢查**
-   - 必須擁有 role:write 權限
+   - 必須擁有 role:update 權限
 
 2. **驗證角色**
    - 角色必須存在
@@ -1832,7 +1846,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 角色ID | `"550e8400-..."` |
+| roleId | String | ✅ | 角色ID | `"550e8400-..."` |
 
 **Request Body**
 
@@ -1871,7 +1885,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 | HTTP | 錯誤碼 | 說明 | 處理建議 |
 |:---:|:---|:---|:---|
 | 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無role:write權限 | 聯繫管理員授權 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無role:update權限 | 聯繫管理員授權 |
 | 404 | RESOURCE_ROLE_NOT_FOUND | 角色不存在 | 確認角色ID |
 | 422 | BUSINESS_SYSTEM_ROLE_READONLY | 系統預設角色不可修改 | 只能修改自訂角色 |
 
@@ -1883,15 +1897,15 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 ---
 
-### 4.5 刪除角色
+### 4.6 刪除角色
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `DELETE /api/v1/roles/{id}` |
+| 端點 | `DELETE /api/v1/roles/{roleId}` |
 | Controller | `HR01RoleCmdController` |
-| Service | `DeleteRoleServiceImpl` |
+| Service | `deleteRoleServiceImpl` |
 | 權限 | `role:delete` |
 | 版本 | v1 |
 
@@ -1926,7 +1940,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 角色ID | `"550e8400-..."` |
+| roleId | String | ✅ | 角色ID | `"550e8400-..."` |
 
 **Response**
 
@@ -1952,26 +1966,26 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 ---
 
-### 4.6 更新角色權限
+### 4.7 指派權限給角色
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/roles/{id}/permissions` |
+| 端點 | `PUT /api/v1/roles/{roleId}/permissions` |
 | Controller | `HR01RoleCmdController` |
-| Service | `UpdateRolePermissionsServiceImpl` |
-| 權限 | `role:manage-permission` |
+| Service | `assignPermissionsServiceImpl` |
+| 權限 | `role:assign-permission` |
 | 版本 | v1 |
 
 **用途說明**
 
-更新角色的權限設定，會完全取代現有權限。系統預設角色的權限不可修改。
+指派權限給角色，會完全取代現有權限。系統預設角色的權限不可修改。
 
 **業務邏輯**
 
 1. **權限檢查**
-   - 必須擁有 role:manage-permission 權限
+   - 必須擁有 role:assign-permission 權限
 
 2. **驗證請求資料**
    - 角色必須存在且非系統預設
@@ -1996,7 +2010,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| id | UUID | ✅ | 角色ID | `"550e8400-..."` |
+| roleId | String | ✅ | 角色ID | `"550e8400-..."` |
 
 **Request Body**
 
@@ -2037,7 +2051,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 | HTTP | 錯誤碼 | 說明 | 處理建議 |
 |:---:|:---|:---|:---|
 | 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無role:manage-permission權限 | 聯繫管理員授權 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無role:assign-permission權限 | 聯繫管理員授權 |
 | 404 | RESOURCE_ROLE_NOT_FOUND | 角色不存在 | 確認角色ID |
 | 404 | RESOURCE_PERMISSION_NOT_FOUND | 權限不存在 | 確認permissionIds正確性 |
 | 422 | BUSINESS_SYSTEM_ROLE_READONLY | 系統預設角色權限不可修改 | 只能修改自訂角色 |
@@ -2159,7 +2173,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
       "permissions": [
         {"permissionId": "perm-1", "permissionCode": "user:read", "displayName": "查看使用者"},
         {"permissionId": "perm-2", "permissionCode": "user:create", "displayName": "建立使用者"},
-        {"permissionId": "perm-3", "permissionCode": "user:write", "displayName": "編輯使用者"},
+        {"permissionId": "perm-3", "permissionCode": "user:update", "displayName": "編輯使用者"},
         {"permissionId": "perm-4", "permissionCode": "user:delete", "displayName": "刪除使用者"}
       ]
     },
@@ -2228,7 +2242,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
     "employeeName": "John Doe",
     "department": "人力資源部",
     "roles": ["HR_ADMIN", "EMPLOYEE"],
-    "permissions": ["user:read", "user:write", "employee:profile:read"],
+    "permissions": ["user:read", "user:update", "employee:profile:read"],
     "lastLoginAt": "2025-12-29T09:00:00Z",
     "passwordChangedAt": "2025-12-01T10:00:00Z",
     "passwordExpiryDate": "2026-03-01T10:00:00Z",
@@ -2402,10 +2416,10 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/iam/system/features` |
-| Controller | `HR01SystemFeatureQryController` |
-| Service | `GetFeatureListServiceImpl` |
-| 權限 | `system:feature:read` |
+| 端點 | `GET /api/v1/system/features` |
+| Controller | `HR01SystemQryController` |
+| Service | `listFeatureTogglesServiceImpl` |
+| 權限 | ADMIN（`@PreAuthorize` 在 Controller 未設定，由 `HR01SystemCmdController` 類別層級統一限制） |
 | 版本 | v1 |
 
 **用途說明**
@@ -2430,7 +2444,7 @@ HR管理員建立新的系統使用者帳號。新使用者會收到一封包含
 
 **範例：**
 ```
-GET /api/v1/iam/system/features?module=HR03&enabled=true
+GET /api/v1/system/features?module=HR03&enabled=true
 ```
 
 **Response**
@@ -2497,188 +2511,29 @@ GET /api/v1/iam/system/features?module=HR03&enabled=true
 
 ---
 
-### 7.2 查詢功能開關詳情
+### 7.2 切換功能開關
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/iam/system/features/{featureId}` |
-| Controller | `HR01SystemFeatureQryController` |
-| Service | `GetFeatureDetailServiceImpl` |
-| 權限 | `system:feature:read` |
+| 端點 | `PUT /api/v1/system/features/{featureCode}/toggle` |
+| Controller | `HR01SystemCmdController` |
+| Service | `toggleFeatureServiceImpl` |
+| 權限 | ADMIN（Controller 類別層級 `@PreAuthorize("hasAuthority('ADMIN') or hasRole('ADMIN')")`) |
 | 版本 | v1 |
 
 **用途說明**
 
-查詢單一功能開關的詳細資訊。
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| featureId | String | ✅ | 功能開關ID | `"feat-uuid-001"` |
-
-**Response**
-
-**成功回應 (200 OK)**
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "查詢成功",
-  "data": {
-    "id": "feat-uuid-001",
-    "featureCode": "LATE_CHECK",
-    "featureName": "遲到判定",
-    "module": "HR03",
-    "enabled": true,
-    "description": "啟用後系統自動判定員工遲到並記錄",
-    "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-    "updatedAt": "2026-01-15T10:00:00Z",
-    "updatedBy": "admin"
-  },
-  "timestamp": "2026-03-05T10:30:00Z"
-}
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:feature:read 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_FEATURE_NOT_FOUND | 功能開關不存在 | 確認 featureId |
-
----
-
-### 7.3 更新功能開關
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `PUT /api/v1/iam/system/features/{featureId}` |
-| Controller | `HR01SystemFeatureCmdController` |
-| Service | `UpdateFeatureServiceImpl` |
-| 權限 | `system:feature:write` |
-| 版本 | v1 |
-
-**用途說明**
-
-更新功能開關的啟用/停用狀態，變更即時生效，不需重啟服務。
+快速切換功能開關的啟停狀態（toggle），無需指定目標狀態。Request Body 為選填（`@RequestBody(required = false)`）。
 
 **業務邏輯**
 
 1. **權限檢查**
-   - 必須擁有 system:feature:write 權限
-   - 僅限 SYSTEM_ADMIN 角色
+   - 必須擁有 ADMIN 權限
 
 2. **查詢功能開關**
-   - 功能開關不存在則返回 404
-
-3. **更新狀態**
-   - 呼叫 FeatureToggle.enable() 或 FeatureToggle.disable()
-   - 記錄操作者與更新時間
-
-4. **發布事件**
-   - 發布 FeatureToggleChangedEvent
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-| Content-Type | ✅ | `application/json` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| featureId | String | ✅ | 功能開關ID | `"feat-uuid-001"` |
-
-**Request Body**
-
-| 欄位 | 類型 | 必填 | 驗證規則 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|:---|
-| enabled | Boolean | ✅ | - | 是否啟用 | `false` |
-
-**範例：**
-```json
-{
-  "enabled": false
-}
-```
-
-**Response**
-
-**成功回應 (200 OK)**
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "功能開關更新成功",
-  "data": {
-    "id": "feat-uuid-001",
-    "featureCode": "LATE_CHECK",
-    "featureName": "遲到判定",
-    "enabled": false,
-    "updatedAt": "2026-03-05T10:30:00Z",
-    "updatedBy": "admin"
-  },
-  "timestamp": "2026-03-05T10:30:00Z"
-}
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:feature:write 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_FEATURE_NOT_FOUND | 功能開關不存在 | 確認 featureId |
-
-**領域事件**
-
-| 事件名稱 | Topic | 說明 |
-|:---|:---|:---|
-| FeatureToggleChangedEvent | `iam.feature-toggle.changed` | 功能開關狀態變更 |
-
----
-
-### 7.4 切換功能開關
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `PUT /api/v1/iam/system/features/{featureId}/toggle` |
-| Controller | `HR01SystemFeatureCmdController` |
-| Service | `ToggleFeatureServiceImpl` |
-| 權限 | `system:feature:write` |
-| 版本 | v1 |
-
-**用途說明**
-
-快速切換功能開關的啟停狀態（toggle），無需指定目標狀態。
-
-**業務邏輯**
-
-1. **權限檢查**
-   - 必須擁有 system:feature:write 權限
-
-2. **查詢功能開關**
-   - 功能開關不存在則返回 404
+   - 依 featureCode 查詢，功能開關不存在則返回 404
 
 3. **切換狀態**
    - 呼叫 FeatureToggle.toggle()，啟用 → 停用 / 停用 → 啟用
@@ -2698,7 +2553,7 @@ GET /api/v1/iam/system/features?module=HR03&enabled=true
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| featureId | String | ✅ | 功能開關ID | `"feat-uuid-001"` |
+| featureCode | String | ✅ | 功能代碼 | `"LATE_CHECK"` |
 
 **Response**
 
@@ -2725,8 +2580,8 @@ GET /api/v1/iam/system/features?module=HR03&enabled=true
 | HTTP | 錯誤碼 | 說明 | 處理建議 |
 |:---:|:---|:---|:---|
 | 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:feature:write 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_FEATURE_NOT_FOUND | 功能開關不存在 | 確認 featureId |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 ADMIN 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_FEATURE_NOT_FOUND | 功能開關不存在 | 確認 featureCode |
 
 **領域事件**
 
@@ -2744,10 +2599,10 @@ GET /api/v1/iam/system/features?module=HR03&enabled=true
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/iam/system/configs` |
-| Controller | `HR01SystemConfigQryController` |
-| Service | `GetConfigListServiceImpl` |
-| 權限 | `system:config:read` |
+| 端點 | `GET /api/v1/system/parameters` |
+| Controller | `HR01SystemQryController` |
+| Service | `listSystemParametersServiceImpl` |
+| 權限 | ADMIN |
 | 版本 | v1 |
 
 **用途說明**
@@ -2774,7 +2629,7 @@ GET /api/v1/iam/system/features?module=HR03&enabled=true
 
 **範例：**
 ```
-GET /api/v1/iam/system/configs?module=GLOBAL&category=SECURITY&page=1&size=20
+GET /api/v1/system/parameters?module=GLOBAL&category=SECURITY&page=1&size=20
 ```
 
 **Response**
@@ -2859,87 +2714,20 @@ GET /api/v1/iam/system/configs?module=GLOBAL&category=SECURITY&page=1&size=20
 | HTTP | 錯誤碼 | 說明 | 處理建議 |
 |:---:|:---|:---|:---|
 | 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:config:read 權限 | 聯繫管理員授權 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 ADMIN 權限 | 聯繫管理員授權 |
 
 ---
 
-### 8.2 查詢系統參數詳情
+### 8.2 更新系統參數
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/iam/system/configs/{configId}` |
-| Controller | `HR01SystemConfigQryController` |
-| Service | `GetConfigDetailServiceImpl` |
-| 權限 | `system:config:read` |
-| 版本 | v1 |
-
-**用途說明**
-
-查詢單一系統參數的詳細資訊，包含預設值與加密標記。
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| configId | String | ✅ | 系統參數ID | `"config-uuid-001"` |
-
-**Response**
-
-**成功回應 (200 OK)**
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "查詢成功",
-  "data": {
-    "id": "config-uuid-001",
-    "paramCode": "MAX_FAILED_LOGIN_ATTEMPTS",
-    "paramName": "最大登入失敗次數",
-    "paramValue": "5",
-    "paramType": "INTEGER",
-    "module": "GLOBAL",
-    "category": "SECURITY",
-    "description": "連續登入失敗達此次數後鎖定帳號",
-    "defaultValue": "5",
-    "isEncrypted": false,
-    "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-    "updatedAt": "2026-01-10T08:00:00Z",
-    "updatedBy": "admin"
-  },
-  "timestamp": "2026-03-05T10:30:00Z"
-}
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:config:read 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_CONFIG_NOT_FOUND | 系統參數不存在 | 確認 configId |
-
----
-
-### 8.3 更新系統參數
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `PUT /api/v1/iam/system/configs/{configId}` |
-| Controller | `HR01SystemConfigCmdController` |
-| Service | `UpdateConfigServiceImpl` |
-| 權限 | `system:config:write` |
+| 端點 | `PUT /api/v1/system/parameters/{paramCode}` |
+| Controller | `HR01SystemCmdController` |
+| Service | `updateSystemParameterServiceImpl` |
+| 權限 | ADMIN（Controller 類別層級 `@PreAuthorize("hasAuthority('ADMIN') or hasRole('ADMIN')")`) |
 | 版本 | v1 |
 
 **用途說明**
@@ -2949,11 +2737,10 @@ GET /api/v1/iam/system/configs?module=GLOBAL&category=SECURITY&page=1&size=20
 **業務邏輯**
 
 1. **權限檢查**
-   - 必須擁有 system:config:write 權限
-   - 僅限 SYSTEM_ADMIN 角色
+   - 必須擁有 ADMIN 權限
 
 2. **查詢參數**
-   - 參數不存在則返回 404
+   - 依 paramCode 查詢，參數不存在則返回 404
 
 3. **驗證新值**
    - 依據 paramType 驗證值的格式：
@@ -2983,7 +2770,7 @@ GET /api/v1/iam/system/configs?module=GLOBAL&category=SECURITY&page=1&size=20
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| configId | String | ✅ | 系統參數ID | `"config-uuid-001"` |
+| paramCode | String | ✅ | 系統參數代碼 | `"MAX_FAILED_LOGIN_ATTEMPTS"` |
 
 **Request Body**
 
@@ -3032,8 +2819,8 @@ GET /api/v1/iam/system/configs?module=GLOBAL&category=SECURITY&page=1&size=20
 | 400 | VALIDATION_PARAM_TYPE_MISMATCH | 參數值與型別不符 | 檢查參數型別，輸入正確格式的值 |
 | 400 | VALIDATION_PARAM_VALUE_INVALID | 參數值無效 | 檢查參數值是否在允許範圍內 |
 | 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:config:write 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_CONFIG_NOT_FOUND | 系統參數不存在 | 確認 configId |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 ADMIN 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_CONFIG_NOT_FOUND | 系統參數不存在 | 確認 paramCode |
 
 **領域事件**
 
@@ -3043,107 +2830,18 @@ GET /api/v1/iam/system/configs?module=GLOBAL&category=SECURITY&page=1&size=20
 
 ---
 
-### 8.4 重設系統參數為預設值
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `PUT /api/v1/iam/system/configs/{configId}/reset` |
-| Controller | `HR01SystemConfigCmdController` |
-| Service | `ResetConfigServiceImpl` |
-| 權限 | `system:config:write` |
-| 版本 | v1 |
-
-**用途說明**
-
-將系統參數重設為預設值，並記錄異動歷史。
-
-**業務邏輯**
-
-1. **權限檢查**
-   - 必須擁有 system:config:write 權限
-
-2. **查詢參數**
-   - 參數不存在則返回 404
-
-3. **重設為預設值**
-   - 呼叫 SystemParameter.resetToDefault()
-   - 回傳 ParameterChange 記錄
-   - 寫入 parameter_change_logs 表
-
-4. **發布事件**
-   - 發布 SystemParameterChangedEvent
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| configId | String | ✅ | 系統參數ID | `"config-uuid-001"` |
-
-**Response**
-
-**成功回應 (200 OK)**
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "系統參數已重設為預設值",
-  "data": {
-    "id": "config-uuid-001",
-    "paramCode": "MAX_FAILED_LOGIN_ATTEMPTS",
-    "paramName": "最大登入失敗次數",
-    "paramValue": "5",
-    "paramType": "INTEGER",
-    "changeLog": {
-      "oldValue": "10",
-      "newValue": "5",
-      "operator": "admin",
-      "changedAt": "2026-03-05T10:30:00Z"
-    },
-    "updatedAt": "2026-03-05T10:30:00Z",
-    "updatedBy": "admin"
-  },
-  "timestamp": "2026-03-05T10:30:00Z"
-}
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:config:write 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_CONFIG_NOT_FOUND | 系統參數不存在 | 確認 configId |
-
-**領域事件**
-
-| 事件名稱 | Topic | 說明 |
-|:---|:---|:---|
-| SystemParameterChangedEvent | `iam.system-parameter.changed` | 系統參數值變更（重設為預設值） |
-
----
-
 ## 9. 系統管理API — 排程管理
 
-### 9.1 查詢排程列表
+### 9.1 查詢排程任務列表
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/iam/system/schedulers` |
-| Controller | `HR01SystemSchedulerQryController` |
-| Service | `GetSchedulerListServiceImpl` |
-| 權限 | `system:scheduler:read` |
+| 端點 | `GET /api/v1/system/jobs` |
+| Controller | `HR01SystemQryController` |
+| Service | `listScheduledJobsServiceImpl` |
+| 權限 | ADMIN |
 | 版本 | v1 |
 
 **用途說明**
@@ -3168,7 +2866,7 @@ GET /api/v1/iam/system/configs?module=GLOBAL&category=SECURITY&page=1&size=20
 
 **範例：**
 ```
-GET /api/v1/iam/system/schedulers?module=HR03&enabled=true
+GET /api/v1/system/jobs?module=HR03&enabled=true
 ```
 
 **Response**
@@ -3266,88 +2964,20 @@ GET /api/v1/iam/system/schedulers?module=HR03&enabled=true
 | HTTP | 錯誤碼 | 說明 | 處理建議 |
 |:---:|:---|:---|:---|
 | 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:read 權限 | 聯繫管理員授權 |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 ADMIN 權限 | 聯繫管理員授權 |
 
 ---
 
-### 9.2 查詢排程詳情
+### 9.2 更新排程任務配置
 
 **基本資訊**
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/iam/system/schedulers/{schedulerId}` |
-| Controller | `HR01SystemSchedulerQryController` |
-| Service | `GetSchedulerDetailServiceImpl` |
-| 權限 | `system:scheduler:read` |
-| 版本 | v1 |
-
-**用途說明**
-
-查詢單一排程任務的詳細資訊，包含最近執行狀態與連續失敗次數。
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| schedulerId | String | ✅ | 排程ID | `"sched-uuid-001"` |
-
-**Response**
-
-**成功回應 (200 OK)**
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "查詢成功",
-  "data": {
-    "id": "sched-uuid-001",
-    "jobCode": "ABSENT_DETECTION",
-    "jobName": "曠職判定",
-    "module": "HR03",
-    "cronExpression": "0 0 19 * * ?",
-    "enabled": true,
-    "description": "每日 19:00 自動判定曠職",
-    "lastExecutedAt": "2026-03-04T19:00:00Z",
-    "lastExecutionStatus": "SUCCESS",
-    "lastErrorMessage": null,
-    "consecutiveFailures": 0,
-    "tenantId": "550e8400-e29b-41d4-a716-446655440000",
-    "updatedAt": "2026-01-10T08:00:00Z",
-    "updatedBy": "admin"
-  },
-  "timestamp": "2026-03-05T10:30:00Z"
-}
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:read 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_SCHEDULER_NOT_FOUND | 排程任務不存在 | 確認 schedulerId |
-
----
-
-### 9.3 更新排程配置
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `PUT /api/v1/iam/system/schedulers/{schedulerId}` |
-| Controller | `HR01SystemSchedulerCmdController` |
-| Service | `UpdateSchedulerServiceImpl` |
-| 權限 | `system:scheduler:write` |
+| 端點 | `PUT /api/v1/system/jobs/{jobCode}` |
+| Controller | `HR01SystemCmdController` |
+| Service | `updateScheduledJobServiceImpl` |
+| 權限 | ADMIN（Controller 類別層級 `@PreAuthorize("hasAuthority('ADMIN') or hasRole('ADMIN')")`) |
 | 版本 | v1 |
 
 **用途說明**
@@ -3357,11 +2987,10 @@ GET /api/v1/iam/system/schedulers?module=HR03&enabled=true
 **業務邏輯**
 
 1. **權限檢查**
-   - 必須擁有 system:scheduler:write 權限
-   - 僅限 SYSTEM_ADMIN 角色
+   - 必須擁有 ADMIN 權限
 
 2. **查詢排程**
-   - 排程不存在則返回 404
+   - 依 jobCode 查詢，排程不存在則返回 404
 
 3. **驗證 Cron 表達式**
    - 若有提供 cronExpression，驗證格式是否為有效的 Cron 表達式
@@ -3387,7 +3016,7 @@ GET /api/v1/iam/system/schedulers?module=HR03&enabled=true
 
 | 參數名 | 類型 | 必填 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|
-| schedulerId | String | ✅ | 排程ID | `"sched-uuid-001"` |
+| jobCode | String | ✅ | 任務代碼 | `"ABSENT_DETECTION"` |
 
 **Request Body**
 
@@ -3431,186 +3060,14 @@ GET /api/v1/iam/system/schedulers?module=HR03&enabled=true
 |:---:|:---|:---|:---|
 | 400 | VALIDATION_CRON_INVALID | Cron 表達式格式無效 | 檢查 Cron 表達式是否正確 |
 | 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:write 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_SCHEDULER_NOT_FOUND | 排程任務不存在 | 確認 schedulerId |
+| 403 | AUTHZ_PERMISSION_DENIED | 無 ADMIN 權限 | 聯繫管理員授權 |
+| 404 | RESOURCE_SCHEDULER_NOT_FOUND | 排程任務不存在 | 確認 jobCode |
 
 **領域事件**
 
 | 事件名稱 | Topic | 說明 |
 |:---|:---|:---|
 | SchedulerConfigChangedEvent | `iam.scheduler-config.changed` | 排程配置變更 |
-
----
-
-### 9.4 手動觸發排程
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `POST /api/v1/iam/system/schedulers/{schedulerId}/trigger` |
-| Controller | `HR01SystemSchedulerCmdController` |
-| Service | `TriggerSchedulerServiceImpl` |
-| 權限 | `system:scheduler:execute` |
-| 版本 | v1 |
-
-**用途說明**
-
-手動觸發排程任務立即執行，不受 Cron 排程時間限制。適用於排程失敗後手動重試或臨時需要執行的場景。
-
-**業務邏輯**
-
-1. **權限檢查**
-   - 必須擁有 system:scheduler:execute 權限
-   - 僅限 SYSTEM_ADMIN 角色
-
-2. **查詢排程**
-   - 排程不存在則返回 404
-   - 若排程正在執行中（lastExecutionStatus = RUNNING），返回 409
-
-3. **觸發執行**
-   - 呼叫 ScheduledJobConfig.recordStart()
-   - 非同步執行排程任務
-   - 執行完成後呼叫 recordSuccess() 或 recordFailure()
-
-4. **告警檢查**
-   - 若 consecutiveFailures >= 3，觸發 SchedulerAlertEvent
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| schedulerId | String | ✅ | 排程ID | `"sched-uuid-003"` |
-
-**Response**
-
-**成功回應 (202 Accepted)**
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "排程任務已觸發執行",
-  "data": {
-    "id": "sched-uuid-003",
-    "jobCode": "INSURANCE_DAILY_REPORT",
-    "jobName": "保險異動報表",
-    "lastExecutionStatus": "RUNNING",
-    "triggeredAt": "2026-03-05T10:30:00Z",
-    "triggeredBy": "admin"
-  },
-  "timestamp": "2026-03-05T10:30:00Z"
-}
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:execute 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_SCHEDULER_NOT_FOUND | 排程任務不存在 | 確認 schedulerId |
-| 409 | BUSINESS_SCHEDULER_ALREADY_RUNNING | 排程任務正在執行中 | 等待目前執行完畢後再觸發 |
-
-**領域事件**
-
-| 事件名稱 | Topic | 說明 |
-|:---|:---|:---|
-| SchedulerTriggeredEvent | `iam.scheduler.triggered` | 排程任務被手動觸發 |
-| SchedulerAlertEvent | `iam.scheduler.alert` | 排程連續失敗告警（consecutiveFailures >= 3） |
-
----
-
-### 9.5 啟用/停用排程（Toggle）
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `PUT /api/v1/iam/system/schedulers/{schedulerId}/toggle` |
-| Controller | `HR01SystemSchedulerCmdController` |
-| Service | `ToggleSchedulerServiceImpl` |
-| 權限 | `system:scheduler:write` |
-| 版本 | v1 |
-
-**用途說明**
-
-切換排程任務的啟用/停用狀態。前端 ScheduledJobTab 透過 Popconfirm 確認後呼叫此端點進行啟停操作。停用後的排程不會依據 Cron 表達式自動執行，但仍可手動觸發。
-
-**業務邏輯**
-
-1. **權限檢查**
-   - 必須擁有 system:scheduler:write 權限
-   - 僅限 SYSTEM_ADMIN 角色
-
-2. **查詢排程**
-   - 排程不存在則返回 404
-
-3. **切換狀態**
-   - 若目前 enabled = true，則呼叫 disable()
-   - 若目前 enabled = false，則呼叫 enable()
-
-4. **發布事件**
-   - 發布 SchedulerConfigChangedEvent
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-
-**Path Parameters**
-
-| 參數名 | 類型 | 必填 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|
-| schedulerId | String | ✅ | 排程ID | `"sched-uuid-001"` |
-
-**Response**
-
-**成功回應 (200 OK)**
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "排程狀態已切換",
-  "data": {
-    "id": "sched-uuid-001",
-    "jobCode": "ABSENT_DETECTION",
-    "jobName": "曠職判定",
-    "enabled": false,
-    "consecutiveFailures": 0,
-    "lastErrorMessage": null,
-    "updatedAt": "2026-03-13T10:30:00Z",
-    "updatedBy": "admin"
-  },
-  "timestamp": "2026-03-13T10:30:00Z"
-}
-```
-
-> **前端行為：** ScheduledJobTab 元件在切換開關前會顯示 Popconfirm 確認對話框。排程詳情可展開 error detail Modal，顯示 `consecutiveFailures`（連續失敗次數）與 `lastErrorMessage`（最近錯誤訊息）。
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 401 | AUTH_TOKEN_INVALID | Token無效 | 重新登入 |
-| 403 | AUTHZ_PERMISSION_DENIED | 無 system:scheduler:write 權限 | 聯繫管理員授權 |
-| 404 | RESOURCE_SCHEDULER_NOT_FOUND | 排程任務不存在 | 確認 schedulerId |
-
-**領域事件**
-
-| 事件名稱 | Topic | 說明 |
-|:---|:---|:---|
-| SchedulerConfigChangedEvent | `iam.scheduler-config.changed` | 排程啟停狀態變更 |
 
 ---
 

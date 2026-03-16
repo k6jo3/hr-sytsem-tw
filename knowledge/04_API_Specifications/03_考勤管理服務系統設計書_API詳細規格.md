@@ -1,7 +1,8 @@
 # HR03 考勤管理服務 API 詳細規格
 
-**版本:** 1.0
+**版本:** 1.1
 **建立日期:** 2025-12-29
+**最後更新:** 2026-03-16
 **服務代碼:** HR03
 **服務名稱:** 考勤管理服務 (Attendance Service)
 
@@ -26,30 +27,30 @@
 
 | 模組 | API 數量 | 說明 |
 |:---|:---:|:---|
-| 打卡管理 | 6 | 上下班打卡、查詢記錄、補卡申請/審核 |
-| 請假管理 | 8 | 假期餘額、請假申請/審核/取消 |
-| 加班管理 | 6 | 加班申請/審核、統計查詢 |
-| 班別管理 | 4 | 班別 CRUD |
-| 假別管理 | 4 | 假別 CRUD |
-| 報表結算 | 3 | 月報、月結算 |
+| 打卡管理 | 8 | 上下班打卡、查詢今日/記錄列表/單筆記錄、補卡申請/審核/查詢 |
+| 請假管理 | 7 | 請假申請/核准/駁回/取消、查詢列表/詳情、假期餘額 |
+| 加班管理 | 5 | 加班申請/核准/駁回、查詢列表/詳情 |
+| 班別管理 | 4 | 建立/更新/停用班別、查詢列表 |
+| 假別管理 | 4 | 建立/更新/停用假別、查詢列表 |
+| 報表結算 | 3 | 考勤月結、月報表、日報表 |
 | **合計** | **31** | |
 
 ### 1.2 Controller 對照表
 
 | Controller | 說明 | API 數量 |
 |:---|:---|:---:|
-| `HR03CheckInCmdController` | 打卡 Command 操作 | 3 |
-| `HR03CheckInQryController` | 打卡記錄 Query 操作 | 3 |
-| `HR03LeaveCmdController` | 請假 Command 操作 | 5 |
-| `HR03LeaveQryController` | 請假 Query 操作 | 3 |
-| `HR03OvertimeCmdController` | 加班 Command 操作 | 4 |
-| `HR03OvertimeQryController` | 加班 Query 操作 | 2 |
-| `HR03ShiftCmdController` | 班別管理 Command 操作 | 3 |
-| `HR03ShiftQryController` | 班別 Query 操作 | 1 |
-| `HR03LeaveTypeCmdController` | 假別管理 Command 操作 | 3 |
-| `HR03LeaveTypeQryController` | 假別 Query 操作 | 1 |
-| `HR03MonthCloseCmdController` | 月結 Command 操作 | 1 |
-| `HR03ReportQryController` | 報表 Query 操作 | 2 |
+| `HR03CheckInCmdController` | 打卡 Command 操作（上班打卡、下班打卡、提交補卡、審核補卡） | 4 |
+| `HR03CheckInQryController` | 打卡記錄 Query 操作（今日打卡、出勤列表、出勤詳情、補卡列表） | 4 |
+| `HR03LeaveCmdController` | 請假 Command 操作（申請、核准、駁回、取消） | 4 |
+| `HR03LeaveQryController` | 請假 Query 操作（申請列表、申請詳情、假別餘額） | 3 |
+| `HR03OvertimeCmdController` | 加班 Command 操作（申請、核准、駁回） | 3 |
+| `HR03OvertimeQryController` | 加班 Query 操作（申請列表、申請詳情） | 2 |
+| `HR03ShiftCmdController` | 班別管理 Command 操作（建立、更新、停用） | 3 |
+| `HR03ShiftQryController` | 班別 Query 操作（查詢列表） | 1 |
+| `HR03LeaveTypeCmdController` | 假別管理 Command 操作（建立、更新、停用） | 3 |
+| `HR03LeaveTypeQryController` | 假別 Query 操作（查詢列表） | 1 |
+| `HR03MonthCloseCmdController` | 月結 Command 操作（執行月結） | 1 |
+| `HR03ReportQryController` | 報表 Query 操作（月報表、日報表） | 2 |
 
 ### 1.3 通用 Headers
 

@@ -2,9 +2,10 @@
 
 **服務代碼:** HR02
 **服務名稱:** 組織員工服務 (Organization & Employee Service)
-**文件版本:** 1.0
+**文件版本:** 1.1
 **建立日期:** 2025-12-29
-**API 總數:** 31 個端點
+**最後更新:** 2026-03-16
+**API 總數:** 42 個端點
 
 ---
 
@@ -22,7 +23,7 @@
 
 ## 1. API 總覽
 
-### 1.1 組織管理 API (5 個端點)
+### 1.1 組織管理 API (6 個端點)
 
 | 端點 | 方法 | Controller | 說明 | 權限 |
 |:---|:---:|:---|:---|:---|
@@ -30,9 +31,10 @@
 | `/api/v1/organizations` | GET | HR02OrganizationQryController | 查詢公司列表 | organization:read |
 | `/api/v1/organizations/{id}` | GET | HR02OrganizationQryController | 查詢公司詳情 | organization:read |
 | `/api/v1/organizations/{id}` | PUT | HR02OrganizationCmdController | 更新公司 | organization:update |
+| `/api/v1/organizations/{id}/deactivate` | PUT | HR02OrganizationCmdController | 停用組織 | organization:update |
 | `/api/v1/organizations/{id}/tree` | GET | HR02OrganizationQryController | 查詢組織樹 | organization:read |
 
-### 1.2 部門管理 API (8 個端點)
+### 1.2 部門管理 API (10 個端點)
 
 | 端點 | 方法 | Controller | 說明 | 權限 |
 |:---|:---:|:---|:---|:---|
@@ -42,10 +44,12 @@
 | `/api/v1/departments/{id}` | PUT | HR02DepartmentCmdController | 更新部門 | department:update |
 | `/api/v1/departments/{id}` | DELETE | HR02DepartmentCmdController | 刪除部門 | department:delete |
 | `/api/v1/departments/{id}/sub-departments` | GET | HR02DepartmentQryController | 查詢子部門列表 | department:read |
+| `/api/v1/departments/{id}/managers` | GET | HR02DepartmentQryController | 查詢部門主管層級 | department:read |
 | `/api/v1/departments/{id}/assign-manager` | PUT | HR02DepartmentCmdController | 指派主管 | department:update |
+| `/api/v1/departments/{id}/reorder` | PUT | HR02DepartmentCmdController | 調整部門順序 | department:update |
 | `/api/v1/departments/{id}/deactivate` | PUT | HR02DepartmentCmdController | 停用部門 | department:update |
 
-### 1.3 員工管理 API (12 個端點)
+### 1.3 員工管理 API (17 個端點)
 
 | 端點 | 方法 | Controller | 說明 | 權限 |
 |:---|:---:|:---|:---|:---|
@@ -56,11 +60,16 @@
 | `/api/v1/employees/{id}/terminate` | POST | HR02EmployeeCmdController | 員工離職 | employee:terminate |
 | `/api/v1/employees/{id}/transfer` | POST | HR02EmployeeCmdController | 部門調動 | employee:transfer |
 | `/api/v1/employees/{id}/promote` | POST | HR02EmployeeCmdController | 員工升遷 | employee:promote |
+| `/api/v1/employees/{id}/adjust-salary` | POST | HR02EmployeeCmdController | 員工調薪 | employee:update |
 | `/api/v1/employees/{id}/regularize` | POST | HR02EmployeeCmdController | 試用期轉正 | employee:update |
 | `/api/v1/employees/{id}/history` | GET | HR02EmployeeQryController | 查詢人事歷程 | employee:read |
+| `/api/v1/employees/{id}/educations` | GET | HR02EmployeeQryController | 查詢員工學歷 | employee:read |
+| `/api/v1/employees/{id}/experiences` | GET | HR02EmployeeQryController | 查詢員工工作經歷 | employee:read |
 | `/api/v1/employees/check-number` | GET | HR02EmployeeQryController | 檢查編號唯一性 | employee:read |
 | `/api/v1/employees/check-email` | GET | HR02EmployeeQryController | 檢查Email唯一性 | employee:read |
 | `/api/v1/employees/check-national-id` | GET | HR02EmployeeQryController | 檢查身分證號唯一性 | employee:read |
+| `/api/v1/employees/export` | GET | HR02EmployeeQryController | 匯出員工資料 | employee:export |
+| `/api/v1/employees/import` | POST | HR02EmployeeCmdController | 批次匯入員工 | employee:import |
 
 ### 1.4 ESS 員工自助 API (4 個端點)
 
@@ -71,7 +80,7 @@
 | `/api/v1/employees/me/certificate-requests` | POST | HR02EssCmdController | 申請證明文件 | - (登入即可) |
 | `/api/v1/employees/me/certificate-requests` | GET | HR02EssQryController | 查詢證明文件列表 | - (登入即可) |
 
-### 1.5 合約管理 API (4 個端點)
+### 1.5 合約管理 API (7 個端點)
 
 | 端點 | 方法 | Controller | 說明 | 權限 |
 |:---|:---:|:---|:---|:---|
@@ -79,6 +88,9 @@
 | `/api/v1/employees/{employeeId}/contracts` | GET | HR02ContractQryController | 查詢合約列表 | contract:read |
 | `/api/v1/contracts/{id}` | GET | HR02ContractQryController | 查詢合約詳情 | contract:read |
 | `/api/v1/contracts/{id}` | PUT | HR02ContractCmdController | 更新合約 | contract:update |
+| `/api/v1/contracts/{id}/renew` | PUT | HR02ContractCmdController | 續約 | contract:update |
+| `/api/v1/contracts/{id}/terminate` | PUT | HR02ContractCmdController | 終止合約 | contract:update |
+| `/api/v1/contracts/expiring` | GET | HR02ContractQryController | 查詢即將到期合約 | contract:read |
 
 ---
 
@@ -605,7 +617,40 @@
 |:---:|:---|:---|:---|
 | 404 | RESOURCE_ORG_NOT_FOUND | 公司不存在 | 確認公司ID正確性 |
 
-### 2.6 前端 OrganizationTreeView UI 行為
+### 2.6 停用組織
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/organizations/{organizationId}/deactivate` |
+| Controller | `HR02OrganizationCmdController` |
+| Service | `DeactivateOrganizationServiceImpl` |
+| 權限 | `organization:update` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 停用組織（組織下有在職員工時無法停用） |
+| 使用者 | 系統管理員 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| organizationId | string | ✅ | 組織 ID |
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | BUSINESS_HAS_ACTIVE_EMPLOYEES | 組織下有在職員工，無法停用 | 先處理員工後再停用 |
+| 404 | RESOURCE_ORG_NOT_FOUND | 組織不存在 | 確認組織 ID |
+
+---
+
+### 2.7 前端 OrganizationTreeView UI 行為
 
 > **組織選擇器：** 下拉選單使用 `OptGroup` 分組，母公司與子公司分組顯示。子公司在其母公司下方以 `└` 前綴縮排顯示。
 >
@@ -1380,6 +1425,74 @@
 | 400 | BUSINESS_DEPT_ALREADY_INACTIVE | 部門已停用 | 無需重複操作 |
 | 400 | BUSINESS_DEPT_HAS_EMPLOYEES | 部門下有在職員工 | 先調動或離職員工 |
 | 400 | BUSINESS_DEPT_HAS_ACTIVE_SUBDEPTS | 部門下有啟用中子部門 | 先停用子部門 |
+
+---
+
+### 3.7 調整部門順序
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/departments/{departmentId}/reorder` |
+| Controller | `HR02DepartmentCmdController` |
+| Service | `ReorderDepartmentServiceImpl` |
+| 權限 | `department:update` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 調整部門在同層級中的排序位置 |
+| 使用者 | HR 管理員 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| departmentId | string | ✅ | 部門 ID |
+
+**Request Body**
+
+使用 `ReorderDepartmentRequest` DTO，包含 `sortOrder` 欄位。
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | RESOURCE_DEPT_NOT_FOUND | 部門不存在 | 確認部門 ID |
+
+---
+
+### 3.8 查詢部門主管層級
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/departments/{departmentId}/managers` |
+| Controller | `HR02DepartmentQryController` |
+| Service | `GetDepartmentManagersServiceImpl` |
+| 權限 | `department:read` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢部門的主管層級（含上級部門主管） |
+| 使用者 | HR 管理員、部門主管 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| departmentId | string | ✅ | 部門 ID |
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | RESOURCE_DEPT_NOT_FOUND | 部門不存在 | 確認部門 ID |
 
 ---
 
@@ -2593,6 +2706,156 @@
 
 ---
 
+### 4.13 員工調薪
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `POST /api/v1/employees/{employeeId}/adjust-salary` |
+| Controller | `HR02EmployeeCmdController` |
+| Service | `AdjustSalaryServiceImpl` |
+| 權限 | `employee:update` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 調整員工薪資 |
+| 使用者 | HR 管理員 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| employeeId | string | ✅ | 員工 ID |
+
+**Response**
+
+**成功回應 (204 No Content)**
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | ENTITY_NOT_FOUND | 員工不存在 | 確認員工 ID |
+
+---
+
+### 4.14 查詢員工學歷
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/employees/{employeeId}/educations` |
+| Controller | `HR02EmployeeQryController` |
+| Service | `GetEmployeeEducationsServiceImpl` |
+| 權限 | `employee:read` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢員工的教育背景資料 |
+| 使用者 | HR 專員 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| employeeId | string | ✅ | 員工 ID |
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | ENTITY_NOT_FOUND | 員工不存在 | 確認員工 ID |
+
+---
+
+### 4.15 查詢員工工作經歷
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/employees/{employeeId}/experiences` |
+| Controller | `HR02EmployeeQryController` |
+| Service | `GetEmployeeExperiencesServiceImpl` |
+| 權限 | `employee:read` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢員工的過往工作經歷 |
+| 使用者 | HR 專員 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| employeeId | string | ✅ | 員工 ID |
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | ENTITY_NOT_FOUND | 員工不存在 | 確認員工 ID |
+
+---
+
+### 4.16 匯出員工資料
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/employees/export` |
+| Controller | `HR02EmployeeQryController` |
+| Service | `ExportEmployeesServiceImpl` |
+| 權限 | `employee:export` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 匯出員工資料為 CSV 檔案 |
+| 使用者 | HR 管理員 |
+
+**Response**
+
+**成功回應 (200 OK)** — 回傳 CSV 檔案（Content-Type: text/csv; charset=UTF-8）
+
+---
+
+### 4.17 批次匯入員工
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `POST /api/v1/employees/import` |
+| Controller | `HR02EmployeeCmdController` |
+| Service | `ImportEmployeesServiceImpl` |
+| 權限 | `employee:import` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 透過上傳檔案批次建立員工 |
+| 使用者 | HR 管理員 |
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | INVALID_FILE_FORMAT | 檔案格式錯誤 | 確認上傳格式 |
+
+---
+
 ## 5. ESS 員工自助 API
 
 ### 5.1 查詢個人資料
@@ -3246,6 +3509,103 @@
 
 ---
 
+### 6.5 續約
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/contracts/{contractId}/renew` |
+| Controller | `HR02ContractCmdController` |
+| Service | `RenewContractServiceImpl` |
+| 權限 | `contract:update` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 合約到期前辦理續約 |
+| 使用者 | HR 專員 |
+| 前置條件 | 合約存在且狀態可續約 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| contractId | string | ✅ | 合約 ID |
+
+**Request Body**
+
+使用 `RenewContractRequest` DTO。
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | BUSINESS_RENEWAL_INVALID | 合約不可續約 | 確認合約狀態 |
+| 404 | ENTITY_NOT_FOUND | 合約不存在 | 確認合約 ID |
+
+---
+
+### 6.6 終止合約
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `PUT /api/v1/contracts/{contractId}/terminate` |
+| Controller | `HR02ContractCmdController` |
+| Service | `TerminateContractServiceImpl` |
+| 權限 | `contract:update` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 提前終止合約 |
+| 使用者 | HR 專員 |
+| 前置條件 | 合約存在 |
+
+**Path Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| contractId | string | ✅ | 合約 ID |
+
+**錯誤碼**
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | ENTITY_NOT_FOUND | 合約不存在 | 確認合約 ID |
+
+---
+
+### 6.7 查詢即將到期合約
+
+**基本資訊**
+
+| 項目 | 內容 |
+|:---|:---|
+| 端點 | `GET /api/v1/contracts/expiring` |
+| Controller | `HR02ContractQryController` |
+| Service | `GetExpiringContractsServiceImpl` |
+| 權限 | `contract:read` |
+
+**用途說明**
+
+| 項目 | 說明 |
+|:---|:---|
+| 業務場景 | 查詢即將到期的合約，提醒 HR 辦理續約 |
+| 使用者 | HR 專員 |
+
+**Query Parameters**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---:|:---:|:---|
+| days | number | 否 | 即將到期的天數範圍 (預設 30) |
+
+---
+
 ## 7. 附錄：列舉值定義
 
 ### 7.1 組織類型 (OrganizationType)
@@ -3353,5 +3713,6 @@
 ---
 
 **文件建立日期:** 2025-12-29
-**版本:** 1.0
-**API 總數:** 31 個端點
+**最後更新:** 2026-03-16
+**版本:** 1.1
+**API 總數:** 42 個端點

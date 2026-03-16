@@ -1,9 +1,11 @@
 # 績效管理服務 API 詳細規格
 
-**版本:** 1.0
-**日期:** 2025-12-30
+**版本:** 1.1
+**建立日期:** 2025-12-30
+**最後更新:** 2026-03-16
 **Domain代號:** 08 (PFM)
 **服務名稱:** hrms-performance
+**API 總數:** 15 個端點
 
 ---
 
@@ -34,26 +36,25 @@
 
 ## 2. API總覽
 
-### 2.1 端點清單 (16個端點)
+### 2.1 端點清單 (15 個端點)
 
-| 端點 | 方法 | Controller | 說明 | 權限 |
-|:---|:---:|:---|:---|:---|
-| `/api/v1/performance/cycles` | POST | HR08CycleCmdController | 建立考核週期 | performance:cycle:create |
-| `/api/v1/performance/cycles/{id}` | PUT | HR08CycleCmdController | 更新考核週期 | performance:cycle:update |
-| `/api/v1/performance/cycles/{id}` | DELETE | HR08CycleCmdController | 刪除考核週期 | performance:cycle:delete |
-| `/api/v1/performance/cycles/{id}/start` | PUT | HR08CycleCmdController | 啟動考核週期 | performance:cycle:start |
-| `/api/v1/performance/cycles/{id}/complete` | PUT | HR08CycleCmdController | 完成考核週期 | performance:cycle:complete |
-| `/api/v1/performance/cycles` | GET | HR08CycleQryController | 查詢考核週期列表 | performance:cycle:read |
-| `/api/v1/performance/cycles/{id}` | GET | HR08CycleQryController | 查詢考核週期詳情 | performance:cycle:read |
-| `/api/v1/performance/cycles/{id}/template` | PUT | HR08TemplateCmdController | 儲存考核表單範本 | performance:template:update |
-| `/api/v1/performance/cycles/{id}/template/publish` | PUT | HR08TemplateCmdController | 發布考核表單 | performance:template:publish |
-| `/api/v1/performance/reviews` | POST | HR08ReviewCmdController | 提交考核評估 | - |
-| `/api/v1/performance/reviews/{id}/finalize` | PUT | HR08ReviewCmdController | 確認最終評等 | performance:review:finalize |
-| `/api/v1/performance/my` | GET | HR08ReviewQryController | 查詢我的考核 | - |
-| `/api/v1/performance/team` | GET | HR08ReviewQryController | 查詢團隊考核 | performance:team:read |
-| `/api/v1/performance/reviews/{id}` | GET | HR08ReviewQryController | 查詢考核詳情 | - |
-| `/api/v1/performance/reports/distribution` | GET | HR08ReportQryController | 查詢評等分布 | performance:report:read |
-| `/api/v1/performance/reports/export` | GET | HR08ReportQryController | 匯出考核報表 | performance:report:export |
+| # | 端點 | 方法 | Controller | 說明 | 權限 | 實作狀態 |
+|:---:|:---|:---:|:---|:---|:---|:---:|
+| 1 | `/api/v1/performance/cycles` | POST | HR08CycleCmdController | 建立考核週期 | performance:cycle:create | 已實現 |
+| 2 | `/api/v1/performance/cycles/{id}` | PUT | HR08CycleCmdController | 更新考核週期 | performance:cycle:update | 已實現 |
+| 3 | `/api/v1/performance/cycles/{id}` | DELETE | HR08CycleCmdController | 刪除考核週期 | performance:cycle:delete | 已實現 |
+| 4 | `/api/v1/performance/cycles/{id}/start` | PUT | HR08CycleCmdController | 啟動考核週期 | performance:cycle:start | 已實現 |
+| 5 | `/api/v1/performance/cycles/{id}/complete` | PUT | HR08CycleCmdController | 完成考核週期 | performance:cycle:complete | 已實現 |
+| 6 | `/api/v1/performance/cycles` | GET | HR08CycleQryController | 查詢考核週期列表 | performance:cycle:read | 已實現 |
+| 7 | `/api/v1/performance/cycles/{id}` | GET | HR08CycleQryController | 查詢考核週期詳情 | performance:cycle:read | 已實現 |
+| 8 | `/api/v1/performance/cycles/{id}/template` | POST | HR08TemplateCmdController | 儲存考核表單範本 | performance:template:update | 已實現 |
+| 9 | `/api/v1/performance/cycles/{id}/template/publish` | PUT | HR08TemplateCmdController | 發布考核表單 | performance:template:publish | 已實現 |
+| 10 | `/api/v1/performance/reviews/{id}/submit` | POST | HR08ReviewCmdController | 提交考核評估 | - | 已實現 |
+| 11 | `/api/v1/performance/reviews/{id}/finalize` | PUT | HR08ReviewCmdController | 確認最終評等 | performance:review:finalize | 已實現 |
+| 12 | `/api/v1/performance/reviews/my` | GET | HR08ReviewQryController | 查詢我的考核 | - | 已實現 |
+| 13 | `/api/v1/performance/reviews/team` | GET | HR08ReviewQryController | 查詢團隊考核 | performance:team:read | 已實現 |
+| 14 | `/api/v1/performance/reviews/{id}` | GET | HR08ReviewQryController | 查詢考核詳情 | - | 已實現 |
+| 15 | `/api/v1/performance/reports/distribution/{cycleId}` | GET | HR08ReportQryController | 查詢評等分布 | performance:report:read | 已實現 |
 
 ---
 
@@ -642,7 +643,7 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `PUT /api/v1/performance/cycles/{id}/template` |
+| 端點 | `POST /api/v1/performance/cycles/{id}/template` |
 | Controller | `HR08TemplateCmdController` |
 | Service | `SaveTemplateServiceImpl` |
 | 權限 | `performance:template:update` |
@@ -827,7 +828,7 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `POST /api/v1/performance/reviews` |
+| 端點 | `POST /api/v1/performance/reviews/{id}/submit` |
 | Controller | `HR08ReviewCmdController` |
 | Service | `SubmitReviewServiceImpl` |
 | 權限 | - (登入即可) |
@@ -861,6 +862,12 @@
 |:---|:---:|:---|
 | Authorization | ✅ | `Bearer {accessToken}` |
 | Content-Type | ✅ | `application/json` |
+
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| id | UUID | ✅ | 考核記錄 ID | `review-uuid-001` |
 
 **Request Body**
 
@@ -1098,7 +1105,7 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/performance/my` |
+| 端點 | `GET /api/v1/performance/reviews/my` |
 | Controller | `HR08ReviewQryController` |
 | Service | `GetMyReviewsServiceImpl` |
 | 權限 | - (登入即可) |
@@ -1187,7 +1194,7 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/performance/team` |
+| 端點 | `GET /api/v1/performance/reviews/team` |
 | Controller | `HR08ReviewQryController` |
 | Service | `GetTeamReviewsServiceImpl` |
 | 權限 | `performance:team:read` |
@@ -1431,7 +1438,7 @@
 
 | 項目 | 內容 |
 |:---|:---|
-| 端點 | `GET /api/v1/performance/reports/distribution` |
+| 端點 | `GET /api/v1/performance/reports/distribution/{cycleId}` |
 | Controller | `HR08ReportQryController` |
 | Service | `GetDistributionServiceImpl` |
 | 權限 | `performance:report:read` |
@@ -1462,11 +1469,16 @@
 |:---|:---:|:---|
 | Authorization | ✅ | `Bearer {accessToken}` |
 
+**Path Parameters**
+
+| 參數名 | 類型 | 必填 | 說明 | 範例 |
+|:---|:---|:---:|:---|:---|
+| cycleId | UUID | ✅ | 考核週期 ID | `cycle-uuid` |
+
 **Query Parameters**
 
 | 參數名 | 類型 | 必填 | 預設值 | 說明 | 範例 |
 |:---|:---|:---:|:---|:---|:---|
-| cycleId | UUID | ✅ | - | 考核週期 ID | `cycle-uuid` |
 | departmentId | UUID | ⬚ | - | 部門篩選 | `dept-uuid` |
 
 **Response**
@@ -1538,66 +1550,7 @@
 
 ---
 
-### 7.2 匯出考核報表
-
-**基本資訊**
-
-| 項目 | 內容 |
-|:---|:---|
-| 端點 | `GET /api/v1/performance/reports/export` |
-| Controller | `HR08ReportQryController` |
-| Service | `ExportReportServiceImpl` |
-| 權限 | `performance:report:export` |
-| 版本 | v1 |
-
-**用途說明**
-
-| 項目 | 說明 |
-|:---|:---|
-| 業務場景 | HR 匯出考核結果為 Excel 檔案 |
-| 使用者 | HR 管理員 |
-| 頁面 | HR08-P05 考核結果分析頁面 |
-
-**業務邏輯**
-
-| 步驟 | 處理邏輯 |
-|:---|:---|
-| 1 | 查詢指定週期的所有考核記錄 |
-| 2 | 產生 Excel 檔案 |
-| 3 | 回傳檔案下載 |
-
-**Request**
-
-**Headers**
-
-| 名稱 | 必填 | 說明 |
-|:---|:---:|:---|
-| Authorization | ✅ | `Bearer {accessToken}` |
-
-**Query Parameters**
-
-| 參數名 | 類型 | 必填 | 預設值 | 說明 | 範例 |
-|:---|:---|:---:|:---|:---|:---|
-| cycleId | UUID | ✅ | - | 考核週期 ID | `cycle-uuid` |
-| format | Enum | ⬚ | XLSX | 匯出格式 | `XLSX` |
-
-**Response**
-
-**成功回應 (200 OK)**
-
-```
-Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-Content-Disposition: attachment; filename="performance_report_2025.xlsx"
-
-[Binary Excel File Content]
-```
-
-**錯誤碼**
-
-| HTTP | 錯誤碼 | 說明 | 處理建議 |
-|:---:|:---|:---|:---|
-| 404 | `PFM_CYCLE_NOT_FOUND` | 週期不存在 | 確認週期 ID |
-| 403 | `AUTHZ_PERMISSION_DENIED` | 無匯出權限 | 需有 performance:report:export 權限 |
+> **注意：** 原文件中的「7.2 匯出考核報表 (`GET /api/v1/performance/reports/export`)」在目前程式碼中尚未實現，已從端點清單移除。如需此功能，需先實作對應的 Controller 端點。
 
 ---
 
@@ -1692,4 +1645,7 @@ Content-Disposition: attachment; filename="performance_report_2025.xlsx"
 ---
 
 **文件建立日期:** 2025-12-30
-**版本:** 1.0
+**最後更新:** 2026-03-16
+**版本:** 1.1
+**API 總數:** 15 個端點
+**變更說明:** v1.1 - 修正 4 個 API 路徑與實際程式碼一致 (reviews/my, reviews/team, reviews/{id}/submit, reports/distribution/{cycleId})，修正 saveTemplate HTTP 方法 (PUT -> POST)，移除未實現的 export 端點 (16 -> 15 個端點)
