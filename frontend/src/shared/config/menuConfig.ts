@@ -82,6 +82,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: '保險管理',
     children: [
       { key: '/admin/insurance/enrollments', label: '勞健保加退保', roles: ['ADMIN', 'HR'] },
+      { key: '/admin/insurance/levels', label: '投保級距管理', roles: ['ADMIN', 'HR'] },
       { key: '/admin/insurance/calculator', label: '保費試算工具', roles: ['ADMIN', 'HR'] },
       { key: '/profile/insurance', label: '我的保險資料' },
     ],

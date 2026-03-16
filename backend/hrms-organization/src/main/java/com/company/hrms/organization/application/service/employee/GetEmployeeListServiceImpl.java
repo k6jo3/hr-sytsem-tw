@@ -57,7 +57,8 @@ public class GetEmployeeListServiceImpl
         }
 
         // 處理權限過濾 (ORG_QRY_E008, ORG_QRY_E009)
-        if (currentUser.hasRole("MANAGER")) {
+        // currentUser 為 null 時表示服務間呼叫，不做權限過濾
+        if (currentUser != null && currentUser.hasRole("MANAGER")) {
             // 主管只能看到管轄部門的員工
             List<String> managedDeptIds = currentUser.getManagedDepartmentIds();
             if (managedDeptIds != null && !managedDeptIds.isEmpty()) {
@@ -66,7 +67,7 @@ public class GetEmployeeListServiceImpl
                     builder.eq("employment_status", "ACTIVE");
                 }
             }
-        } else if (currentUser.hasRole("EMPLOYEE")) {
+        } else if (currentUser != null && currentUser.hasRole("EMPLOYEE")) {
             // 一般員工只能看到同部門的在職員工
             String deptId = currentUser.getDepartmentId();
             if (deptId != null) {

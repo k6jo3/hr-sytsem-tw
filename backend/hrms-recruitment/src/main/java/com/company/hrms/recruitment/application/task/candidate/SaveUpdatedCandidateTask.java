@@ -17,6 +17,6 @@ public class SaveUpdatedCandidateTask implements PipelineTask<UpdateCandidateSta
     @Override
     public void execute(UpdateCandidateStatusContext context) {
         Candidate candidate = context.getCandidate();
-        candidateRepository.save(candidate);
+        candidateRepository.update(candidate);
     }
 }

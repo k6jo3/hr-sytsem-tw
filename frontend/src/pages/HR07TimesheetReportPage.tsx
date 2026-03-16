@@ -54,11 +54,10 @@ export const HR07TimesheetReportPage: React.FC = () => {
 
   const getUnreportedColumns = () => [
     { title: '姓名', dataIndex: 'name', key: 'name' },
-    { title: '員工編號', dataIndex: 'id', key: 'id' },
-    { 
-      title: '狀態', 
-      key: 'status', 
-      render: () => <Tag color="warning">未回報</Tag> 
+    {
+      title: '狀態',
+      key: 'status',
+      render: () => <Tag color="warning">未回報</Tag>
     },
   ];
 

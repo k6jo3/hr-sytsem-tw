@@ -414,6 +414,7 @@ export interface ShiftDto {
  * Create Shift Request
  */
 export interface CreateShiftRequest {
+  organizationId: string;
   shiftCode: string;
   shiftName: string;
   shiftType: string;

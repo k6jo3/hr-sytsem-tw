@@ -698,7 +698,7 @@ public class AttendanceContractTest extends BaseContractTest {
 
                         Map<String, Object> request = new HashMap<>();
                         request.put("shiftCode", "NIGHT-01");
-                        request.put("shiftName", "Night Shift");
+                        request.put("shiftName", "夜班");
                         request.put("organizationId", AttendanceTestData.ORG_001);
                         request.put("shiftType", "REGULAR");
                         request.put("workStartTime", "22:00");

@@ -54,6 +54,7 @@ export class MockPayrollApi {
           amount: 800
         }
       ],
+      base_salary: 50000,
       gross_pay: 55000,
       total_deductions: 2300,
       net_pay: 52700,

@@ -12,7 +12,7 @@ import lombok.Data;
 /**
  * Attendance Service (考勤服務) 外部客戶端
  */
-@FeignClient(name = "hrms-attendance", url = "${hrms.attendance-service.url:http://localhost:8083/api/v1}")
+@FeignClient(name = "hrms-attendance", url = "${hrms.attendance-service.url:http://localhost:8083/api/v1/attendance}")
 public interface AttendanceServiceClient {
 
     /**

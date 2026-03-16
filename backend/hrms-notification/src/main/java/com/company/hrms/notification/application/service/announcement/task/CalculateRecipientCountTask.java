@@ -34,7 +34,8 @@ public class CalculateRecipientCountTask implements PipelineTask<AnnouncementCon
         context.setRecipientCount(count);
         announcement.setRecipientCount(count);
 
-        // 更新公告中的收件人數
-        announcementRepository.save(announcement);
+        // 更新公告中的收件人數（使用返回值保留版本號）
+        var saved = announcementRepository.save(announcement);
+        context.setAnnouncement(saved);
     }
 }

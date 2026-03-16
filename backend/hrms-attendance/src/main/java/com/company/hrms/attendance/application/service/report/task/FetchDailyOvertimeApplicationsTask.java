@@ -31,7 +31,7 @@ public class FetchDailyOvertimeApplicationsTask implements PipelineTask<DailyRep
 
         // 查詢該日期的加班
         QueryGroup query = QueryBuilder.where()
-                .and("date", Operator.EQ, date)
+                .and("overtimeDate", Operator.EQ, date)
                 .and("status", Operator.EQ, "APPROVED") // 只統計已核准的
                 .build();
 

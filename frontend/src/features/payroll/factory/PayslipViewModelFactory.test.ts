@@ -18,6 +18,7 @@ describe('PayslipViewModelFactory', () => {
       { item_code: 'BASE_SALARY', item_name: '底薪', item_type: 'INCOME', amount: 50000 },
       { item_code: 'LABOR_INSURANCE', item_name: '勞保費', item_type: 'DEDUCTION', amount: 1000 },
     ],
+    base_salary: 50000,
     gross_pay: 50000,
     total_deductions: 1000,
     net_pay: 49000,

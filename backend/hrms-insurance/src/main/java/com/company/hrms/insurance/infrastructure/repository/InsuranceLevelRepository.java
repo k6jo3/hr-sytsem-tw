@@ -78,6 +78,58 @@ public class InsuranceLevelRepository extends CommandBatchBaseRepository<Insuran
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<InsuranceLevel> findByTypeAndEndDateIsNull(InsuranceType type) {
+        QueryGroup query = QueryGroup.and()
+                .eq("insuranceType", type)
+                .eq("isActive", true)
+                .isNull("endDate");
+        return super.findAll(query).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public InsuranceLevel save(InsuranceLevel level) {
+        InsuranceLevelEntity entity = toEntity(level);
+        super.save(entity);
+        return level;
+    }
+
+    @Override
+    public InsuranceLevel update(InsuranceLevel level) {
+        InsuranceLevelEntity entity = toEntity(level);
+        super.update(entity);
+        return level;
+    }
+
+    @Override
+    public void saveBatch(List<InsuranceLevel> levels) {
+        List<InsuranceLevelEntity> entities = levels.stream()
+                .map(this::toEntity)
+                .collect(Collectors.toList());
+        super.saveAll(entities);
+    }
+
+    // ==================== Domain -> Entity 轉換 ====================
+
+    private InsuranceLevelEntity toEntity(InsuranceLevel level) {
+        return InsuranceLevelEntity.builder()
+                .levelId(UUID.fromString(level.getId().getValue()))
+                .insuranceType(level.getInsuranceType())
+                .levelNumber(level.getLevelNumber())
+                .monthlySalary(level.getMonthlySalary())
+                .laborEmployeeRate(level.getLaborEmployeeRate())
+                .laborEmployerRate(level.getLaborEmployerRate())
+                .healthEmployeeRate(level.getHealthEmployeeRate())
+                .healthEmployerRate(level.getHealthEmployerRate())
+                .pensionEmployerRate(level.getPensionEmployerRate())
+                .effectiveDate(level.getEffectiveDate())
+                .endDate(level.getEndDate())
+                .isActive(level.isActive())
+                .build();
+    }
+
     // ==================== Entity -> Domain 轉換 ====================
 
     private InsuranceLevel toDomain(InsuranceLevelEntity entity) {

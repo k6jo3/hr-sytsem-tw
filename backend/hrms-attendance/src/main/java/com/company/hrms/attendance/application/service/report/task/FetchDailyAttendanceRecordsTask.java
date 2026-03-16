@@ -31,7 +31,7 @@ public class FetchDailyAttendanceRecordsTask implements PipelineTask<DailyReport
 
         // 查詢該日期的所有出勤記錄
         QueryGroup query = QueryBuilder.where()
-                .and("date", Operator.EQ, date)
+                .and("recordDate", Operator.EQ, date)
                 .build();
 
         List<AttendanceRecord> records = recordRepository.findByQuery(query);

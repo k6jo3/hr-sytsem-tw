@@ -191,7 +191,20 @@ export class ProjectApi {
    */
   static async createProject(request: CreateProjectRequest): Promise<CreateProjectResponse> {
     if (MockConfig.isEnabled('PROJECT')) return MockProjectApi.createProject(request);
-    return apiClient.post<CreateProjectResponse>(this.BASE_PATH, request);
+    const payload = {
+      projectCode: request.project_code,
+      projectName: request.project_name,
+      customerId: request.customer_id,
+      projectType: request.project_type,
+      projectManager: request.project_manager_id,
+      budgetType: request.budget_type,
+      budgetAmount: request.budget_amount,
+      budgetHours: request.budget_hours,
+      plannedStartDate: request.planned_start_date,
+      plannedEndDate: request.planned_end_date,
+      description: request.description,
+    };
+    return apiClient.post<CreateProjectResponse>(this.BASE_PATH, payload);
   }
 
   /**
@@ -310,8 +323,15 @@ export class ProjectApi {
    * POST /api/v1/projects/{id}/tasks - 建立工項
    */
   static async createTask(projectId: string, request: CreateTaskRequest): Promise<TaskDto> {
-    // Mock not implemented yet
-    const raw: any = await apiClient.post(`${this.BASE_PATH}/${projectId}/tasks`, request);
+    const payload = {
+      taskCode: request.task_code,
+      taskName: request.task_name,
+      estimatedHours: request.estimated_hours,
+      assigneeId: request.assignee_id || null,
+      parentTaskId: request.parent_task_id || null,
+      description: request.description,
+    };
+    const raw: any = await apiClient.post(`${this.BASE_PATH}/${projectId}/tasks`, payload);
     return adaptTaskItem(raw);
   }
 

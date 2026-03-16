@@ -37,4 +37,24 @@ public interface IInsuranceLevelRepository {
      * 查詢指定日期有效的所有級距
      */
     List<InsuranceLevel> findAllActive(LocalDate date);
+
+    /**
+     * 查詢指定保險類型中有效且無結束日期的級距
+     */
+    List<InsuranceLevel> findByTypeAndEndDateIsNull(InsuranceType type);
+
+    /**
+     * 新增投保級距
+     */
+    InsuranceLevel save(InsuranceLevel level);
+
+    /**
+     * 更新投保級距
+     */
+    InsuranceLevel update(InsuranceLevel level);
+
+    /**
+     * 批量新增投保級距
+     */
+    void saveBatch(List<InsuranceLevel> levels);
 }

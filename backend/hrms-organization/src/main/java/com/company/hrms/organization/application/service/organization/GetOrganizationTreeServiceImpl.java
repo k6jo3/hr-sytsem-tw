@@ -13,6 +13,7 @@ import com.company.hrms.organization.application.service.organization.context.Or
 import com.company.hrms.organization.application.service.organization.task.LoadDepartmentTreeTask;
 import com.company.hrms.organization.application.service.organization.task.LoadOrgTask;
 import com.company.hrms.organization.domain.model.aggregate.Organization;
+import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,7 @@ public class GetOrganizationTreeServiceImpl
 
     private final LoadOrgTask loadOrgTask;
     private final LoadDepartmentTreeTask loadDepartmentTreeTask;
+    private final IEmployeeRepository employeeRepository;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -64,12 +66,16 @@ public class GetOrganizationTreeServiceImpl
         List<OrganizationTreeResponse.DepartmentTreeNode> departmentNodes = (List<OrganizationTreeResponse.DepartmentTreeNode>) context
                 .getAttribute("departmentNodes");
 
+        // 查詢組織總員工數
+        int employeeCount = employeeRepository.countByOrganizationId(org.getId());
+
         return OrganizationTreeResponse.builder()
                 .organizationId(org.getId().getValue().toString())
                 .code(org.getCode())
                 .name(org.getName())
                 .type(org.getType().name())
                 .status(org.getStatus().name())
+                .employeeCount(employeeCount)
                 .departments(departmentNodes)
                 .build();
     }

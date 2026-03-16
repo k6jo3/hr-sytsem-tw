@@ -493,7 +493,7 @@ export const OrganizationTreeView: React.FC = () => {
                     onSubmit={handleModalSubmit}
                     loading={modalLoading}
                     organizationId={selectedOrg.organizationId}
-                    parentDepartmentId={targetParentId}
+                    parentId={targetParentId}
                     initialValues={editingDept}
                 />
             )}

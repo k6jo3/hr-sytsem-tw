@@ -48,6 +48,7 @@ const HR04PayrollHistoryPage = React.lazy(() => import('./pages/HR04PayrollHisto
 const HR05InsuranceEnrollmentPage = React.lazy(() => import('./pages/HR05InsuranceEnrollmentPage'));
 const HR05InsuranceCalculatorPage = React.lazy(() => import('./pages/HR05InsuranceCalculatorPage'));
 const HR05MyInsurancePage = React.lazy(() => import('./pages/HR05MyInsurancePage'));
+const HR05InsuranceLevelPage = React.lazy(() => import('./pages/HR05InsuranceLevelPage'));
 
 // Project (HR06)
 const HR06ProjectListPage = React.lazy(() => import('./pages/HR06ProjectListPage'));
@@ -166,6 +167,7 @@ const App: React.FC = () => {
 
           <Route path="/admin/insurance/enrollments" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR05InsuranceEnrollmentPage /></ProtectedRoute>} />
           <Route path="/admin/insurance/calculator" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR05InsuranceCalculatorPage /></ProtectedRoute>} />
+          <Route path="/admin/insurance/levels" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR']}><HR05InsuranceLevelPage /></ProtectedRoute>} />
           <Route path="/profile/insurance" element={<ProtectedRoute><HR05MyInsurancePage /></ProtectedRoute>} />
 
           {/* ========== 專案與工時追蹤 (HR06/07) ========== */}

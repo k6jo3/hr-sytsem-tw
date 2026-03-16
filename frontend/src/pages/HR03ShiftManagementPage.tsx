@@ -31,11 +31,27 @@ export const HR03ShiftManagementPage: React.FC = () => {
     fetchShifts();
   }, []);
 
+  /** 取得當前使用者的組織 ID */
+  const getOrganizationId = (): string => {
+    try {
+      const authUser = localStorage.getItem('auth_user');
+      if (authUser) {
+        const parsed = JSON.parse(authUser);
+        if (parsed.organizationId) return parsed.organizationId;
+      }
+    } catch {
+      // ignore parse error
+    }
+    // 若 localStorage 無法取得，使用預設組織 ID
+    return 'default-org';
+  };
+
   const handleCreateOrUpdate = async () => {
     try {
       const values = await form.validateFields();
       const request: CreateShiftRequest = {
         ...values,
+        organizationId: getOrganizationId(),
         workStartTime: values.workStartTime.format('HH:mm'),
         workEndTime: values.workEndTime.format('HH:mm'),
       };

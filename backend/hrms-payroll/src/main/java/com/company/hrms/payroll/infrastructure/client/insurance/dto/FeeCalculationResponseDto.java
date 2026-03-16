@@ -6,10 +6,35 @@ import lombok.Data;
 
 @Data
 public class FeeCalculationResponseDto {
-    private BigDecimal laborInsurance;
-    private BigDecimal healthInsurance;
+    private Integer levelNumber;
+    private BigDecimal monthlySalary;
+    private BigDecimal laborEmployeeFee;
+    private BigDecimal laborEmployerFee;
+    private BigDecimal healthEmployeeFee;
+    private BigDecimal healthEmployerFee;
+    private BigDecimal pensionEmployerFee;
     private BigDecimal pensionSelfContribution;
-    private BigDecimal employerLaborInsurance;
-    private BigDecimal employerHealthInsurance;
-    private BigDecimal employerPension;
+    private BigDecimal totalEmployeeFee;
+    private BigDecimal totalEmployerFee;
+
+    // 為了向後相容，提供 alias getter
+    public BigDecimal getLaborInsurance() {
+        return laborEmployeeFee;
+    }
+
+    public BigDecimal getHealthInsurance() {
+        return healthEmployeeFee;
+    }
+
+    public BigDecimal getEmployerLaborInsurance() {
+        return laborEmployerFee;
+    }
+
+    public BigDecimal getEmployerHealthInsurance() {
+        return healthEmployerFee;
+    }
+
+    public BigDecimal getEmployerPension() {
+        return pensionEmployerFee;
+    }
 }

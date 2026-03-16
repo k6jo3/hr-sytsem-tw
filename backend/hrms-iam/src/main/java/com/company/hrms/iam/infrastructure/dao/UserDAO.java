@@ -78,6 +78,13 @@ public class UserDAO {
     }
 
     /**
+     * 根據員工 ID 查詢使用者
+     */
+    public UserPO selectByEmployeeId(String employeeId) {
+        return userMapper.selectByEmployeeId(employeeId);
+    }
+
+    /**
      * 檢查使用者名稱是否存在
      */
     public boolean existsByUsername(String username) {

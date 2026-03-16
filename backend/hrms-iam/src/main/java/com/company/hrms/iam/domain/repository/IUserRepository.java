@@ -101,8 +101,16 @@ public interface IUserRepository {
     void deleteById(UserId id);
 
     /**
+     * 根據員工 ID 查找使用者
+     *
+     * @param employeeId 員工 ID
+     * @return 使用者 Optional
+     */
+    Optional<User> findByEmployeeId(String employeeId);
+
+    /**
      * 檢查使用者名稱是否存在
-     * 
+     *
      * @param username 使用者名稱
      * @return 是否存在
      */

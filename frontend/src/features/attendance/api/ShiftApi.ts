@@ -9,12 +9,21 @@ import type {
 import { MockAttendanceApi } from './MockAttendanceApi';
 
 /**
- * 後端 shiftType → 前端 shiftType 映射
+ * 後端 shiftType → 前端 shiftType 映射（讀取用）
  */
 const SHIFT_TYPE_MAP: Record<string, ShiftDto['shiftType']> = {
   REGULAR: 'STANDARD',
   FLEXIBLE: 'FLEXIBLE',
   SHIFT: 'ROTATING',
+};
+
+/**
+ * 前端 shiftType → 後端 shiftType 映射（寫入用）
+ */
+const REVERSE_SHIFT_TYPE_MAP: Record<string, string> = {
+  'STANDARD': 'REGULAR',
+  'FLEXIBLE': 'FLEXIBLE',
+  'ROTATING': 'SHIFT',
 };
 
 function adaptShiftDto(raw: any): ShiftDto {
@@ -42,18 +51,30 @@ export class ShiftApi {
 
   /**
    * 建立班別
+   * 送出前將前端 shiftType 反向映射為後端 enum 值
    */
   static async createShift(request: CreateShiftRequest): Promise<any> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.createShift(request);
-    return apiClient.post(this.BASE_PATH, request);
+    const payload = {
+      ...request,
+      shiftType: REVERSE_SHIFT_TYPE_MAP[request.shiftType] ?? request.shiftType,
+    };
+    return apiClient.post(this.BASE_PATH, payload);
   }
 
   /**
    * 更新班別
+   * 送出前將前端 shiftType 反向映射為後端 enum 值
    */
   static async updateShift(shiftId: string, request: UpdateShiftRequest): Promise<any> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.updateShift(shiftId, request);
-    return apiClient.put(`${this.BASE_PATH}/${shiftId}`, request);
+    const payload = {
+      ...request,
+      shiftType: request.shiftType
+        ? (REVERSE_SHIFT_TYPE_MAP[request.shiftType] ?? request.shiftType)
+        : undefined,
+    };
+    return apiClient.put(`${this.BASE_PATH}/${shiftId}`, payload);
   }
 
   /**

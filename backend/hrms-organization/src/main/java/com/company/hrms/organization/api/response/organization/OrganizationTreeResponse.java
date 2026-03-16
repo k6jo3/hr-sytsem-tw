@@ -29,6 +29,9 @@ public class OrganizationTreeResponse {
     @Schema(description = "組織狀態")
     private String status;
 
+    @Schema(description = "組織總員工數")
+    private int employeeCount;
+
     @Schema(description = "子組織清單")
     private List<OrganizationTreeResponse> children;
 

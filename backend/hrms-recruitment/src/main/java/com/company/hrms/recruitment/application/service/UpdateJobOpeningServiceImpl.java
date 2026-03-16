@@ -51,8 +51,8 @@ public class UpdateJobOpeningServiceImpl
         BusinessPipeline.start(ctx)
                 .next(loadTask)
                 .next(updateTask)
-                .next(saveTask)
                 .next(eventTask)
+                .next(saveTask)
                 .execute();
 
         return UpdateJobOpeningResponse.builder()

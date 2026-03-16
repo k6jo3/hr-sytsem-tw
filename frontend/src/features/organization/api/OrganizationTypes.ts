@@ -108,10 +108,10 @@ export interface OrganizationRequest {
  */
 export interface DepartmentRequest {
   organizationId: string;
-  parentDepartmentId?: string;
-  departmentCode: string;
-  departmentName: string;
+  parentId?: string;
+  code: string;
+  name: string;
   managerId?: string;
-  displayOrder?: number;
+  sortOrder?: number;
 }
 

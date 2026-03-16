@@ -85,10 +85,10 @@ export const HR04SalaryStructurePage: React.FC = () => {
   };
 
   const columns = [
-    { 
-      title: '員工ID', 
-      dataIndex: 'employeeId', 
-      key: 'employeeId' 
+    {
+      title: '員工',
+      dataIndex: 'employeeDisplay',
+      key: 'employee'
     },
     { 
       title: '薪資制度', 

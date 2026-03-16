@@ -52,6 +52,18 @@ public class CandidateRepositoryImpl
     }
 
     @Override
+    public Candidate update(Candidate candidate) {
+        CandidateEntity entity = toEntity(candidate);
+        super.update(entity);
+
+        // 發布 Domain Events
+        candidate.getDomainEvents().forEach(eventPublisher::publish);
+        candidate.clearDomainEvents();
+
+        return candidate;
+    }
+
+    @Override
     public void delete(Candidate candidate) {
         CandidateEntity entity = toEntity(candidate);
         super.delete(entity);

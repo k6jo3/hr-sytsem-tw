@@ -4,10 +4,19 @@ import lombok.Data;
 
 @Data
 public class EmployeeSummaryDto {
-    private String id;
-    private String employeeCode;
-    private String firstName;
-    private String lastName;
+    private String employeeId;
+    private String employeeNumber;
+    private String fullName;
+    private String departmentId;
     private String departmentName;
     private String status;
+
+    // 向後相容 alias
+    public String getId() {
+        return employeeId;
+    }
+
+    public String getEmployeeCode() {
+        return employeeNumber;
+    }
 }

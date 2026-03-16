@@ -36,8 +36,8 @@ public class FetchMonthlyAttendanceRecordsTask implements PipelineTask<MonthlyRe
 
         // 查詢該月份的所有出勤記錄
         QueryGroup query = QueryBuilder.where()
-                .and("date", Operator.GTE, firstDay)
-                .and("date", Operator.LTE, lastDay)
+                .and("recordDate", Operator.GTE, firstDay)
+                .and("recordDate", Operator.LTE, lastDay)
                 .build();
 
         List<AttendanceRecord> records = recordRepository.findByQuery(query);

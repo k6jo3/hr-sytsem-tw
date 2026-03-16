@@ -54,6 +54,14 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
 
+hrms:
+  organization:
+    url: http://localhost:8082
+  attendance-service:
+    url: http://localhost:8083/api/v1/attendance
+  insurance:
+    url: http://localhost:8085
+
 logging:
   level:
     com.company.hrms.payroll: DEBUG

@@ -14,7 +14,7 @@ interface DepartmentFormModalProps {
   onSubmit: (values: DepartmentRequest) => Promise<void>;
   initialValues?: DepartmentDto | null;
   organizationId: string;
-  parentDepartmentId?: string;
+  parentId?: string;
   loading?: boolean;
 }
 
@@ -24,7 +24,7 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
   onSubmit,
   initialValues,
   organizationId,
-  parentDepartmentId,
+  parentId,
   loading = false,
 }) => {
   const [form] = Form.useForm();
@@ -34,20 +34,20 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
     if (visible) {
       if (initialValues) {
         form.setFieldsValue({
-          departmentCode: initialValues.code,
-          departmentName: initialValues.name,
+          code: initialValues.code,
+          name: initialValues.name,
           managerId: initialValues.managerId,
-          displayOrder: initialValues.sortOrder,
+          sortOrder: initialValues.sortOrder,
         });
       } else {
         form.resetFields();
         form.setFieldsValue({
             organizationId, // Hidden field if needed, or handled in submit
-            parentDepartmentId, // Context for new child
+            parentId, // Context for new child
         });
       }
     }
-  }, [visible, initialValues, form, organizationId, parentDepartmentId]);
+  }, [visible, initialValues, form, organizationId, parentId]);
 
   const handleSubmit = async () => {
     try {
@@ -55,7 +55,7 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
       await onSubmit({
         ...values,
         organizationId,
-        parentDepartmentId: isEdit ? initialValues?.parentId : parentDepartmentId,
+        parentId: isEdit ? initialValues?.parentId : parentId,
       });
       onCancel();
     } catch (error) {
@@ -77,7 +77,7 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
         layout="vertical"
       >
         <Form.Item
-          name="departmentCode"
+          name="code"
           label="部門代號"
           rules={[{ required: true, message: '請輸入部門代號' }]}
         >
@@ -85,7 +85,7 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
         </Form.Item>
 
         <Form.Item
-          name="departmentName"
+          name="name"
           label="部門名稱"
           rules={[{ required: true, message: '請輸入部門名稱' }]}
         >
@@ -106,7 +106,7 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
         */}
 
         <Form.Item
-          name="displayOrder"
+          name="sortOrder"
           label="顯示順序"
         >
           <InputNumber min={0} step={1} style={{ width: '100%' }} />

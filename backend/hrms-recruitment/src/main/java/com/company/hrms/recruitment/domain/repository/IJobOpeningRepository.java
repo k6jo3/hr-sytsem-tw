@@ -15,9 +15,14 @@ import com.company.hrms.recruitment.domain.model.valueobject.OpeningId;
 public interface IJobOpeningRepository {
 
     /**
-     * 儲存職缺
+     * 新增職缺
      */
     JobOpening save(JobOpening jobOpening);
+
+    /**
+     * 更新職缺
+     */
+    JobOpening update(JobOpening jobOpening);
 
     /**
      * 刪除職缺

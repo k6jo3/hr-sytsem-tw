@@ -52,6 +52,8 @@ export interface SalaryItemDto {
 export interface SalaryStructureDto {
   id: string;
   employeeId: string;
+  employeeName?: string;
+  employeeNumber?: string;
   payrollSystem: 'MONTHLY' | 'HOURLY';
   payrollCycle: 'DAILY' | 'WEEKLY' | 'BI_WEEKLY' | 'MONTHLY';
   monthlySalary?: number;
@@ -144,6 +146,7 @@ export interface PayslipDto {
   items: PayrollItemDto[];
 
   // 金額統計
+  base_salary: number; // 底薪
   gross_pay: number; // 應發薪資
   total_deductions: number; // 扣除總額
   net_pay: number; // 實發薪資

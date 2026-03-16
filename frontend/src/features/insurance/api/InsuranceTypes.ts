@@ -213,3 +213,19 @@ export interface GetLevelsResponse {
   levels: InsuranceLevelDto[];
   total: number;
 }
+
+/**
+ * POST /api/v1/insurance/levels/batch-adjust - 批量調整投保級距
+ */
+export interface BatchAdjustLevelsRequest {
+  insurance_types: InsuranceType[];
+  adjustment_amount: number;
+  effective_date: string;
+  new_highest_level_salary?: number;
+}
+
+export interface BatchAdjustLevelsResponse {
+  old_levels_deactivated: number;
+  new_levels_created: number;
+  message: string;
+}

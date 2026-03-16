@@ -54,6 +54,7 @@ function adaptPayslipDto(raw: any): PayslipDto {
     payment_date: raw.payDate ?? raw.paymentDate ?? '',
     status: guardEnum('payslip.status', PAYSLIP_STATUS_MAP[raw.status] ?? raw.status, ['DRAFT', 'CALCULATED', 'APPROVED', 'PAID', 'VOID'] as const, 'DRAFT'),
     items: [], // 後端列表查詢不含 items 明細
+    base_salary: raw.baseSalary ?? 0,
     gross_pay: raw.grossWage ?? raw.grossPay ?? raw.totalEarnings ?? 0,
     total_deductions: raw.totalDeductions ?? raw.insuranceDeductions ?? 0,
     net_pay: raw.netWage ?? raw.netPay ?? 0,

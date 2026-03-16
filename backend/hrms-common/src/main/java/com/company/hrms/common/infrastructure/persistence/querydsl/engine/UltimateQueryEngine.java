@@ -87,23 +87,27 @@ public class UltimateQueryEngine<T> {
     private BooleanExpression parseGroup(QueryGroup group) {
         BooleanBuilder builder = new BooleanBuilder();
 
-        // 處理條件
+        // 處理條件（null 表示該條件值為空，應跳過）
         for (FilterUnit unit : group.getConditions()) {
             BooleanExpression exp = buildExpression(unit);
-            if (group.getJunction() == LogicalOp.OR) {
-                builder.or(exp);
-            } else {
-                builder.and(exp);
+            if (exp != null) {
+                if (group.getJunction() == LogicalOp.OR) {
+                    builder.or(exp);
+                } else {
+                    builder.and(exp);
+                }
             }
         }
 
         // 處理子群組
         for (QueryGroup subGroup : group.getSubGroups()) {
             BooleanExpression subExp = parseGroup(subGroup);
-            if (group.getJunction() == LogicalOp.OR) {
-                builder.or(subExp);
-            } else {
-                builder.and(subExp);
+            if (subExp != null) {
+                if (group.getJunction() == LogicalOp.OR) {
+                    builder.or(subExp);
+                } else {
+                    builder.and(subExp);
+                }
             }
         }
 

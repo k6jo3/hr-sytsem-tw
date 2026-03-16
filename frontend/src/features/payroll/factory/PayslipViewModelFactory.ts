@@ -67,6 +67,8 @@ export class PayslipViewModelFactory {
       statusColor: this.mapStatusColor(dto.status),
       incomeItems,
       deductionItems,
+      baseSalary: dto.base_salary,
+      baseSalaryDisplay: this.formatCurrency(dto.base_salary),
       grossPay: dto.gross_pay,
       grossPayDisplay: this.formatCurrency(dto.gross_pay),
       totalDeductions: dto.total_deductions,

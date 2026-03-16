@@ -18,9 +18,14 @@ import com.company.hrms.recruitment.domain.model.valueobject.OpeningId;
 public interface ICandidateRepository {
 
     /**
-     * 儲存應徵者
+     * 新增應徵者
      */
     Candidate save(Candidate candidate);
+
+    /**
+     * 更新應徵者
+     */
+    Candidate update(Candidate candidate);
 
     /**
      * 刪除應徵者

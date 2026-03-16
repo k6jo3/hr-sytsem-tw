@@ -47,6 +47,18 @@ public class JobOpeningRepositoryImpl
     }
 
     @Override
+    public JobOpening update(JobOpening jobOpening) {
+        JobOpeningEntity entity = toEntity(jobOpening);
+        super.update(entity);
+
+        // 發布 Domain Events
+        jobOpening.getDomainEvents().forEach(eventPublisher::publish);
+        jobOpening.clearDomainEvents();
+
+        return jobOpening;
+    }
+
+    @Override
     public void delete(JobOpening jobOpening) {
         JobOpeningEntity entity = toEntity(jobOpening);
         super.delete(entity);

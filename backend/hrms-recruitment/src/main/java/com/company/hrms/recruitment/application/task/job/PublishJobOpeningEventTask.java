@@ -8,6 +8,7 @@ import com.company.hrms.recruitment.application.context.CloseJobOpeningContext;
 import com.company.hrms.recruitment.application.context.CreateJobOpeningContext;
 import com.company.hrms.recruitment.application.context.UpdateJobOpeningContext;
 import com.company.hrms.recruitment.domain.model.aggregate.JobOpening;
+import com.company.hrms.recruitment.domain.model.valueobject.JobStatus;
 
 @Component
 public class PublishJobOpeningEventTask implements PipelineTask<PipelineContext> {
@@ -23,8 +24,9 @@ public class PublishJobOpeningEventTask implements PipelineTask<PipelineContext>
             job = c.getJobOpening();
         }
 
-        if (job != null) {
-            job.publish(); // This registers domain event in the Aggregate Root
+        // 只有草稿狀態才執行發布（狀態轉 OPEN）
+        if (job != null && job.getStatus() == JobStatus.DRAFT) {
+            job.publish();
         }
     }
 }

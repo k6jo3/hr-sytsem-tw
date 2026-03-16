@@ -59,6 +59,8 @@ export interface PayslipDetailViewModel {
   deductionItems: PayrollItemViewModel[];
 
   // 金額統計
+  baseSalary: number;
+  baseSalaryDisplay: string;
   grossPay: number;
   grossPayDisplay: string;
   totalDeductions: number;

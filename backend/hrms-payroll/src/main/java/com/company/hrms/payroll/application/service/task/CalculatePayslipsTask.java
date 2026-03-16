@@ -38,7 +38,7 @@ public class CalculatePayslipsTask implements PipelineTask<CalculatePayrollConte
                                                 .getEmployeeInfoMap().get(struct.getEmployeeId());
                                 String empCode = empInfo != null ? empInfo.getEmployeeCode() : struct.getEmployeeId();
                                 String empName = empInfo != null
-                                                ? (empInfo.getFirstName() + " " + empInfo.getLastName())
+                                                ? empInfo.getFullName()
                                                 : "員工 " + struct.getEmployeeId();
 
                                 // 建立薪資單草稿

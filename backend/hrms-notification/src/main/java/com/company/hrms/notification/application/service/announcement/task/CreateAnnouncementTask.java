@@ -76,8 +76,8 @@ public class CreateAnnouncementTask implements PipelineTask<AnnouncementContext>
             }
         }
 
-        // 7. 儲存公告
-        announcementRepository.save(announcement);
-        context.setAnnouncement(announcement);
+        // 7. 儲存公告（使用返回值以取得版本號，避免後續 save 樂觀鎖衝突）
+        Announcement saved = announcementRepository.save(announcement);
+        context.setAnnouncement(saved);
     }
 }

@@ -106,6 +106,15 @@ public interface UserMapper {
         void deleteById(@Param("userId") String userId);
 
         /**
+         * 根據員工 ID 查詢使用者
+         */
+        @Select("SELECT user_id, username, email, password_hash, display_name, first_name, last_name, employee_id, tenant_id," +
+                        "status, failed_login_attempts, locked_until, last_login_at, last_logout_at, last_login_ip, preferred_language, timezone, password_changed_at, " +
+                        "must_change_password, is_deleted, created_at, updated_at " +
+                        "FROM users WHERE employee_id = #{employeeId} AND is_deleted = FALSE")
+        UserPO selectByEmployeeId(@Param("employeeId") String employeeId);
+
+        /**
          * 檢查使用者名稱是否存在
          */
         @Select("SELECT COUNT(1) > 0 FROM users WHERE username = #{username}")

@@ -11,7 +11,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { PayrollApi } from '../features/payroll/api/PayrollApi';
 import { PayslipViewModelFactory } from '../features/payroll/factory/PayslipViewModelFactory';
 import { usePayrollRuns } from '../features/payroll/hooks/usePayrollRuns';
-import type { PayrollItemViewModel, PayslipDetailViewModel } from '../features/payroll/model/PayrollViewModel';
+import type { PayslipDetailViewModel } from '../features/payroll/model/PayrollViewModel';
 
 const { Title, Text } = Typography;
 
@@ -57,13 +57,10 @@ export const HR04PayrollBatchDetailPage: React.FC = () => {
   const columns = [
     { title: '員工編號', dataIndex: 'employeeCode', key: 'employeeCode' },
     { title: '姓名', dataIndex: 'employeeName', key: 'employeeName' },
-    { 
-      title: '底薪', 
+    {
+      title: '底薪',
+      dataIndex: 'baseSalaryDisplay',
       key: 'base',
-      render: (_: any, record: PayslipDetailViewModel) => {
-        const base = record.incomeItems.find((i: PayrollItemViewModel) => i.itemCode === 'BASE_SALARY')?.amount || 0;
-        return `$${base.toLocaleString()}`;
-      }
     },
     { 
       title: '應發總額', 

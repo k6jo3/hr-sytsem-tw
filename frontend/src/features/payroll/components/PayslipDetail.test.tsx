@@ -24,6 +24,8 @@ const mockPayslip: PayslipDetailViewModel = {
     { itemCode: 'LABOR', itemName: '勞保費', itemType: 'DEDUCTION', amount: 1053, amountDisplay: '$1,053' },
     { itemCode: 'HEALTH', itemName: '健保費', itemType: 'DEDUCTION', amount: 786, amountDisplay: '$786' },
   ],
+  baseSalary: 50000,
+  baseSalaryDisplay: '$50,000',
   grossPay: 55000,
   grossPayDisplay: '$55,000',
   totalDeductions: 1839,

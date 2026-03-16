@@ -296,12 +296,12 @@ export class MockOrganizationApi {
     await delay(600);
     const newDept: DepartmentDto = {
       departmentId: uuidv4(),
-      code: data.departmentCode,
-      name: data.departmentName,
-      level: data.parentDepartmentId ? 2 : 1,
-      sortOrder: data.displayOrder || this.departments.length + 1,
+      code: data.code,
+      name: data.name,
+      level: data.parentId ? 2 : 1,
+      sortOrder: data.sortOrder || this.departments.length + 1,
       organizationId: data.organizationId,
-      parentId: data.parentDepartmentId,
+      parentId: data.parentId,
       managerId: data.managerId,
       status: 'ACTIVE',
       statusDisplay: '啟用',
@@ -319,10 +319,10 @@ export class MockOrganizationApi {
     const existing = this.departments[index]!;
     const updated: DepartmentDto = {
       ...existing,
-      code: data.departmentCode ?? existing.code,
-      name: data.departmentName ?? existing.name,
+      code: data.code ?? existing.code,
+      name: data.name ?? existing.name,
       managerId: data.managerId ?? existing.managerId,
-      sortOrder: data.displayOrder ?? existing.sortOrder
+      sortOrder: data.sortOrder ?? existing.sortOrder
     };
     this.departments[index] = updated;
     return updated;

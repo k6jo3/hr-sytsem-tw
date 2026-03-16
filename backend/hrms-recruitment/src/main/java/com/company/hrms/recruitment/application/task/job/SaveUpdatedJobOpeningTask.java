@@ -28,7 +28,7 @@ public class SaveUpdatedJobOpeningTask implements PipelineTask<PipelineContext> 
         }
 
         if (job != null) {
-            repository.save(job);
+            repository.update(job);
         }
     }
 }

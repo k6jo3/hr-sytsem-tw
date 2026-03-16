@@ -47,7 +47,7 @@ public class PayslipPO {
     @QueryFilter(operator = Operator.EQ)
     private String employeeId;
 
-    @Column(name = "employee_code", length = 20)
+    @Column(name = "employee_code", length = 50)
     private String employeeCode;
 
     @Column(name = "employee_name", length = 100)

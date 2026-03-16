@@ -139,6 +139,12 @@ public class UserRepositoryImpl implements IUserRepository {
     }
 
     @Override
+    public Optional<User> findByEmployeeId(String employeeId) {
+        UserPO po = userDAO.selectByEmployeeId(employeeId);
+        return Optional.ofNullable(po).map(this::toDomain);
+    }
+
+    @Override
     public boolean existsByUsername(String username) {
         return userDAO.existsByUsername(username);
     }

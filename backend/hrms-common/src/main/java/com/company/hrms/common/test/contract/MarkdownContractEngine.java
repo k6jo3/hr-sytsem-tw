@@ -900,6 +900,13 @@ public class MarkdownContractEngine {
                     passed = ((Number) actualValue).doubleValue() == ((Number) expectedValue).doubleValue();
                 } else if (actualValue instanceof Number && expectedValue instanceof String) {
                     passed = Double.parseDouble(actualValue.toString()) == Double.parseDouble((String) expectedValue);
+                } else if (actualValue instanceof Number && expectedValue instanceof Boolean) {
+                    // H2 資料庫以 Integer 1/0 表示 boolean，PostgreSQL 使用原生 boolean
+                    int intVal = ((Number) actualValue).intValue();
+                    passed = (Boolean) expectedValue ? intVal == 1 : intVal == 0;
+                } else if (actualValue instanceof Boolean && expectedValue instanceof Number) {
+                    int intVal = ((Number) expectedValue).intValue();
+                    passed = (Boolean) actualValue ? intVal == 1 : intVal == 0;
                 } else {
                     passed = actualValue != null && actualValue.equals(expectedValue);
                 }

@@ -4,6 +4,8 @@ import { guardEnum } from '../../../shared/utils/adapterGuard';
 import type {
     AdjustLevelRequest,
     AdjustLevelResponse,
+    BatchAdjustLevelsRequest,
+    BatchAdjustLevelsResponse,
     CalculateFeesRequest,
     CalculateFeesResponse,
     CreateEnrollmentRequest,
@@ -315,6 +317,24 @@ export class InsuranceApi {
     return {
       levels,
       total: levels.length,
+    };
+  }
+
+  /**
+   * POST /api/v1/insurance/levels/batch-adjust - 批量調整投保級距
+   */
+  static async batchAdjustLevels(request: BatchAdjustLevelsRequest): Promise<BatchAdjustLevelsResponse> {
+    const backendRequest = {
+      insuranceTypes: request.insurance_types,
+      adjustmentAmount: request.adjustment_amount,
+      effectiveDate: request.effective_date,
+      newHighestLevelSalary: request.new_highest_level_salary,
+    };
+    const raw: any = await apiClient.post(`${this.BASE_PATH}/levels/batch-adjust`, backendRequest);
+    return {
+      old_levels_deactivated: raw.oldLevelsDeactivated ?? raw.old_levels_deactivated ?? 0,
+      new_levels_created: raw.newLevelsCreated ?? raw.new_levels_created ?? 0,
+      message: raw.message ?? '調整完成',
     };
   }
 }

@@ -36,8 +36,8 @@ public class FetchMonthlyOvertimeApplicationsTask implements PipelineTask<Monthl
 
         // 查詢該月份的加班
         QueryGroup query = QueryBuilder.where()
-                .and("date", Operator.GTE, firstDay)
-                .and("date", Operator.LTE, lastDay)
+                .and("overtimeDate", Operator.GTE, firstDay)
+                .and("overtimeDate", Operator.LTE, lastDay)
                 .and("status", Operator.EQ, "APPROVED")
                 .build();
 
