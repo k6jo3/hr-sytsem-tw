@@ -1,11 +1,11 @@
 package com.company.hrms.notification.infrastructure.channel;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.notification.domain.model.aggregate.Notification;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -19,11 +19,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-
 public class InAppChannelSender implements ChannelSender {
 
     private final SimpMessagingTemplate messagingTemplate;
+
+    public InAppChannelSender(@Qualifier("brokerMessagingTemplate") SimpMessagingTemplate messagingTemplate) {
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @Override
     public void send(Notification notification, String recipientId) throws Exception {

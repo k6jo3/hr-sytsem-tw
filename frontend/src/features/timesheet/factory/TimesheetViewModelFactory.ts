@@ -141,7 +141,9 @@ export class TimesheetViewModelFactory {
    * 格式化日期顯示為 MM/DD
    */
   private static formatDateDisplay(isoDate: string): string {
+    if (!isoDate) return '--/--';
     const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return '--/--';
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     return `${month}/${day}`;

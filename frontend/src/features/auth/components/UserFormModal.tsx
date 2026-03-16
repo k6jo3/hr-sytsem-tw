@@ -3,7 +3,7 @@
  * Domain Code: HR01
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Modal,
   Form,
@@ -11,9 +11,12 @@ import {
   Select,
   Switch,
   Space,
+  Spin,
 } from 'antd';
 import type { RoleDto, CreateUserRequest, UpdateUserRequest } from '../api/AuthTypes';
 import type { UserListViewModel } from '../model/UserProfile';
+import { OrganizationApi } from '../../organization/api/OrganizationApi';
+import type { EmployeeDto } from '../../organization/api/OrganizationTypes';
 
 export interface UserFormModalProps {
   open: boolean;
@@ -49,6 +52,33 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 }) => {
   const [form] = Form.useForm<UserFormValues>();
   const isEdit = !!user;
+
+  // 員工清單狀態
+  const [employees, setEmployees] = useState<EmployeeDto[]>([]);
+  const [employeesLoading, setEmployeesLoading] = useState(false);
+
+  /**
+   * 從 Organization 服務載入員工列表
+   */
+  const fetchEmployees = useCallback(async () => {
+    setEmployeesLoading(true);
+    try {
+      const response = await OrganizationApi.getEmployeeList({ page: 1, page_size: 500 });
+      setEmployees(response.employees);
+    } catch (err) {
+      console.error('[UserFormModal] 載入員工列表失敗:', err);
+      setEmployees([]);
+    } finally {
+      setEmployeesLoading(false);
+    }
+  }, []);
+
+  // Modal 開啟時載入員工列表
+  useEffect(() => {
+    if (open) {
+      fetchEmployees();
+    }
+  }, [open, fetchEmployees]);
 
   // 當 user 變更時，重置表單
   useEffect(() => {
@@ -196,10 +226,27 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({
 
           <Form.Item
             name="employee_id"
-            label="員工編號"
+            label="關聯員工"
             style={{ marginTop: 16 }}
           >
-            <Input placeholder="請輸入關聯的員工編號（選填）" />
+            <Select
+              showSearch
+              allowClear
+              placeholder="搜尋並選擇員工（選填）"
+              loading={employeesLoading}
+              notFoundContent={employeesLoading ? <Spin size="small" /> : '無符合的員工'}
+              filterOption={(input, option) => {
+                const label = option?.label;
+                if (typeof label === 'string') {
+                  return label.toLowerCase().includes(input.toLowerCase());
+                }
+                return false;
+              }}
+              options={employees.map((emp) => ({
+                label: `${emp.employee_number} - ${emp.full_name}`,
+                value: emp.employee_number,
+              }))}
+            />
           </Form.Item>
 
           <Form.Item

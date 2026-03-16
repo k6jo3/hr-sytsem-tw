@@ -48,7 +48,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
       setLoading(true);
       const request: ApplyLeaveRequest = {
         employeeId: user.employeeId,
-        leaveTypeCode: values.leaveTypeCode,
+        leaveTypeCode: values.leaveTypeCode, // 保留以供前端使用
         startDate: values.range[0].format('YYYY-MM-DD'),
         endDate: values.range[1].format('YYYY-MM-DD'),
         reason: values.reason,
@@ -83,7 +83,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
         >
           <Select placeholder="請選擇假別">
             {leaveTypes.map((type) => (
-              <Select.Option key={type.leaveTypeCode} value={type.leaveTypeCode}>
+              <Select.Option key={type.leaveTypeId} value={type.leaveTypeId}>
                 {type.leaveTypeName}
               </Select.Option>
             ))}

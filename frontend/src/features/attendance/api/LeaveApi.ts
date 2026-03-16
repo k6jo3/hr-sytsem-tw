@@ -23,7 +23,16 @@ export class LeaveApi {
    */
   static async applyLeave(request: ApplyLeaveRequest): Promise<ApplyLeaveResponse> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.applyLeave(request);
-    return apiClient.post(`${this.BASE_PATH}/applications`, request);
+    // 後端期望 leaveTypeId，前端表單可能用 leaveTypeCode 存放 leaveTypeId 值
+    const payload = {
+      employeeId: request.employeeId,
+      leaveTypeId: request.leaveTypeCode || (request as any).leaveTypeId,
+      startDate: request.startDate,
+      endDate: request.endDate,
+      reason: request.reason,
+      proofAttachmentUrl: request.proofAttachmentUrl,
+    };
+    return apiClient.post(`${this.BASE_PATH}/applications`, payload);
   }
 
   /**
@@ -78,10 +87,33 @@ export class LeaveApi {
 
   /**
    * 建立假別 (管理員用)
+   * 自動補上 organizationId 與 boolean 欄位預設值
    */
   static async createLeaveType(request: CreateLeaveTypeRequest): Promise<void> {
-    // Mock not implemented yet
-    return apiClient.post(`${this.BASE_PATH}/types`, request);
+    const payload = {
+      ...request,
+      organizationId: (request as any).organizationId || await this.getDefaultOrganizationId(),
+      isPaid: request.isPaid ?? false,
+      allowCarryOver: request.allowCarryOver ?? false,
+      isActive: (request as any).isActive ?? true,
+    };
+    return apiClient.post(`${this.BASE_PATH}/types`, payload);
+  }
+
+  /**
+   * 取得預設組織 ID（從組織列表取第一個）
+   */
+  private static async getDefaultOrganizationId(): Promise<string> {
+    try {
+      const resp: any = await apiClient.get('/organizations');
+      const items = resp.items ?? resp.content ?? [];
+      if (items.length > 0) {
+        return items[0].organizationId;
+      }
+    } catch {
+      // 忽略錯誤
+    }
+    return '';
   }
 
   /**

@@ -104,6 +104,7 @@ function adaptUpdateRequest(request: UpdateUserRequest): Record<string, unknown>
     firstName: request.first_name,
     lastName: request.last_name,
     roles: request.role_ids,
+    employeeId: request.employee_id,
     mustChangePassword: undefined,
   };
 }
@@ -181,11 +182,11 @@ export const UserApi = {
    * 管理員重置密碼
    */
   resetPassword: async (request: AdminResetPasswordRequest): Promise<SuccessResponse> => {
-    return apiClient.put<SuccessResponse>(
-      `${BASE_URL}/${request.user_id}/reset-password`,
+    return apiClient.post<SuccessResponse>(
+      `/auth/users/${request.user_id}/password/reset`,
       {
-        new_password: request.new_password,
-        force_change: request.force_change,
+        newPassword: request.new_password,
+        forceChangeOnNextLogin: request.force_change,
       }
     );
   },

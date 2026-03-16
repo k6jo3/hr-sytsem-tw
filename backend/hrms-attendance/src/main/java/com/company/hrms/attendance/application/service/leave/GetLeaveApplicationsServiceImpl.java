@@ -111,6 +111,7 @@ public class GetLeaveApplicationsServiceImpl implements
                 .endDate(entity.getEndDate())
                 .leaveDays(days)
                 .status(entity.getStatus().name())
+                .appliedAt(entity.getCreatedAt())
                 .build();
     }
 }

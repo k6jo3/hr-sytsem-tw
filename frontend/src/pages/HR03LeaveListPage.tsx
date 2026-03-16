@@ -108,7 +108,7 @@ export const HR03LeaveListPage: React.FC = () => {
       title: '申請時間',
       dataIndex: 'appliedAt',
       key: 'appliedAt',
-      render: (date) => dayjs(date).format('YYYY-MM-DD HH:mm'),
+      render: (date: string | null) => date ? dayjs(date).format('YYYY-MM-DD HH:mm') : '-',
     },
     {
       title: '操作',

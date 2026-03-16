@@ -22,5 +22,10 @@ public class UpdateProfileTask implements PipelineTask<UserPipelineContext> {
         if (request.getLastName() != null) {
             user.setLastName(request.getLastName());
         }
+
+        // 更新員工編號關聯
+        if (request.getEmployeeId() != null) {
+            user.setEmployeeId(request.getEmployeeId());
+        }
     }
 }

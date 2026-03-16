@@ -48,6 +48,11 @@ public class UpdateUserRequest {
     private List<String> roles;
 
     /**
+     * 員工編號（關聯員工，可選）
+     */
+    private String employeeId;
+
+    /**
      * 是否需要變更密碼
      */
     private Boolean mustChangePassword;
