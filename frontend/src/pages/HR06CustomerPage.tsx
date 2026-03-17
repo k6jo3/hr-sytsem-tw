@@ -1,4 +1,4 @@
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { Button, Card, Input, Space, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { CustomerList } from '../features/project/components/CustomerList';
@@ -70,12 +70,12 @@ export const HR06CustomerPage: React.FC = () => {
 
         <Card>
           <div style={{ marginBottom: 16 }}>
-            <Input
+            <Input.Search
               placeholder="搜尋客戶名稱、代碼或統編..."
-              prefix={<SearchOutlined />}
-              onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
-              style={{ width: 300 }}
+              onSearch={handleSearch}
               allowClear
+              style={{ width: 300 }}
+              onChange={(e) => !e.target.value && handleSearch('')}
             />
           </div>
 

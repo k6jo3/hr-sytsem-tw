@@ -1,4 +1,4 @@
-import { PlusOutlined, SearchOutlined, TeamOutlined } from '@ant-design/icons';
+import { PlusOutlined, TeamOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Input, Radio, Row, Space, Typography } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -65,10 +65,9 @@ export const HR06ProjectListPage: React.FC = () => {
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             <Row gutter={16} align="middle">
               <Col span={8}>
-                <Input
+                <Input.Search
                   placeholder="搜尋專案代碼、名稱或客戶..."
-                  prefix={<SearchOutlined />}
-                  onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                  onSearch={handleSearch}
                   allowClear
                   onChange={(e) => !e.target.value && handleSearch('')}
                 />

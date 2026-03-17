@@ -97,6 +97,9 @@ const HR14HRReportPage = React.lazy(() => import('./pages/HR14HRReportPage').the
 const HR14ProjectReportPage = React.lazy(() => import('./pages/HR14ProjectReportPage').then(m => ({ default: m.HR14ProjectReportPage })));
 const HR14FinanceReportPage = React.lazy(() => import('./pages/HR14FinanceReportPage').then(m => ({ default: m.HR14FinanceReportPage })));
 
+// 404 頁面
+const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'));
+
 /**
  * 頁面載入中的 Spinner
  */
@@ -211,7 +214,7 @@ const App: React.FC = () => {
 
           {/* ========== 預設與錯誤處理 ========== */}
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<ProtectedRoute><NotFoundPage /></ProtectedRoute>} />
         </Routes>
       </Suspense>
     </ConfigProvider>

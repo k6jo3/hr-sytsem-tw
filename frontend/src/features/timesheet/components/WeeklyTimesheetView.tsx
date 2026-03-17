@@ -1,5 +1,5 @@
 import { DeleteOutlined, EditOutlined, SendOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Empty, Popconfirm, Skeleton, Space, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Empty, Modal, Popconfirm, Skeleton, Space, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import React from 'react';
 import type { TimesheetEntryViewModel, WeeklyTimesheetSummary } from '../model/TimesheetViewModel';
@@ -21,6 +21,17 @@ export const WeeklyTimesheetView: React.FC<WeeklyTimesheetViewProps> = ({
   onEdit,
   onDelete,
 }) => {
+  // 送出審核前的二次確認對話框
+  const handleSubmitClick = () => {
+    Modal.confirm({
+      title: '確認送出工時',
+      content: '送出後將進入主管審核流程，送出前請確認所有工時資料正確。確定要送出嗎？',
+      okText: '確認送出',
+      cancelText: '取消',
+      onOk: () => onSubmit(),
+    });
+  };
+
   if (loading) {
     return <Card><Skeleton active /></Card>;
   }
@@ -78,7 +89,7 @@ export const WeeklyTimesheetView: React.FC<WeeklyTimesheetViewProps> = ({
           <Button
             type="primary"
             icon={<SendOutlined />}
-            onClick={onSubmit}
+            onClick={handleSubmitClick}
             disabled={!summary.canSubmit}
           >
             送出審核

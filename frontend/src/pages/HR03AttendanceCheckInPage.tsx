@@ -1,7 +1,7 @@
 import { CheckInButton } from '@features/attendance/components/CheckInButton';
 import { TodayAttendanceCard } from '@features/attendance/components/TodayAttendanceCard';
 import { useAttendance } from '@features/attendance/hooks/useAttendance';
-import { Card, Col, Row, Space, Typography, message } from 'antd';
+import { Card, Col, Modal, Row, Space, Typography, message } from 'antd';
 import React from 'react';
 
 const { Title } = Typography;
@@ -30,14 +30,22 @@ const HR03AttendanceCheckInPage: React.FC = () => {
     }
   };
 
-  // 處理下班打卡
-  const handleCheckOutClick = async () => {
-    try {
-      await handleCheckIn('CHECK_OUT');
-      message.success('下班打卡成功！');
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : '打卡失敗，請稍後再試');
-    }
+  // 處理下班打卡（含二次確認）
+  const handleCheckOutClick = () => {
+    Modal.confirm({
+      title: '確認下班打卡',
+      content: '確定要執行下班打卡嗎？打卡後將記錄您的下班時間。',
+      okText: '確認打卡',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          await handleCheckIn('CHECK_OUT');
+          message.success('下班打卡成功！');
+        } catch (err) {
+          message.error(err instanceof Error ? err.message : '打卡失敗，請稍後再試');
+        }
+      },
+    });
   };
 
   return (

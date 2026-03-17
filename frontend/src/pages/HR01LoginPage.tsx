@@ -10,17 +10,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const { Title, Text } = Typography;
 
 /**
- * 根據使用者角色清單取得登入後的預設首頁路徑
- * 優先順序：ADMIN > HR > PM > MANAGER > FINANCE > EMPLOYEE > 預設
+ * 取得登入後的預設首頁路徑
+ * 所有角色統一導向 Dashboard，Dashboard 會根據角色顯示對應的快捷操作與統計數據
  */
-const getDefaultPathByRoles = (roles: string[]): string => {
-  if (roles.includes('ADMIN')) return '/admin/users';
-  if (roles.includes('HR') || roles.includes('HR_ADMIN') || roles.includes('HR_MANAGER')) return '/admin/employees';
-  if (roles.includes('PM')) return '/admin/projects';
-  if (roles.includes('MANAGER')) return '/admin/attendance/approvals';
-  if (roles.includes('FINANCE')) return '/admin/payroll/runs';
-  // EMPLOYEE 或其他角色預設導向打卡頁面
-  return '/attendance/check-in';
+const getDefaultPathByRoles = (_roles: string[]): string => {
+  return '/dashboard';
 };
 
 /**
