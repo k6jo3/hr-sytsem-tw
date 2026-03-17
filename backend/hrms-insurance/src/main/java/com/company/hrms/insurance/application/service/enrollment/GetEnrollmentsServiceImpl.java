@@ -14,6 +14,7 @@ import com.company.hrms.insurance.api.response.EnrollmentDetailResponse;
 import com.company.hrms.insurance.application.assembler.EnrollmentResponseAssembler;
 import com.company.hrms.insurance.domain.model.aggregate.InsuranceEnrollment;
 import com.company.hrms.insurance.domain.repository.IInsuranceEnrollmentRepository;
+import com.company.hrms.insurance.infrastructure.client.OrganizationClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class GetEnrollmentsServiceImpl
 
     private final IInsuranceEnrollmentRepository enrollmentRepository;
     private final EnrollmentResponseAssembler assembler;
+    private final OrganizationClient organizationClient;
 
     @Override
     public PageResponse<EnrollmentDetailResponse> getResponse(GetEnrollmentListRequest request, JWTModel currentUser,
@@ -44,7 +46,13 @@ public class GetEnrollmentsServiceImpl
         }
 
         List<EnrollmentDetailResponse> items = enrollments.stream()
-                .map(e -> assembler.toDetailResponse(e, null))
+                .map(e -> {
+                    // 透過 OrganizationClient 查詢員工姓名
+                    String empName = organizationClient.getEmployeeById(e.getEmployeeId())
+                            .map(info -> info.getEmployeeName())
+                            .orElse(null);
+                    return assembler.toDetailResponse(e, empName);
+                })
                 .collect(Collectors.toList());
 
         return PageResponse.of(items, 1, 20, items.size());

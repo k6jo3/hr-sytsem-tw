@@ -99,7 +99,8 @@ html {
 
 /* 響應式防禦性樣式 — 防止表格與統計元件在小螢幕溢出 */
 .ant-table-cell {
-  word-break: break-word;
+  word-break: normal;
+  white-space: nowrap;
 }
 
 .ant-statistic-title {

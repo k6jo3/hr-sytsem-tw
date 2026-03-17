@@ -127,7 +127,7 @@ export const HR09RecruitmentPage: React.FC = () => {
 
       <Row gutter={16} style={{ marginBottom: 24 }}>
         {kanban.columns.map((column) => (
-          <Col span={4} key={column.id}>
+          <Col xs={12} sm={8} md={4} key={column.id}>
             <Card size="small" style={{ textAlign: 'center' }}>
               <div
                 style={{
@@ -138,7 +138,7 @@ export const HR09RecruitmentPage: React.FC = () => {
               >
                 {column.count}
               </div>
-              <Text type="secondary">{column.title}</Text>
+              <Text type="secondary" style={{ whiteSpace: 'nowrap' }}>{column.title}</Text>
             </Card>
           </Col>
         ))}
@@ -152,7 +152,7 @@ export const HR09RecruitmentPage: React.FC = () => {
 
       <Row gutter={16}>
         {kanban.columns.map((column) => (
-          <Col span={4} key={column.id}>
+          <Col xs={24} sm={12} md={8} lg={4} key={column.id}>
             <KanbanColumn column={column} />
           </Col>
         ))}

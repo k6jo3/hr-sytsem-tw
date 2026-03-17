@@ -64,7 +64,8 @@ export const WorkflowDefinitionList: React.FC<WorkflowDefinitionListProps> = ({
       title: '建立時間',
       dataIndex: 'createdAtDisplay',
       key: 'createdAtDisplay',
-      width: 150,
+      width: 180,
+      render: (text: string) => <span style={{ whiteSpace: 'nowrap' }}>{text}</span>,
     },
     {
       title: '操作',
@@ -115,6 +116,7 @@ export const WorkflowDefinitionList: React.FC<WorkflowDefinitionListProps> = ({
           dataSource={definitions}
           rowKey="definitionId"
           pagination={{ pageSize: 10 }}
+          scroll={{ x: 860 }}
         />
       )}
     </Card>

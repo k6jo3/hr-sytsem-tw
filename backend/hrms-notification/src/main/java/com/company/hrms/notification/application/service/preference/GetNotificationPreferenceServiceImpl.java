@@ -36,8 +36,14 @@ public class GetNotificationPreferenceServiceImpl
             JWTModel currentUser,
             String... args) throws Exception {
 
-        // 1. 取得員工編號 (使用 employeeNumber 作為員工 ID)
+        // 1. 取得員工編號 (優先使用 employeeNumber，不存在則 fallback 到 employeeId 或 userId)
         String employeeId = currentUser.getEmployeeNumber();
+        if (employeeId == null || employeeId.isBlank()) {
+            employeeId = currentUser.getEmployeeId();
+        }
+        if (employeeId == null || employeeId.isBlank()) {
+            employeeId = currentUser.getUserId();
+        }
 
         // 2. 查詢偏好設定，若不存在則建立預設值
         NotificationPreference preference = preferenceRepository

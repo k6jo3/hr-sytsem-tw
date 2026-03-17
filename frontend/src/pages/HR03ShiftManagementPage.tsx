@@ -95,12 +95,12 @@ export const HR03ShiftManagementPage: React.FC = () => {
   };
 
   const columns = [
-    { title: '班別名稱', dataIndex: 'shiftName', key: 'shiftName' },
-    { title: '代碼', dataIndex: 'shiftCode', key: 'shiftCode' },
-    { title: '類型', dataIndex: 'shiftType', key: 'shiftType', render: (type: string) => <Tag color="blue">{type}</Tag> },
-    { title: '上班時間', dataIndex: 'workStartTime', key: 'workStartTime' },
-    { title: '下班時間', dataIndex: 'workEndTime', key: 'workEndTime' },
-    { title: '狀態', dataIndex: 'isActive', key: 'isActive', render: (active: boolean) => active ? <Tag color="green">啟用中</Tag> : <Tag color="red">已停用</Tag> },
+    { title: '班別名稱', dataIndex: 'shiftName', key: 'shiftName', width: 150 },
+    { title: '代碼', dataIndex: 'shiftCode', key: 'shiftCode', width: 120 },
+    { title: '類型', dataIndex: 'shiftType', key: 'shiftType', width: 120, render: (type: string) => <Tag color="blue">{type}</Tag> },
+    { title: '上班時間', dataIndex: 'workStartTime', key: 'workStartTime', width: 120 },
+    { title: '下班時間', dataIndex: 'workEndTime', key: 'workEndTime', width: 120 },
+    { title: '狀態', dataIndex: 'isActive', key: 'isActive', width: 100, render: (active: boolean) => active ? <Tag color="green">啟用中</Tag> : <Tag color="red">已停用</Tag> },
     {
       title: '操作',
       key: 'action',
@@ -121,11 +121,12 @@ export const HR03ShiftManagementPage: React.FC = () => {
         title={<Title level={3}>班別管理</Title>}
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => showModal()}>新增班別</Button>}
       >
-        <Table 
-          columns={columns} 
-          dataSource={shifts} 
-          rowKey="shiftId" 
-          loading={loading} 
+        <Table
+          columns={columns}
+          dataSource={shifts}
+          rowKey="shiftId"
+          loading={loading}
+          scroll={{ x: 900 }}
         />
       </Card>
 
