@@ -1,4 +1,5 @@
 import {
+    BellOutlined,
     LockOutlined,
     LogoutOutlined,
     MenuFoldOutlined,
@@ -7,8 +8,9 @@ import {
 } from '@ant-design/icons';
 import { logout } from '@store/authSlice';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { Avatar, Button, Dropdown, Layout, Menu, Space, type MenuProps } from 'antd';
-import React, { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { Avatar, Badge, Button, Dropdown, Layout, Menu, Space, type MenuProps } from 'antd';
+import React, { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { apiClient } from '@shared/api';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MENU_CONFIG } from '../config/menuConfig';
 import { MenuFactory } from '../factory/MenuFactory';
@@ -28,6 +30,9 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+
+  // 未讀通知數量
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // 側邊欄收合狀態管理（響應式設計）
   const [siderCollapsed, setSiderCollapsed] = useState(false);
@@ -49,6 +54,17 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
   const toggleSider = useCallback(() => {
     setSiderCollapsed((prev) => !prev);
   }, []);
+
+  // 載入時取得未讀通知數量（靜默模式，失敗不影響頁面）
+  useEffect(() => {
+    if (isAuthenticated) {
+      apiClient.get<any>('/notifications/unread-count')
+        .then((data) => {
+          setUnreadCount(data?.unreadCount ?? data?.unread_count ?? 0);
+        })
+        .catch(() => { /* 靜默失敗，不影響主要功能 */ });
+    }
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -129,12 +145,26 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
           </span>
         </div>
         {isAuthenticated && user && (
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Space style={{ cursor: 'pointer' }}>
-              <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#667eea' }} />
-              <span>{user.displayName}</span>
-            </Space>
-          </Dropdown>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* 通知鈴鐺 */}
+            <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+              <Button
+                type="text"
+                icon={<BellOutlined style={{ fontSize: 18 }} />}
+                onClick={() => navigate('/profile/notifications')}
+                aria-label="通知"
+                style={{ color: '#595959' }}
+              />
+            </Badge>
+
+            {/* 使用者下拉選單 */}
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+              <Space style={{ cursor: 'pointer' }}>
+                <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#667eea' }} />
+                <span>{user.displayName}</span>
+              </Space>
+            </Dropdown>
+          </div>
         )}
       </Header>
       <Layout>

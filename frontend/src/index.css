@@ -139,3 +139,29 @@ html {
     padding: 16px !important;
   }
 }
+
+/* ========== 頁面切換淡入動畫 ========== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 應用到主要內容區域 */
+.ant-layout-content > * {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* 表格行過渡效果 */
+.ant-table-tbody > tr {
+  transition: background-color 0.2s ease;
+}
+
+.ant-table-tbody > tr:hover {
+  cursor: default;
+}
+
+/* 卡片 hover 提升效果 */
+.ant-card-hoverable:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}

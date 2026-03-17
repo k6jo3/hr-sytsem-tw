@@ -2,8 +2,9 @@ import { CalculatorOutlined, DollarOutlined, InfoCircleOutlined } from '@ant-des
 import { Button, Card, Col, Divider, InputNumber, message, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useInsuranceCalculator } from '../features/insurance/hooks';
+import { PageHeader } from '@shared/components/PageHeader';
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 
 /**
  * HR05-P04: 保險費用試算頁面
@@ -60,12 +61,14 @@ export const HR05InsuranceCalculatorPage: React.FC = () => {
   return (
     <div style={{ padding: 24 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Title level={2}>保險費用試算</Title>
-            <Text type="secondary">輸入員工月薪，預估勞健保及勞退費用的自付額與公提額。</Text>
-          </Col>
-        </Row>
+        <PageHeader
+          title="保險費用試算"
+          subtitle="輸入員工月薪，預估勞健保及勞退費用的自付額與公提額。"
+          breadcrumbs={[
+            { title: '保險管理', path: '/admin/insurance/enrollment' },
+            { title: '保費試算工具' },
+          ]}
+        />
 
         <Card>
           <Row gutter={24} align="middle">

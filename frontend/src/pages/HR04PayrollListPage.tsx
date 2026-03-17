@@ -8,13 +8,14 @@ import {
     SearchOutlined,
     SendOutlined
 } from '@ant-design/icons';
-import { Button, Card, Col, DatePicker, Form, Input, message, Modal, Popconfirm, Progress, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, DatePicker, Form, Input, message, Modal, Popconfirm, Progress, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePayrollRuns } from '../features/payroll/hooks/usePayrollRuns';
 import type { PayrollRunViewModel } from '../features/payroll/model/PayrollViewModel';
+import { PageHeader } from '@shared/components/PageHeader';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 /**
@@ -155,14 +156,19 @@ export const HR04PayrollListPage: React.FC = () => {
   return (
     <div style={{ padding: '24px' }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Row justify="space-between" align="middle">
-          <Col><Title level={2}>薪資計算批次管理</Title></Col>
-          <Col>
+        <PageHeader
+          title="薪資計算批次管理"
+          subtitle="管理薪資計算批次，進行計薪與發薪作業"
+          breadcrumbs={[
+            { title: '薪資核算', path: '/admin/payroll/runs' },
+            { title: '計薪作業中心' },
+          ]}
+          extra={
             <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalVisible(true)}>
               建立新批次
             </Button>
-          </Col>
-        </Row>
+          }
+        />
 
         <Card title="篩選條件">
           <Form form={searchForm} layout="inline">

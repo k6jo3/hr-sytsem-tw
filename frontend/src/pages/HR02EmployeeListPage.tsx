@@ -4,7 +4,9 @@ import { OrganizationApi } from '@features/organization/api/OrganizationApi';
 import { UserApi } from '@features/auth/api/UserApi';
 import type { CreateUserRequest } from '@features/auth/api/AuthTypes';
 import { useEmployees } from '@features/organization/hooks/useEmployees';
-import { Layout, message } from 'antd';
+import { PageHeader } from '@shared/components/PageHeader';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Button, Layout, message, Space } from 'antd';
 import React, { useState } from 'react';
 
 const { Content } = Layout;
@@ -90,6 +92,23 @@ const HR02EmployeeListPage: React.FC = () => {
   return (
     <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
       <Content style={{ padding: 24 }}>
+        <PageHeader
+          title="員工列表"
+          breadcrumbs={[
+            { title: '組織與員工', path: '/admin/employees' },
+            { title: '員工列表' },
+          ]}
+          extra={
+            <Space>
+              <Button icon={<ReloadOutlined />} onClick={refresh}>
+                重新整理
+              </Button>
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+                新增員工
+              </Button>
+            </Space>
+          }
+        />
         <EmployeeList
           employees={employees}
           loading={loading}

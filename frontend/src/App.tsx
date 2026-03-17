@@ -135,6 +135,9 @@ const App: React.FC = () => {
             darkItemSelectedBg: '#667eea',
             darkItemHoverBg: 'rgba(102, 126, 234, 0.15)',
           },
+          Table: {
+            rowHoverBg: '#f0f5ff',  // hover 時的背景色（淺藍色）
+          },
         },
       }}
     >
