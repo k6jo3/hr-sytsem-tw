@@ -68,7 +68,7 @@ class ApiClient {
    * 設定請求與回應攔截器
    */
   private setupInterceptors(): void {
-    // 請求攔截器：注入 Token
+    // 請求攔截器：注入 Token，標記靜默模式
     this.instance.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('accessToken');
@@ -84,9 +84,14 @@ class ApiClient {
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error) => {
+        // 判斷是否為靜默模式（不顯示錯誤 toast）
+        const isSilent = error.config?._silent === true;
+
         // 網路錯誤（無 response）
         if (!error.response) {
-          antdMessage.error('網路連線異常，請檢查網路狀態後再試');
+          if (!isSilent) {
+            antdMessage.error('網路連線異常，請檢查網路狀態後再試');
+          }
           const apiError = new ApiError({
             message: '網路連線異常，請檢查網路狀態後再試',
             originalMessage: error.message,
@@ -102,32 +107,22 @@ class ApiClient {
         // 錯誤訊息優先取 response.data.message，其次取 response.data.error，最後用通用訊息
         const displayMessage = serverMessage || serverError || defaultMessage;
 
+        // 靜默模式下跳過所有 toast 提示（401 跳轉仍保留）
         if (status === 401) {
           // 登入 API 本身的 401 不跳轉，讓呼叫端自行處理
           const isLoginApi = error.config?.url?.includes('/auth/login');
           if (!isLoginApi) {
-            antdMessage.error('登入已過期，請重新登入');
+            if (!isSilent) antdMessage.error('登入已過期，請重新登入');
             localStorage.removeItem('accessToken');
             window.location.href = '/login';
           }
-        } else if (status === 403) {
-          // 403 權限不足提示
-          antdMessage.error('權限不足，無法執行此操作');
-        } else if (status === 400) {
-          // 400 請求驗證失敗
-          antdMessage.error(displayMessage);
-        } else if (status === 404) {
-          // 404 資源不存在
-          antdMessage.error(displayMessage);
-        } else if (status === 409) {
-          // 409 資料衝突
-          antdMessage.error(displayMessage);
-        } else if (status && status >= 500) {
-          // 5xx 伺服器錯誤
-          antdMessage.error(displayMessage);
-        } else {
-          // 其他未預期的 HTTP 錯誤
-          antdMessage.error(displayMessage);
+        } else if (!isSilent) {
+          // 非靜默模式才顯示錯誤 toast
+          if (status === 403) {
+            antdMessage.error('權限不足，無法執行此操作');
+          } else {
+            antdMessage.error(displayMessage);
+          }
         }
 
         // 建立型別安全的結構化錯誤
@@ -159,9 +154,11 @@ class ApiClient {
 
   /**
    * GET 請求
+   * @param config.silent - 設為 true 時錯誤不彈出 toast（適用於背景資料載入）
    */
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.instance.get<T>(url, config);
+  async get<T>(url: string, config?: AxiosRequestConfig & { silent?: boolean }): Promise<T> {
+    const axiosConfig = config ? { ...config, _silent: config.silent } as any : undefined;
+    const response = await this.instance.get<T>(url, axiosConfig);
     return response.data;
   }
 

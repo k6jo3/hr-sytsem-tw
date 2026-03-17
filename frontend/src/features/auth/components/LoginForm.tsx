@@ -121,11 +121,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         </Form.Item>
       </Form>
 
-      <div style={{ marginTop: 24, textAlign: 'center' }}>
-        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-          © 2026 HR System. All rights reserved.
-        </Typography.Text>
-      </div>
+      {/* 版權資訊已移至登入頁左側品牌區 */}
     </div>
   );
 };

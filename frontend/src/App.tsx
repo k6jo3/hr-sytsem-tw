@@ -123,6 +123,19 @@ const App: React.FC = () => {
           borderRadius: 8,
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
         },
+        components: {
+          Layout: {
+            siderBg: '#1a1a2e',
+            headerBg: '#ffffff',
+            bodyBg: '#f0f2f5',
+          },
+          Menu: {
+            darkItemBg: '#1a1a2e',
+            darkSubMenuItemBg: '#151525',
+            darkItemSelectedBg: '#667eea',
+            darkItemHoverBg: 'rgba(102, 126, 234, 0.15)',
+          },
+        },
       }}
     >
       <Suspense fallback={<PageLoading />}>

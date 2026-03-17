@@ -35,8 +35,8 @@ describe('TodayAttendanceCard', () => {
     it('應該顯示總工作時數', () => {
       render(<TodayAttendanceCard summary={mockSummary} />);
 
-      expect(screen.getByText(/8\.5/)).toBeInTheDocument();
-      expect(screen.getByText(/小時/)).toBeInTheDocument();
+      // formatWorkHours(8.5) → 「8 小時 30 分鐘」
+      expect(screen.getByText(/8 小時 30 分鐘/)).toBeInTheDocument();
     });
 
     it('應該顯示打卡記錄', () => {

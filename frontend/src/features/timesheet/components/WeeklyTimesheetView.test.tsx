@@ -114,7 +114,7 @@ describe('WeeklyTimesheetView', () => {
       expect(submitButton.closest('button')).toBeDisabled();
     });
 
-    it('點擊提交按鈕應該呼叫onSubmit', () => {
+    it('點擊提交按鈕應該顯示確認對話框並在確認後呼叫onSubmit', async () => {
       const handleSubmit = vi.fn();
 
       render(
@@ -126,7 +126,12 @@ describe('WeeklyTimesheetView', () => {
         />
       );
 
+      // 點擊「送出審核」按鈕，應彈出 Modal.confirm 確認對話框
       fireEvent.click(screen.getByText('送出審核'));
+
+      // 確認對話框中點擊「確認送出」按鈕
+      const confirmBtn = await screen.findByText('確認送出');
+      fireEvent.click(confirmBtn);
 
       expect(handleSubmit).toHaveBeenCalledTimes(1);
     });

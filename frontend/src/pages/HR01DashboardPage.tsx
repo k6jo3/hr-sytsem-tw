@@ -84,23 +84,26 @@ export const HR01DashboardPage: React.FC = () => {
     const todoList: TodoItem[] = [];
     const announcementList: Announcement[] = [];
 
-    // 平行呼叫各 API，任一失敗不影響其他
+    // 平行呼叫各 API，任一失敗不影響其他（靜默模式：不彈錯誤 toast）
     const results = await Promise.allSettled([
       // 1. 未讀通知數
-      apiClient.get<any>('/notifications/unread-count'),
+      apiClient.get<any>('/notifications/unread-count', { silent: true }),
       // 2. 本月考勤紀錄
       apiClient.get<any>('/attendance/records', {
         params: { page: 1, size: 1 },
+        silent: true,
       }),
       // 3. 假別餘額
-      apiClient.get<any>('/leave/balances').catch(() => null),
+      apiClient.get<any>('/leave/balances', { silent: true }).catch(() => null),
       // 4. 簽核待處理
       apiClient.get<any>('/workflows/instances', {
         params: { status: 'PENDING', page: 1, size: 1 },
+        silent: true,
       }).catch(() => null),
       // 5. 公告列表
       apiClient.get<any>('/notifications/announcements', {
         params: { page: 1, size: 5 },
+        silent: true,
       }),
     ]);
 

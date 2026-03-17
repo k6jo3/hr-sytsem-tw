@@ -112,21 +112,19 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
           justifyContent: 'space-between',
           background: '#fff',
           padding: '0 24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {/* 漢堡按鈕：小螢幕時顯示，可手動展開/收合 Sider */}
-          {isBelowBreakpoint && (
-            <Button
-              type="text"
-              icon={siderCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-              onClick={toggleSider}
-              style={{ fontSize: 18 }}
-              aria-label={siderCollapsed ? '展開選單' : '收合選單'}
-            />
-          )}
-          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#667eea' }}>
+          {/* 漢堡按鈕：桌面與手機皆顯示，可手動展開/收合 Sider */}
+          <Button
+            type="text"
+            icon={siderCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            onClick={toggleSider}
+            style={{ fontSize: 18 }}
+            aria-label={siderCollapsed ? '展開選單' : '收合選單'}
+          />
+          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#1a1a2e' }}>
             HR System 3.0
           </span>
         </div>
@@ -144,26 +142,30 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
           width={250}
           collapsible
           breakpoint="lg"
-          collapsedWidth={0}
+          collapsedWidth={isBelowBreakpoint ? 0 : 80}
           collapsed={siderCollapsed}
           onCollapse={handleSiderCollapse}
           onBreakpoint={handleBreakpoint}
           trigger={null}
           style={{
-            background: '#fff',
-            // 小螢幕時 Sider 以浮動覆蓋方式顯示
-            ...(isBelowBreakpoint
+            background: '#1a1a2e',
+            // 手機展開時以浮動覆蓋方式顯示
+            ...(isBelowBreakpoint && !siderCollapsed
               ? { position: 'fixed', height: '100vh', zIndex: 100, top: 64, left: 0 }
               : {}),
           }}
         >
           <Menu
             mode="inline"
+            theme="dark"
             selectedKeys={selectedKeys}
             defaultOpenKeys={defaultOpenKeys}
             items={menuItems}
             onClick={handleMenuClick}
-            style={{ borderRight: 0 }}
+            style={{
+              borderRight: 0,
+              background: '#1a1a2e',
+            }}
           />
         </Sider>
         {/* 小螢幕展開 Sider 時的遮罩層，點擊可收合 */}
