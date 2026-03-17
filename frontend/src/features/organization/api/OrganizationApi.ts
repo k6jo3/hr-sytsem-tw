@@ -22,14 +22,18 @@ const EMPLOYEE_STATUS_VALUES = ['ACTIVE', 'PROBATION', 'TERMINATED', 'ON_LEAVE',
 function adaptEmployeeItem(raw: any): EmployeeDto {
   const backendStatus = raw.employmentStatus ?? raw.status;
 
+  // 後端詳細查詢回傳 department 為巢狀物件，列表查詢為扁平欄位
+  const departmentId = raw.departmentId ?? raw.department_id ?? raw.department?.departmentId ?? '';
+  const departmentName = raw.departmentName ?? raw.department_name ?? raw.department?.departmentName ?? '';
+
   return {
     id: raw.employeeId ?? raw.id,
     employee_number: raw.employeeNumber ?? raw.employee_number ?? '',
     full_name: raw.fullName ?? raw.full_name ?? '',
     email: raw.companyEmail ?? raw.email ?? '',
-    phone: raw.phone,
-    department_id: raw.departmentId ?? raw.department_id ?? '',
-    department_name: raw.departmentName ?? raw.department_name ?? '',
+    phone: raw.mobilePhone ?? raw.phone,
+    department_id: departmentId,
+    department_name: departmentName,
     position: raw.jobTitle ?? raw.position ?? '',
     status: guardEnum('employee.status', backendStatus, EMPLOYEE_STATUS_VALUES, 'ACTIVE'),
     hire_date: raw.hireDate ?? raw.hire_date ?? '',
@@ -81,10 +85,12 @@ export const OrganizationApi = {
 
   /**
    * 取得員工詳細資料
+   * 後端直接回傳 EmployeeDetailResponse（扁平結構），需適配為 { employee: EmployeeDto }
    */
-  getEmployeeDetail: (id: string): Promise<GetEmployeeDetailResponse> => {
+  getEmployeeDetail: async (id: string): Promise<GetEmployeeDetailResponse> => {
     if (MockConfig.isEnabled('ORGANIZATION')) return MockOrganizationApi.getEmployeeDetail(id);
-    return apiClient.get<GetEmployeeDetailResponse>(`/employees/${id}`);
+    const raw = await apiClient.get<any>(`/employees/${id}`);
+    return { employee: adaptEmployeeItem(raw) };
   },
 
   /**

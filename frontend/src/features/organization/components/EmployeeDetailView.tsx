@@ -17,6 +17,7 @@ interface EmployeeDetailViewProps {
 
 const STATUS_MAP: Record<string, { color: string; label: string }> = {
   ACTIVE: { color: 'green', label: '在職' },
+  PROBATION: { color: 'blue', label: '試用期' },
   INACTIVE: { color: 'default', label: '非使用中' },
   ON_LEAVE: { color: 'orange', label: '留職停薪' },
   TERMINATED: { color: 'red', label: '已離職' },
@@ -82,8 +83,12 @@ export const EmployeeDetailView: React.FC<EmployeeDetailViewProps> = ({ employee
                     {dayjs(employee.termination_date).format('YYYY-MM-DD')}
                   </Descriptions.Item>
                 )}
-                <Descriptions.Item label="建立時間">{dayjs(employee.created_at).format('YYYY-MM-DD HH:mm')}</Descriptions.Item>
-                <Descriptions.Item label="更新時間">{dayjs(employee.updated_at).format('YYYY-MM-DD HH:mm')}</Descriptions.Item>
+                <Descriptions.Item label="建立時間">
+                  {employee.created_at ? dayjs(employee.created_at).format('YYYY-MM-DD HH:mm') : '-'}
+                </Descriptions.Item>
+                <Descriptions.Item label="更新時間">
+                  {employee.updated_at ? dayjs(employee.updated_at).format('YYYY-MM-DD HH:mm') : '-'}
+                </Descriptions.Item>
               </Descriptions>
             )
           },
