@@ -185,6 +185,20 @@
     <build>
         <pluginManagement>
             <plugins>
+                <!-- Maven Toolchains Plugin: 強制所有 plugin 使用 JDK 21 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-toolchains-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <configuration>
+                        <toolchains>
+                            <jdk>
+                                <version>21</version>
+                            </jdk>
+                        </toolchains>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
@@ -203,6 +217,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
+                        <release>${java.version}</release>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
                         <annotationProcessorPaths>
@@ -229,13 +244,26 @@
         </pluginManagement>
 
         <plugins>
+        <!-- Maven Toolchains Plugin: 強制使用 JDK 21（解決系統 JAVA_HOME 為 JDK 17 的問題） -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-toolchains-plugin</artifactId>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>toolchain</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
         <!-- Maven Compiler Plugin: 實際使用 -->
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
         </plugin>
 
-        <!-- Maven Surefire Plugin: 實際使用 -->
+        <!-- Maven Surefire Plugin: 實際使用（jvm 設定確保測試用 JDK 21） -->
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>

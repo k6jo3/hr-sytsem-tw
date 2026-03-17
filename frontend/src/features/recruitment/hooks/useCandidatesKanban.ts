@@ -16,10 +16,12 @@ export const useCandidatesKanban = () => {
 
     try {
       const response = await RecruitmentApi.getCandidates({ page: 1, page_size: 100 });
-      const kanbanViewModel = RecruitmentViewModelFactory.createKanbanViewModel(response.data);
+      const candidates = response?.data ?? [];
+      const kanbanViewModel = RecruitmentViewModelFactory.createKanbanViewModel(candidates);
       setKanban(kanbanViewModel);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '載入應徵者失敗';
+      console.error('[useCandidatesKanban] 載入失敗:', err);
       setError(errorMessage);
     } finally {
       setLoading(false);

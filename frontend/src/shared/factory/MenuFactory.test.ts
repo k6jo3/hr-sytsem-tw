@@ -62,6 +62,42 @@ describe('MenuFactory', () => {
       expect(items).toHaveLength(0);
     });
 
+    it('父級有路由但子項全被過濾時，仍作為葉節點顯示', () => {
+      const config: MenuItemConfig[] = [
+        {
+          key: '/admin/training',
+          icon: 'BookOutlined',
+          label: '教育訓練',
+          children: [
+            { key: '/admin/training/courses', label: '課程管理', roles: ['ADMIN'] },
+          ],
+        },
+      ];
+      const items = MenuFactory.createMenuItems(config, ['EMPLOYEE']);
+      // 父級 key 以 '/' 開頭，有實際路由 → 仍顯示為葉節點
+      expect(items).toHaveLength(1);
+      expect(items[0]!.key).toBe('/admin/training');
+      // 不應有 children 屬性（已降級為葉節點）
+      expect((items[0] as any).children).toBeUndefined();
+    });
+
+    it('父級自身有 roles 限制且使用者無權限時應隱藏', () => {
+      const config: MenuItemConfig[] = [
+        {
+          key: 'finance-group',
+          icon: 'DollarOutlined',
+          label: '財務管理',
+          roles: ['FINANCE'],
+          children: [
+            { key: '/admin/finance/reports', label: '財務報表' },
+          ],
+        },
+      ];
+      const items = MenuFactory.createMenuItems(config, ['EMPLOYEE']);
+      // 父級限定 FINANCE 角色，EMPLOYEE 無法看到
+      expect(items).toHaveLength(0);
+    });
+
     it('無角色限制的項目所有人都能看到', () => {
       const config: MenuItemConfig[] = [
         { key: '/public', icon: 'HomeOutlined', label: '公開頁面' },

@@ -1,0 +1,596 @@
+# ============================================================
+# HRMS Docker Compose - 完整容器化部署
+# 包含：PostgreSQL + Redis + Gateway + 14 微服務 + 前端
+#
+# 使用方式：
+#   啟動全部：   docker compose up -d --build
+#   啟動基礎設施：docker compose up -d postgres redis
+#   查看狀態：   docker compose ps
+#   查看日誌：   docker compose logs -f hrms-iam
+#   停止全部：   docker compose down
+#   清除資料：   docker compose down -v
+# ============================================================
+
+services:
+  # ==========================================
+  # 基礎設施 — PostgreSQL
+  # ==========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: hrms-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: hrms_iam
+      POSTGRES_USER: hrms_user
+      POSTGRES_PASSWORD: hrms_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/01-init-databases.sql
+      - ./backend/hrms-iam/src/main/resources/db/schema-local.sql:/docker-entrypoint-initdb.d/02-schema-iam.sql
+      - ./docker/seed-iam.sql:/docker-entrypoint-initdb.d/03-seed-iam.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hrms_user -d hrms_iam"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    command: postgres -c max_connections=300 -c shared_buffers=128MB
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # 基礎設施 — Redis
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: hrms-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # API Gateway
+  # ==========================================
+  hrms-gateway:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-gateway
+    container_name: hrms-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8080
+      REDIS_HOST: redis
+      EUREKA_ENABLED: "false"
+      # Gateway 路由 — 指向 Docker 內部服務名稱
+      ROUTE_IAM_URI: http://hrms-iam:8081
+      ROUTE_ORG_URI: http://hrms-organization:8082
+      ROUTE_ATT_URI: http://hrms-attendance:8083
+      ROUTE_PAY_URI: http://hrms-payroll:8084
+      ROUTE_INS_URI: http://hrms-insurance:8085
+      ROUTE_PROJ_URI: http://hrms-project:8086
+      ROUTE_TIME_URI: http://hrms-timesheet:8087
+      ROUTE_PERF_URI: http://hrms-performance:8088
+      ROUTE_RECRUIT_URI: http://hrms-recruitment:8089
+      ROUTE_TRAIN_URI: http://hrms-training:8090
+      ROUTE_WF_URI: http://hrms-workflow:8091
+      ROUTE_NOTI_URI: http://hrms-notification:8092
+      ROUTE_DOC_URI: http://hrms-document:8093
+      ROUTE_RPT_URI: http://hrms-reporting:8094
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR01 IAM 認證授權服務
+  # ==========================================
+  hrms-iam:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-iam
+    container_name: hrms-iam
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8081
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: hrms_iam
+      DB_USERNAME: hrms_user
+      DB_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      REDIS_HOST: redis
+      EUREKA_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR02 組織員工服務
+  # ==========================================
+  hrms-organization:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-organization
+    container_name: hrms-organization
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_organization
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR03 考勤管理服務
+  # ==========================================
+  hrms-attendance:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-attendance
+    container_name: hrms-attendance
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8083
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_attendance
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR04 薪資管理服務
+  # ==========================================
+  hrms-payroll:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-payroll
+    container_name: hrms-payroll
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8084
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_payroll
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR05 保險管理服務
+  # ==========================================
+  hrms-insurance:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-insurance
+    container_name: hrms-insurance
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8085
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_insurance
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR06 專案管理服務
+  # ==========================================
+  hrms-project:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-project
+    container_name: hrms-project
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8086
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_project
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR07 工時管理服務
+  # ==========================================
+  hrms-timesheet:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-timesheet
+    container_name: hrms-timesheet
+    restart: unless-stopped
+    ports:
+      - "8087:8087"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8087
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_timesheet
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR08 績效管理服務
+  # ==========================================
+  hrms-performance:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-performance
+    container_name: hrms-performance
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8088
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_performance
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR09 招募管理服務
+  # ==========================================
+  hrms-recruitment:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-recruitment
+    container_name: hrms-recruitment
+    restart: unless-stopped
+    ports:
+      - "8089:8089"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8089
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_recruitment
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR10 訓練管理服務
+  # ==========================================
+  hrms-training:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-training
+    container_name: hrms-training
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8090
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_training
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR11 簽核流程服務
+  # ==========================================
+  hrms-workflow:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-workflow
+    container_name: hrms-workflow
+    restart: unless-stopped
+    ports:
+      - "8091:8091"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8091
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_workflow
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR12 通知服務
+  # ==========================================
+  hrms-notification:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-notification
+    container_name: hrms-notification
+    restart: unless-stopped
+    ports:
+      - "8092:8092"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_notification
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR13 文件管理服務
+  # ==========================================
+  hrms-document:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-document
+    container_name: hrms-document
+    restart: unless-stopped
+    ports:
+      - "8093:8093"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8093
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_document
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # HR14 報表分析服務
+  # ==========================================
+  hrms-reporting:
+    build:
+      context: ./backend
+      args:
+        SERVICE: hrms-reporting
+    container_name: hrms-reporting
+    restart: unless-stopped
+    ports:
+      - "8094:8094"
+    environment:
+      SPRING_PROFILES_ACTIVE: local,docker
+      SERVER_PORT: 8094
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_reporting
+      SPRING_DATASOURCE_USERNAME: hrms_user
+      SPRING_DATASOURCE_PASSWORD: hrms_password
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 3
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: 1
+      SPRING_REDIS_HOST: redis
+      SPRING_KAFKA_ENABLED: "false"
+      SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      EUREKA_CLIENT_ENABLED: "false"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hrms-network
+
+  # ==========================================
+  # 前端 — React SPA (Nginx)
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+    container_name: hrms-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - hrms-gateway
+    networks:
+      - hrms-network
+
+# ==========================================
+# 網路設定
+# ==========================================
+networks:
+  hrms-network:
+    driver: bridge
+
+# ==========================================
+# 資料卷（持久化）
+# ==========================================
+volumes:
+  postgres_data:
+    name: hrms_postgres_data
+  redis_data:
+    name: hrms_redis_data

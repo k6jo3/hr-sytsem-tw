@@ -73,4 +73,24 @@ public interface INotificationRepository {
      * @param id 通知 ID
      */
     void deleteById(NotificationId id);
+
+    /**
+     * 查詢所有通知（支援篩選條件）
+     *
+     * @param recipientId 收件人 ID（可為 null 表示不篩選）
+     * @param status      通知狀態（可為 null 表示不篩選）
+     * @param page        頁碼（從 1 開始）
+     * @param pageSize    每頁筆數
+     * @return 通知列表
+     */
+    List<Notification> findAllNotifications(String recipientId, String status, int page, int pageSize);
+
+    /**
+     * 查詢所有通知的總筆數（支援篩選條件）
+     *
+     * @param recipientId 收件人 ID（可為 null 表示不篩選）
+     * @param status      通知狀態（可為 null 表示不篩選）
+     * @return 總筆數
+     */
+    long countAllNotifications(String recipientId, String status);
 }

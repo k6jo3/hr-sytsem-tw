@@ -117,7 +117,21 @@ export const UserApi = {
    */
   getUsers: async (params?: GetUsersRequest): Promise<GetUsersResponse> => {
     if (MockConfig.isEnabled('AUTH')) return MockAuthApi.getUsers(params || {});
-    const raw = await apiClient.get(BASE_URL, { params });
+    // 前端 snake_case → 後端 camelCase 參數轉換
+    const backendParams: Record<string, unknown> = {
+      page: params?.page,
+      size: params?.page_size,
+      keyword: params?.keyword,
+      status: params?.status,
+      roleId: params?.role_id,
+      sortBy: params?.sort_by,
+      sortDirection: params?.sort_order?.toUpperCase(),
+    };
+    // 移除 undefined 值，避免送出空的查詢參數
+    Object.keys(backendParams).forEach((key) => {
+      if (backendParams[key] === undefined) delete backendParams[key];
+    });
+    const raw = await apiClient.get(BASE_URL, { params: backendParams });
     return adaptGetUsersResponse(raw);
   },
 

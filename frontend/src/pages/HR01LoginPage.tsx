@@ -10,6 +10,20 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const { Title, Text } = Typography;
 
 /**
+ * 根據使用者角色清單取得登入後的預設首頁路徑
+ * 優先順序：ADMIN > HR > PM > MANAGER > FINANCE > EMPLOYEE > 預設
+ */
+const getDefaultPathByRoles = (roles: string[]): string => {
+  if (roles.includes('ADMIN')) return '/admin/users';
+  if (roles.includes('HR') || roles.includes('HR_ADMIN') || roles.includes('HR_MANAGER')) return '/admin/employees';
+  if (roles.includes('PM')) return '/admin/projects';
+  if (roles.includes('MANAGER')) return '/admin/attendance/approvals';
+  if (roles.includes('FINANCE')) return '/admin/payroll/runs';
+  // EMPLOYEE 或其他角色預設導向打卡頁面
+  return '/attendance/check-in';
+};
+
+/**
  * HR01-P01 - 登入頁面
  * Domain Code: HR01
  */
@@ -17,16 +31,21 @@ export const HR01LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, loading, error } = useLogin();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user: currentUser } = useAppSelector((state) => state.auth);
   const [forgotPasswordVisible, setForgotPasswordVisible] = React.useState(false);
 
   // 如果已經登入，重定向到首頁或原本要去的頁面
   useEffect(() => {
     if (isAuthenticated) {
-      const from = (location.state as any)?.from?.pathname || '/admin/users';
-      navigate(from, { replace: true });
+      const from = (location.state as any)?.from?.pathname;
+      if (from && from !== '/login') {
+        navigate(from, { replace: true });
+      } else {
+        const defaultPath = getDefaultPathByRoles(currentUser?.roles ?? []);
+        navigate(defaultPath, { replace: true });
+      }
     }
-  }, [isAuthenticated, navigate, location]);
+  }, [isAuthenticated, navigate, location, currentUser]);
 
   const handleSubmit = async (data: LoginFormData) => {
     try {
@@ -38,8 +57,8 @@ export const HR01LoginPage: React.FC = () => {
       if (from && from !== '/login') {
         navigate(from, { replace: true });
       } else {
-        // 默認導向使用者管理頁面（管理員）或打卡頁面（員工）
-        const defaultPath = user.isAdmin ? '/admin/users' : '/attendance/check-in';
+        // 依據角色導向對應首頁
+        const defaultPath = getDefaultPathByRoles(user.roles);
         navigate(defaultPath, { replace: true });
       }
     } catch (err) {
@@ -85,7 +104,7 @@ export const HR01LoginPage: React.FC = () => {
 
         <div style={{ textAlign: 'center', marginTop: 16 }}>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            Version 3.0 | © 2024 HR System
+            Version 3.0 | © 2026 HR System
           </Text>
         </div>
       </Card>

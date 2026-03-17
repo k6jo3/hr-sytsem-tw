@@ -98,26 +98,40 @@ export class MenuFactory {
 
   /** 將單一設定項轉為 Ant Design MenuItem，不符合角色時回傳 null */
   private static transformItem(item: MenuItemConfig, userRoles: string[]): MenuItem | null {
+    // 父級項目自身若有 roles 限制，先檢查角色權限
+    if (!this.hasAccess(item.roles, userRoles)) return null;
+
     // 有子選單的情況
     if (item.children) {
       const filteredChildren = item.children
         .map((child) => this.transformItem(child, userRoles))
         .filter((child): child is MenuItem => child !== null);
 
-      // 子選單全被過濾 → 父項也隱藏
-      if (filteredChildren.length === 0) return null;
+      // 過濾後無可見子項目：
+      // - 若父級本身無對應路由（key 不以 '/' 開頭，僅為分組用）→ 隱藏父項
+      // - 若父級有對應路由（key 以 '/' 開頭）→ 仍可作為獨立頁面顯示
+      const isGroupOnly = !item.key.startsWith('/');
+      if (filteredChildren.length === 0 && isGroupOnly) return null;
 
+      // 有可見子項目時正常顯示父項與子項
+      if (filteredChildren.length > 0) {
+        return {
+          key: item.key,
+          icon: this.resolveIcon(item.icon),
+          label: item.label,
+          children: filteredChildren,
+        } as MenuItem;
+      }
+
+      // 父級有路由但無子項 → 作為葉節點顯示（不含 children 屬性）
       return {
         key: item.key,
         icon: this.resolveIcon(item.icon),
         label: item.label,
-        children: filteredChildren,
       } as MenuItem;
     }
 
-    // 葉節點：檢查角色權限
-    if (!this.hasAccess(item.roles, userRoles)) return null;
-
+    // 葉節點：檢查角色權限（上方已檢查，此處保留語意清晰）
     return {
       key: item.key,
       icon: this.resolveIcon(item.icon),

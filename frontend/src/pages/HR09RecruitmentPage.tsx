@@ -65,7 +65,7 @@ const KanbanColumn: React.FC<{ column: KanbanColumnViewModel }> = ({ column }) =
         </Space>
       }
       style={{ height: '100%', minHeight: 500 }}
-      bodyStyle={{ padding: 12, overflowY: 'auto', maxHeight: 600 }}
+      styles={{ body: { padding: 12, overflowY: 'auto', maxHeight: 600 } }}
     >
       {column.candidates.length === 0 ? (
         <Empty
@@ -104,9 +104,7 @@ export const HR09RecruitmentPage: React.FC = () => {
   if (!kanban) {
     return (
       <Card style={{ margin: 24 }}>
-        <div style={{ textAlign: 'center', padding: '50px 0', color: '#999' }}>
-          查無資料
-        </div>
+        <Empty description="查無資料" />
       </Card>
     );
   }

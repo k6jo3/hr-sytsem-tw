@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { message as antdMessage } from 'antd';
 
 /**
  * API 回應包裝介面
@@ -8,6 +9,32 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
   errorCode?: string;
+}
+
+/**
+ * 標準化 API 錯誤類別
+ * 取代 (error as any).status 的 unsafe 寫法，提供型別安全的錯誤資訊
+ */
+export class ApiError extends Error {
+  /** HTTP 狀態碼 */
+  public readonly status: number | undefined;
+  /** 後端定義的錯誤碼 */
+  public readonly errorCode: string | undefined;
+  /** 後端回傳的原始錯誤訊息 */
+  public readonly originalMessage: string | undefined;
+
+  constructor(params: {
+    message: string;
+    status?: number;
+    errorCode?: string;
+    originalMessage?: string;
+  }) {
+    super(params.message);
+    this.name = 'ApiError';
+    this.status = params.status;
+    this.errorCode = params.errorCode;
+    this.originalMessage = params.originalMessage;
+  }
 }
 
 /**
@@ -57,23 +84,59 @@ class ApiClient {
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error) => {
+        // 網路錯誤（無 response）
+        if (!error.response) {
+          antdMessage.error('網路連線異常，請檢查網路狀態後再試');
+          const apiError = new ApiError({
+            message: '網路連線異常，請檢查網路狀態後再試',
+            originalMessage: error.message,
+          });
+          return Promise.reject(apiError);
+        }
+
         const status = error.response?.status;
         const serverMessage = error.response?.data?.message;
+        const serverError = error.response?.data?.error;
         const errorCode = error.response?.data?.errorCode;
+        const defaultMessage = this.getDefaultMessage(status);
+        // 錯誤訊息優先取 response.data.message，其次取 response.data.error，最後用通用訊息
+        const displayMessage = serverMessage || serverError || defaultMessage;
 
         if (status === 401) {
           // 登入 API 本身的 401 不跳轉，讓呼叫端自行處理
           const isLoginApi = error.config?.url?.includes('/auth/login');
           if (!isLoginApi) {
+            antdMessage.error('登入已過期，請重新登入');
             localStorage.removeItem('accessToken');
             window.location.href = '/login';
           }
+        } else if (status === 403) {
+          // 403 權限不足提示
+          antdMessage.error('權限不足，無法執行此操作');
+        } else if (status === 400) {
+          // 400 請求驗證失敗
+          antdMessage.error(displayMessage);
+        } else if (status === 404) {
+          // 404 資源不存在
+          antdMessage.error(displayMessage);
+        } else if (status === 409) {
+          // 409 資料衝突
+          antdMessage.error(displayMessage);
+        } else if (status && status >= 500) {
+          // 5xx 伺服器錯誤
+          antdMessage.error(displayMessage);
+        } else {
+          // 其他未預期的 HTTP 錯誤
+          antdMessage.error(displayMessage);
         }
 
-        // 建立結構化錯誤，包含 HTTP 狀態碼和後端錯誤碼
-        const apiError = new Error(serverMessage || this.getDefaultMessage(status));
-        (apiError as any).status = status;
-        (apiError as any).errorCode = errorCode;
+        // 建立型別安全的結構化錯誤
+        const apiError = new ApiError({
+          message: displayMessage,
+          status,
+          errorCode,
+          originalMessage: serverMessage,
+        });
         return Promise.reject(apiError);
       }
     );

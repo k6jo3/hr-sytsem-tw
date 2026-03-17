@@ -25,7 +25,8 @@ public class SaveWithdrawalTask implements PipelineTask<WithdrawalContext> {
 
         log.debug("儲存退保記錄: enrollmentId={}", enrollment.getId().getValue());
 
-        enrollmentRepository.save(enrollment);
+        // 退保是更新既有記錄，使用 update（em.merge）而非 save（em.persist）
+        enrollmentRepository.update(enrollment);
 
         log.info("退保記錄儲存成功");
     }

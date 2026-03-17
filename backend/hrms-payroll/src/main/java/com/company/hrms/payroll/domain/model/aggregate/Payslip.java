@@ -113,6 +113,18 @@ public class Payslip {
     private BigDecimal incomeTax = BigDecimal.ZERO;
 
     /**
+     * 法扣款扣除
+     */
+    @Builder.Default
+    private BigDecimal legalDeductionAmount = BigDecimal.ZERO;
+
+    /**
+     * 預借薪資扣回
+     */
+    @Builder.Default
+    private BigDecimal salaryAdvanceRepayment = BigDecimal.ZERO;
+
+    /**
      * 應發薪資
      */
     private BigDecimal grossWage;
@@ -176,6 +188,8 @@ public class Payslip {
                 .leaveDeduction(BigDecimal.ZERO)
                 .insuranceDeductions(InsuranceDeductions.empty())
                 .incomeTax(BigDecimal.ZERO)
+                .legalDeductionAmount(BigDecimal.ZERO)
+                .salaryAdvanceRepayment(BigDecimal.ZERO)
                 .grossWage(BigDecimal.ZERO)
                 .netWage(BigDecimal.ZERO)
                 .status(PayslipStatus.DRAFT)
@@ -261,12 +275,32 @@ public class Payslip {
 
     /**
      * 設定所得稅
-     * 
+     *
      * @param incomeTax 所得稅
      */
     public void setIncomeTax(BigDecimal incomeTax) {
         validateDraft();
         this.incomeTax = incomeTax != null ? incomeTax : BigDecimal.ZERO;
+    }
+
+    /**
+     * 設定法扣款扣除金額
+     *
+     * @param amount 法扣款金額
+     */
+    public void setLegalDeductionAmount(BigDecimal amount) {
+        validateDraft();
+        this.legalDeductionAmount = amount != null ? amount : BigDecimal.ZERO;
+    }
+
+    /**
+     * 設定預借薪資扣回金額
+     *
+     * @param amount 預借扣回金額
+     */
+    public void setSalaryAdvanceRepayment(BigDecimal amount) {
+        validateDraft();
+        this.salaryAdvanceRepayment = amount != null ? amount : BigDecimal.ZERO;
     }
 
     /**
@@ -303,11 +337,13 @@ public class Payslip {
 
         BigDecimal insuranceTotal = insuranceDeductions.getTotal();
 
-        // 計算實發薪資
+        // 計算實發薪資（含法扣款與預借扣回）
         this.netWage = grossWage
                 .subtract(totalDeductions)
                 .subtract(insuranceTotal)
                 .subtract(incomeTax)
+                .subtract(legalDeductionAmount)
+                .subtract(salaryAdvanceRepayment)
                 .setScale(0, RoundingMode.HALF_UP);
     }
 
@@ -383,7 +419,9 @@ public class Payslip {
 
         return itemDeductions
                 .add(insuranceDeductions.getTotal())
-                .add(incomeTax);
+                .add(incomeTax)
+                .add(legalDeductionAmount)
+                .add(salaryAdvanceRepayment);
     }
 
     /**
@@ -429,6 +467,8 @@ public class Payslip {
             BigDecimal leaveDeduction,
             InsuranceDeductions insuranceDeductions,
             BigDecimal incomeTax,
+            BigDecimal legalDeductionAmount,
+            BigDecimal salaryAdvanceRepayment,
             BigDecimal grossWage,
             BigDecimal netWage,
             BankAccount bankAccount,
@@ -451,6 +491,8 @@ public class Payslip {
                 .leaveDeduction(leaveDeduction)
                 .insuranceDeductions(insuranceDeductions)
                 .incomeTax(incomeTax)
+                .legalDeductionAmount(legalDeductionAmount != null ? legalDeductionAmount : BigDecimal.ZERO)
+                .salaryAdvanceRepayment(salaryAdvanceRepayment != null ? salaryAdvanceRepayment : BigDecimal.ZERO)
                 .grossWage(grossWage)
                 .netWage(netWage)
                 .bankAccount(bankAccount)

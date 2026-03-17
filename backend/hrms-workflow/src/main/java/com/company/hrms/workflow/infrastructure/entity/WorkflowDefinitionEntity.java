@@ -52,11 +52,9 @@ public class WorkflowDefinitionEntity {
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
 
-    @Lob
     @Column(name = "nodes_json", columnDefinition = "text")
     private String nodesJson;
 
-    @Lob
     @Column(name = "edges_json", columnDefinition = "text")
     private String edgesJson;
 

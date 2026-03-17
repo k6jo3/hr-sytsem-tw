@@ -26,7 +26,9 @@ import type {
     StartWorkflowRequest,
     StartWorkflowResponse,
     WorkflowDefinitionDto,
+    WorkflowEdgeDto,
     WorkflowInstanceDto,
+    WorkflowNodeDto,
 } from './WorkflowTypes';
 
 const BASE_URL = '/workflows';
@@ -61,15 +63,44 @@ function adaptDefinition(raw: any): WorkflowDefinitionDto {
   let edges = raw.edges ?? raw.edgesJson ?? '[]';
   if (typeof nodes === 'string') { try { nodes = JSON.parse(nodes); } catch { nodes = []; } }
   if (typeof edges === 'string') { try { edges = JSON.parse(edges); } catch { edges = []; } }
+  // 防禦性：確保 nodes/edges 一定是陣列（避免 Factory 呼叫 .map() 時 crash）
+  if (!Array.isArray(nodes)) { nodes = []; }
+  if (!Array.isArray(edges)) { edges = []; }
+
+  // Lombok boolean isActive 序列化可能產生 "active"（primitive boolean getter 會移除 is prefix）
+  const isActive = raw.isActive ?? raw.active ?? raw.is_active ?? false;
+
   return {
     definition_id: raw.definitionId ?? raw.definition_id ?? '',
     flow_name: raw.flowName ?? raw.flow_name ?? '',
     flow_type: raw.flowType ?? raw.flow_type ?? '',
-    nodes,
-    edges,
-    is_active: raw.isActive ?? raw.is_active ?? false,
+    nodes: nodes.map(adaptNodeItem),
+    edges: edges.map(adaptEdgeItem),
+    is_active: isActive,
     version: raw.version ?? 0,
     created_at: raw.createdAt ?? raw.created_at ?? '',
+  };
+}
+
+/** 後端節點 JSON 內部欄位映射（camelCase → snake_case） */
+function adaptNodeItem(raw: any): WorkflowNodeDto {
+  return {
+    node_id: raw.node_id ?? raw.nodeId ?? '',
+    node_type: raw.node_type ?? raw.nodeType ?? 'APPROVAL',
+    node_name: raw.node_name ?? raw.name ?? raw.nodeName ?? '',
+    assignee_type: raw.assignee_type ?? raw.assigneeType,
+    assignee_ids: raw.assignee_ids ?? raw.assigneeIds,
+    condition: raw.condition,
+  };
+}
+
+/** 後端連線 JSON 內部欄位映射（camelCase → snake_case） */
+function adaptEdgeItem(raw: any): WorkflowEdgeDto {
+  return {
+    edge_id: raw.edge_id ?? raw.edgeId ?? '',
+    source_node: raw.source_node ?? raw.sourceNode ?? raw.from ?? '',
+    target_node: raw.target_node ?? raw.targetNode ?? raw.to ?? '',
+    condition: raw.condition,
   };
 }
 

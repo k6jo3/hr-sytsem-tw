@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.company.hrms.common.controller.QueryBaseController;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.notification.api.response.notification.GetMyNotificationsResponse;
+import com.company.hrms.notification.api.response.notification.GetNotificationsResponse;
 import com.company.hrms.notification.api.response.notification.NotificationDetailResponse;
 import com.company.hrms.notification.api.response.notification.UnreadCountResponse;
 
@@ -42,6 +43,34 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Tag(name = "HR12 通知管理 - 查詢操作", description = "通知查詢相關 API")
 public class HR12NotificationQryController extends QueryBaseController {
+
+        /**
+         * 查詢通知列表（管理員用）
+         */
+        @GetMapping
+        @Operation(summary = "查詢通知列表", description = "管理員用 - 查詢所有通知列表，支援收件人、狀態篩選與分頁")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "查詢成功"),
+                        @ApiResponse(responseCode = "401", description = "未授權"),
+                        @ApiResponse(responseCode = "500", description = "系統錯誤")
+        })
+        public ResponseEntity<GetNotificationsResponse> getNotifications(
+                        @Parameter(description = "收件人 ID 篩選") @RequestParam(required = false) String recipientId,
+                        @Parameter(description = "狀態篩選（PENDING/SENT/READ/FAILED）") @RequestParam(required = false) String status,
+                        @Parameter(description = "頁碼") @RequestParam(defaultValue = "1") Integer page,
+                        @Parameter(description = "每頁筆數") @RequestParam(defaultValue = "20") Integer pageSize,
+                        @Parameter(hidden = true) @AuthenticationPrincipal JWTModel currentUser) throws Exception {
+                log.info("[HR12NotificationQry] 查詢通知列表 - 使用者: {}, 收件人: {}, 狀態: {}",
+                                currentUser.getEmployeeNumber(), recipientId, status);
+
+                GetNotificationsResponse response = getResponse(null, currentUser,
+                                recipientId, status, String.valueOf(page), String.valueOf(pageSize));
+
+                log.info("[HR12NotificationQry] 通知列表查詢完成 - 總筆數: {}",
+                                response.getPagination() != null ? response.getPagination().getTotalItems() : 0);
+
+                return ResponseEntity.ok(response);
+        }
 
         /**
          * 查詢我的通知列表

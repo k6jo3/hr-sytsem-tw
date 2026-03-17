@@ -75,6 +75,12 @@ public class PayslipPO {
     @Column(name = "income_tax", precision = 10, scale = 2)
     private BigDecimal incomeTax;
 
+    @Column(name = "legal_deduction_amount", precision = 10, scale = 2)
+    private BigDecimal legalDeductionAmount;
+
+    @Column(name = "salary_advance_repayment", precision = 10, scale = 2)
+    private BigDecimal salaryAdvanceRepayment;
+
     @Column(name = "leave_deduction", precision = 10, scale = 2)
     private BigDecimal leaveDeduction;
 

@@ -96,3 +96,45 @@ html {
 .ant-input-password {
   border-radius: 6px;
 }
+
+/* 響應式防禦性樣式 — 防止表格與統計元件在小螢幕溢出 */
+.ant-table-cell {
+  word-break: break-word;
+}
+
+.ant-statistic-title {
+  white-space: nowrap;
+}
+
+/* 小螢幕（<768px）：Header 內縮排精簡、Content 留白縮小 */
+@media (max-width: 767px) {
+  .ant-layout-header {
+    padding: 0 12px !important;
+  }
+
+  .ant-layout-content {
+    padding: 12px !important;
+  }
+
+  /* 表格水平可捲動，避免欄位被壓縮 */
+  .ant-table-wrapper {
+    overflow-x: auto;
+  }
+
+  /* 統計數值區塊自動換行 */
+  .ant-statistic {
+    min-width: 0;
+  }
+
+  /* Card 內容區段縮小留白 */
+  .ant-card-body {
+    padding: 12px !important;
+  }
+}
+
+/* 中等螢幕（768px - 1024px）：微調留白 */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .ant-layout-content {
+    padding: 16px !important;
+  }
+}

@@ -9,6 +9,7 @@ WORKDIR /app
 # 先複製 pom.xml 利用 Docker layer cache
 COPY pom.xml .
 COPY hrms-common/pom.xml hrms-common/pom.xml
+COPY hrms-gateway/pom.xml hrms-gateway/pom.xml
 COPY hrms-iam/pom.xml hrms-iam/pom.xml
 COPY hrms-organization/pom.xml hrms-organization/pom.xml
 COPY hrms-attendance/pom.xml hrms-attendance/pom.xml
@@ -29,6 +30,9 @@ RUN mvn dependency:go-offline -B -q 2>/dev/null || true
 
 # 複製全部原始碼
 COPY . .
+
+# Docker 容器內已有 JDK 21，替換 Windows 專用的 Toolchains 為容器內路徑
+RUN echo '<?xml version="1.0" encoding="UTF-8"?><toolchains xmlns="http://maven.apache.org/TOOLCHAINS/1.1.0"><toolchain><type>jdk</type><provides><version>21</version></provides><configuration><jdkHome>/opt/java/openjdk</jdkHome></configuration></toolchain></toolchains>' > .mvn/toolchains.xml
 
 # 編譯指定的服務模組（跳過測試加速建置）
 ARG SERVICE=hrms-iam

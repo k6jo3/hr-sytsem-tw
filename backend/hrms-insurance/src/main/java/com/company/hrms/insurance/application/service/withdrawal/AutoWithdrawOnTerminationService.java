@@ -63,7 +63,8 @@ public class AutoWithdrawOnTerminationService {
                         enrollment.getInsuranceType(), terminationDate);
 
                 enrollment.withdraw(withdrawDate);
-                enrollmentRepository.save(enrollment);
+                // 退保是更新既有記錄，使用 update 而非 save
+                enrollmentRepository.update(enrollment);
 
                 InsuranceWithdrawalCompletedEvent event = InsuranceWithdrawalCompletedEvent.create(
                         employeeId,

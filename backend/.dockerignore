@@ -1,8 +1,40 @@
+# Build output
 **/target/
+
+# IDE
 **/.idea/
 **/.settings/
 **/.classpath
 **/.project
 **/*.iml
+**/.vscode/
+
+# Logs
+*.log
+**/*.log
 **/build_log.txt
+
+# Test reports
+**/surefire-reports/
+**/test-results/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files
+**/temp/
+**/tmp/
+*.tmp
+*.swp
+*.bak
+
+# Documentation
+*.md
+
+# Docker files (avoid recursive copy)
 docker-compose.yml
+docker/
+
+# Performance tests
+performance-tests/

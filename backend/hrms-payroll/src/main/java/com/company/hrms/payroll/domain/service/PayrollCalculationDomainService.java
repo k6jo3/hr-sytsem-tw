@@ -6,7 +6,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.company.hrms.common.exception.DomainException;
+import com.company.hrms.payroll.domain.model.aggregate.LegalDeduction;
 import com.company.hrms.payroll.domain.model.aggregate.Payslip;
+import com.company.hrms.payroll.domain.model.aggregate.SalaryAdvance;
 import com.company.hrms.payroll.domain.model.aggregate.SalaryStructure;
 import com.company.hrms.payroll.domain.model.entity.PayslipItem;
 import com.company.hrms.payroll.domain.model.valueobject.InsuranceDeductions;
@@ -30,16 +32,20 @@ public class PayrollCalculationDomainService {
 
     /**
      * 執行薪資計算
-     * 
-     * @param payslip     薪資單 (草稿)
-     * @param structure   薪資結構
-     * @param input       外部輸入數據 (差勤、保險等)
-     * @param taxBrackets 所得稅級距表
+     *
+     * @param payslip          薪資單 (草稿)
+     * @param structure        薪資結構
+     * @param input            外部輸入數據 (差勤、保險等)
+     * @param taxBrackets      所得稅級距表
+     * @param legalDeductions  法扣款列表（ACTIVE 狀態，依優先順序排列）
+     * @param salaryAdvances   預借薪資列表（DISBURSED 或 REPAYING 狀態）
      */
     public void calculate(Payslip payslip,
             SalaryStructure structure,
             PayrollCalculationInput input,
-            List<TaxBracket> taxBrackets) {
+            List<TaxBracket> taxBrackets,
+            List<LegalDeduction> legalDeductions,
+            List<SalaryAdvance> salaryAdvances) {
 
         if (!payslip.isDraft()) {
             throw new DomainException("PAY_CALC_NOT_DRAFT", "僅能計算草稿狀態的薪資單");
@@ -54,7 +60,6 @@ public class PayrollCalculationDomainService {
 
         // 2. 加入固定薪資項目 (來自結構)
         structure.getItems().forEach(item -> {
-            // 轉換 SalaryItem 為 PayslipItem
             payslip.addEarningItem(PayslipItem.fromSalaryItem(item));
         });
 
@@ -78,21 +83,52 @@ public class PayrollCalculationDomainService {
         payslip.setInsuranceDeductions(input.insuranceDeductions);
 
         // 6. 預算應發薪資 (用於計算所得稅)
-        // 應發 = 底薪 + 津貼 + 加班 - 請假
-        // 先計算目前為止的總額
         BigDecimal taxableIncome = baseSalary
-                .add(payslip.getTotalEarnings()) // 津貼 (假設全稅? 需過濾 taxable)
-                .add(overtimePay.getTotal()) // 加班費 (通常有免稅額，此處簡化全加)
+                .add(payslip.getTotalEarnings())
+                .add(overtimePay.getTotal())
                 .subtract(leaveDeduction);
-
-        // 修正：應過濾不可稅項目
-        // 此處簡化邏輯，實際應依 PayslipItem.taxable 判斷
 
         // 7. 計算所得稅
         BigDecimal incomeTax = incomeTaxCalculator.calculate(taxableIncome, taxBrackets);
         payslip.setIncomeTax(incomeTax);
 
-        // 8. 執行總計算 (產生 Gross 和 Net)
+        // 8. 法扣款扣除
+        BigDecimal totalLegalDeduction = BigDecimal.ZERO;
+        if (legalDeductions != null && !legalDeductions.isEmpty()) {
+            // 計算法扣可用額度：淨薪 = 應稅所得 - 保險 - 所得稅
+            BigDecimal netForGarnishment = taxableIncome
+                    .subtract(input.getInsuranceDeductions().getTotal())
+                    .subtract(incomeTax);
+
+            // 法定可扣上限（使用預設最低生活費 14,230 + 扶養費 0）
+            BigDecimal maxGarnishment = LegalDeduction.calculateMaxGarnishment(
+                    netForGarnishment,
+                    input.getMinimumLivingCost() != null ? input.getMinimumLivingCost() : new BigDecimal("14230"),
+                    input.getDependentCost() != null ? input.getDependentCost() : BigDecimal.ZERO);
+
+            BigDecimal remainingGarnishment = maxGarnishment;
+
+            // 依優先順序逐筆扣除
+            for (LegalDeduction ld : legalDeductions) {
+                if (remainingGarnishment.compareTo(BigDecimal.ZERO) <= 0) break;
+                BigDecimal deducted = ld.deduct(remainingGarnishment);
+                totalLegalDeduction = totalLegalDeduction.add(deducted);
+                remainingGarnishment = remainingGarnishment.subtract(deducted);
+            }
+        }
+        payslip.setLegalDeductionAmount(totalLegalDeduction);
+
+        // 9. 預借薪資扣回
+        BigDecimal totalAdvanceRepayment = BigDecimal.ZERO;
+        if (salaryAdvances != null && !salaryAdvances.isEmpty()) {
+            for (SalaryAdvance sa : salaryAdvances) {
+                BigDecimal repaid = sa.repay(sa.getInstallmentAmount());
+                totalAdvanceRepayment = totalAdvanceRepayment.add(repaid);
+            }
+        }
+        payslip.setSalaryAdvanceRepayment(totalAdvanceRepayment);
+
+        // 10. 執行總計算 (產生 Gross 和 Net)
         payslip.calculate();
     }
 
@@ -136,5 +172,15 @@ public class PayrollCalculationDomainService {
          * 保險扣除額 (勞健保)
          */
         private InsuranceDeductions insuranceDeductions;
+
+        /**
+         * 最低生活費（用於法扣上限計算）
+         */
+        private BigDecimal minimumLivingCost;
+
+        /**
+         * 扶養費用（用於法扣上限計算）
+         */
+        private BigDecimal dependentCost;
     }
 }

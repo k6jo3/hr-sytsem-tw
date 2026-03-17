@@ -17,9 +17,12 @@ import {
     Typography
 } from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { InsuranceApi } from '../features/insurance/api/InsuranceApi';
 import { useInsuranceEnrollments } from '../features/insurance/hooks';
 import type { EnrollmentViewModel } from '../features/insurance/model/InsuranceViewModel';
+import { OrganizationApi } from '../features/organization/api/OrganizationApi';
+import type { EmployeeDto } from '../features/organization/api/OrganizationTypes';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -37,9 +40,53 @@ export const HR05InsuranceEnrollmentPage: React.FC = () => {
   const [withdrawForm] = Form.useForm();
   const [searchForm] = Form.useForm();
 
+  /** 員工選項列表（供下拉選單使用） */
+  const [employeeOptions, setEmployeeOptions] = useState<EmployeeDto[]>([]);
+  const [employeeLoading, setEmployeeLoading] = useState(false);
+
+  /** 投保單位選項列表（從現有加保記錄中提取） */
+  const [unitOptions, setUnitOptions] = useState<{ unit_id: string; unit_name: string }[]>([]);
+
+  /** 載入員工列表供選單使用 */
+  const loadEmployeeOptions = useCallback(async () => {
+    setEmployeeLoading(true);
+    try {
+      const response = await OrganizationApi.getEmployeeList({ page: 1, page_size: 500 });
+      setEmployeeOptions(response.employees);
+    } catch (err) {
+      console.warn('[HR05] 無法載入員工列表，將允許手動輸入員工 ID', err);
+    } finally {
+      setEmployeeLoading(false);
+    }
+  }, []);
+
+  /** 從現有加保記錄的原始 DTO 中提取不重複的投保單位作為選項 */
+  const loadUnitOptions = useCallback(async () => {
+    try {
+      const response = await InsuranceApi.getEnrollments({});
+      const unitMap = new Map<string, string>();
+      response.enrollments.forEach((e) => {
+        if (e.insurance_unit_id && e.insurance_unit_name) {
+          unitMap.set(e.insurance_unit_id, e.insurance_unit_name);
+        }
+      });
+      const options = Array.from(unitMap.entries()).map(([id, name]) => ({
+        unit_id: id,
+        unit_name: name,
+      }));
+      if (options.length > 0) {
+        setUnitOptions(options);
+      }
+    } catch (err) {
+      console.warn('[HR05] 無法載入投保單位列表', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchEnrollments();
-  }, [fetchEnrollments]);
+    loadEmployeeOptions();
+    loadUnitOptions();
+  }, [fetchEnrollments, loadEmployeeOptions, loadUnitOptions]);
 
   const handleSearch = () => {
     const values = searchForm.getFieldsValue();
@@ -134,7 +181,21 @@ export const HR05InsuranceEnrollmentPage: React.FC = () => {
         <Card>
           <Form form={searchForm} layout="inline" style={{ marginBottom: 16 }}>
             <Form.Item name="employeeId">
-              <Input placeholder="員工 ID" style={{ width: 150 }} />
+              <Select
+                placeholder="員工編號或姓名"
+                style={{ width: 220 }}
+                allowClear
+                showSearch
+                loading={employeeLoading}
+                filterOption={(input, option) =>
+                  (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={employeeOptions.map(emp => ({
+                  value: emp.id,
+                  label: `${emp.employee_number} - ${emp.full_name}`,
+                }))}
+                notFoundContent={employeeLoading ? '載入中...' : '無符合的員工'}
+              />
             </Form.Item>
             <Form.Item name="insuranceType">
               <Select placeholder="保險類型" style={{ width: 120 }} allowClear>
@@ -172,11 +233,34 @@ export const HR05InsuranceEnrollmentPage: React.FC = () => {
         onOk={handleEnroll}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="employee_id" label="員工 ID" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item name="employee_id" label="員工" rules={[{ required: true, message: '請選擇員工' }]}>
+            <Select
+              placeholder="搜尋員工編號或姓名"
+              showSearch
+              loading={employeeLoading}
+              filterOption={(input, option) =>
+                (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={employeeOptions.map(emp => ({
+                value: emp.id,
+                label: `${emp.employee_number} - ${emp.full_name}`,
+              }))}
+              notFoundContent={employeeLoading ? '載入中...' : '無符合的員工'}
+            />
           </Form.Item>
-          <Form.Item name="insurance_unit_id" label="投保單位 ID" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item name="insurance_unit_id" label="投保單位" rules={[{ required: true, message: '請選擇投保單位' }]}>
+            <Select
+              placeholder="搜尋投保單位"
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={unitOptions.map(unit => ({
+                value: unit.unit_id,
+                label: unit.unit_name,
+              }))}
+              notFoundContent="無可用的投保單位"
+            />
           </Form.Item>
           <Form.Item name="insurance_types" label="投保項目" rules={[{ required: true }]}>
             <Select mode="multiple">

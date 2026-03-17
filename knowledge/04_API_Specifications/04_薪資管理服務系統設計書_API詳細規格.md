@@ -1,7 +1,8 @@
 # HR04 薪資管理服務 API 詳細規格
 
-**版本:** 1.0
+**版本:** 1.1
 **建立日期:** 2025-12-29
+**更新日期:** 2026-03-16
 **服務代碼:** HR04
 **服務名稱:** 薪資管理服務 (Payroll Service)
 
@@ -14,7 +15,9 @@
 3. [薪資計算批次 API](#3-薪資計算批次-api)
 4. [薪資單管理 API](#4-薪資單管理-api)
 5. [薪轉檔案 API](#5-薪轉檔案-api)
-6. [附錄：列舉值定義](#6-附錄列舉值定義)
+6. [法扣款管理 API](#6-法扣款管理-api)
+7. [預借薪資管理 API](#7-預借薪資管理-api)
+8. [附錄：列舉值定義](#8-附錄列舉值定義)
 
 ---
 
@@ -28,7 +31,9 @@
 | 薪資計算批次 | 8 | 建立、執行、送審、核准、發放、重算 |
 | 薪資單管理 | 4 | 員工查詢、詳情、PDF 下載、Email 發送 |
 | 薪轉檔案 | 2 | 產生、下載銀行媒體檔 |
-| **合計** | **19** | |
+| 法扣款管理 | 6 | 建立、暫停、恢復、終止、列表、詳情 |
+| 預借薪資管理 | 7 | 申請、核准、駁回、撥款、取消、列表、詳情 |
+| **合計** | **32** | |
 
 ### 1.2 Controller 對照表
 
@@ -41,6 +46,10 @@
 | `HR04PayslipCmdController` | 薪資單 Command 操作 | 1 |
 | `HR04PayslipQryController` | 薪資單 Query 操作 | 3 |
 | `HR04BankTransferCmdController` | 薪轉檔案 Command 操作 | 2 |
+| `HR04LegalDeductionCmdController` | 法扣款 Command 操作 | 4 |
+| `HR04LegalDeductionQryController` | 法扣款 Query 操作 | 2 |
+| `HR04SalaryAdvanceCmdController` | 預借薪資 Command 操作 | 4 |
+| `HR04SalaryAdvanceQryController` | 預借薪資 Query 操作 | 2 |
 
 ### 1.3 Saga 模式整合
 
@@ -1444,9 +1453,1123 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 
 ---
 
-## 6. 附錄：列舉值定義
+## 6. 法扣款管理 API
 
-### 6.1 薪資制度 (PayrollSystem)
+> **法律依據：** 強制執行法 &sect;115-1（扣薪上限為薪資三分之一）、&sect;122（最低生活費保護，不得扣押維持債務人及其共同生活之親屬生活所必需之金額）
+
+### 6.1 建立法扣款
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `POST /api/v1/payroll/legal-deductions` |
+| **方法** | POST |
+| **Controller** | `HR04LegalDeductionCmdController` |
+| **Service** | `CreateLegalDeductionServiceImpl` |
+| **權限** | `payroll:legal-deduction:manage` |
+
+#### 用途說明
+
+- **業務場景:** HR 依法院執行命令或行政機關通知，建立員工法定扣款記錄
+- **使用者:** HR 管理員、薪資專員
+- **解決問題:** 管理員工因法院強制執行或行政徵收須從薪資中扣除的款項
+
+#### 業務邏輯
+
+1. **驗證規則:**
+   - 驗證員工 ID 是否存在且為在職狀態
+   - 法院執行命令字號不可重複
+   - 總扣款金額須大於 0
+   - 生效日不可早於當前日期
+   - 到期日（若提供）須晚於生效日
+
+2. **處理步驟:**
+   - 檢查員工是否已有相同字號的法扣款
+   - 建立法扣款記錄，狀態為 ACTIVE
+   - 已扣除金額初始化為 0，剩餘金額等於總扣款金額
+   - 發布 `LegalDeductionCreatedEvent`
+
+3. **扣款上限規則（強制執行法 &sect;115-1）:**
+   - 每月扣款金額不得超過員工薪資的三分之一
+   - 扣除法扣款後，員工實領金額不得低於當年度最低生活費標準
+
+#### Request 規格
+
+**Request Body:**
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 |
+|:---|:---|:---:|:---|:---|
+| `employeeId` | string (UUID) | Y | 有效 UUID | 員工 ID |
+| `courtOrderNumber` | string | Y | 1-100 字元，不可重複 | 法院執行命令字號 |
+| `garnishmentType` | string | Y | `COURT_ORDER` 或 `ADMINISTRATIVE_LEVY` | 扣款類型 |
+| `totalAmount` | number (BigDecimal) | Y | > 0 | 總扣款金額 |
+| `priority` | integer | N | >= 1，預設 1 | 優先順序（多筆法扣款時的扣款順序） |
+| `effectiveDate` | date | Y | >= 今日，格式 yyyy-MM-dd | 生效日 |
+| `expiryDate` | date | N | > effectiveDate，格式 yyyy-MM-dd | 到期日 |
+| `issuingAuthority` | string | N | 1-200 字元 | 發布機關 |
+| `caseNumber` | string | N | 1-100 字元 | 案件編號 |
+| `note` | string | N | <= 500 字元 | 備註 |
+
+**Request 範例:**
+
+```json
+{
+  "employeeId": "emp-001",
+  "courtOrderNumber": "113年度司執字第12345號",
+  "garnishmentType": "COURT_ORDER",
+  "totalAmount": 500000,
+  "priority": 1,
+  "effectiveDate": "2026-04-01",
+  "expiryDate": "2027-03-31",
+  "issuingAuthority": "臺灣臺北地方法院",
+  "caseNumber": "113-12345",
+  "note": "每月扣款金額依強制執行法規定上限執行"
+}
+```
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+| 欄位 | 類型 | 說明 |
+|:---|:---|:---|
+| `deductionId` | string | 法扣款 ID |
+| `employeeId` | string | 員工 ID |
+| `courtOrderNumber` | string | 法院執行命令字號 |
+| `garnishmentType` | string | 扣款類型 |
+| `totalAmount` | number | 總扣款金額 |
+| `deductedAmount` | number | 已扣除金額 |
+| `remainingAmount` | number | 剩餘金額 |
+| `priority` | integer | 優先順序 |
+| `status` | string | 狀態 (ACTIVE) |
+| `effectiveDate` | date | 生效日 |
+| `expiryDate` | date | 到期日 |
+| `issuingAuthority` | string | 發布機關 |
+| `caseNumber` | string | 案件編號 |
+| `note` | string | 備註 |
+| `createdAt` | datetime | 建立時間 |
+
+**Response 範例:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deductionId": "ld-001",
+    "employeeId": "emp-001",
+    "courtOrderNumber": "113年度司執字第12345號",
+    "garnishmentType": "COURT_ORDER",
+    "totalAmount": 500000,
+    "deductedAmount": 0,
+    "remainingAmount": 500000,
+    "priority": 1,
+    "status": "ACTIVE",
+    "effectiveDate": "2026-04-01",
+    "expiryDate": "2027-03-31",
+    "issuingAuthority": "臺灣臺北地方法院",
+    "caseNumber": "113-12345",
+    "note": "每月扣款金額依強制執行法規定上限執行",
+    "createdAt": "2026-03-16T10:00:00Z"
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `PAY_INVALID_EFFECTIVE_DATE` | 生效日不可早於今日 | 檢查日期 |
+| 400 | `PAY_INVALID_EXPIRY_DATE` | 到期日須晚於生效日 | 檢查日期 |
+| 400 | `PAY_INVALID_AMOUNT` | 總扣款金額須大於 0 | 檢查金額 |
+| 404 | `EMP_NOT_FOUND` | 員工不存在 | 確認員工 ID |
+| 409 | `PAY_LEGAL_DEDUCTION_DUPLICATE` | 相同法院字號已存在 | 檢查是否重複建立 |
+
+#### 領域事件
+
+**LegalDeductionCreatedEvent:**
+
+| 項目 | 內容 |
+|:---|:---|
+| **Topic** | `hrms.payroll.legal-deduction-created` |
+| **觸發時機** | 法扣款建立後 |
+| **訂閱服務** | Notification Service |
+
+```json
+{
+  "eventId": "evt-ld-001",
+  "eventType": "LegalDeductionCreated",
+  "timestamp": "2026-03-16T10:00:00Z",
+  "payload": {
+    "deductionId": "ld-001",
+    "employeeId": "emp-001",
+    "courtOrderNumber": "113年度司執字第12345號",
+    "garnishmentType": "COURT_ORDER",
+    "totalAmount": 500000,
+    "effectiveDate": "2026-04-01"
+  }
+}
+```
+
+---
+
+### 6.2 暫停法扣款
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `PUT /api/v1/payroll/legal-deductions/{id}/suspend` |
+| **方法** | PUT |
+| **Controller** | `HR04LegalDeductionCmdController` |
+| **Service** | `SuspendLegalDeductionServiceImpl` |
+| **權限** | `payroll:legal-deduction:manage` |
+
+#### 用途說明
+
+- **業務場景:** 依法院裁定暫時停止扣款（如：債務人聲明異議、提起訴訟等）
+- **使用者:** HR 管理員
+- **解決問題:** 暫停法扣款的執行
+
+#### 業務邏輯
+
+1. **驗證規則:**
+   - 僅 `ACTIVE` 狀態可暫停
+   - 其他狀態呼叫此 API 回傳 400
+
+2. **處理步驟:**
+   - 更新狀態為 SUSPENDED
+   - 發布 `LegalDeductionSuspendedEvent`
+
+#### Request 規格
+
+**Path Parameters:**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| `id` | string (UUID) | 法扣款 ID |
+
+**Request Body:**
+
+| 欄位 | 類型 | 必填 | 說明 |
+|:---|:---|:---:|:---|
+| `reason` | string | N | 暫停原因 |
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deductionId": "ld-001",
+    "employeeId": "emp-001",
+    "courtOrderNumber": "113年度司執字第12345號",
+    "status": "SUSPENDED",
+    "totalAmount": 500000,
+    "deductedAmount": 50000,
+    "remainingAmount": 450000,
+    "suspendedAt": "2026-05-15T09:00:00Z"
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `PAY_LEGAL_DEDUCTION_INVALID_STATUS` | 僅 ACTIVE 狀態可暫停 | 確認目前狀態 |
+| 404 | `PAY_LEGAL_DEDUCTION_NOT_FOUND` | 法扣款不存在 | 確認 ID |
+
+---
+
+### 6.3 恢復法扣款
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `PUT /api/v1/payroll/legal-deductions/{id}/resume` |
+| **方法** | PUT |
+| **Controller** | `HR04LegalDeductionCmdController` |
+| **Service** | `ResumeLegalDeductionServiceImpl` |
+| **權限** | `payroll:legal-deduction:manage` |
+
+#### 用途說明
+
+- **業務場景:** 暫停的法扣款恢復執行
+- **使用者:** HR 管理員
+- **解決問題:** 恢復暫停中的法扣款
+
+#### 業務邏輯
+
+1. **驗證規則:**
+   - 僅 `SUSPENDED` 狀態可恢復
+   - 其他狀態呼叫此 API 回傳 400
+
+2. **處理步驟:**
+   - 更新狀態為 ACTIVE
+   - 發布 `LegalDeductionResumedEvent`
+
+#### Request 規格
+
+**Path Parameters:**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| `id` | string (UUID) | 法扣款 ID |
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deductionId": "ld-001",
+    "employeeId": "emp-001",
+    "courtOrderNumber": "113年度司執字第12345號",
+    "status": "ACTIVE",
+    "totalAmount": 500000,
+    "deductedAmount": 50000,
+    "remainingAmount": 450000,
+    "resumedAt": "2026-06-01T09:00:00Z"
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `PAY_LEGAL_DEDUCTION_INVALID_STATUS` | 僅 SUSPENDED 狀態可恢復 | 確認目前狀態 |
+| 404 | `PAY_LEGAL_DEDUCTION_NOT_FOUND` | 法扣款不存在 | 確認 ID |
+
+---
+
+### 6.4 終止法扣款
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `PUT /api/v1/payroll/legal-deductions/{id}/terminate` |
+| **方法** | PUT |
+| **Controller** | `HR04LegalDeductionCmdController` |
+| **Service** | `TerminateLegalDeductionServiceImpl` |
+| **權限** | `payroll:legal-deduction:manage` |
+
+#### 用途說明
+
+- **業務場景:** 法扣款已全額扣除、法院撤銷執行命令、或其他原因需終止法扣款
+- **使用者:** HR 管理員
+- **解決問題:** 永久終止法扣款的執行
+
+#### 業務邏輯
+
+1. **驗證規則:**
+   - `ACTIVE` 或 `SUSPENDED` 狀態可終止
+   - 已終止（TERMINATED）或已完成（COMPLETED）的不可再終止
+
+2. **處理步驟:**
+   - 更新狀態為 TERMINATED
+   - 記錄終止原因
+   - 發布 `LegalDeductionTerminatedEvent`
+
+#### Request 規格
+
+**Path Parameters:**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| `id` | string (UUID) | 法扣款 ID |
+
+**Request Body:**
+
+| 欄位 | 類型 | 必填 | 說明 |
+|:---|:---|:---:|:---|
+| `reason` | string | N | 終止原因 |
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deductionId": "ld-001",
+    "employeeId": "emp-001",
+    "courtOrderNumber": "113年度司執字第12345號",
+    "status": "TERMINATED",
+    "totalAmount": 500000,
+    "deductedAmount": 50000,
+    "remainingAmount": 450000,
+    "terminatedAt": "2026-07-01T09:00:00Z",
+    "terminationReason": "法院撤銷執行命令"
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `PAY_LEGAL_DEDUCTION_INVALID_STATUS` | 僅 ACTIVE 或 SUSPENDED 可終止 | 確認目前狀態 |
+| 404 | `PAY_LEGAL_DEDUCTION_NOT_FOUND` | 法扣款不存在 | 確認 ID |
+
+---
+
+### 6.5 查詢法扣款列表
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `GET /api/v1/payroll/legal-deductions` |
+| **方法** | GET |
+| **Controller** | `HR04LegalDeductionQryController` |
+| **Service** | `GetLegalDeductionsServiceImpl` |
+| **權限** | `payroll:legal-deduction:read` |
+
+#### 用途說明
+
+- **業務場景:** 查詢法扣款列表，支援依員工、狀態篩選
+- **使用者:** HR 管理員、薪資專員
+- **解決問題:** 管理與追蹤所有法扣款記錄
+
+#### Request 規格
+
+**Query Parameters:**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---|:---:|:---|
+| `employeeId` | string (UUID) | N | 篩選特定員工 |
+| `status` | string | N | 狀態篩選 (ACTIVE/SUSPENDED/TERMINATED/COMPLETED) |
+| `page` | integer | N | 頁碼（預設 1） |
+| `size` | integer | N | 每頁筆數（預設 20） |
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "deductionId": "ld-001",
+        "employeeId": "emp-001",
+        "employeeName": "張三",
+        "employeeNumber": "E0001",
+        "courtOrderNumber": "113年度司執字第12345號",
+        "garnishmentType": "COURT_ORDER",
+        "totalAmount": 500000,
+        "deductedAmount": 50000,
+        "remainingAmount": 450000,
+        "priority": 1,
+        "status": "ACTIVE",
+        "effectiveDate": "2026-04-01",
+        "expiryDate": "2027-03-31",
+        "issuingAuthority": "臺灣臺北地方法院",
+        "createdAt": "2026-03-16T10:00:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "size": 20,
+      "totalRecords": 5,
+      "totalPages": 1
+    }
+  }
+}
+```
+
+---
+
+### 6.6 查詢單筆法扣款
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `GET /api/v1/payroll/legal-deductions/{id}` |
+| **方法** | GET |
+| **Controller** | `HR04LegalDeductionQryController` |
+| **Service** | `GetLegalDeductionDetailServiceImpl` |
+| **權限** | `payroll:legal-deduction:read` |
+
+#### 用途說明
+
+- **業務場景:** 查詢特定法扣款的完整詳情
+- **使用者:** HR 管理員、薪資專員
+- **解決問題:** 檢視法扣款的扣除進度與完整資訊
+
+#### Request 規格
+
+**Path Parameters:**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| `id` | string (UUID) | 法扣款 ID |
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "deductionId": "ld-001",
+    "employeeId": "emp-001",
+    "employeeName": "張三",
+    "employeeNumber": "E0001",
+    "departmentName": "資訊部",
+    "courtOrderNumber": "113年度司執字第12345號",
+    "garnishmentType": "COURT_ORDER",
+    "totalAmount": 500000,
+    "deductedAmount": 50000,
+    "remainingAmount": 450000,
+    "priority": 1,
+    "status": "ACTIVE",
+    "effectiveDate": "2026-04-01",
+    "expiryDate": "2027-03-31",
+    "issuingAuthority": "臺灣臺北地方法院",
+    "caseNumber": "113-12345",
+    "note": "每月扣款金額依強制執行法規定上限執行",
+    "createdAt": "2026-03-16T10:00:00Z",
+    "updatedAt": "2026-05-15T09:00:00Z",
+    "deductionHistory": [
+      {
+        "payPeriod": "2026-04",
+        "amount": 16667,
+        "payrollRunId": "run-202604",
+        "deductedAt": "2026-05-05T00:00:00Z"
+      },
+      {
+        "payPeriod": "2026-05",
+        "amount": 16667,
+        "payrollRunId": "run-202605",
+        "deductedAt": "2026-06-05T00:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PAY_LEGAL_DEDUCTION_NOT_FOUND` | 法扣款不存在 | 確認 ID |
+
+---
+
+## 7. 預借薪資管理 API
+
+> **可預借金額計算公式：** 可預借金額 <= (應發薪資 - 法定扣除 - 法扣款) x 90%
+>
+> 其中法定扣除包含：勞保費、健保費、勞退自提、所得稅預扣等。此公式確保員工在預借後仍有足夠的實領金額支應基本生活所需。
+
+### 7.1 申請預借薪資
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `POST /api/v1/payroll/salary-advances` |
+| **方法** | POST |
+| **Controller** | `HR04SalaryAdvanceCmdController` |
+| **Service** | `CreateSalaryAdvanceServiceImpl` |
+| **權限** | `payroll:salary-advance:create` |
+
+#### 用途說明
+
+- **業務場景:** 員工因急需資金，申請預借薪資
+- **使用者:** HR 管理員代申請或員工自助申請（ESS）
+- **解決問題:** 管理員工預借薪資流程，確保合理性與可追蹤性
+
+#### 業務邏輯
+
+1. **驗證規則:**
+   - 驗證員工 ID 是否存在且為在職狀態
+   - 申請金額須大於 0
+   - 分期月數須 >= 1
+   - 申請金額不得超過可預借上限（見公式）
+   - 員工不可有未還清的預借薪資（狀態為 DISBURSED 或 REPAYING）
+
+2. **處理步驟:**
+   - 計算員工可預借上限金額
+   - 建立預借薪資記錄，狀態為 PENDING
+   - 計算每月應還金額 = approvedAmount / installmentMonths
+   - 發布 `SalaryAdvanceRequestedEvent`
+
+3. **可預借金額計算:**
+   ```
+   可預借金額 = (應發薪資 - 法定扣除 - 法扣款) x 90%
+   ```
+
+#### Request 規格
+
+**Request Body:**
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 |
+|:---|:---|:---:|:---|:---|
+| `employeeId` | string (UUID) | Y | 有效 UUID | 員工 ID |
+| `requestedAmount` | number (BigDecimal) | Y | > 0 | 申請金額 |
+| `installmentMonths` | integer | Y | >= 1 | 分期月數 |
+| `reason` | string | N | <= 500 字元 | 申請原因 |
+
+**Request 範例:**
+
+```json
+{
+  "employeeId": "emp-001",
+  "requestedAmount": 30000,
+  "installmentMonths": 3,
+  "reason": "緊急醫療費用"
+}
+```
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+| 欄位 | 類型 | 說明 |
+|:---|:---|:---|
+| `advanceId` | string | 預借薪資 ID |
+| `employeeId` | string | 員工 ID |
+| `requestedAmount` | number | 申請金額 |
+| `installmentMonths` | integer | 分期月數 |
+| `estimatedMonthlyRepayment` | number | 預估每月扣還金額 |
+| `maxAdvanceAmount` | number | 可預借上限金額 |
+| `status` | string | 狀態 (PENDING) |
+| `reason` | string | 申請原因 |
+| `createdAt` | datetime | 申請時間 |
+
+**Response 範例:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "advanceId": "adv-001",
+    "employeeId": "emp-001",
+    "requestedAmount": 30000,
+    "installmentMonths": 3,
+    "estimatedMonthlyRepayment": 10000,
+    "maxAdvanceAmount": 40500,
+    "status": "PENDING",
+    "reason": "緊急醫療費用",
+    "createdAt": "2026-03-16T10:00:00Z"
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `PAY_INVALID_AMOUNT` | 申請金額須大於 0 | 檢查金額 |
+| 400 | `PAY_ADVANCE_EXCEEDS_LIMIT` | 申請金額超過可預借上限 | 降低申請金額 |
+| 400 | `PAY_ADVANCE_OUTSTANDING` | 員工有未還清的預借薪資 | 待現有預借還清後再申請 |
+| 400 | `PAY_INVALID_INSTALLMENT_MONTHS` | 分期月數須 >= 1 | 檢查分期月數 |
+| 404 | `EMP_NOT_FOUND` | 員工不存在 | 確認員工 ID |
+
+#### 領域事件
+
+**SalaryAdvanceRequestedEvent:**
+
+| 項目 | 內容 |
+|:---|:---|
+| **Topic** | `hrms.payroll.salary-advance-requested` |
+| **觸發時機** | 預借薪資申請建立後 |
+| **訂閱服務** | Notification Service, Workflow Service |
+
+```json
+{
+  "eventId": "evt-adv-001",
+  "eventType": "SalaryAdvanceRequested",
+  "timestamp": "2026-03-16T10:00:00Z",
+  "payload": {
+    "advanceId": "adv-001",
+    "employeeId": "emp-001",
+    "requestedAmount": 30000,
+    "installmentMonths": 3
+  }
+}
+```
+
+---
+
+### 7.2 核准預借薪資
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `PUT /api/v1/payroll/salary-advances/{id}/approve` |
+| **方法** | PUT |
+| **Controller** | `HR04SalaryAdvanceCmdController` |
+| **Service** | `ApproveSalaryAdvanceServiceImpl` |
+| **權限** | `payroll:salary-advance:approve` |
+
+#### 用途說明
+
+- **業務場景:** 主管或 HR 核准員工的預借薪資申請
+- **使用者:** 部門主管、HR 主管
+- **解決問題:** 完成預借薪資的核准流程
+
+#### 業務邏輯
+
+1. **驗證規則:**
+   - 僅 `PENDING` 狀態可核准
+   - 核准金額須大於 0 且不可超過申請金額
+   - 核准金額不可超過可預借上限
+
+2. **處理步驟:**
+   - 更新狀態為 APPROVED
+   - 計算實際每月扣還金額 = approvedAmount / installmentMonths
+   - 發布 `SalaryAdvanceApprovedEvent`
+
+#### Request 規格
+
+**Path Parameters:**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| `id` | string (UUID) | 預借薪資 ID |
+
+**Request Body:**
+
+| 欄位 | 類型 | 必填 | 驗證規則 | 說明 |
+|:---|:---|:---:|:---|:---|
+| `approvedAmount` | number (BigDecimal) | Y | > 0 且 <= requestedAmount | 核准金額 |
+
+**Request 範例:**
+
+```json
+{
+  "approvedAmount": 30000
+}
+```
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "advanceId": "adv-001",
+    "employeeId": "emp-001",
+    "requestedAmount": 30000,
+    "approvedAmount": 30000,
+    "installmentMonths": 3,
+    "monthlyRepayment": 10000,
+    "status": "APPROVED",
+    "approvedBy": "王經理",
+    "approvedAt": "2026-03-17T09:00:00Z"
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `PAY_ADVANCE_INVALID_STATUS` | 僅 PENDING 狀態可核准 | 確認目前狀態 |
+| 400 | `PAY_ADVANCE_AMOUNT_EXCEEDS_REQUEST` | 核准金額不可超過申請金額 | 降低核准金額 |
+| 404 | `PAY_ADVANCE_NOT_FOUND` | 預借薪資不存在 | 確認 ID |
+
+---
+
+### 7.3 駁回預借薪資
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `PUT /api/v1/payroll/salary-advances/{id}/reject` |
+| **方法** | PUT |
+| **Controller** | `HR04SalaryAdvanceCmdController` |
+| **Service** | `RejectSalaryAdvanceServiceImpl` |
+| **權限** | `payroll:salary-advance:approve` |
+
+#### 用途說明
+
+- **業務場景:** 主管或 HR 駁回員工的預借薪資申請
+- **使用者:** 部門主管、HR 主管
+- **解決問題:** 拒絕不合理的預借薪資申請
+
+#### 業務邏輯
+
+1. **驗證規則:**
+   - 僅 `PENDING` 狀態可駁回
+
+2. **處理步驟:**
+   - 更新狀態為 REJECTED
+   - 記錄駁回原因
+   - 發布 `SalaryAdvanceRejectedEvent`
+
+#### Request 規格
+
+**Path Parameters:**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| `id` | string (UUID) | 預借薪資 ID |
+
+**Request Body:**
+
+| 欄位 | 類型 | 必填 | 說明 |
+|:---|:---|:---:|:---|
+| `reason` | string | Y | 駁回原因 |
+
+**Request 範例:**
+
+```json
+{
+  "reason": "到職未滿三個月，不符合預借薪資資格"
+}
+```
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "advanceId": "adv-001",
+    "employeeId": "emp-001",
+    "status": "REJECTED",
+    "rejectedBy": "王經理",
+    "rejectedAt": "2026-03-17T09:00:00Z",
+    "rejectionReason": "到職未滿三個月，不符合預借薪資資格"
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `PAY_ADVANCE_INVALID_STATUS` | 僅 PENDING 狀態可駁回 | 確認目前狀態 |
+| 404 | `PAY_ADVANCE_NOT_FOUND` | 預借薪資不存在 | 確認 ID |
+
+---
+
+### 7.4 撥款
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `PUT /api/v1/payroll/salary-advances/{id}/disburse` |
+| **方法** | PUT |
+| **Controller** | `HR04SalaryAdvanceCmdController` |
+| **Service** | `DisburseSalaryAdvanceServiceImpl` |
+| **權限** | `payroll:salary-advance:disburse` |
+
+#### 用途說明
+
+- **業務場景:** 財務人員確認預借薪資已撥款至員工帳戶
+- **使用者:** 財務人員
+- **解決問題:** 記錄預借薪資的實際撥款
+
+#### 業務邏輯
+
+1. **驗證規則:**
+   - 僅 `APPROVED` 狀態可撥款
+
+2. **處理步驟:**
+   - 更新狀態為 DISBURSED
+   - 記錄撥款時間
+   - 設定扣還開始月份（下個薪資週期）
+   - 發布 `SalaryAdvanceDisbursedEvent`
+
+#### Request 規格
+
+**Path Parameters:**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| `id` | string (UUID) | 預借薪資 ID |
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "advanceId": "adv-001",
+    "employeeId": "emp-001",
+    "approvedAmount": 30000,
+    "status": "DISBURSED",
+    "disbursedAt": "2026-03-18T10:00:00Z",
+    "repaymentStartMonth": "2026-04",
+    "repaymentEndMonth": "2026-06",
+    "monthlyRepayment": 10000
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `PAY_ADVANCE_INVALID_STATUS` | 僅 APPROVED 狀態可撥款 | 確認目前狀態 |
+| 404 | `PAY_ADVANCE_NOT_FOUND` | 預借薪資不存在 | 確認 ID |
+
+#### 領域事件
+
+**SalaryAdvanceDisbursedEvent:**
+
+| 項目 | 內容 |
+|:---|:---|
+| **Topic** | `hrms.payroll.salary-advance-disbursed` |
+| **觸發時機** | 預借薪資撥款後 |
+| **訂閱服務** | Notification Service |
+
+```json
+{
+  "eventId": "evt-adv-002",
+  "eventType": "SalaryAdvanceDisbursed",
+  "timestamp": "2026-03-18T10:00:00Z",
+  "payload": {
+    "advanceId": "adv-001",
+    "employeeId": "emp-001",
+    "approvedAmount": 30000,
+    "repaymentStartMonth": "2026-04",
+    "monthlyRepayment": 10000
+  }
+}
+```
+
+---
+
+### 7.5 取消預借薪資
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `PUT /api/v1/payroll/salary-advances/{id}/cancel` |
+| **方法** | PUT |
+| **Controller** | `HR04SalaryAdvanceCmdController` |
+| **Service** | `CancelSalaryAdvanceServiceImpl` |
+| **權限** | `payroll:salary-advance:manage` |
+
+#### 用途說明
+
+- **業務場景:** 取消尚未撥款的預借薪資申請
+- **使用者:** 員工本人、HR 管理員
+- **解決問題:** 允許在撥款前取消申請
+
+#### 業務邏輯
+
+1. **驗證規則:**
+   - 僅 `PENDING` 或 `APPROVED` 狀態可取消
+   - `DISBURSED`（已撥款）或 `REPAYING`（扣回中）不可取消
+
+2. **處理步驟:**
+   - 更新狀態為 CANCELLED
+   - 發布 `SalaryAdvanceCancelledEvent`
+
+#### Request 規格
+
+**Path Parameters:**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| `id` | string (UUID) | 預借薪資 ID |
+
+**Request Body:**
+
+| 欄位 | 類型 | 必填 | 說明 |
+|:---|:---|:---:|:---|
+| `reason` | string | N | 取消原因 |
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "advanceId": "adv-001",
+    "employeeId": "emp-001",
+    "status": "CANCELLED",
+    "cancelledAt": "2026-03-17T15:00:00Z",
+    "cancelReason": "員工本人取消申請"
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 400 | `PAY_ADVANCE_INVALID_STATUS` | 已撥款或扣回中不可取消 | 確認目前狀態 |
+| 404 | `PAY_ADVANCE_NOT_FOUND` | 預借薪資不存在 | 確認 ID |
+
+---
+
+### 7.6 查詢預借薪資列表
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `GET /api/v1/payroll/salary-advances` |
+| **方法** | GET |
+| **Controller** | `HR04SalaryAdvanceQryController` |
+| **Service** | `GetSalaryAdvancesServiceImpl` |
+| **權限** | `payroll:salary-advance:read` |
+
+#### 用途說明
+
+- **業務場景:** 查詢預借薪資列表
+- **使用者:** HR 管理員、薪資專員
+- **解決問題:** 管理與追蹤所有預借薪資記錄
+
+#### Request 規格
+
+**Query Parameters:**
+
+| 參數 | 類型 | 必填 | 說明 |
+|:---|:---|:---:|:---|
+| `employeeId` | string (UUID) | N | 篩選特定員工 |
+| `status` | string | N | 狀態篩選 |
+| `page` | integer | N | 頁碼（預設 1） |
+| `size` | integer | N | 每頁筆數（預設 20） |
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "advanceId": "adv-001",
+        "employeeId": "emp-001",
+        "employeeName": "張三",
+        "employeeNumber": "E0001",
+        "requestedAmount": 30000,
+        "approvedAmount": 30000,
+        "repaidAmount": 10000,
+        "remainingAmount": 20000,
+        "installmentMonths": 3,
+        "status": "REPAYING",
+        "createdAt": "2026-03-16T10:00:00Z",
+        "disbursedAt": "2026-03-18T10:00:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "size": 20,
+      "totalRecords": 3,
+      "totalPages": 1
+    },
+    "summary": {
+      "totalOutstanding": 120000,
+      "totalActiveAdvances": 3
+    }
+  }
+}
+```
+
+---
+
+### 7.7 查詢單筆預借薪資
+
+#### 基本資訊
+
+| 項目 | 內容 |
+|:---|:---|
+| **端點** | `GET /api/v1/payroll/salary-advances/{id}` |
+| **方法** | GET |
+| **Controller** | `HR04SalaryAdvanceQryController` |
+| **Service** | `GetSalaryAdvanceDetailServiceImpl` |
+| **權限** | `payroll:salary-advance:read` |
+
+#### 用途說明
+
+- **業務場景:** 查詢特定預借薪資的完整詳情
+- **使用者:** HR 管理員、薪資專員、員工本人
+- **解決問題:** 檢視預借薪資的還款進度與完整資訊
+
+#### Request 規格
+
+**Path Parameters:**
+
+| 參數 | 類型 | 說明 |
+|:---|:---|:---|
+| `id` | string (UUID) | 預借薪資 ID |
+
+#### Response 規格
+
+**成功回應 (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "advanceId": "adv-001",
+    "employeeId": "emp-001",
+    "employeeName": "張三",
+    "employeeNumber": "E0001",
+    "departmentName": "資訊部",
+    "requestedAmount": 30000,
+    "approvedAmount": 30000,
+    "repaidAmount": 10000,
+    "remainingAmount": 20000,
+    "installmentMonths": 3,
+    "monthlyRepayment": 10000,
+    "status": "REPAYING",
+    "reason": "緊急醫療費用",
+    "approvedBy": "王經理",
+    "approvedAt": "2026-03-17T09:00:00Z",
+    "disbursedAt": "2026-03-18T10:00:00Z",
+    "repaymentStartMonth": "2026-04",
+    "repaymentEndMonth": "2026-06",
+    "createdAt": "2026-03-16T10:00:00Z",
+    "repaymentHistory": [
+      {
+        "payPeriod": "2026-04",
+        "amount": 10000,
+        "payrollRunId": "run-202604",
+        "deductedAt": "2026-05-05T00:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+#### 錯誤碼
+
+| HTTP 狀態碼 | 錯誤碼 | 說明 | 處理建議 |
+|:---:|:---|:---|:---|
+| 404 | `PAY_ADVANCE_NOT_FOUND` | 預借薪資不存在 | 確認 ID |
+
+---
+
+## 8. 附錄：列舉值定義
+
+### 8.1 薪資制度 (PayrollSystem)
 
 | 值 | 說明 |
 |:---|:---|
@@ -1454,14 +2577,14 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 | `DAILY` | 日薪制 - 依實際出勤天數計算 |
 | `MONTHLY` | 月薪制 - 固定月薪 |
 
-### 6.1.1 領薪方式 (PaymentMethod)
+### 8.1.1 領薪方式 (PaymentMethod)
 
 | 值 | 說明 | 備註 |
 |:---|:---|:---|
 | `BANK_TRANSFER` | 銀行匯款 | 需確認員工已設定銀行帳號 |
 | `CASH` | 現金領取 | 無需銀行帳號 |
 
-### 6.2 領薪週期 (PayrollCycle)
+### 8.2 領薪週期 (PayrollCycle)
 
 | 值 | 說明 |
 |:---|:---|
@@ -1470,14 +2593,14 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 | `BI_WEEKLY` | 雙週結薪 |
 | `MONTHLY` | 月結月領 |
 
-### 6.3 薪資項目類型 (ItemType)
+### 8.3 薪資項目類型 (ItemType)
 
 | 值 | 說明 |
 |:---|:---|
 | `EARNING` | 收入項 - 計入應發 |
 | `DEDUCTION` | 扣除項 - 計入應扣 |
 
-### 6.4 薪資批次狀態 (PayrollRunStatus)
+### 8.4 薪資批次狀態 (PayrollRunStatus)
 
 | 值 | 說明 | 可轉換至 |
 |:---|:---|:---|
@@ -1489,7 +2612,7 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 | `PAID` | 已發放 | - |
 | `CANCELLED` | 已取消 | - |
 
-### 6.5 薪資單狀態 (PayslipStatus)
+### 8.5 薪資單狀態 (PayslipStatus)
 
 | 值 | 說明 |
 |:---|:---|
@@ -1497,7 +2620,7 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 | `FINALIZED` | 已確定 - 薪資已發放 |
 | `SENT` | 已發送 - Email 已寄出 |
 
-### 6.6 常用薪資項目代碼
+### 8.6 常用薪資項目代碼
 
 | 代碼 | 名稱 | 類型 | 課稅 | 投保 |
 |:---|:---|:---|:---:|:---:|
@@ -1513,7 +2636,7 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 | `PENSION_SELF` | 勞退自提 | DEDUCTION | - | - |
 | `INCOME_TAX` | 所得稅 | DEDUCTION | - | - |
 
-### 6.7 加班費率 (勞基法規定)
+### 8.7 加班費率 (勞基法規定)
 
 | 加班類型 | 時段 | 費率 |
 |:---|:---|:---:|
@@ -1526,7 +2649,37 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 
 ---
 
-## 7. 領域事件總覽
+### 8.8 法扣款類型 (GarnishmentType)
+
+| 值 | 說明 |
+|:---|:---|
+| `COURT_ORDER` | 法院強制執行 - 依法院執行命令扣款 |
+| `ADMINISTRATIVE_LEVY` | 行政徵收 - 依行政機關通知扣款（如欠稅） |
+
+### 8.9 法扣款狀態 (LegalDeductionStatus)
+
+| 值 | 說明 | 可轉換至 |
+|:---|:---|:---|
+| `ACTIVE` | 執行中 | SUSPENDED, TERMINATED, COMPLETED |
+| `SUSPENDED` | 已暫停 | ACTIVE, TERMINATED |
+| `TERMINATED` | 已終止 | - |
+| `COMPLETED` | 已完成（全額扣除） | - |
+
+### 8.10 預借薪資狀態 (SalaryAdvanceStatus)
+
+| 值 | 說明 | 可轉換至 |
+|:---|:---|:---|
+| `PENDING` | 待審核 | APPROVED, REJECTED, CANCELLED |
+| `APPROVED` | 已核准 | DISBURSED, CANCELLED |
+| `REJECTED` | 已駁回 | - |
+| `DISBURSED` | 已撥款 | REPAYING |
+| `REPAYING` | 扣回中 | COMPLETED |
+| `COMPLETED` | 已還清 | - |
+| `CANCELLED` | 已取消 | - |
+
+---
+
+## 9. 領域事件總覽
 
 | 事件名稱 | Kafka Topic | 觸發時機 | 訂閱服務 |
 |:---|:---|:---|:---|
@@ -1538,6 +2691,15 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 | `PayrollApproved` | `hrms.payroll.approved` | 薪資核准 | - |
 | `PayrollPaid` | `hrms.payroll.paid` | 薪資已發放 | Report |
 | `PayslipSent` | `hrms.payroll.payslip-sent` | 薪資單已寄送 | - |
+| `LegalDeductionCreated` | `hrms.payroll.legal-deduction-created` | 建立法扣款 | Notification |
+| `LegalDeductionSuspended` | `hrms.payroll.legal-deduction-suspended` | 暫停法扣款 | - |
+| `LegalDeductionResumed` | `hrms.payroll.legal-deduction-resumed` | 恢復法扣款 | - |
+| `LegalDeductionTerminated` | `hrms.payroll.legal-deduction-terminated` | 終止法扣款 | - |
+| `SalaryAdvanceRequested` | `hrms.payroll.salary-advance-requested` | 申請預借薪資 | Notification, Workflow |
+| `SalaryAdvanceApproved` | `hrms.payroll.salary-advance-approved` | 核准預借薪資 | Notification |
+| `SalaryAdvanceRejected` | `hrms.payroll.salary-advance-rejected` | 駁回預借薪資 | Notification |
+| `SalaryAdvanceDisbursed` | `hrms.payroll.salary-advance-disbursed` | 預借薪資撥款 | Notification |
+| `SalaryAdvanceCancelled` | `hrms.payroll.salary-advance-cancelled` | 取消預借薪資 | - |
 
 ---
 
@@ -1548,3 +2710,4 @@ Content-Disposition: attachment; filename="payroll_202511_012.txt"
 | 版本 | 日期 | 說明 |
 |:---|:---|:---|
 | 1.0 | 2025-12-29 | 初版建立 |
+| 1.1 | 2026-03-16 | 新增法扣款管理 API（6 端點）、預借薪資管理 API（7 端點） |

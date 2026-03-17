@@ -1,0 +1,58 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings
+
+# Build artifacts
+**/target/
+**/node_modules/
+**/dist/
+**/build/
+
+# Logs
+*.log
+**/*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Documentation (not needed in image)
+knowledge/
+contracts/
+framework/
+*.md
+
+# Temp files
+**/temp/
+**/tmp/
+*.tmp
+*.swp
+*.bak
+
+# Test artifacts
+**/test-results/
+**/coverage/
+**/.nyc_output/
+
+# Screenshots and misc
+*.png
+*.jpg
+*.jpeg
+*.gif

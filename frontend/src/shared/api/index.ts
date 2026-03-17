@@ -1,2 +1,2 @@
-export { apiClient, type ApiResponse } from './apiClient';
+export { apiClient, ApiError, type ApiResponse } from './apiClient';
 

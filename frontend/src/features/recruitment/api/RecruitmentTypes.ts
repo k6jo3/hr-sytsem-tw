@@ -25,6 +25,7 @@ export type RecruitmentSource =
   | 'REFERRAL' // 員工推薦
   | 'WEBSITE' // 官網
   | 'LINKEDIN' // LinkedIn
+  | 'HEADHUNTER' // 獵頭
   | 'OTHER'; // 其他
 
 /**

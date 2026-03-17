@@ -112,4 +112,45 @@ public class NotificationRepositoryImpl
     public void deleteById(NotificationId id) {
         super.deleteById(id.getValue());
     }
+
+    @Override
+    public List<Notification> findAllNotifications(String recipientId, String status, int page, int pageSize) {
+        // 建構動態查詢條件
+        QueryBuilder builder = QueryBuilder.where()
+                .and("isDeleted", Operator.EQ, false);
+
+        if (recipientId != null && !recipientId.isBlank()) {
+            builder.and("recipientId", Operator.EQ, recipientId);
+        }
+        if (status != null && !status.isBlank()) {
+            builder.and("status", Operator.EQ, status);
+        }
+
+        QueryGroup query = builder.build();
+
+        // 使用 BaseRepository 的分頁查詢
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page - 1, pageSize,
+                org.springframework.data.domain.Sort.by(
+                        org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+
+        org.springframework.data.domain.Page<NotificationPO> poPage = super.findPage(query, pageable);
+        return mapper.toDomainList(poPage.getContent());
+    }
+
+    @Override
+    public long countAllNotifications(String recipientId, String status) {
+        QueryBuilder builder = QueryBuilder.where()
+                .and("isDeleted", Operator.EQ, false);
+
+        if (recipientId != null && !recipientId.isBlank()) {
+            builder.and("recipientId", Operator.EQ, recipientId);
+        }
+        if (status != null && !status.isBlank()) {
+            builder.and("status", Operator.EQ, status);
+        }
+
+        QueryGroup query = builder.build();
+        return super.count(query);
+    }
 }

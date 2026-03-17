@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { OrganizationApi } from '../api/OrganizationApi';
 import { EmployeeViewModelFactory } from '../factory/EmployeeViewModelFactory';
+import { extractApiError } from '@shared/utils/errorUtils';
 import type { EmployeeViewModel } from '../model/EmployeeViewModel';
 import type { GetEmployeeListRequest } from '../api/OrganizationTypes';
 
@@ -32,9 +33,8 @@ export const useEmployees = (params?: GetEmployeeListRequest) => {
       setEmployees(viewModels);
       setTotal(response.total);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : '無法取得員工列表';
-      setError(errorMessage);
+      const { message } = extractApiError(err, '無法取得員工列表');
+      setError(message);
       setEmployees([]);
       setTotal(0);
     } finally {

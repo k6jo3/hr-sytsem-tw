@@ -21,20 +21,45 @@ public class Email {
     private final String value;
 
     /**
-     * 建構 Email 值對象
+     * 從持久層重建 Email 值對象（跳過驗證）
+     * 用於從 DB 讀取已存儲的資料時，避免查詢路徑觸發 Domain 驗證
+     *
+     * @param value 資料庫中的 Email 地址
+     * @return Email 實例，若 value 為 null 或空白則回傳 null
+     */
+    public static Email reconstitute(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return new Email(value, false);
+    }
+
+    /**
+     * 內部建構子（可選擇是否驗證）
+     *
+     * @param value    Email 地址
+     * @param validate 是否進行格式驗證
+     */
+    private Email(String value, boolean validate) {
+        if (value == null || value.isBlank()) {
+            throw new DomainException("EMAIL_REQUIRED", "Email 不可為空");
+        }
+        String normalized = value.trim().toLowerCase();
+        if (validate && !EMAIL_PATTERN.matcher(normalized).matches()) {
+            throw new DomainException("EMAIL_INVALID", "Email 格式無效: " + normalized);
+        }
+        this.value = normalized;
+    }
+
+    /**
+     * 建構 Email 值對象（含完整驗證）
+     * 用於新增/更新時，確保 Email 格式正確
+     *
      * @param value Email 地址
      * @throws DomainException 若 Email 格式無效
      */
     public Email(String value) {
-        if (value == null || value.isBlank()) {
-            throw new DomainException("EMAIL_REQUIRED", "Email 不可為空");
-        }
-        // 先去除前後空白並轉為小寫，再進行驗證
-        String normalized = value.trim().toLowerCase();
-        if (!EMAIL_PATTERN.matcher(normalized).matches()) {
-            throw new DomainException("EMAIL_INVALID", "Email 格式無效: " + normalized);
-        }
-        this.value = normalized;
+        this(value, true);
     }
 
     /**

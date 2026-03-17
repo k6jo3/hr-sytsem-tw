@@ -130,8 +130,15 @@ export class AuthApi {
 
   /**
    * 修改密碼
+   * 後端 API: PUT /api/v1/profile/change-password
+   * 欄位映射: old_password → currentPassword, new_password → newPassword, confirm_password → confirmPassword
    */
   static async changePassword(data: any): Promise<void> {
-    return apiClient.post(`${this.BASE_PATH}/change-password`, data);
+    const payload = {
+      currentPassword: data.old_password ?? data.currentPassword,
+      newPassword: data.new_password ?? data.newPassword,
+      confirmPassword: data.confirm_password ?? data.confirmPassword,
+    };
+    return apiClient.put('/profile/change-password', payload);
   }
 }

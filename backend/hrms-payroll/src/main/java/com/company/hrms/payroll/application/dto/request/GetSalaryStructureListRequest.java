@@ -31,7 +31,7 @@ public class GetSalaryStructureListRequest extends PageRequest {
     /**
      * 是否有效
      */
-    @QueryFilter(property = "isActive", operator = Operator.EQ)
+    @QueryFilter(property = "active", operator = Operator.EQ)
     private Boolean isActive;
 
     /**

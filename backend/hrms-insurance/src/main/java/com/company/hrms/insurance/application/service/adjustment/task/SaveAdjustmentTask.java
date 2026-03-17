@@ -25,7 +25,8 @@ public class SaveAdjustmentTask implements PipelineTask<AdjustmentContext> {
 
         log.debug("儲存調整記錄: enrollmentId={}", enrollment.getId().getValue());
 
-        enrollmentRepository.save(enrollment);
+        // 調整級距是更新既有記錄，使用 update（em.merge）而非 save（em.persist）
+        enrollmentRepository.update(enrollment);
 
         log.info("調整記錄儲存成功");
     }

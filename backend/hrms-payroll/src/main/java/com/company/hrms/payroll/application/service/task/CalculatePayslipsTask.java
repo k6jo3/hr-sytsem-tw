@@ -2,15 +2,20 @@ package com.company.hrms.payroll.application.service.task;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
 import com.company.hrms.payroll.application.service.context.CalculatePayrollContext;
+import com.company.hrms.payroll.domain.model.aggregate.LegalDeduction;
 import com.company.hrms.payroll.domain.model.aggregate.Payslip;
+import com.company.hrms.payroll.domain.model.aggregate.SalaryAdvance;
 import com.company.hrms.payroll.domain.model.aggregate.SalaryStructure;
 import com.company.hrms.payroll.domain.model.valueobject.InsuranceDeductions;
+import com.company.hrms.payroll.domain.repository.ILegalDeductionRepository;
 import com.company.hrms.payroll.domain.repository.IPayslipRepository;
+import com.company.hrms.payroll.domain.repository.ISalaryAdvanceRepository;
 import com.company.hrms.payroll.domain.service.PayrollCalculationDomainService;
 import com.company.hrms.payroll.domain.service.PayrollCalculationDomainService.PayrollCalculationInput;
 
@@ -20,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 計算薪資單任務
  * 遍歷所有符合條件的薪資結構，計算並儲存薪資單
+ * 整合法扣款與預借薪資扣回
  */
 @Slf4j
 @Component
@@ -28,6 +34,8 @@ public class CalculatePayslipsTask implements PipelineTask<CalculatePayrollConte
 
         private final IPayslipRepository payslipRepository;
         private final PayrollCalculationDomainService calculationService;
+        private final ILegalDeductionRepository legalDeductionRepository;
+        private final ISalaryAdvanceRepository salaryAdvanceRepository;
 
         @Override
         public void execute(CalculatePayrollContext context) {
@@ -83,10 +91,25 @@ public class CalculatePayslipsTask implements PipelineTask<CalculatePayrollConte
                                                 ) : InsuranceDeductions.empty())
                                                 .build();
 
-                                // 執行計算
-                                calculationService.calculate(payslip, struct, input, Collections.emptyList());
+                                // 載入法扣款記錄（ACTIVE 狀態，依優先順序排列）
+                                List<LegalDeduction> legalDeductions = legalDeductionRepository
+                                                .findActiveByEmployeeId(struct.getEmployeeId());
 
-                                // 儲存
+                                // 載入預借薪資記錄（DISBURSED 或 REPAYING 狀態）
+                                List<SalaryAdvance> salaryAdvances = salaryAdvanceRepository
+                                                .findActiveByEmployeeId(struct.getEmployeeId());
+
+                                // 執行計算（含法扣與預借扣回）
+                                calculationService.calculate(payslip, struct, input, Collections.emptyList(),
+                                                legalDeductions, salaryAdvances);
+
+                                // 持久化法扣款更新（已扣金額/狀態可能變更）
+                                legalDeductions.forEach(legalDeductionRepository::save);
+
+                                // 持久化預借扣回更新（已扣金額/狀態可能變更）
+                                salaryAdvances.forEach(salaryAdvanceRepository::save);
+
+                                // 儲存薪資單
                                 payslipRepository.save(payslip);
 
                                 // 更新統計

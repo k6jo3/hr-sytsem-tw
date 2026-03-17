@@ -14,6 +14,7 @@ import type {
 import { RoleApi } from '../api/RoleApi';
 import { UserApi } from '../api/UserApi';
 import { UserViewModelFactory } from '../factory/UserViewModelFactory';
+import { extractApiError } from '@shared/utils/errorUtils';
 import type { UserListViewModel } from '../model/UserProfile';
 
 
@@ -71,7 +72,8 @@ export const useUsers = (params: UseUsersParams = {}): UseUsersResult => {
       setUsers(viewModels);
       setTotal(response.pagination.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '載入使用者列表失敗');
+      const { message } = extractApiError(err, '載入使用者列表失敗');
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -83,7 +85,7 @@ export const useUsers = (params: UseUsersParams = {}): UseUsersResult => {
       const roleList = await RoleApi.getAllRoles();
       setRoles(roleList);
     } catch (err) {
-      console.error('載入角色列表失敗', err);
+      console.error('[useUsers] 載入角色列表失敗', err);
     }
   }, []);
 

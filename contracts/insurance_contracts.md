@@ -51,7 +51,16 @@
 |:---:|:---|:---:|:---|:---|:---:|
 | 1 | `GET /api/v1/insurance/my` | GET | INS_QRY_MY001 | 查詢我的保險資訊 | ✅ 已實作 |
 
-**總計：12 個場景（7 個 Command + 5 個 Query）**
+### 團體保險方案管理 API
+| # | 端點 | 方法 | 場景 ID | 說明 | 實作狀態 |
+|:---:|:---|:---:|:---|:---|:---:|
+| 1 | `POST /api/v1/insurance/group-plans` | POST | INS_CMD_GP001 | 建立團體保險方案 | 待實作 |
+| 2 | `POST /api/v1/insurance/group-plans/{id}/tiers` | POST | INS_CMD_GP002 | 新增職等方案對應 | 待實作 |
+| 3 | `PUT /api/v1/insurance/group-plans/{id}/deactivate` | PUT | INS_CMD_GP003 | 停用團體保險方案 | 待實作 |
+| 4 | `GET /api/v1/insurance/group-plans` | GET | INS_QRY_GP001 | 查詢團體保險方案列表 | 待實作 |
+| 5 | `GET /api/v1/insurance/group-plans/{id}` | GET | INS_QRY_GP002 | 查詢團體保險方案詳情 | 待實作 |
+
+**總計：17 個場景（10 個 Command + 7 個 Query）**
 
 ---
 
@@ -1424,5 +1433,554 @@ HR 依職災發生日期查詢紀錄。
 
 ---
 
+---
+
+## 5. 團體保險方案管理合約（2026-03-16 新增）
+
+### API 端點概覽 — 團體保險方案
+
+| # | 端點 | 方法 | 場景 ID | 說明 | 實作狀態 |
+|:---:|:---|:---:|:---|:---|:---:|
+| 1 | `POST /api/v1/insurance/group-plans` | POST | INS_CMD_GP001 | 建立團體保險方案 | 待實作 |
+| 2 | `POST /api/v1/insurance/group-plans/{id}/tiers` | POST | INS_CMD_GP002 | 新增職等方案對應 | 待實作 |
+| 3 | `PUT /api/v1/insurance/group-plans/{id}/deactivate` | PUT | INS_CMD_GP003 | 停用團體保險方案 | 待實作 |
+| 4 | `GET /api/v1/insurance/group-plans` | GET | INS_QRY_GP001 | 查詢團體保險方案列表 | 待實作 |
+| 5 | `GET /api/v1/insurance/group-plans/{id}` | GET | INS_QRY_GP002 | 查詢團體保險方案詳情 | 待實作 |
+
+---
+
+### 5.1 Command 操作業務合約
+
+#### INS_CMD_GP001: 建立團體保險方案
+
+**API 端點：** `POST /api/v1/insurance/group-plans`
+
+**業務場景描述：**
+
+HR 管理員為組織建立團體保險方案（團體壽險、團體意外險、團體醫療險）。系統建立方案後預設為啟用狀態，方案代碼在系統內必須唯一。合約起迄日期需合理（結束日晚於起始日），保險類型僅限 GROUP_ 開頭的類型。
+
+**測試合約：**
+
+```json
+{
+  "scenarioId": "INS_CMD_GP001",
+  "apiEndpoint": "POST /api/v1/insurance/group-plans",
+  "controller": "HR05GroupPlanCmdController",
+  "service": "createGroupInsurancePlanServiceImpl",
+  "permission": "insurance:group-plan:manage",
+  "request": {
+    "organizationId": "org-001",
+    "planName": "2026年度團體壽險方案",
+    "planCode": "GLP-2026-LIFE-001",
+    "insuranceType": "GROUP_LIFE",
+    "insurerName": "國泰人壽",
+    "policyNumber": "GL-2026-001234",
+    "contractStartDate": "2026-01-01",
+    "contractEndDate": "2026-12-31"
+  },
+  "businessRules": [
+    {"rule": "planCode 在系統內必須唯一，不可重複", "ruleId": "BR-05-GP001"},
+    {"rule": "contractEndDate 必須晚於 contractStartDate", "ruleId": "BR-05-GP002"},
+    {"rule": "insuranceType 必須是 GROUP_ 開頭（GROUP_LIFE / GROUP_ACCIDENT / GROUP_MEDICAL）", "ruleId": "BR-05-GP003"},
+    {"rule": "新建立的方案預設 active = true", "ruleId": "BR-05-GP004"},
+    {"rule": "organizationId 必須存在", "ruleId": "BR-05-GP005"}
+  ],
+  "expectedResponse": {
+    "statusCode": 201,
+    "requiredFields": [
+      {"name": "planId", "type": "string", "notNull": true},
+      {"name": "organizationId", "type": "string", "notNull": true},
+      {"name": "planName", "type": "string", "notNull": true},
+      {"name": "planCode", "type": "string", "notNull": true},
+      {"name": "insuranceType", "type": "string", "notNull": true},
+      {"name": "insurerName", "type": "string", "notNull": true},
+      {"name": "policyNumber", "type": "string", "notNull": true},
+      {"name": "contractStartDate", "type": "date", "notNull": true},
+      {"name": "contractEndDate", "type": "date", "notNull": true},
+      {"name": "active", "type": "boolean", "notNull": true}
+    ]
+  },
+  "expectedDataChanges": [
+    {
+      "action": "INSERT",
+      "table": "group_insurance_plans",
+      "count": 1,
+      "assertions": [
+        {"field": "plan_id", "operator": "notNull"},
+        {"field": "organization_id", "operator": "equals", "value": "org-001"},
+        {"field": "plan_name", "operator": "equals", "value": "2026年度團體壽險方案"},
+        {"field": "plan_code", "operator": "equals", "value": "GLP-2026-LIFE-001"},
+        {"field": "insurance_type", "operator": "equals", "value": "GROUP_LIFE"},
+        {"field": "insurer_name", "operator": "equals", "value": "國泰人壽"},
+        {"field": "policy_number", "operator": "equals", "value": "GL-2026-001234"},
+        {"field": "contract_start_date", "operator": "equals", "value": "2026-01-01"},
+        {"field": "contract_end_date", "operator": "equals", "value": "2026-12-31"},
+        {"field": "is_active", "operator": "equals", "value": true}
+      ]
+    }
+  ],
+  "expectedEvents": [
+    {
+      "eventType": "GroupInsurancePlanCreatedEvent",
+      "payload": [
+        {"field": "planId", "operator": "notNull"},
+        {"field": "organizationId", "operator": "equals", "value": "org-001"},
+        {"field": "insuranceType", "operator": "equals", "value": "GROUP_LIFE"}
+      ]
+    }
+  ],
+  "errorScenarios": [
+    {
+      "scenario": "planCode 重複",
+      "request": {
+        "organizationId": "org-001",
+        "planName": "重複方案",
+        "planCode": "GLP-2026-LIFE-001",
+        "insuranceType": "GROUP_LIFE",
+        "insurerName": "國泰人壽",
+        "policyNumber": "GL-2026-999",
+        "contractStartDate": "2026-01-01",
+        "contractEndDate": "2026-12-31"
+      },
+      "expectedResponse": {
+        "statusCode": 409,
+        "errorCode": "PLAN_CODE_DUPLICATE"
+      }
+    },
+    {
+      "scenario": "合約結束日早於起始日",
+      "request": {
+        "organizationId": "org-001",
+        "planName": "日期錯誤方案",
+        "planCode": "GLP-2026-ERR-001",
+        "insuranceType": "GROUP_LIFE",
+        "insurerName": "國泰人壽",
+        "policyNumber": "GL-2026-ERR",
+        "contractStartDate": "2026-12-31",
+        "contractEndDate": "2026-01-01"
+      },
+      "expectedResponse": {
+        "statusCode": 400,
+        "errorCode": "INVALID_CONTRACT_DATE_RANGE"
+      }
+    },
+    {
+      "scenario": "insuranceType 非 GROUP_ 開頭",
+      "request": {
+        "organizationId": "org-001",
+        "planName": "類型錯誤方案",
+        "planCode": "GLP-2026-ERR-002",
+        "insuranceType": "LABOR",
+        "insurerName": "國泰人壽",
+        "policyNumber": "GL-2026-ERR2",
+        "contractStartDate": "2026-01-01",
+        "contractEndDate": "2026-12-31"
+      },
+      "expectedResponse": {
+        "statusCode": 400,
+        "errorCode": "INVALID_INSURANCE_TYPE"
+      }
+    }
+  ]
+}
+```
+
+---
+
+#### INS_CMD_GP002: 新增職等方案對應
+
+**API 端點：** `POST /api/v1/insurance/group-plans/{id}/tiers`
+
+**業務場景描述：**
+
+HR 管理員為團體保險方案新增職等對應的保障內容（保額、月繳保費、雇主分攤比例）。同一方案內不可重複相同職等。雇主分攤比例介於 0 到 1 之間，保額必須大於 0。系統自動根據 employerShareRate 計算雇主負擔金額與員工負擔金額。
+
+**測試合約：**
+
+```json
+{
+  "scenarioId": "INS_CMD_GP002",
+  "apiEndpoint": "POST /api/v1/insurance/group-plans/{id}/tiers",
+  "controller": "HR05GroupPlanCmdController",
+  "service": "addGroupPlanTierServiceImpl",
+  "permission": "insurance:group-plan:manage",
+  "request": {
+    "planId": "plan-001",
+    "jobGrade": "G5",
+    "coverageAmount": 5000000,
+    "monthlyPremium": 1200,
+    "employerShareRate": 0.7
+  },
+  "businessRules": [
+    {"rule": "方案必須存在且為 active 狀態", "ruleId": "BR-05-GP006"},
+    {"rule": "同一方案內不可有重複的 jobGrade", "ruleId": "BR-05-GP007"},
+    {"rule": "employerShareRate 必須介於 0 到 1 之間（含）", "ruleId": "BR-05-GP008"},
+    {"rule": "coverageAmount 必須大於 0", "ruleId": "BR-05-GP009"},
+    {"rule": "monthlyPremium 必須大於等於 0", "ruleId": "BR-05-GP010"},
+    {"rule": "employerAmount = monthlyPremium * employerShareRate（四捨五入至整數）", "ruleId": "BR-05-GP011"},
+    {"rule": "employeeAmount = monthlyPremium - employerAmount", "ruleId": "BR-05-GP012"}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "requiredFields": [
+      {"name": "planId", "type": "string", "notNull": true},
+      {"name": "planName", "type": "string", "notNull": true},
+      {"name": "planCode", "type": "string", "notNull": true},
+      {"name": "insuranceType", "type": "string", "notNull": true},
+      {"name": "active", "type": "boolean", "notNull": true},
+      {"name": "tiers", "type": "array", "notNull": true}
+    ],
+    "tiersRequiredFields": [
+      {"name": "tierId", "type": "string", "notNull": true},
+      {"name": "jobGrade", "type": "string", "notNull": true},
+      {"name": "coverageAmount", "type": "number", "notNull": true},
+      {"name": "monthlyPremium", "type": "number", "notNull": true},
+      {"name": "employerShareRate", "type": "number", "notNull": true},
+      {"name": "employerAmount", "type": "number", "notNull": true},
+      {"name": "employeeAmount", "type": "number", "notNull": true}
+    ]
+  },
+  "expectedDataChanges": [
+    {
+      "action": "INSERT",
+      "table": "group_insurance_plan_tiers",
+      "count": 1,
+      "assertions": [
+        {"field": "tier_id", "operator": "notNull"},
+        {"field": "plan_id", "operator": "equals", "value": "plan-001"},
+        {"field": "job_grade", "operator": "equals", "value": "G5"},
+        {"field": "coverage_amount", "operator": "equals", "value": 5000000},
+        {"field": "monthly_premium", "operator": "equals", "value": 1200},
+        {"field": "employer_share_rate", "operator": "equals", "value": 0.7}
+      ]
+    }
+  ],
+  "expectedEvents": [],
+  "errorScenarios": [
+    {
+      "scenario": "方案不存在",
+      "request": {
+        "planId": "non-existent-plan",
+        "jobGrade": "G5",
+        "coverageAmount": 5000000,
+        "monthlyPremium": 1200,
+        "employerShareRate": 0.7
+      },
+      "expectedResponse": {
+        "statusCode": 404,
+        "errorCode": "GROUP_PLAN_NOT_FOUND"
+      }
+    },
+    {
+      "scenario": "同一方案重複職等",
+      "request": {
+        "planId": "plan-001",
+        "jobGrade": "G5",
+        "coverageAmount": 3000000,
+        "monthlyPremium": 800,
+        "employerShareRate": 0.6
+      },
+      "expectedResponse": {
+        "statusCode": 409,
+        "errorCode": "DUPLICATE_JOB_GRADE_IN_PLAN"
+      }
+    },
+    {
+      "scenario": "employerShareRate 超出範圍",
+      "request": {
+        "planId": "plan-001",
+        "jobGrade": "G6",
+        "coverageAmount": 5000000,
+        "monthlyPremium": 1200,
+        "employerShareRate": 1.5
+      },
+      "expectedResponse": {
+        "statusCode": 400,
+        "errorCode": "INVALID_EMPLOYER_SHARE_RATE"
+      }
+    },
+    {
+      "scenario": "coverageAmount 為 0 或負數",
+      "request": {
+        "planId": "plan-001",
+        "jobGrade": "G7",
+        "coverageAmount": 0,
+        "monthlyPremium": 1200,
+        "employerShareRate": 0.7
+      },
+      "expectedResponse": {
+        "statusCode": 400,
+        "errorCode": "INVALID_COVERAGE_AMOUNT"
+      }
+    }
+  ]
+}
+```
+
+---
+
+#### INS_CMD_GP003: 停用團體保險方案
+
+**API 端點：** `PUT /api/v1/insurance/group-plans/{id}/deactivate`
+
+**業務場景描述：**
+
+HR 管理員停用團體保險方案。僅有 active 狀態的方案可被停用，停用後 active 設為 false。已停用的方案不可再次停用。
+
+**測試合約：**
+
+```json
+{
+  "scenarioId": "INS_CMD_GP003",
+  "apiEndpoint": "PUT /api/v1/insurance/group-plans/{id}/deactivate",
+  "controller": "HR05GroupPlanCmdController",
+  "service": "deactivateGroupInsurancePlanServiceImpl",
+  "permission": "insurance:group-plan:manage",
+  "request": {
+    "planId": "plan-001"
+  },
+  "businessRules": [
+    {"rule": "方案必須存在", "ruleId": "BR-05-GP013"},
+    {"rule": "僅 active = true 的方案可被停用", "ruleId": "BR-05-GP014"},
+    {"rule": "停用後 active 設為 false", "ruleId": "BR-05-GP015"},
+    {"rule": "停用不影響已存在的 tiers 資料", "ruleId": "BR-05-GP016"}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "requiredFields": [
+      {"name": "planId", "type": "string", "notNull": true},
+      {"name": "planName", "type": "string", "notNull": true},
+      {"name": "planCode", "type": "string", "notNull": true},
+      {"name": "insuranceType", "type": "string", "notNull": true},
+      {"name": "active", "type": "boolean", "notNull": true}
+    ],
+    "assertions": [
+      {"field": "active", "operator": "equals", "value": false}
+    ]
+  },
+  "expectedDataChanges": [
+    {
+      "action": "UPDATE",
+      "table": "group_insurance_plans",
+      "count": 1,
+      "assertions": [
+        {"field": "is_active", "operator": "equals", "value": false},
+        {"field": "updated_at", "operator": "notNull"}
+      ]
+    }
+  ],
+  "expectedEvents": [
+    {
+      "eventType": "GroupInsurancePlanDeactivatedEvent",
+      "payload": [
+        {"field": "planId", "operator": "notNull"},
+        {"field": "organizationId", "operator": "notNull"}
+      ]
+    }
+  ],
+  "errorScenarios": [
+    {
+      "scenario": "方案不存在",
+      "request": {
+        "planId": "non-existent-plan"
+      },
+      "expectedResponse": {
+        "statusCode": 404,
+        "errorCode": "GROUP_PLAN_NOT_FOUND"
+      }
+    },
+    {
+      "scenario": "方案已停用",
+      "request": {
+        "planId": "plan-inactive-001"
+      },
+      "expectedResponse": {
+        "statusCode": 409,
+        "errorCode": "PLAN_ALREADY_INACTIVE"
+      }
+    }
+  ]
+}
+```
+
+---
+
+### 5.2 Query 操作業務合約
+
+#### INS_QRY_GP001: 查詢團體保險方案列表
+
+**API 端點：** `GET /api/v1/insurance/group-plans`
+
+**業務場景描述：**
+
+HR 管理員查詢組織內的團體保險方案列表。organizationId 為必填篩選條件，可選擇依 insuranceType 與 active 狀態進行過濾。每筆結果包含方案基本資訊與該方案下的 tier 數量（tierCount）。
+
+**測試合約：**
+
+```json
+{
+  "scenarioId": "INS_QRY_GP001",
+  "apiEndpoint": "GET /api/v1/insurance/group-plans",
+  "controller": "HR05GroupPlanQryController",
+  "service": "getGroupInsurancePlanListServiceImpl",
+  "permission": "insurance:group-plan:read",
+  "request": {
+    "organizationId": "org-001",
+    "insuranceType": "GROUP_LIFE",
+    "active": true
+  },
+  "businessRules": [
+    {"rule": "organizationId 為必填篩選條件", "ruleId": "BR-05-GP017"},
+    {"rule": "insuranceType 為可選篩選條件", "ruleId": "BR-05-GP018"},
+    {"rule": "active 為可選篩選條件", "ruleId": "BR-05-GP019"},
+    {"rule": "tierCount 為該方案下 tiers 的數量統計", "ruleId": "BR-05-GP020"}
+  ],
+  "expectedQueryFilters": [
+    {"field": "organization_id", "operator": "=", "value": "org-001"},
+    {"field": "insurance_type", "operator": "=", "value": "GROUP_LIFE"},
+    {"field": "is_active", "operator": "=", "value": true}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "dataPath": "groupPlans",
+    "requiredFields": [
+      {"name": "planId", "type": "string", "notNull": true},
+      {"name": "planName", "type": "string", "notNull": true},
+      {"name": "planCode", "type": "string", "notNull": true},
+      {"name": "insuranceType", "type": "string", "notNull": true},
+      {"name": "insurerName", "type": "string", "notNull": true},
+      {"name": "active", "type": "boolean", "notNull": true},
+      {"name": "contractStartDate", "type": "date", "notNull": true},
+      {"name": "contractEndDate", "type": "date", "notNull": true},
+      {"name": "tierCount", "type": "integer", "notNull": true}
+    ]
+  }
+}
+```
+
+---
+
+#### INS_QRY_GP002: 查詢團體保險方案詳情
+
+**API 端點：** `GET /api/v1/insurance/group-plans/{id}`
+
+**業務場景描述：**
+
+HR 管理員查詢特定團體保險方案的完整資訊，包含所有職等方案對應（tiers）。每筆 tier 包含職等、保額、月繳保費、雇主分攤比例以及系統計算的雇主負擔金額與員工負擔金額。若方案不存在則回傳 404。
+
+**測試合約：**
+
+```json
+{
+  "scenarioId": "INS_QRY_GP002",
+  "apiEndpoint": "GET /api/v1/insurance/group-plans/{id}",
+  "controller": "HR05GroupPlanQryController",
+  "service": "getGroupInsurancePlanDetailServiceImpl",
+  "permission": "insurance:group-plan:read",
+  "request": {
+    "planId": "plan-001"
+  },
+  "businessRules": [
+    {"rule": "方案必須存在，不存在回傳 404", "ruleId": "BR-05-GP021"},
+    {"rule": "回傳完整 tiers 列表", "ruleId": "BR-05-GP022"},
+    {"rule": "每筆 tier 的 employerAmount = monthlyPremium * employerShareRate（四捨五入至整數）", "ruleId": "BR-05-GP023"},
+    {"rule": "每筆 tier 的 employeeAmount = monthlyPremium - employerAmount", "ruleId": "BR-05-GP024"}
+  ],
+  "expectedResponse": {
+    "statusCode": 200,
+    "requiredFields": [
+      {"name": "planId", "type": "string", "notNull": true},
+      {"name": "organizationId", "type": "string", "notNull": true},
+      {"name": "planName", "type": "string", "notNull": true},
+      {"name": "planCode", "type": "string", "notNull": true},
+      {"name": "insuranceType", "type": "string", "notNull": true},
+      {"name": "insurerName", "type": "string", "notNull": true},
+      {"name": "policyNumber", "type": "string", "notNull": true},
+      {"name": "contractStartDate", "type": "date", "notNull": true},
+      {"name": "contractEndDate", "type": "date", "notNull": true},
+      {"name": "active", "type": "boolean", "notNull": true},
+      {"name": "tiers", "type": "array", "notNull": true}
+    ],
+    "tiersRequiredFields": [
+      {"name": "tierId", "type": "string", "notNull": true},
+      {"name": "jobGrade", "type": "string", "notNull": true},
+      {"name": "coverageAmount", "type": "number", "notNull": true},
+      {"name": "monthlyPremium", "type": "number", "notNull": true},
+      {"name": "employerShareRate", "type": "number", "notNull": true},
+      {"name": "employerAmount", "type": "number", "notNull": true},
+      {"name": "employeeAmount", "type": "number", "notNull": true}
+    ]
+  },
+  "errorScenarios": [
+    {
+      "scenario": "方案不存在",
+      "request": {
+        "planId": "non-existent-plan"
+      },
+      "expectedResponse": {
+        "statusCode": 404,
+        "errorCode": "GROUP_PLAN_NOT_FOUND"
+      }
+    }
+  ]
+}
+```
+
+---
+
+### 5.3 團體保險方案測試資料
+
+#### 5.3.1 團體保險方案 (group_insurance_plans) - 3 筆
+
+| ID | 組織 | 方案名稱 | 方案代碼 | 保險類型 | 承保公司 | 保單號碼 | 合約起始 | 合約結束 | 啟用 |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| plan-001 | org-001 | 2026年度團體壽險方案 | GLP-2026-LIFE-001 | GROUP_LIFE | 國泰人壽 | GL-2026-001234 | 2026-01-01 | 2026-12-31 | true |
+| plan-002 | org-001 | 2026年度團體意外險方案 | GLP-2026-ACC-001 | GROUP_ACCIDENT | 富邦產險 | GA-2026-005678 | 2026-01-01 | 2026-12-31 | true |
+| plan-003 | org-001 | 2025年度團體壽險方案（已停用） | GLP-2025-LIFE-001 | GROUP_LIFE | 國泰人壽 | GL-2025-009999 | 2025-01-01 | 2025-12-31 | false |
+
+#### 5.3.2 職等方案對應 (group_insurance_plan_tiers) - 6 筆
+
+| ID | 方案 | 職等 | 保額 | 月繳保費 | 雇主分攤率 | 雇主負擔 | 員工負擔 |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| tier-001 | plan-001 | G3 | 2,000,000 | 600 | 0.6 | 360 | 240 |
+| tier-002 | plan-001 | G5 | 5,000,000 | 1,200 | 0.7 | 840 | 360 |
+| tier-003 | plan-001 | G7 | 10,000,000 | 2,500 | 0.8 | 2,000 | 500 |
+| tier-004 | plan-002 | G3 | 3,000,000 | 400 | 0.5 | 200 | 200 |
+| tier-005 | plan-002 | G5 | 5,000,000 | 800 | 0.6 | 480 | 320 |
+| tier-006 | plan-002 | G7 | 10,000,000 | 1,500 | 0.7 | 1,050 | 450 |
+
+---
+
+### 5.4 團體保險業務規則彙整
+
+| 規則代碼 | 規則描述 | 影響場景 |
+|:---|:---|:---|
+| BR-05-GP001 | planCode 在系統內必須唯一，不可重複 | INS_CMD_GP001 |
+| BR-05-GP002 | contractEndDate 必須晚於 contractStartDate | INS_CMD_GP001 |
+| BR-05-GP003 | insuranceType 必須是 GROUP_ 開頭（GROUP_LIFE / GROUP_ACCIDENT / GROUP_MEDICAL） | INS_CMD_GP001 |
+| BR-05-GP004 | 新建立的方案預設 active = true | INS_CMD_GP001 |
+| BR-05-GP005 | organizationId 必須存在 | INS_CMD_GP001 |
+| BR-05-GP006 | 方案必須存在且為 active 狀態才可新增 tier | INS_CMD_GP002 |
+| BR-05-GP007 | 同一方案內不可有重複的 jobGrade | INS_CMD_GP002 |
+| BR-05-GP008 | employerShareRate 必須介於 0 到 1 之間（含） | INS_CMD_GP002 |
+| BR-05-GP009 | coverageAmount 必須大於 0 | INS_CMD_GP002 |
+| BR-05-GP010 | monthlyPremium 必須大於等於 0 | INS_CMD_GP002 |
+| BR-05-GP011 | employerAmount = monthlyPremium * employerShareRate（四捨五入至整數） | INS_CMD_GP002, INS_QRY_GP002 |
+| BR-05-GP012 | employeeAmount = monthlyPremium - employerAmount | INS_CMD_GP002, INS_QRY_GP002 |
+| BR-05-GP013 | 方案必須存在才可停用 | INS_CMD_GP003 |
+| BR-05-GP014 | 僅 active = true 的方案可被停用 | INS_CMD_GP003 |
+| BR-05-GP015 | 停用後 active 設為 false | INS_CMD_GP003 |
+| BR-05-GP016 | 停用不影響已存在的 tiers 資料 | INS_CMD_GP003 |
+| BR-05-GP017 | organizationId 為必填篩選條件 | INS_QRY_GP001 |
+| BR-05-GP018 | insuranceType 為可選篩選條件 | INS_QRY_GP001 |
+| BR-05-GP019 | active 為可選篩選條件 | INS_QRY_GP001 |
+| BR-05-GP020 | tierCount 為該方案下 tiers 的數量統計 | INS_QRY_GP001 |
+| BR-05-GP021 | 方案不存在回傳 404 | INS_QRY_GP002 |
+| BR-05-GP022 | 回傳完整 tiers 列表 | INS_QRY_GP002 |
+| BR-05-GP023 | 每筆 tier 的 employerAmount = monthlyPremium * employerShareRate（四捨五入至整數） | INS_QRY_GP002 |
+| BR-05-GP024 | 每筆 tier 的 employeeAmount = monthlyPremium - employerAmount | INS_QRY_GP002 |
+
+---
+
 **文件完成日期:** 2026-02-20
-**版本:** 1.1（2026-03-05 擴充）
+**版本:** 1.2（2026-03-16 新增團體保險方案管理合約）

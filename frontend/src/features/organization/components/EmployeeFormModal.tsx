@@ -4,10 +4,12 @@
  * 新增員工表單 Modal
  */
 
-import { DatePicker, Form, Input, Modal, Select } from 'antd';
+import { DatePicker, Form, Input, Modal, Select, Switch } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { OrganizationApi } from '../api/OrganizationApi';
 import type { DepartmentDto } from '../api/OrganizationTypes';
+import { RoleApi } from '../../auth/api/RoleApi';
+import type { RoleDto } from '../../auth/api/AuthTypes';
 
 const { Option } = Select;
 
@@ -31,11 +33,20 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
   const [form] = Form.useForm();
   const [departments, setDepartments] = useState<DepartmentDto[]>([]);
   const [deptLoading, setDeptLoading] = useState(false);
+  const [createAccount, setCreateAccount] = useState(false);
+  const [roles, setRoles] = useState<RoleDto[]>([]);
+  const [rolesLoading, setRolesLoading] = useState(false);
+  /** 追蹤使用者是否手動修改過帳號名稱 */
+  const [usernameManuallyEdited, setUsernameManuallyEdited] = useState(false);
 
-  /** 載入部門列表供選擇 */
+  /** 載入部門列表與角色列表供選擇 */
   useEffect(() => {
     if (open) {
       form.resetFields();
+      setCreateAccount(false);
+      setUsernameManuallyEdited(false);
+
+      // 載入部門列表
       setDeptLoading(true);
       OrganizationApi.getDepartments()
         .then((res) => {
@@ -47,15 +58,33 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
         .finally(() => {
           setDeptLoading(false);
         });
+
+      // 載入角色列表（供帳號建立使用）
+      setRolesLoading(true);
+      RoleApi.getAllRoles()
+        .then(setRoles)
+        .catch(() => setRoles([]))
+        .finally(() => setRolesLoading(false));
     }
   }, [open, form]);
+
+  /** 員工編號變更時，自動同步登入帳號（若使用者未手動修改） */
+  const handleValuesChange = (changedValues: any) => {
+    if (changedValues.employeeNumber !== undefined && createAccount && !usernameManuallyEdited) {
+      form.setFieldValue('accountUsername', changedValues.employeeNumber);
+    }
+    // 偵測使用者是否手動修改帳號名稱
+    if (changedValues.accountUsername !== undefined) {
+      setUsernameManuallyEdited(true);
+    }
+  };
 
   const handleFinish = async () => {
     try {
       const values = await form.validateFields();
       // 取得所選部門對應的組織ID
       const selectedDept = departments.find(d => d.departmentId === values.departmentId);
-      const payload = {
+      const payload: any = {
         employeeNumber: values.employeeNumber,
         lastName: values.lastName,
         firstName: values.firstName,
@@ -70,6 +99,18 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
         employmentType: values.employmentType,
         hireDate: values.hireDate?.format('YYYY-MM-DD'),
       };
+
+      // 附加帳號建立資訊
+      if (createAccount) {
+        payload.createAccount = true;
+        payload.accountInfo = {
+          username: values.accountUsername || values.employeeNumber,
+          password: 'Change@123',
+          roleIds: values.accountRoles || [],
+          mustChangePassword: true,
+        };
+      }
+
       await onSubmit(payload);
     } catch (error) {
       console.error('Validation failed:', error);
@@ -88,7 +129,7 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
       width={640}
       destroyOnClose
     >
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" onValuesChange={handleValuesChange}>
         <Form.Item
           name="employeeNumber"
           label="員工編號"
@@ -215,6 +256,60 @@ export const EmployeeFormModal: React.FC<EmployeeFormModalProps> = ({
             <Option value="INTERN">實習</Option>
           </Select>
         </Form.Item>
+
+        {/* 同時建立系統帳號區塊 */}
+        <Form.Item label="同時建立系統帳號" valuePropName="checked">
+          <Switch checked={createAccount} onChange={(checked) => {
+            setCreateAccount(checked);
+            if (checked && !usernameManuallyEdited) {
+              // 開啟時自動填入目前的員工編號
+              const currentEmpNo = form.getFieldValue('employeeNumber');
+              if (currentEmpNo) {
+                form.setFieldValue('accountUsername', currentEmpNo);
+              }
+            }
+          }} />
+        </Form.Item>
+
+        {createAccount && (
+          <>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <Form.Item
+                name="accountUsername"
+                label="登入帳號"
+                rules={createAccount ? [{ required: true, message: '請輸入登入帳號' }] : []}
+                style={{ flex: 1 }}
+              >
+                <Input placeholder="預設為員工編號" />
+              </Form.Item>
+              <Form.Item
+                name="accountRoles"
+                label="系統角色"
+                rules={createAccount ? [{ required: true, message: '請選擇角色' }] : []}
+                style={{ flex: 1 }}
+              >
+                <Select mode="multiple" placeholder="選擇角色" loading={rolesLoading}>
+                  {roles.map((role) => (
+                    <Option key={role.id} value={role.id}>
+                      {role.role_name}（{role.role_code}）
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </div>
+            <div style={{
+              padding: '8px 12px',
+              background: '#f6ffed',
+              border: '1px solid #b7eb8f',
+              borderRadius: 6,
+              marginBottom: 16,
+              fontSize: 13,
+              color: '#52c41a',
+            }}>
+              預設密碼為 <strong>Change@123</strong>，使用者首次登入時須強制變更密碼
+            </div>
+          </>
+        )}
       </Form>
     </Modal>
   );

@@ -153,7 +153,7 @@ export class AttendanceApi {
     params?: GetTodayAttendanceRequest
   ): Promise<GetTodayAttendanceResponse> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getTodayAttendance(params);
-    const raw = await apiClient.get(`${this.BASE_PATH}/today`, { params });
+    const raw: any = await apiClient.get(`${this.BASE_PATH}/today`, { params });
     return {
       records: adaptBackendRecords(raw.records ?? []),
       hasCheckedIn: raw.hasCheckedIn ?? false,

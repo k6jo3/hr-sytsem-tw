@@ -13,9 +13,11 @@ import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.timesheet.api.request.GetMyTimesheetRequest;
 import com.company.hrms.timesheet.api.request.GetPendingApprovalsRequest;
 import com.company.hrms.timesheet.api.request.GetTimesheetDetailRequest;
+import com.company.hrms.timesheet.api.request.GetTimesheetListRequest;
 import com.company.hrms.timesheet.api.response.GetMyTimesheetResponse;
 import com.company.hrms.timesheet.api.response.GetPendingApprovalsResponse;
 import com.company.hrms.timesheet.api.response.GetTimesheetDetailResponse;
+import com.company.hrms.timesheet.api.response.GetTimesheetListResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +26,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/v1/timesheets")
 @Tag(name = "HR07-工時查詢", description = "工時管理 - 查詢 API")
 public class HR07TimesheetQryController extends QueryBaseController {
+
+    @Operation(summary = "查詢工時表列表", operationId = "getTimesheets", description = "管理者 - 查詢所有工時表列表，支援篩選與分頁")
+    @GetMapping
+    public ResponseEntity<GetTimesheetListResponse> getTimesheets(
+            @ModelAttribute GetTimesheetListRequest request,
+            @CurrentUser JWTModel currentUser) throws Exception {
+        return ResponseEntity.ok(getResponse(request, currentUser));
+    }
 
     @Operation(summary = "查詢我的工時表", operationId = "getMyTimesheet", description = "ESS - 查詢當前使用者的工時表列表")
     @GetMapping("/my")

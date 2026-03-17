@@ -123,6 +123,8 @@ public class SalaryStructureRepositoryImpl extends CommandBatchBaseRepository<Sa
                 .dailyRate(domain.getDailyRate())
                 .hourlyRate(domain.getHourlyRate())
                 .active(domain.isActive())
+                .createdAt(domain.getCreatedAt())
+                .updatedAt(domain.getUpdatedAt())
                 .items(new ArrayList<>())
                 .build();
 
@@ -169,7 +171,9 @@ public class SalaryStructureRepositoryImpl extends CommandBatchBaseRepository<Sa
                 items,
                 po.getEffectiveDate(),
                 po.getEndDate(),
-                po.isActive());
+                po.isActive(),
+                po.getCreatedAt(),
+                po.getUpdatedAt());
     }
 
     private SalaryItem toItemDomain(SalaryItemPO po) {

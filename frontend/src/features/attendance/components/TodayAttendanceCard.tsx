@@ -6,6 +6,26 @@ import type { TodayAttendanceSummary } from '../model/AttendanceRecordViewModel'
 const { Title, Text } = Typography;
 
 /**
+ * 格式化工時顯示
+ * - 不足 1 小時：顯示「X 分鐘」
+ * - 1 小時以上：顯示「X 小時 Y 分鐘」
+ * - 整數小時且分鐘為 0：顯示「X 小時」
+ */
+const formatWorkHours = (hours: number): string => {
+  if (hours < 0) return '0 分鐘';
+  const totalMinutes = Math.round(hours * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h === 0) {
+    return `${m} 分鐘`;
+  }
+  if (m === 0) {
+    return `${h} 小時`;
+  }
+  return `${h} 小時 ${m} 分鐘`;
+};
+
+/**
  * TodayAttendanceCard Props
  */
 export interface TodayAttendanceCardProps {
@@ -73,7 +93,7 @@ export const TodayAttendanceCard: React.FC<TodayAttendanceCardProps> = ({
           <div>
             <Text type="secondary">總工作時數</Text>
             <Title level={2} style={{ margin: '8px 0 0 0', color: '#1890ff' }}>
-              {summary.totalWorkHours} 小時
+              {formatWorkHours(summary.totalWorkHours)}
             </Title>
           </div>
         )}

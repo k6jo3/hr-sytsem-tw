@@ -1,0 +1,96 @@
+# Docker 環境配置 — 覆蓋 local profile 的 localhost URI
+spring:
+  cloud:
+    gateway:
+      routes:
+        # HR01 IAM
+        - id: hrms-iam
+          uri: ${ROUTE_IAM_URI:http://hrms-iam:8081}
+          predicates:
+            - Path=/api/v1/auth/**, /api/v1/users/**, /api/v1/roles/**, /api/v1/permissions/**, /api/v1/system/**, /api/v1/profile/**
+
+        # HR02 Organization
+        - id: hrms-organization
+          uri: ${ROUTE_ORG_URI:http://hrms-organization:8082}
+          predicates:
+            - Path=/api/v1/employees/**, /api/v1/organizations/**, /api/v1/departments/**
+
+        # HR03 Attendance
+        - id: hrms-attendance
+          uri: ${ROUTE_ATT_URI:http://hrms-attendance:8083}
+          predicates:
+            - Path=/api/v1/attendance/**, /api/v1/leave/**, /api/v1/overtime/**, /api/v1/shifts/**
+
+        # HR04 Payroll
+        - id: hrms-payroll
+          uri: ${ROUTE_PAY_URI:http://hrms-payroll:8084}
+          predicates:
+            - Path=/api/v1/payslips/**, /api/v1/payroll-runs/**, /api/v1/salary-structures/**, /api/v1/payroll-item-definitions/**
+
+        # HR05 Insurance
+        - id: hrms-insurance
+          uri: ${ROUTE_INS_URI:http://hrms-insurance:8085}
+          predicates:
+            - Path=/api/v1/insurance/**
+
+        # HR06 Project
+        - id: hrms-project
+          uri: ${ROUTE_PROJ_URI:http://hrms-project:8086}
+          predicates:
+            - Path=/api/v1/projects/**, /api/v1/customers/**, /api/v1/tasks/**
+
+        # HR07 Timesheet
+        - id: hrms-timesheet
+          uri: ${ROUTE_TIME_URI:http://hrms-timesheet:8087}
+          predicates:
+            - Path=/api/v1/timesheets/**
+
+        # HR08 Performance
+        - id: hrms-performance
+          uri: ${ROUTE_PERF_URI:http://hrms-performance:8088}
+          predicates:
+            - Path=/api/v1/performance/**
+
+        # HR09 Recruitment
+        - id: hrms-recruitment
+          uri: ${ROUTE_RECRUIT_URI:http://hrms-recruitment:8089}
+          predicates:
+            - Path=/api/v1/recruitment/**, /api/v1/candidates/**
+
+        # HR10 Training
+        - id: hrms-training
+          uri: ${ROUTE_TRAIN_URI:http://hrms-training:8090}
+          predicates:
+            - Path=/api/v1/training/**
+
+        # HR11 Workflow
+        - id: hrms-workflow
+          uri: ${ROUTE_WF_URI:http://hrms-workflow:8091}
+          predicates:
+            - Path=/api/v1/workflows/**
+
+        # HR12 Notification
+        - id: hrms-notification
+          uri: ${ROUTE_NOTI_URI:http://hrms-notification:8092}
+          predicates:
+            - Path=/api/v1/notifications/**
+
+        # HR13 Document
+        - id: hrms-document
+          uri: ${ROUTE_DOC_URI:http://hrms-document:8093}
+          predicates:
+            - Path=/api/v1/documents/**
+
+        # HR14 Reporting
+        - id: hrms-reporting
+          uri: ${ROUTE_RPT_URI:http://hrms-reporting:8094}
+          predicates:
+            - Path=/api/v1/reporting/**
+
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+
+eureka:
+  client:
+    enabled: false

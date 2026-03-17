@@ -1,4 +1,5 @@
 import { apiClient } from '@shared/api';
+import { guardEnum } from '../../../shared/utils/adapterGuard';
 import { MockConfig } from '../../../config/MockConfig';
 import type {
     CandidateDto,
@@ -31,29 +32,37 @@ import type {
 
 // ========== Response Adapters (後端 camelCase → 前端 snake_case) ==========
 
+/** 應徵者狀態合法值 */
+const CANDIDATE_STATUS_VALUES = ['NEW', 'SCREENING', 'INTERVIEWING', 'OFFERED', 'HIRED', 'REJECTED'] as const;
+/** 招募來源合法值 */
+const RECRUITMENT_SOURCE_VALUES = ['JOB_BANK', 'REFERRAL', 'WEBSITE', 'LINKEDIN', 'HEADHUNTER', 'OTHER'] as const;
+
 function adaptCandidateDto(raw: any): CandidateDto {
   return {
     candidate_id: raw.candidateId ?? raw.candidate_id ?? raw.id,
     opening_id: raw.openingId ?? raw.opening_id,
     job_title: raw.jobTitle ?? raw.job_title,
-    full_name: raw.fullName ?? raw.full_name,
-    email: raw.email,
+    full_name: raw.fullName ?? raw.full_name ?? '',
+    email: raw.email ?? '',
     phone_number: raw.phoneNumber ?? raw.phone_number,
     resume_url: raw.resumeUrl ?? raw.resume_url,
     // M1: 後端提供但前端原先缺漏的欄位
     cover_letter: raw.coverLetter ?? raw.cover_letter,
     expected_salary: raw.expectedSalary ?? raw.expected_salary,
     available_date: raw.availableDate ?? raw.available_date,
-    source: raw.source,
+    source: guardEnum('candidate.source', raw.source, RECRUITMENT_SOURCE_VALUES, 'OTHER'),
     referrer_id: raw.referrerId ?? raw.referrer_id,
     referrer_name: raw.referrerName ?? raw.referrer_name,
-    application_date: raw.applicationDate ?? raw.application_date,
-    status: raw.status,
+    application_date: raw.applicationDate ?? raw.application_date ?? '',
+    status: guardEnum('candidate.status', raw.status, CANDIDATE_STATUS_VALUES, 'NEW'),
     rejection_reason: raw.rejectionReason ?? raw.rejection_reason,
-    created_at: raw.createdAt ?? raw.created_at,
-    updated_at: raw.updatedAt ?? raw.updated_at,
+    created_at: raw.createdAt ?? raw.created_at ?? '',
+    updated_at: raw.updatedAt ?? raw.updated_at ?? '',
   };
 }
+
+/** 職缺狀態合法值 */
+const JOB_OPENING_STATUS_VALUES = ['DRAFT', 'OPEN', 'CLOSED', 'FILLED'] as const;
 
 function adaptJobOpeningDto(raw: any): JobOpeningDto {
   return {
@@ -70,11 +79,11 @@ function adaptJobOpeningDto(raw: any): JobOpeningDto {
     work_location: raw.workLocation ?? raw.work_location,
     requirements: raw.requirements,
     responsibilities: raw.responsibilities,
-    status: raw.status,
+    status: guardEnum('jobOpening.status', raw.status, JOB_OPENING_STATUS_VALUES, 'DRAFT'),
     open_date: raw.openDate ?? raw.open_date,
     close_date: raw.closeDate ?? raw.close_date,
     created_by: raw.createdBy ?? raw.created_by ?? '',
-    created_at: raw.createdAt ?? raw.created_at,
+    created_at: raw.createdAt ?? raw.created_at ?? '',
     updated_at: raw.updatedAt ?? raw.updated_at,
   };
 }
@@ -176,13 +185,17 @@ function adaptPage<T>(raw: any, adaptFn: (item: any) => T): { data: T[]; total: 
   };
 }
 
-/** 前端分頁參數 → 後端分頁參數 */
+/**
+ * 前端分頁參數 → 後端分頁參數
+ * 後端 PageRequest.page 從 1 開始，前端也從 1 開始，不需轉換
+ * 僅需將 page_size 重新命名為 size
+ */
 function adaptPageParams(params?: { page?: number; page_size?: number; [key: string]: any }) {
   if (!params) return params;
   const { page, page_size, ...rest } = params;
   return {
     ...rest,
-    ...(page != null ? { page: page - 1 } : {}),
+    ...(page != null ? { page } : {}),
     ...(page_size != null ? { size: page_size } : {}),
   };
 }

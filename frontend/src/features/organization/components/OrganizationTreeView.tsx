@@ -76,7 +76,7 @@ export const OrganizationTreeView: React.FC = () => {
             setSelectedOrg(treeRes.data);
             setSelectedOrgId(orgId);
         } catch (err) {
-            console.error(err);
+            console.error('[OrganizationTreeView]', err);
             setError('無法載入組織架構資料，請稍後再試');
         } finally {
             setLoading(false);
@@ -102,7 +102,7 @@ export const OrganizationTreeView: React.FC = () => {
                 : options[0]!.organizationId;
             await loadTreeForOrg(targetId);
         } catch (err) {
-            console.error(err);
+            console.error('[OrganizationTreeView]', err);
             setError('無法載入組織架構資料，請稍後再試');
             setLoading(false);
         }
@@ -161,7 +161,7 @@ export const OrganizationTreeView: React.FC = () => {
             setModalVisible(false);
             loadOrganizationData();
         } catch (err) {
-            console.error(err);
+            console.error('[OrganizationTreeView]', err);
             message.error('儲存失敗，請稍後再試');
             throw err;
         } finally {

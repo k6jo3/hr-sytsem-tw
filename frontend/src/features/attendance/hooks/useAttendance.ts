@@ -84,7 +84,7 @@ export const useAttendance = () => {
         setCheckingIn(false);
       }
     },
-    [fetchTodayAttendance]
+    [user, fetchTodayAttendance]
   );
 
   const refresh = useCallback(() => {

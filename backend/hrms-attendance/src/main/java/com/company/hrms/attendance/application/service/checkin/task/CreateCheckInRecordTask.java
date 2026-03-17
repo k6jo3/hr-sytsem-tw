@@ -11,6 +11,7 @@ import com.company.hrms.attendance.domain.model.aggregate.Shift;
 import com.company.hrms.attendance.domain.model.valueobject.RecordId;
 import com.company.hrms.attendance.domain.repository.IShiftRepository;
 import com.company.hrms.common.application.pipeline.PipelineTask;
+import com.company.hrms.common.exception.DomainException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class CreateCheckInRecordTask implements PipelineTask<AttendanceContext> 
         // Get default shift
         Shift shift = shiftRepository.findAll().stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("找不到班別設定"));
+                .orElseThrow(() -> new DomainException("SHIFT_NOT_FOUND", "找不到班別設定，請先建立班別資料"));
 
         // Create AttendanceRecord
         AttendanceRecord record = new AttendanceRecord(

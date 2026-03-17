@@ -6,7 +6,6 @@ import {
     DatePicker,
     Divider,
     Form,
-    Input,
     InputNumber,
     message,
     Modal,
@@ -18,7 +17,9 @@ import {
     Typography
 } from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { OrganizationApi } from '../features/organization/api/OrganizationApi';
+import type { EmployeeDto } from '../features/organization/api/OrganizationTypes';
 import type { SalaryStructureViewModel } from '../features/payroll/factory/SalaryStructureViewModelFactory';
 import { useSalaryStructure } from '../features/payroll/hooks/useSalaryStructure';
 
@@ -36,9 +37,27 @@ export const HR04SalaryStructurePage: React.FC = () => {
   const [form] = Form.useForm();
   const [searchForm] = Form.useForm();
 
+  /** 員工選項列表（供下拉選單使用） */
+  const [employeeOptions, setEmployeeOptions] = useState<EmployeeDto[]>([]);
+  const [employeeLoading, setEmployeeLoading] = useState(false);
+
+  /** 載入員工列表供選單使用 */
+  const loadEmployeeOptions = useCallback(async () => {
+    setEmployeeLoading(true);
+    try {
+      const response = await OrganizationApi.getEmployeeList({ page: 1, page_size: 500 });
+      setEmployeeOptions(response.employees);
+    } catch (err) {
+      console.warn('[HR04] 無法載入員工列表，將允許手動輸入員工 ID', err);
+    } finally {
+      setEmployeeLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchStructures();
-  }, [fetchStructures]);
+    loadEmployeeOptions();
+  }, [fetchStructures, loadEmployeeOptions]);
 
   const handleSearch = () => {
     const values = searchForm.getFieldsValue();
@@ -79,8 +98,12 @@ export const HR04SalaryStructurePage: React.FC = () => {
         message.success(editingRecord ? '更新成功' : '建立成功');
         setModalVisible(false);
       }
-    } catch (error) {
-      // Form validation failed or API error handled by hook
+    } catch (error: any) {
+      // 表單驗證失敗時 antd 會自動顯示欄位錯誤，不需額外處理
+      // API 錯誤則顯示具體錯誤訊息給使用者
+      if (error?.message && !error?.errorFields) {
+        message.error(error.message);
+      }
     }
   };
 
@@ -143,7 +166,22 @@ export const HR04SalaryStructurePage: React.FC = () => {
         <Card>
           <Form form={searchForm} layout="inline" style={{ marginBottom: 16 }}>
             <Form.Item name="searchEmployeeId">
-              <Input placeholder="搜尋員工 ID" prefix={<SearchOutlined />} style={{ width: 200 }} />
+              <Select
+                placeholder="搜尋員工編號或姓名"
+                style={{ width: 250 }}
+                allowClear
+                showSearch
+                loading={employeeLoading}
+                filterOption={(input, option) =>
+                  (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                options={employeeOptions.map(emp => ({
+                  value: emp.id,
+                  label: `${emp.employee_number} - ${emp.full_name}`,
+                }))}
+                suffixIcon={<SearchOutlined />}
+                notFoundContent={employeeLoading ? '載入中...' : '無符合的員工'}
+              />
             </Form.Item>
             <Form.Item name="searchSystem">
               <Select placeholder="薪資制度" style={{ width: 120 }} allowClear>
@@ -181,8 +219,21 @@ export const HR04SalaryStructurePage: React.FC = () => {
         <Form form={form} layout="vertical">
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="employeeId" label="員工ID" rules={[{ required: true }]}>
-                <Input disabled={!!editingRecord} />
+              <Form.Item name="employeeId" label="員工" rules={[{ required: true, message: '請選擇員工' }]}>
+                <Select
+                  placeholder="搜尋員工編號或姓名"
+                  disabled={!!editingRecord}
+                  showSearch
+                  loading={employeeLoading}
+                  filterOption={(input, option) =>
+                    (option?.label as string ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  options={employeeOptions.map(emp => ({
+                    value: emp.id,
+                    label: `${emp.employee_number} - ${emp.full_name}`,
+                  }))}
+                  notFoundContent={employeeLoading ? '載入中...' : '無符合的員工'}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>

@@ -141,6 +141,8 @@ public class PayslipRepositoryImpl extends CommandBatchBaseRepository<PayslipPO,
                 .grossWage(domain.getGrossWage())
                 .netWage(domain.getNetWage())
                 .incomeTax(domain.getIncomeTax())
+                .legalDeductionAmount(domain.getLegalDeductionAmount())
+                .salaryAdvanceRepayment(domain.getSalaryAdvanceRepayment())
                 .leaveDeduction(domain.getLeaveDeduction())
 
                 // Overtime
@@ -252,6 +254,8 @@ public class PayslipRepositoryImpl extends CommandBatchBaseRepository<PayslipPO,
                 po.getLeaveDeduction() != null ? po.getLeaveDeduction() : java.math.BigDecimal.ZERO,
                 ins,
                 po.getIncomeTax() != null ? po.getIncomeTax() : java.math.BigDecimal.ZERO,
+                po.getLegalDeductionAmount() != null ? po.getLegalDeductionAmount() : java.math.BigDecimal.ZERO,
+                po.getSalaryAdvanceRepayment() != null ? po.getSalaryAdvanceRepayment() : java.math.BigDecimal.ZERO,
                 po.getGrossWage() != null ? po.getGrossWage() : java.math.BigDecimal.ZERO,
                 po.getNetWage() != null ? po.getNetWage() : java.math.BigDecimal.ZERO,
                 bank,

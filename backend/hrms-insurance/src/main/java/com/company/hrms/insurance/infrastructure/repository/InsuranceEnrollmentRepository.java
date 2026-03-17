@@ -35,6 +35,15 @@ public class InsuranceEnrollmentRepository
         @Override
         public InsuranceEnrollment save(InsuranceEnrollment enrollment) {
                 InsuranceEnrollmentEntity entity = toEntity(enrollment);
+                // 新建記錄使用 persist，而非 merge（修正 500 Internal Server Error）
+                super.save(entity);
+                return enrollment;
+        }
+
+        @Override
+        public InsuranceEnrollment update(InsuranceEnrollment enrollment) {
+                InsuranceEnrollmentEntity entity = toEntity(enrollment);
+                // 更新既有記錄使用 merge（適用於退保、調整等操作）
                 super.update(entity);
                 return enrollment;
         }

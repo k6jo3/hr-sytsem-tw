@@ -14,9 +14,14 @@ import com.company.hrms.insurance.domain.model.valueobject.InsuranceType;
 public interface IInsuranceEnrollmentRepository {
 
     /**
-     * 儲存加退保記錄
+     * 新增加退保記錄（使用 persist）
      */
     InsuranceEnrollment save(InsuranceEnrollment enrollment);
+
+    /**
+     * 更新既有加退保記錄（使用 merge，適用於退保、調整等操作）
+     */
+    InsuranceEnrollment update(InsuranceEnrollment enrollment);
 
     /**
      * 根據ID查詢

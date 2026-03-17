@@ -47,6 +47,8 @@ public class CalculatePayrollContext extends PipelineContext {
     private BigDecimal totalNet = BigDecimal.ZERO;
     private BigDecimal totalDeductions = BigDecimal.ZERO;
     private BigDecimal totalOvertime = BigDecimal.ZERO;
+    private BigDecimal totalLegalDeductions = BigDecimal.ZERO;
+    private BigDecimal totalAdvanceRepayments = BigDecimal.ZERO;
 
     public CalculatePayrollContext(CalculatePayrollRequest request, JWTModel currentUser) {
         this.request = request;
@@ -69,6 +71,12 @@ public class CalculatePayrollContext extends PipelineContext {
         totalDeductions = totalDeductions.add(payslip.getTotalDeductions());
         if (payslip.getOvertimePay() != null) {
             totalOvertime = totalOvertime.add(payslip.getOvertimePay().getTotal());
+        }
+        if (payslip.getLegalDeductionAmount() != null) {
+            totalLegalDeductions = totalLegalDeductions.add(payslip.getLegalDeductionAmount());
+        }
+        if (payslip.getSalaryAdvanceRepayment() != null) {
+            totalAdvanceRepayments = totalAdvanceRepayments.add(payslip.getSalaryAdvanceRepayment());
         }
     }
 

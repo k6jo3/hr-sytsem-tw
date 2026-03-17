@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "cd", "/d", "D:\\java\\hr-sytsem-2\\frontend", "&&", "npx", "vite", "--port", "5173"],
+      "port": 5173
+    }
+  ]
+}

@@ -133,9 +133,10 @@ export class RecruitmentViewModelFactory {
       REFERRAL: '員工推薦',
       WEBSITE: '官網',
       LINKEDIN: 'LinkedIn',
+      HEADHUNTER: '獵頭',
       OTHER: '其他',
     };
-    return labelMap[source];
+    return labelMap[source] ?? source;
   }
 
   private static mapSourceColor(source: RecruitmentSource): string {
@@ -144,9 +145,10 @@ export class RecruitmentViewModelFactory {
       REFERRAL: 'green',
       WEBSITE: 'purple',
       LINKEDIN: 'cyan',
+      HEADHUNTER: 'orange',
       OTHER: 'default',
     };
-    return colorMap[source];
+    return colorMap[source] ?? 'default';
   }
 
   private static calculateDaysAgo(dateString: string): number {
@@ -338,7 +340,8 @@ export class RecruitmentViewModelFactory {
   }
 
   static createKanbanViewModel(candidates: CandidateDto[]): RecruitmentKanbanViewModel {
-    const candidateVMs = this.createCandidateList(candidates);
+    const safeCandidates = Array.isArray(candidates) ? candidates : [];
+    const candidateVMs = this.createCandidateList(safeCandidates);
 
     const columns: KanbanColumnViewModel[] = [
       {

@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { RoleApi } from '../api/RoleApi';
+import { extractApiError } from '@shared/utils/errorUtils';
 import type {
   RoleDto,
   PermissionDto,
@@ -45,7 +46,8 @@ export const useRoles = (): UseRolesResult => {
       const response = await RoleApi.getRoles({ page_size: 100 });
       setRoles(response.roles);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '載入角色列表失敗');
+      const { message } = extractApiError(err, '載入角色列表失敗');
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -57,7 +59,7 @@ export const useRoles = (): UseRolesResult => {
       const response = await RoleApi.getPermissions();
       setPermissions(response.permissions);
     } catch (err) {
-      console.error('載入權限列表失敗', err);
+      console.error('[useRoles] 載入權限列表失敗', err);
     }
   }, []);
 

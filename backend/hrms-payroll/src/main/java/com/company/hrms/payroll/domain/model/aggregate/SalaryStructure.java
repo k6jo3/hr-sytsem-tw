@@ -424,6 +424,7 @@ public class SalaryStructure {
 
     /**
      * 重建 Aggregate (Persistence 用)
+     * 從持久層還原聚合根，包含時間戳欄位
      */
     public static SalaryStructure reconstruct(StructureId id,
             String employeeId,
@@ -436,13 +437,28 @@ public class SalaryStructure {
             java.util.List<SalaryItem> items,
             java.time.LocalDate effectiveDate,
             java.time.LocalDate endDate,
-            boolean active) {
+            boolean active,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+        // 根據薪資制度計算時薪
+        BigDecimal calcHourlyRate = null;
+        if (payrollSystem == PayrollSystem.MONTHLY && monthlySalary != null) {
+            calcHourlyRate = monthlySalary.divide(
+                    BigDecimal.valueOf(240), 4, RoundingMode.HALF_UP);
+        } else if (payrollSystem == PayrollSystem.DAILY && dailyRate != null) {
+            calcHourlyRate = dailyRate.divide(
+                    BigDecimal.valueOf(8), 4, RoundingMode.HALF_UP);
+        } else if (payrollSystem == PayrollSystem.HOURLY && hourlyRate != null) {
+            calcHourlyRate = hourlyRate;
+        }
+
         return SalaryStructure.builder()
                 .id(id)
                 .employeeId(employeeId)
                 .monthlySalary(monthlySalary)
                 .dailyRate(dailyRate)
                 .hourlyRate(hourlyRate)
+                .calculatedHourlyRate(calcHourlyRate)
                 .payrollSystem(payrollSystem)
                 .payrollCycle(payrollCycle)
                 .paymentMethod(paymentMethod != null ? paymentMethod : PaymentMethod.BANK_TRANSFER)
@@ -450,6 +466,8 @@ public class SalaryStructure {
                 .effectiveDate(effectiveDate)
                 .endDate(endDate)
                 .active(active)
+                .createdAt(createdAt != null ? createdAt : LocalDateTime.now())
+                .updatedAt(updatedAt != null ? updatedAt : LocalDateTime.now())
                 .build();
     }
 }

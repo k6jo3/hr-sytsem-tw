@@ -31,27 +31,50 @@ public class NationalId {
     private final String value;
 
     /**
-     * 建構身分證號值對象
-     * 
+     * 從持久層重建身分證號值對象（跳過驗證）
+     * 用於從 DB 讀取已存儲的資料時，避免查詢路徑觸發 Domain 驗證
+     *
+     * @param value 資料庫中的身分證字號
+     * @return NationalId 實例，若 value 為 null 或空白則回傳 null
+     */
+    public static NationalId reconstitute(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return new NationalId(value, false);
+    }
+
+    /**
+     * 內部建構子（可選擇是否驗證）
+     *
+     * @param value    身分證字號
+     * @param validate 是否進行格式與 checksum 驗證
+     */
+    private NationalId(String value, boolean validate) {
+        if (value == null || value.isBlank()) {
+            throw new DomainException("NATIONAL_ID_REQUIRED", "身分證字號不可為空");
+        }
+        String normalized = value.trim().toUpperCase();
+        if (validate) {
+            if (!NATIONAL_ID_PATTERN.matcher(normalized).matches()) {
+                throw new DomainException("NATIONAL_ID_FORMAT_INVALID", "身分證字號格式無效");
+            }
+            if (!validateChecksum(normalized)) {
+                throw new DomainException("NATIONAL_ID_CHECKSUM_INVALID", "身分證字號檢核錯誤");
+            }
+        }
+        this.value = normalized;
+    }
+
+    /**
+     * 建構身分證號值對象（含完整驗證）
+     * 用於新增/更新員工時，確保身分證字號格式與 checksum 正確
+     *
      * @param value 身分證字號
      * @throws DomainException 若格式無效或驗證碼錯誤
      */
     public NationalId(String value) {
-        if (value == null || value.isBlank()) {
-            throw new DomainException("NATIONAL_ID_REQUIRED", "身分證字號不可為空");
-        }
-
-        String normalized = value.trim().toUpperCase();
-
-        if (!NATIONAL_ID_PATTERN.matcher(normalized).matches()) {
-            throw new DomainException("NATIONAL_ID_FORMAT_INVALID", "身分證字號格式無效");
-        }
-
-        if (!validateChecksum(normalized)) {
-            throw new DomainException("NATIONAL_ID_CHECKSUM_INVALID", "身分證字號檢核錯誤");
-        }
-
-        this.value = normalized;
+        this(value, true);
     }
 
     /**
@@ -60,7 +83,7 @@ public class NationalId {
      * @param id 身分證字號
      * @return 驗證碼是否正確
      */
-    private boolean validateChecksum(String id) {
+    private static boolean validateChecksum(String id) {
         // 將字母轉換為數字
         int letterValue = LETTER_MAP[id.charAt(0) - 'A'];
         int n1 = letterValue / 10;
