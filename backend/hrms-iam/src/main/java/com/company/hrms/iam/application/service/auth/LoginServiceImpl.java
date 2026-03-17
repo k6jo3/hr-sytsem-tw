@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.application.pipeline.BusinessPipeline;
+import com.company.hrms.common.application.pipeline.PipelineExecutionException;
 import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.service.CommandApiService;
@@ -41,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service("loginServiceImpl")
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(noRollbackFor = DomainException.class)
+@Transactional(noRollbackFor = { DomainException.class, PipelineExecutionException.class })
 public class LoginServiceImpl
         implements CommandApiService<LoginRequest, LoginResponse> {
 
