@@ -6,6 +6,7 @@ import com.company.hrms.common.application.pipeline.PipelineTask;
 import com.company.hrms.organization.api.request.employee.TerminateEmployeeRequest;
 import com.company.hrms.organization.application.service.employee.context.EmployeeContext;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
+import com.company.hrms.organization.domain.model.valueobject.TerminationType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +25,16 @@ public class TerminateEmployeeTask implements PipelineTask<EmployeeContext> {
         Employee employee = context.getEmployee();
         TerminateEmployeeRequest request = context.getTerminateRequest();
 
-        // 呼叫聚合根業務方法
-        employee.terminate(request.getTerminationDate(), request.getReason());
+        // 解析離職類型
+        TerminationType terminationType = TerminationType.valueOf(request.getTerminationType());
 
-        log.info("離職執行: employeeId={}, date={}",
+        // 呼叫聚合根業務方法（含離職類型）
+        employee.terminate(request.getTerminationDate(), request.getReason(), terminationType);
+
+        log.info("離職執行: employeeId={}, date={}, type={}",
                 context.getEmployeeId(),
-                request.getTerminationDate());
+                request.getTerminationDate(),
+                terminationType.getDisplayName());
     }
 
     @Override

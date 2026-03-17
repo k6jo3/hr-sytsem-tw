@@ -36,6 +36,7 @@
         <result column="probation_end_date" property="probationEndDate"/>
         <result column="termination_date" property="terminationDate"/>
         <result column="termination_reason" property="terminationReason"/>
+        <result column="termination_type" property="terminationType"/>
         <result column="manager_id" property="supervisorId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -51,7 +52,7 @@
         emergency_contact_name, emergency_contact_relationship, emergency_contact_phone,
         bank_code, bank_branch_code, bank_account_number, bank_account_holder_name,
         organization_id, department_id, job_title, job_level, employment_type, employment_status,
-        hire_date, probation_end_date, termination_date, termination_reason, manager_id,
+        hire_date, probation_end_date, termination_date, termination_reason, termination_type, manager_id,
         created_at, updated_at, is_deleted, created_by, updated_by
     </sql>
 
@@ -170,7 +171,7 @@
             emergency_contact_name, emergency_contact_relationship, emergency_contact_phone,
             bank_code, bank_branch_code, bank_account_number, bank_account_holder_name,
             organization_id, department_id, job_title, job_level, employment_type, employment_status,
-            hire_date, probation_end_date, termination_date, termination_reason, manager_id,
+            hire_date, probation_end_date, termination_date, termination_reason, termination_type, manager_id,
             created_at, updated_at, is_deleted, created_by, updated_by
         ) VALUES (
             #{id}, #{employeeNumber}, #{firstName}, #{lastName}, #{fullName}, #{englishName}, #{gender}, #{birthDate},
@@ -179,7 +180,7 @@
             #{emergencyContactName}, #{emergencyContactRelationship}, #{emergencyContactPhone},
             #{bankCode}, #{bankBranchCode}, #{bankAccountNumber}, #{bankAccountHolderName},
             #{organizationId}, #{departmentId}, #{jobTitle}, #{jobLevel}, #{employmentType}, #{employmentStatus},
-            #{hireDate}, #{probationEndDate}, #{terminationDate}, #{terminationReason}, #{supervisorId},
+            #{hireDate}, #{probationEndDate}, #{terminationDate}, #{terminationReason}, #{terminationType}, #{supervisorId},
             #{createdAt}, #{updatedAt}, #{isDeleted}, #{createdBy}, #{updatedBy}
         )
     </insert>
@@ -218,6 +219,7 @@
             probation_end_date = #{probationEndDate},
             termination_date = #{terminationDate},
             termination_reason = #{terminationReason},
+            termination_type = #{terminationType},
             manager_id = #{supervisorId},
             is_deleted = #{isDeleted},
             updated_at = #{updatedAt},

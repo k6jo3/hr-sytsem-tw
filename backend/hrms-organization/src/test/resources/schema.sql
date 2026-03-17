@@ -109,6 +109,7 @@ CREATE TABLE employees (
     probation_end_date DATE,
     termination_date DATE,
     termination_reason TEXT,
+    termination_type VARCHAR(30),
     
     -- Photo
     photo_url VARCHAR(500),

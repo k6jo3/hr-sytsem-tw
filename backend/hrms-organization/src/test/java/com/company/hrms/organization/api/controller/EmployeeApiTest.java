@@ -246,18 +246,21 @@ public class EmployeeApiTest extends BaseApiContractTest {
                 }
 
                 @Test
-                @DisplayName("ORG_EMP_005: 員工離職 - 應回傳離職資訊")
+                @DisplayName("ORG_EMP_005: 員工離職 - 應回傳離職資訊（含離職類型）")
                 void terminateEmployee_ShouldReturnTerminateInfo() throws Exception {
                         // Arrange
                         String employeeId = "emp-001";
                         TerminateEmployeeRequest request = new TerminateEmployeeRequest();
                         request.setTerminationDate(LocalDate.of(2025, 5, 31));
                         request.setReason("個人生涯規劃");
+                        request.setTerminationType("VOLUNTARY_RESIGNATION");
 
                         TerminateEmployeeResponse response = TerminateEmployeeResponse.builder()
                                         .employeeId(employeeId)
                                         .terminationDate(LocalDate.of(2025, 5, 31))
-                                        .message("離職申請已處理")
+                                        .terminationType("VOLUNTARY_RESIGNATION")
+                                        .noticePeriodDays(20)
+                                        .message("離職處理成功")
                                         .build();
 
                         when(terminateEmployeeService.execCommand(any(TerminateEmployeeRequest.class),
@@ -269,6 +272,8 @@ public class EmployeeApiTest extends BaseApiContractTest {
                         performPost("/api/v1/employees/" + employeeId + "/terminate", request)
                                         .andExpect(status().isOk())
                                         .andExpect(jsonPath("$.employeeId").value(employeeId))
+                                        .andExpect(jsonPath("$.terminationType").value("VOLUNTARY_RESIGNATION"))
+                                        .andExpect(jsonPath("$.noticePeriodDays").value(20))
                                         .andExpect(jsonPath("$.message").isNotEmpty());
                 }
         }

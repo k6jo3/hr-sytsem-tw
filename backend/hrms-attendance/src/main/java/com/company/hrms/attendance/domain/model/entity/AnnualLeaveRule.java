@@ -3,29 +3,65 @@ package com.company.hrms.attendance.domain.model.entity;
 import com.company.hrms.common.domain.model.Entity;
 import com.company.hrms.common.domain.model.Identifier;
 
-// Using a simple ID or just treating it as local entity with generated ID
-// For simplicity reusing Identifier<String> or creating RuleId if strict.
-// Checklist doesn't mention RuleId. I'll use String ID for internal entity.
+import lombok.Getter;
 
+/**
+ * 特休規則實體
+ *
+ * <p>以「月數」為精度定義年資區間與對應特休天數。
+ * 支援勞基法第 38 條的 6 個月(含)起算等非整數年資情境。
+ *
+ * <p>建構參數：
+ * <ul>
+ *   <li>minServiceMonths — 最低年資月數（含）</li>
+ *   <li>maxServiceMonths — 最高年資月數（不含）</li>
+ *   <li>days — 對應特休天數</li>
+ * </ul>
+ */
+@Getter
 public class AnnualLeaveRule extends Entity<Identifier<String>> {
 
-    private int minServiceYears;
-    private int maxServiceYears;
+    /** 最低年資月數（含） */
+    private int minServiceMonths;
+
+    /** 最高年資月數（不含） */
+    private int maxServiceMonths;
+
+    /** 對應特休天數 */
     private int days;
 
-    public AnnualLeaveRule(Identifier<String> id, int minYear, int maxYear, int days) {
+    /**
+     * 建立特休規則
+     *
+     * @param id               規則 ID
+     * @param minServiceMonths 最低年資月數（含）
+     * @param maxServiceMonths 最高年資月數（不含）
+     * @param days             對應特休天數
+     */
+    public AnnualLeaveRule(Identifier<String> id, int minServiceMonths, int maxServiceMonths, int days) {
         super(id);
-        this.minServiceYears = minYear;
-        this.maxServiceYears = maxYear;
+        this.minServiceMonths = minServiceMonths;
+        this.maxServiceMonths = maxServiceMonths;
         this.days = days;
     }
 
-    public boolean matches(int yearsOfService) {
-        return yearsOfService >= minServiceYears && yearsOfService < maxServiceYears;
+    /**
+     * 依月數判斷是否匹配此規則
+     *
+     * @param serviceMonths 員工年資月數
+     * @return 是否落在此規則的月數區間 [min, max)
+     */
+    public boolean matchesMonths(int serviceMonths) {
+        return serviceMonths >= minServiceMonths && serviceMonths < maxServiceMonths;
     }
 
-    public int getDays() {
-        return days;
+    /**
+     * 向後相容：依年數判斷是否匹配（年數 * 12 轉月數）
+     *
+     * @param yearsOfService 員工年資年數
+     * @return 是否匹配
+     */
+    public boolean matches(int yearsOfService) {
+        return matchesMonths(yearsOfService * 12);
     }
-    // Getters etc
 }

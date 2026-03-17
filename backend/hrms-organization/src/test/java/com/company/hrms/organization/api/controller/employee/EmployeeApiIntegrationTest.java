@@ -213,13 +213,14 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 	class EmployeeTerminationApiTests {
 
 		@Test
-		@DisplayName("ORG_EMP_API_008: 員工離職 - 應返回成功訊息")
+		@DisplayName("ORG_EMP_API_008: 員工離職 - 應返回成功訊息（含離職類型）")
 		void ORG_EMP_API_008_terminateEmployee_ShouldReturnSuccess() throws Exception {
 			// Given
 			String employeeId = "e0000001-0001-0001-0001-000000000001";
 			TerminateEmployeeRequest request = new TerminateEmployeeRequest();
 			request.setTerminationDate(LocalDate.now());
 			request.setReason("Resignation");
+			request.setTerminationType("VOLUNTARY_RESIGNATION");
 
 			// When & Then
 			var response = performPost("/api/v1/employees/" + employeeId + "/terminate", request)
@@ -228,6 +229,8 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 
 			String responseBody = response.getResponse().getContentAsString();
 			assertThat(responseBody).contains("employeeId");
+			assertThat(responseBody).contains("terminationType");
+			assertThat(responseBody).contains("VOLUNTARY_RESIGNATION");
 		}
 
 		@Test
@@ -238,6 +241,7 @@ class EmployeeApiIntegrationTest extends BaseApiIntegrationTest {
 			TerminateEmployeeRequest request = new TerminateEmployeeRequest();
 			request.setTerminationDate(LocalDate.now());
 			request.setReason("Resignation");
+			request.setTerminationType("VOLUNTARY_RESIGNATION");
 
 			// When & Then
 			performPost("/api/v1/employees/" + employeeId + "/terminate", request)

@@ -18,6 +18,7 @@ import com.company.hrms.payroll.domain.repository.IPayslipRepository;
 import com.company.hrms.payroll.domain.repository.ISalaryAdvanceRepository;
 import com.company.hrms.payroll.domain.service.PayrollCalculationDomainService;
 import com.company.hrms.payroll.domain.service.PayrollCalculationDomainService.PayrollCalculationInput;
+import com.company.hrms.payroll.domain.service.SupplementaryPremiumCalculator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class CalculatePayslipsTask implements PipelineTask<CalculatePayrollConte
         private final PayrollCalculationDomainService calculationService;
         private final ILegalDeductionRepository legalDeductionRepository;
         private final ISalaryAdvanceRepository salaryAdvanceRepository;
+        private final SupplementaryPremiumCalculator supplementaryPremiumCalculator;
 
         @Override
         public void execute(CalculatePayrollContext context) {
@@ -87,7 +89,7 @@ public class CalculatePayslipsTask implements PipelineTask<CalculatePayrollConte
                                                                 ins.getLaborInsurance(),
                                                                 ins.getHealthInsurance(),
                                                                 ins.getPensionSelfContribution(),
-                                                                BigDecimal.ZERO // 補充保費目前預設為0
+                                                                calculateSupplementaryPremium(struct, ins)
                                                 ) : InsuranceDeductions.empty())
                                                 .build();
 
@@ -125,5 +127,32 @@ public class CalculatePayslipsTask implements PipelineTask<CalculatePayrollConte
         @Override
         public String getName() {
                 return "CalculatePayslipsTask";
+        }
+
+        /**
+         * 計算二代健保補充保費
+         * 判斷是否有高額獎金（單次超過投保薪資 4 倍），如有則計算補充保費
+         *
+         * @param struct 薪資結構（用於計算投保薪資）
+         * @param ins    保險費計算結果（用於取得投保薪資級距）
+         * @return 補充保費金額
+         */
+        private BigDecimal calculateSupplementaryPremium(
+                        SalaryStructure struct,
+                        com.company.hrms.payroll.infrastructure.client.insurance.dto.FeeCalculationResponseDto ins) {
+                if (ins == null || ins.getMonthlySalary() == null) {
+                        return BigDecimal.ZERO;
+                }
+
+                // 計算員工獎金總額（薪資結構中的收入項目減去底薪即為獎金/津貼）
+                BigDecimal totalBonus = struct.calculateMonthlyGross()
+                                .subtract(struct.getPayrollSystem() == com.company.hrms.payroll.domain.model.valueobject.PayrollSystem.MONTHLY
+                                                ? struct.getMonthlySalary()
+                                                : BigDecimal.ZERO);
+
+                // 投保薪資來自保險模組的計算結果
+                BigDecimal insuredSalary = ins.getMonthlySalary();
+
+                return supplementaryPremiumCalculator.calculateBonusPremium(totalBonus, insuredSalary);
         }
 }

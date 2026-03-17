@@ -22,9 +22,25 @@ public class EmployeeTerminatedEvent extends DomainEvent {
     private final LocalDate terminationDate;
     private final String terminationReason;
 
+    /**
+     * 離職類型（VOLUNTARY_RESIGNATION, LAYOFF, DISMISSAL, MUTUAL_AGREEMENT, CONTRACT_EXPIRY, RETIREMENT）
+     */
+    private final String terminationType;
+
+    /**
+     * 到職日期（下游服務用於計算年資與資遣費）
+     */
+    private final LocalDate hireDate;
+
+    /**
+     * 預告期天數（依勞基法第 16 條計算）
+     */
+    private final int noticePeriodDays;
+
     public EmployeeTerminatedEvent(UUID employeeId, String employeeNumber, String fullName,
                                     String companyEmail, UUID organizationId, UUID departmentId,
-                                    LocalDate terminationDate, String terminationReason) {
+                                    LocalDate terminationDate, String terminationReason,
+                                    String terminationType, LocalDate hireDate, int noticePeriodDays) {
         super();
         this.employeeId = employeeId;
         this.employeeNumber = employeeNumber;
@@ -34,5 +50,8 @@ public class EmployeeTerminatedEvent extends DomainEvent {
         this.departmentId = departmentId;
         this.terminationDate = terminationDate;
         this.terminationReason = terminationReason;
+        this.terminationType = terminationType;
+        this.hireDate = hireDate;
+        this.noticePeriodDays = noticePeriodDays;
     }
 }

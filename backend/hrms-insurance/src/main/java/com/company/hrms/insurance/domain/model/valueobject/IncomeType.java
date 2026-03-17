@@ -17,7 +17,22 @@ public enum IncomeType {
     /**
      * 執行業務所得
      */
-    PROFESSIONAL_FEE("執行業務所得");
+    PROFESSIONAL_FEE("執行業務所得"),
+
+    /**
+     * 股利所得
+     */
+    STOCK_DIVIDEND("股利所得"),
+
+    /**
+     * 利息所得
+     */
+    INTEREST("利息所得"),
+
+    /**
+     * 租金收入
+     */
+    RENTAL("租金收入");
 
     private final String displayName;
 

@@ -109,6 +109,9 @@ public class EmployeePO {
     @Column(name = "termination_reason")
     private String terminationReason;
 
+    @Column(name = "termination_type")
+    private String terminationType;
+
     // 審計
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -16,6 +16,7 @@ import com.company.hrms.organization.domain.model.valueobject.EmploymentType;
 import com.company.hrms.organization.domain.model.valueobject.Gender;
 import com.company.hrms.organization.domain.model.valueobject.MaritalStatus;
 import com.company.hrms.organization.domain.model.valueobject.NationalId;
+import com.company.hrms.organization.domain.model.valueobject.TerminationType;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -167,6 +168,11 @@ public class Employee {
      * 離職原因
      */
     private String terminationReason;
+
+    /**
+     * 離職類型
+     */
+    private TerminationType terminationType;
 
     // ==================== 銀行資訊 ====================
 
@@ -323,12 +329,13 @@ public class Employee {
     }
 
     /**
-     * 離職
-     * 
+     * 離職（含離職類型）
+     *
      * @param terminationDate 離職日期
      * @param reason          離職原因
+     * @param terminationType 離職類型
      */
-    public void terminate(LocalDate terminationDate, String reason) {
+    public void terminate(LocalDate terminationDate, String reason, TerminationType terminationType) {
         if (this.employmentStatus.isTerminated()) {
             throw new DomainException("ALREADY_TERMINATED", "員工已離職");
         }
@@ -338,10 +345,67 @@ public class Employee {
         if (terminationDate.isBefore(this.hireDate)) {
             throw new DomainException("INVALID_TERMINATION_DATE", "離職日期不可早於到職日期");
         }
+        if (terminationType == null) {
+            throw new DomainException("TERMINATION_TYPE_REQUIRED", "離職類型不可為空");
+        }
         this.employmentStatus = EmploymentStatus.TERMINATED;
         this.terminationDate = terminationDate;
         this.terminationReason = reason;
+        this.terminationType = terminationType;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 離職（向後相容，預設為自願離職）
+     *
+     * @param terminationDate 離職日期
+     * @param reason          離職原因
+     */
+    public void terminate(LocalDate terminationDate, String reason) {
+        terminate(terminationDate, reason, TerminationType.VOLUNTARY_RESIGNATION);
+    }
+
+    /**
+     * 計算預告期天數
+     * 依據勞基法第 16 條：
+     * - 年資 3 個月以上未滿 1 年：10 天
+     * - 年資 1 年以上未滿 3 年：20 天
+     * - 年資 3 年以上：30 天
+     * - 年資未滿 3 個月：0 天（無預告期）
+     *
+     * @return 預告期天數
+     */
+    public int calculateNoticePeriod() {
+        long totalMonths = getServiceMonths();
+        if (totalMonths < 3) {
+            return 0;
+        } else if (totalMonths < 12) {
+            return 10;
+        } else if (totalMonths < 36) {
+            return 20;
+        } else {
+            return 30;
+        }
+    }
+
+    /**
+     * 取得年資（年）
+     *
+     * @return 完整年數
+     */
+    public int getServiceYears() {
+        LocalDate endDate = this.terminationDate != null ? this.terminationDate : LocalDate.now();
+        return (int) java.time.temporal.ChronoUnit.YEARS.between(this.hireDate, endDate);
+    }
+
+    /**
+     * 取得年資（月）
+     *
+     * @return 完整月數
+     */
+    public long getServiceMonths() {
+        LocalDate endDate = this.terminationDate != null ? this.terminationDate : LocalDate.now();
+        return java.time.temporal.ChronoUnit.MONTHS.between(this.hireDate, endDate);
     }
 
     /**
@@ -574,6 +638,7 @@ public class Employee {
             LocalDate probationEndDate,
             LocalDate terminationDate,
             String terminationReason,
+            TerminationType terminationType,
             EmployeeId supervisorId) {
 
         String fullName = lastName + firstName;
@@ -603,6 +668,7 @@ public class Employee {
                 .probationEndDate(probationEndDate)
                 .terminationDate(terminationDate)
                 .terminationReason(terminationReason)
+                .terminationType(terminationType)
                 .managerId(supervisorId != null ? supervisorId.getValue() : null)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())

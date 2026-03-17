@@ -23,6 +23,7 @@ import com.company.hrms.organization.domain.model.valueobject.Gender;
 import com.company.hrms.organization.domain.model.valueobject.MaritalStatus;
 import com.company.hrms.organization.domain.model.valueobject.NationalId;
 import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
+import com.company.hrms.organization.domain.model.valueobject.TerminationType;
 import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 import com.company.hrms.organization.infrastructure.dao.EmployeeDAO;
 import com.company.hrms.organization.infrastructure.po.EmployeePO;
@@ -304,6 +305,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
                 po.getProbationEndDate(),
                 po.getTerminationDate(),
                 po.getTerminationReason(),
+                po.getTerminationType() != null ? TerminationType.valueOf(po.getTerminationType()) : null,
                 po.getSupervisorId() != null ? new EmployeeId(po.getSupervisorId()) : null);
     }
 
@@ -354,6 +356,7 @@ public class EmployeeRepositoryImpl implements IEmployeeRepository {
         po.setProbationEndDate(employee.getProbationEndDate());
         po.setTerminationDate(employee.getTerminationDate());
         po.setTerminationReason(employee.getTerminationReason());
+        po.setTerminationType(employee.getTerminationType() != null ? employee.getTerminationType().name() : null);
         po.setSupervisorId(
                 employee.getSupervisorId() != null ? employee.getSupervisorId().getValue().toString() : null);
 

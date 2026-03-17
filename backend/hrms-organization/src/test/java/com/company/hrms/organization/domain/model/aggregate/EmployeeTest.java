@@ -13,6 +13,7 @@ import com.company.hrms.common.exception.DomainException;
 import com.company.hrms.organization.domain.model.valueobject.EmploymentStatus;
 import com.company.hrms.organization.domain.model.valueobject.EmploymentType;
 import com.company.hrms.organization.domain.model.valueobject.Gender;
+import com.company.hrms.organization.domain.model.valueobject.TerminationType;
 
 /**
  * Employee 聚合根單元測試
@@ -235,20 +236,63 @@ class EmployeeTest {
     class TerminationTests {
 
         @Test
-        @DisplayName("應成功辦理離職")
-        void shouldTerminate() {
+        @DisplayName("應成功辦理離職（含離職類型）")
+        void shouldTerminateWithType() {
             // Given
             Employee employee = createTestEmployee(0);
             LocalDate terminationDate = LocalDate.now().plusDays(30);
 
             // When
-            employee.terminate(terminationDate, "自願離職");
+            employee.terminate(terminationDate, "自願離職", TerminationType.VOLUNTARY_RESIGNATION);
 
             // Then
             assertEquals(EmploymentStatus.TERMINATED, employee.getEmploymentStatus());
             assertEquals(terminationDate, employee.getTerminationDate());
             assertEquals("自願離職", employee.getTerminationReason());
+            assertEquals(TerminationType.VOLUNTARY_RESIGNATION, employee.getTerminationType());
             assertTrue(employee.isTerminated());
+        }
+
+        @Test
+        @DisplayName("資遣離職應正確設定離職類型")
+        void shouldTerminateWithLayoffType() {
+            // Given
+            Employee employee = createTestEmployee(0);
+            LocalDate terminationDate = LocalDate.now().plusDays(30);
+
+            // When
+            employee.terminate(terminationDate, "業務縮減", TerminationType.LAYOFF);
+
+            // Then
+            assertEquals(TerminationType.LAYOFF, employee.getTerminationType());
+            assertTrue(employee.getTerminationType().isInvoluntary());
+            assertTrue(employee.getTerminationType().requiresSeverancePay());
+        }
+
+        @Test
+        @DisplayName("向後相容 - 無離職類型時預設為自願離職")
+        void shouldDefaultToVoluntaryResignation() {
+            // Given
+            Employee employee = createTestEmployee(0);
+            LocalDate terminationDate = LocalDate.now().plusDays(30);
+
+            // When
+            employee.terminate(terminationDate, "個人因素");
+
+            // Then
+            assertEquals(TerminationType.VOLUNTARY_RESIGNATION, employee.getTerminationType());
+        }
+
+        @Test
+        @DisplayName("離職類型為空時應拋出例外")
+        void shouldThrowExceptionWhenTerminationTypeIsNull() {
+            // Given
+            Employee employee = createTestEmployee(0);
+
+            // When & Then
+            DomainException exception = assertThrows(DomainException.class,
+                    () -> employee.terminate(LocalDate.now().plusDays(30), "離職", null));
+            assertEquals("TERMINATION_TYPE_REQUIRED", exception.getErrorCode());
         }
 
         @Test
@@ -274,6 +318,122 @@ class EmployeeTest {
             DomainException exception = assertThrows(DomainException.class,
                     () -> employee.terminate(LocalDate.now().minusYears(1), "離職"));
             assertEquals("INVALID_TERMINATION_DATE", exception.getErrorCode());
+        }
+    }
+
+    // ==================== Notice Period Tests ====================
+
+    @Nested
+    @DisplayName("預告期計算")
+    class NoticePeriodTests {
+
+        @Test
+        @DisplayName("年資未滿 3 個月 - 預告期 0 天")
+        void shouldReturn0DaysForLessThan3Months() {
+            // Given - 到職日期在 2 個月前
+            Employee employee = Employee.onboard(
+                    "EMP001", "大明", "王", "A123456789",
+                    LocalDate.of(1990, 1, 1), Gender.MALE,
+                    "wang@company.com", "0912345678",
+                    ORG_ID, DEPT_ID, "軟體工程師",
+                    EmploymentType.FULL_TIME, LocalDate.now().minusMonths(2), 0);
+
+            // When
+            int noticePeriod = employee.calculateNoticePeriod();
+
+            // Then
+            assertEquals(0, noticePeriod);
+        }
+
+        @Test
+        @DisplayName("年資 3 個月以上未滿 1 年 - 預告期 10 天")
+        void shouldReturn10DaysFor3To12Months() {
+            // Given - 到職日期在 6 個月前
+            Employee employee = Employee.onboard(
+                    "EMP001", "大明", "王", "A123456789",
+                    LocalDate.of(1990, 1, 1), Gender.MALE,
+                    "wang@company.com", "0912345678",
+                    ORG_ID, DEPT_ID, "軟體工程師",
+                    EmploymentType.FULL_TIME, LocalDate.now().minusMonths(6), 0);
+
+            // When
+            int noticePeriod = employee.calculateNoticePeriod();
+
+            // Then
+            assertEquals(10, noticePeriod);
+        }
+
+        @Test
+        @DisplayName("年資 1 年以上未滿 3 年 - 預告期 20 天")
+        void shouldReturn20DaysFor1To3Years() {
+            // Given - 到職日期在 2 年前
+            Employee employee = Employee.onboard(
+                    "EMP001", "大明", "王", "A123456789",
+                    LocalDate.of(1990, 1, 1), Gender.MALE,
+                    "wang@company.com", "0912345678",
+                    ORG_ID, DEPT_ID, "軟體工程師",
+                    EmploymentType.FULL_TIME, LocalDate.now().minusYears(2), 0);
+
+            // When
+            int noticePeriod = employee.calculateNoticePeriod();
+
+            // Then
+            assertEquals(20, noticePeriod);
+        }
+
+        @Test
+        @DisplayName("年資 3 年以上 - 預告期 30 天")
+        void shouldReturn30DaysForMoreThan3Years() {
+            // Given - 到職日期在 5 年前
+            Employee employee = Employee.onboard(
+                    "EMP001", "大明", "王", "A123456789",
+                    LocalDate.of(1990, 1, 1), Gender.MALE,
+                    "wang@company.com", "0912345678",
+                    ORG_ID, DEPT_ID, "軟體工程師",
+                    EmploymentType.FULL_TIME, LocalDate.now().minusYears(5), 0);
+
+            // When
+            int noticePeriod = employee.calculateNoticePeriod();
+
+            // Then
+            assertEquals(30, noticePeriod);
+        }
+    }
+
+    // ==================== Service Years/Months Tests ====================
+
+    @Nested
+    @DisplayName("年資查詢")
+    class ServiceYearsTests {
+
+        @Test
+        @DisplayName("getServiceYears 應正確計算完整年數")
+        void shouldCalculateServiceYears() {
+            // Given
+            Employee employee = Employee.onboard(
+                    "EMP001", "大明", "王", "A123456789",
+                    LocalDate.of(1990, 1, 1), Gender.MALE,
+                    "wang@company.com", "0912345678",
+                    ORG_ID, DEPT_ID, "軟體工程師",
+                    EmploymentType.FULL_TIME, LocalDate.now().minusYears(5), 0);
+
+            // When & Then
+            assertEquals(5, employee.getServiceYears());
+        }
+
+        @Test
+        @DisplayName("getServiceMonths 應正確計算完整月數")
+        void shouldCalculateServiceMonths() {
+            // Given
+            Employee employee = Employee.onboard(
+                    "EMP001", "大明", "王", "A123456789",
+                    LocalDate.of(1990, 1, 1), Gender.MALE,
+                    "wang@company.com", "0912345678",
+                    ORG_ID, DEPT_ID, "軟體工程師",
+                    EmploymentType.FULL_TIME, LocalDate.now().minusMonths(18), 0);
+
+            // When & Then
+            assertEquals(18, employee.getServiceMonths());
         }
     }
 

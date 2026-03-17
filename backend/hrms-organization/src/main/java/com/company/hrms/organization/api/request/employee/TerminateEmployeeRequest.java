@@ -15,4 +15,11 @@ public class TerminateEmployeeRequest {
     private LocalDate terminationDate;
 
     private String reason;
+
+    /**
+     * 離職類型（必填）
+     * 可選值：VOLUNTARY_RESIGNATION, LAYOFF, DISMISSAL, MUTUAL_AGREEMENT, CONTRACT_EXPIRY, RETIREMENT
+     */
+    @NotNull(message = "離職類型不可為空")
+    private String terminationType;
 }

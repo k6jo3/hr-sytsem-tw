@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.company.hrms.organization.api.request.employee.TerminateEmployeeRequest;
 import com.company.hrms.organization.application.service.employee.context.EmployeeContext;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
+import com.company.hrms.organization.domain.model.valueobject.TerminationType;
 
 /**
  * TerminateEmployeeTask 單元測試
@@ -36,6 +37,7 @@ class TerminateEmployeeTaskTest {
         request = new TerminateEmployeeRequest();
         request.setTerminationDate(LocalDate.now());
         request.setReason("Personal Reason");
+        request.setTerminationType("VOLUNTARY_RESIGNATION");
 
         context = new EmployeeContext();
         context.setEmployee(mockEmployee);
@@ -43,13 +45,42 @@ class TerminateEmployeeTaskTest {
     }
 
     @Test
-    @DisplayName("應成功執行離職")
-    void shouldTerminateEmployeeSuccessfully() throws Exception {
+    @DisplayName("應成功執行離職（含離職類型）")
+    void shouldTerminateEmployeeWithType() throws Exception {
         // When
         task.execute(context);
 
         // Then
-        verify(mockEmployee).terminate(request.getTerminationDate(), request.getReason());
+        verify(mockEmployee).terminate(
+                request.getTerminationDate(),
+                request.getReason(),
+                TerminationType.VOLUNTARY_RESIGNATION);
+    }
+
+    @Test
+    @DisplayName("資遣類型應正確傳遞")
+    void shouldPassLayoffType() throws Exception {
+        // Given
+        request.setTerminationType("LAYOFF");
+
+        // When
+        task.execute(context);
+
+        // Then
+        verify(mockEmployee).terminate(
+                request.getTerminationDate(),
+                request.getReason(),
+                TerminationType.LAYOFF);
+    }
+
+    @Test
+    @DisplayName("無效離職類型應拋出例外")
+    void shouldThrowExceptionForInvalidType() {
+        // Given
+        request.setTerminationType("INVALID_TYPE");
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> task.execute(context));
     }
 
     @Test

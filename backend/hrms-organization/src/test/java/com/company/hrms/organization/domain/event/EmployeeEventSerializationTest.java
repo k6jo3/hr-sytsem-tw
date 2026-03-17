@@ -89,7 +89,8 @@ class EmployeeEventSerializationTest {
             // Arrange
             EmployeeTerminatedEvent event = new EmployeeTerminatedEvent(
                     EMPLOYEE_ID, "EMP001", "王大明", "wang@company.com",
-                    ORG_ID, DEPT_ID, LocalDate.of(2026, 3, 31), "自願離職"
+                    ORG_ID, DEPT_ID, LocalDate.of(2026, 3, 31), "自願離職",
+                    "VOLUNTARY_RESIGNATION", LocalDate.of(2024, 1, 15), 20
             );
 
             // Act
@@ -105,6 +106,30 @@ class EmployeeEventSerializationTest {
             assertThat(json.has("organizationId")).isTrue();
             assertThat(json.has("departmentId")).isTrue();
             assertThat(json.has("terminationReason")).isTrue();
+
+            // 新增欄位驗證
+            assertThat(json.has("terminationType")).as("terminationType 必須存在（IAM 帳號停用用）").isTrue();
+            assertThat(json.has("hireDate")).as("hireDate 必須存在（資遣費計算用）").isTrue();
+            assertThat(json.has("noticePeriodDays")).as("noticePeriodDays 必須存在（預告期用）").isTrue();
+        }
+
+        @Test
+        @DisplayName("新增欄位值正確性驗證")
+        void newFieldValues_areCorrect() {
+            // Arrange
+            EmployeeTerminatedEvent event = new EmployeeTerminatedEvent(
+                    EMPLOYEE_ID, "EMP001", "王大明", "wang@company.com",
+                    ORG_ID, DEPT_ID, LocalDate.of(2026, 3, 31), "業務縮減",
+                    "LAYOFF", LocalDate.of(2024, 1, 15), 20
+            );
+
+            // Act
+            JsonNode json = EventSerializationTestHelper.toJsonNode(event);
+
+            // Assert
+            assertThat(json.get("terminationType").asText()).isEqualTo("LAYOFF");
+            assertThat(json.get("hireDate").asText()).isEqualTo("2024-01-15");
+            assertThat(json.get("noticePeriodDays").asInt()).isEqualTo(20);
         }
 
         @Test
@@ -113,7 +138,8 @@ class EmployeeEventSerializationTest {
             // Arrange
             EmployeeTerminatedEvent event = new EmployeeTerminatedEvent(
                     EMPLOYEE_ID, "EMP001", "王大明", "wang@company.com",
-                    ORG_ID, DEPT_ID, LocalDate.of(2026, 3, 31), "自願離職"
+                    ORG_ID, DEPT_ID, LocalDate.of(2026, 3, 31), "自願離職",
+                    "VOLUNTARY_RESIGNATION", LocalDate.of(2024, 1, 15), 20
             );
 
             // Act

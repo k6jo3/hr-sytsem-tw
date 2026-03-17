@@ -6,7 +6,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import com.company.hrms.common.application.pipeline.PipelineTask;
-import com.company.hrms.organization.api.request.employee.TerminateEmployeeRequest;
 import com.company.hrms.organization.application.service.employee.context.EmployeeContext;
 import com.company.hrms.organization.domain.event.EmployeeTerminatedEvent;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
@@ -28,12 +27,19 @@ public class PublishTerminatedEventTask implements PipelineTask<EmployeeContext>
     @Override
     public void execute(EmployeeContext context) throws Exception {
         Employee employee = context.getEmployee();
-        TerminateEmployeeRequest request = context.getTerminateRequest();
 
         UUID employeeIdUuid = UUID.fromString(context.getEmployeeId());
         String companyEmail = employee.getCompanyEmail() != null
                 ? employee.getCompanyEmail().getValue()
                 : null;
+
+        // 取得離職類型名稱
+        String terminationTypeName = employee.getTerminationType() != null
+                ? employee.getTerminationType().name()
+                : null;
+
+        // 計算預告期天數
+        int noticePeriodDays = employee.calculateNoticePeriod();
 
         EmployeeTerminatedEvent event = new EmployeeTerminatedEvent(
                 employeeIdUuid,
@@ -42,14 +48,19 @@ public class PublishTerminatedEventTask implements PipelineTask<EmployeeContext>
                 companyEmail,
                 employee.getOrganizationId(),
                 employee.getDepartmentId(),
-                request.getTerminationDate(),
-                request.getReason());
+                employee.getTerminationDate(),
+                employee.getTerminationReason(),
+                terminationTypeName,
+                employee.getHireDate(),
+                noticePeriodDays);
 
         eventPublisher.publishEvent(event);
 
-        log.info("離職事件發布: {} - {}",
+        log.info("離職事件發布: {} - {}, 類型={}, 預告期={}天",
                 employee.getFullName(),
-                request.getTerminationDate());
+                employee.getTerminationDate(),
+                terminationTypeName,
+                noticePeriodDays);
     }
 
     @Override

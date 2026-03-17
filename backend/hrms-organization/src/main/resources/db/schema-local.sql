@@ -132,6 +132,7 @@ CREATE TABLE IF NOT EXISTS employees (
     probation_end_date DATE,
     termination_date DATE,
     termination_reason CLOB,
+    termination_type VARCHAR(30),
 
     -- 照片
     photo_url VARCHAR(500),

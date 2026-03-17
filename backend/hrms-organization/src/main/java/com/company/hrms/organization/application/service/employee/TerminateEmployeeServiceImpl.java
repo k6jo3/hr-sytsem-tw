@@ -72,6 +72,10 @@ public class TerminateEmployeeServiceImpl
                                 employeeId,
                                 context.getEmployee().getEmployeeNumber(),
                                 context.getEmployee().getFullName(),
-                                request.getTerminationDate());
+                                request.getTerminationDate(),
+                                context.getEmployee().getTerminationType() != null
+                                        ? context.getEmployee().getTerminationType().name()
+                                        : null,
+                                context.getEmployee().calculateNoticePeriod());
         }
 }
