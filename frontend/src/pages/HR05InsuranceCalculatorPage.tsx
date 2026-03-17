@@ -13,8 +13,12 @@ export const HR05InsuranceCalculatorPage: React.FC = () => {
   const { calculateFees, result, levelNumber, loading, error } = useInsuranceCalculator();
 
   const handleCalculate = async () => {
-    if (!salary || salary <= 0) {
-      message.warning('請輸入有效的月薪金額');
+    if (salary === null || salary === undefined) {
+      message.warning('請輸入待試算月薪');
+      return;
+    }
+    if (salary <= 0) {
+      message.warning('請輸入大於 0 的月薪金額');
       return;
     }
     await calculateFees(salary);

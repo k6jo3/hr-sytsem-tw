@@ -123,7 +123,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
       <div style={{ marginTop: 24, textAlign: 'center' }}>
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-          © 2025 HR System. All rights reserved.
+          © 2026 HR System. All rights reserved.
         </Typography.Text>
       </div>
     </div>

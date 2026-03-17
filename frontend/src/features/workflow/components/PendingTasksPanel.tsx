@@ -16,6 +16,7 @@ import {
   Card,
   Col,
   Empty,
+  Form,
   Input,
   message,
   Modal,
@@ -38,6 +39,7 @@ export const PendingTasksPanel: React.FC = () => {
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<ApprovalTaskViewModel | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [rejectForm] = Form.useForm();
 
   const { tasks, summary, loading, error, refresh, approveTask, rejectTask } = usePendingTasks();
 
@@ -61,23 +63,27 @@ export const PendingTasksPanel: React.FC = () => {
   const handleRejectClick = (task: ApprovalTaskViewModel) => {
     setSelectedTask(task);
     setRejectReason('');
+    rejectForm.resetFields();
     setRejectModalVisible(true);
   };
 
   const handleRejectConfirm = async () => {
     if (!selectedTask) return;
-    if (!rejectReason.trim()) {
-      message.warning('請輸入駁回原因');
-      return;
-    }
-    const result = await rejectTask(selectedTask.taskId, { comments: rejectReason });
-    if (result.success) {
-      message.success(result.message);
-      setRejectModalVisible(false);
-      setSelectedTask(null);
-      setRejectReason('');
-    } else {
-      message.error(result.message);
+    try {
+      const values = await rejectForm.validateFields();
+      const reason = values.rejectReason.trim();
+      const result = await rejectTask(selectedTask.taskId, { comments: reason });
+      if (result.success) {
+        message.success(result.message);
+        setRejectModalVisible(false);
+        setSelectedTask(null);
+        setRejectReason('');
+        rejectForm.resetFields();
+      } else {
+        message.error(result.message);
+      }
+    } catch {
+      // 表單驗證失敗，Form.Item 會自動顯示錯誤訊息
     }
   };
 
@@ -231,12 +237,28 @@ export const PendingTasksPanel: React.FC = () => {
           申請人：{selectedTask?.applicantName}<br />
           摘要：{selectedTask?.businessSummary}
         </div>
-        <TextArea
-          rows={4}
-          placeholder="請輸入駁回原因（必填）..."
-          value={rejectReason}
-          onChange={(e) => setRejectReason(e.target.value)}
-        />
+        <Form form={rejectForm} layout="vertical">
+          <Form.Item
+            name="rejectReason"
+            label="駁回原因"
+            rules={[
+              { required: true, message: '請輸入駁回原因' },
+              {
+                validator: (_, value) =>
+                  value && value.trim()
+                    ? Promise.resolve()
+                    : Promise.reject(new Error('駁回原因不可為空白')),
+              },
+            ]}
+          >
+            <TextArea
+              rows={4}
+              placeholder="請輸入駁回原因..."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+          </Form.Item>
+        </Form>
       </Modal>
     </>
   );
