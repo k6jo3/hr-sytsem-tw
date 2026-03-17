@@ -3,13 +3,13 @@ spring:
     name: hrms-notification-test
   main:
     allow-bean-definition-overriding: true
-  
+
   datasource:
     url: jdbc:h2:mem:hrms_notification_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
     username: sa
     password: sa
     driver-class-name: org.h2.Driver
-  
+
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -18,13 +18,22 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
-  
+
+  # 測試環境停用 Kafka，避免嘗試連線 localhost:9092 導致 ApplicationContext 載入失敗
   kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: hrms-notification-test-group
-      auto-offset-reset: earliest
-    # 測試時可能需要 Mock Kafka 或接受連線失敗
+    enabled: false
+
+  # 測試環境停用 Redis Repository 自動配置
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
 eureka:
   client:
@@ -32,11 +41,12 @@ eureka:
     register-with-eureka: false
     fetch-registry: false
 
+# JWT Configuration for Testing
+jwt:
+  secret: test-secret-key-for-jwt-token-generation-must-be-long-enough-256-bits
+  access-token-expiry: 3600000
+  refresh-token-expiry: 604800000
+
 logging:
   level:
     com.company.hrms.notification: DEBUG
-    
-security:
-  jwt:
-    secret: "testSecretKeyForJwtTokenGenerationWhichNeedsToBeLongEnough"
-    expiration: 3600
