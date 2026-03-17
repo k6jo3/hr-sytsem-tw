@@ -22,6 +22,7 @@ import com.company.hrms.attendance.domain.model.aggregate.Shift;
 import com.company.hrms.attendance.domain.model.valueobject.ShiftId;
 import com.company.hrms.attendance.domain.model.valueobject.ShiftType;
 import com.company.hrms.attendance.domain.repository.IShiftRepository;
+import com.company.hrms.common.exception.DomainException;
 
 /**
  * CreateCheckInRecordTask 單元測試
@@ -87,10 +88,10 @@ class CreateCheckInRecordTaskTest {
             // Given
             when(shiftRepository.findAll()).thenReturn(java.util.Collections.emptyList());
 
-            // When & Then
-            IllegalStateException exception = assertThrows(IllegalStateException.class,
+            // When & Then — 程式碼已改為拋出 DomainException
+            DomainException exception = assertThrows(DomainException.class,
                     () -> task.execute(context));
-            assertTrue(exception.getMessage().contains("班別設定"));
+            assertTrue(exception.getMessage().contains("班別"));
         }
     }
 

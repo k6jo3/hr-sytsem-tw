@@ -26,10 +26,10 @@ public class SalaryStructureQueryAssembler {
                     .gt("endDate", request.getEffectiveDate()));
         }
 
-        // 軟刪除過濾 (HR04 v2.0): 不使用 is_deleted，改用 isActive
+        // 軟刪除過濾 (HR04 v2.0): 不使用 is_deleted，改用 active（與 PO 欄位名一致）
         // 如果 request 中沒有指定 isActive，預設應查詢有效結構
         if (request.getIsActive() == null && request.getEffectiveDate() == null) {
-            builder.eq("isActive", true);
+            builder.eq("active", true);
         }
 
         return builder.build();
