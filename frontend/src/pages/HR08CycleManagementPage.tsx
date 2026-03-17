@@ -1,4 +1,5 @@
 import { DeleteOutlined, EditOutlined, FileTextOutlined, PlayCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { PageHeader } from '@shared/components/PageHeader';
 import { Button, Card, DatePicker, Form, Input, Modal, Select, Space, Table, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
@@ -183,12 +184,17 @@ export const HR08CycleManagementPage: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <Card 
-        title="考核週期管理" 
+      <PageHeader
+        title="績效週期"
+        subtitle="管理考核週期，包含建立、編輯、啟動與表單設計"
+        breadcrumbs={[
+          { title: '績效管理' },
+          { title: '績效週期' },
+        ]}
         extra={
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />} 
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
             onClick={() => {
               setEditingId(null);
               form.resetFields();
@@ -198,7 +204,8 @@ export const HR08CycleManagementPage: React.FC = () => {
             新增考核週期
           </Button>
         }
-      >
+      />
+      <Card>
         <Table
           columns={columns}
           dataSource={cycles}

@@ -1,12 +1,11 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Input, Space, Typography } from 'antd';
+import { PageHeader } from '@shared/components/PageHeader';
+import { Button, Card, Input, Space } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { CustomerList } from '../features/project/components/CustomerList';
 import { CustomerModal } from '../features/project/components/CustomerModal';
 import { useCustomers } from '../features/project/hooks/useCustomers';
 import { CustomerViewModel } from '../features/project/model/CustomerViewModel';
-
-const { Title } = Typography;
 
 /**
  * HR06-P01: 客戶管理頁面
@@ -61,12 +60,19 @@ export const HR06CustomerPage: React.FC = () => {
   return (
     <div style={{ padding: 24 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Title level={3} style={{ margin: 0 }}>客戶管理</Title>
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            新增客戶
-          </Button>
-        </div>
+        <PageHeader
+          title="客戶管理"
+          subtitle="管理專案客戶資料，包含新增、編輯客戶資訊"
+          breadcrumbs={[
+            { title: '專案管理', path: '/admin/projects' },
+            { title: '客戶管理' },
+          ]}
+          extra={
+            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+              新增客戶
+            </Button>
+          }
+        />
 
         <Card>
           <div style={{ marginBottom: 16 }}>

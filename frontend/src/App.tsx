@@ -138,6 +138,9 @@ const App: React.FC = () => {
           Table: {
             rowHoverBg: '#f0f5ff',  // hover 時的背景色（淺藍色）
           },
+          Card: {
+            borderRadiusLG: 12,
+          },
         },
       }}
     >

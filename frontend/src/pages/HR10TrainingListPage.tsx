@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Table, Tabs, Tag, Typography, message } from 'antd';
+import { Card, Table, Tabs, Tag, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { PageHeader } from '@shared/components/PageHeader';
 import { useTraining } from '@features/training/hooks/useTraining';
 import type { CertificateViewModel, CourseViewModel, EnrollmentViewModel } from '@features/training/model/TrainingViewModel';
-
-const { Title } = Typography;
 
 const courseColumns: ColumnsType<CourseViewModel> = [
   { title: '課程代碼', dataIndex: 'courseCode', key: 'courseCode', width: 120 },
@@ -74,7 +73,14 @@ export const HR10TrainingListPage: React.FC = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      <Title level={2}>訓練管理</Title>
+      <PageHeader
+        title="教育訓練"
+        subtitle="瀏覽課程列表、個人訓練紀錄與證照管理"
+        breadcrumbs={[
+          { title: '教育訓練' },
+          { title: '課程管理' },
+        ]}
+      />
       <Card>
         <Tabs activeKey={activeTab} onChange={handleTabChange} items={[
           {

@@ -1,4 +1,5 @@
-import { CalendarOutlined, LeftOutlined, PlusOutlined, RightOutlined } from '@ant-design/icons';
+import { LeftOutlined, PlusOutlined, RightOutlined } from '@ant-design/icons';
+import { PageHeader } from '@shared/components/PageHeader';
 import { Alert, Button, Card, Col, DatePicker, Layout, Row, Space, Typography } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
@@ -14,7 +15,7 @@ import { RootState } from '../store';
 dayjs.extend(weekOfYear);
 
 const { Content } = Layout;
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 /**
  * HR07-P01: 每週工時填報 (Timesheet Entry)
@@ -70,17 +71,19 @@ export const HR07TimesheetPage: React.FC = () => {
   return (
     <Content style={{ padding: 24 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Space align="baseline">
-            <CalendarOutlined style={{ fontSize: 24, color: '#1890ff' }} />
-            <Title level={2}>每週工時填報</Title>
-          </Space>
-          <Space>
+        <PageHeader
+          title="工時填報"
+          subtitle="每週工時填報與提交審核"
+          breadcrumbs={[
+            { title: '工時管理' },
+            { title: '工時填報' },
+          ]}
+          extra={
             <Button icon={<PlusOutlined />} type="primary" onClick={handleAddClick}>
               新增工時
             </Button>
-          </Space>
-        </div>
+          }
+        />
 
         {error && <Alert message="錯誤" description={error} type="error" showIcon />}
 

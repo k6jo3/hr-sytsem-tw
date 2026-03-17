@@ -58,7 +58,7 @@ export const HR14FinanceReportPage: React.FC = () => {
       </div>
 
       {!dashboard ? (
-        <Empty description="無資料" />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="尚無財務報表資料" />
       ) : (
         <>
           <Row gutter={[16, 16]}>

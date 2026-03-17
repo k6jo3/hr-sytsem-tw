@@ -219,22 +219,22 @@ export const HR01DashboardPage: React.FC = () => {
       <Spin spinning={loading}>
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           <Col xs={12} sm={6}>
-            <Card hoverable onClick={() => navigate('/admin/workflow')} style={{ cursor: 'pointer' }}>
+            <Card hoverable onClick={() => navigate('/admin/workflow')} style={{ cursor: 'pointer' }} styles={{ body: { padding: '20px 24px' } }}>
               <Statistic title="待辦事項" value={stats.pendingTodos} prefix={<FileTextOutlined />} valueStyle={{ color: '#667eea' }} />
             </Card>
           </Col>
           <Col xs={12} sm={6}>
-            <Card hoverable onClick={() => navigate('/attendance/my-records')} style={{ cursor: 'pointer' }}>
+            <Card hoverable onClick={() => navigate('/attendance/my-records')} style={{ cursor: 'pointer' }} styles={{ body: { padding: '20px 24px' } }}>
               <Statistic title="本月出勤" value={stats.attendanceDays} suffix="天" prefix={<CheckCircleOutlined />} valueStyle={{ color: '#52c41a' }} />
             </Card>
           </Col>
           <Col xs={12} sm={6}>
-            <Card hoverable onClick={() => navigate('/profile/notifications')} style={{ cursor: 'pointer' }}>
+            <Card hoverable onClick={() => navigate('/profile/notifications')} style={{ cursor: 'pointer' }} styles={{ body: { padding: '20px 24px' } }}>
               <Statistic title="未讀通知" value={stats.unreadNotifications} prefix={<BellOutlined />} valueStyle={{ color: '#faad14' }} />
             </Card>
           </Col>
           <Col xs={12} sm={6}>
-            <Card hoverable onClick={() => navigate('/attendance/leave/balance')} style={{ cursor: 'pointer' }}>
+            <Card hoverable onClick={() => navigate('/attendance/leave/balance')} style={{ cursor: 'pointer' }} styles={{ body: { padding: '20px 24px' } }}>
               <Statistic title="特休餘額" value={stats.leaveBalance} suffix="天" prefix={<CalendarOutlined />} valueStyle={{ color: '#13c2c2' }} />
             </Card>
           </Col>

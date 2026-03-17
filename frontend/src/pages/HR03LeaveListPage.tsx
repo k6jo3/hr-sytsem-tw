@@ -1,13 +1,12 @@
 import { RootState } from '@/store';
-import { Button, Card, message, Space, Table, Tag, Typography } from 'antd';
+import { PageHeader } from '@shared/components/PageHeader';
+import { Button, Card, message, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import type { LeaveApplicationDto, LeaveStatus } from '../features/attendance/api/AttendanceTypes';
 import { LeaveApi } from '../features/attendance/api/LeaveApi';
-
-const { Title } = Typography;
 
 import { ApplyLeaveModal } from '../features/attendance/components/ApplyLeaveModal';
 
@@ -128,10 +127,17 @@ export const HR03LeaveListPage: React.FC = () => {
   return (
     <>
       <div style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <Title level={3}>請假與加班申請列表</Title>
-          <Button type="primary" onClick={() => setModalVisible(true)}>申請請假</Button>
-        </div>
+        <PageHeader
+          title="請假申請"
+          subtitle="查看及管理個人請假與加班申請記錄"
+          breadcrumbs={[
+            { title: '考勤管理' },
+            { title: '請假申請' },
+          ]}
+          extra={
+            <Button type="primary" onClick={() => setModalVisible(true)}>申請請假</Button>
+          }
+        />
 
         <Card>
           <Table

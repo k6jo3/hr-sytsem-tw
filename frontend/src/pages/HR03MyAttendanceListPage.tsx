@@ -1,5 +1,6 @@
 import { RootState } from '@/store';
-import { Button, Card, DatePicker, message, Space, Table, Tag, Typography } from 'antd';
+import { PageHeader } from '@shared/components/PageHeader';
+import { Button, Card, DatePicker, message, Space, Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -7,7 +8,6 @@ import { useSelector } from 'react-redux';
 import { AttendanceApi } from '../features/attendance/api/AttendanceApi';
 import type { AttendanceRecordDto, AttendanceStatus } from '../features/attendance/api/AttendanceTypes';
 
-const { Title } = Typography;
 const { RangePicker } = DatePicker;
 
 import { ApplyCorrectionModal } from '../features/attendance/components/ApplyCorrectionModal';
@@ -120,13 +120,20 @@ export const HR03MyAttendanceListPage: React.FC = () => {
   return (
     <>
       <div style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <Title level={3}>我的考勤記錄查詢</Title>
-          <RangePicker 
-            value={dateRange} 
-            onChange={(val) => setDateRange(val as any)}
-          />
-        </div>
+        <PageHeader
+          title="考勤紀錄"
+          subtitle="查詢個人出勤打卡紀錄與申請補卡"
+          breadcrumbs={[
+            { title: '考勤管理' },
+            { title: '考勤紀錄' },
+          ]}
+          extra={
+            <RangePicker
+              value={dateRange}
+              onChange={(val) => setDateRange(val as any)}
+            />
+          }
+        />
 
         <Card>
           <Table

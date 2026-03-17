@@ -1,13 +1,14 @@
 import React from 'react';
 import { Card, Typography, Spin, Alert, Row, Col, Tag, Space, Empty, Button } from 'antd';
 import { MailOutlined, PhoneOutlined, UserOutlined, ReloadOutlined } from '@ant-design/icons';
+import { PageHeader } from '@shared/components/PageHeader';
 import { useCandidatesKanban } from '../features/recruitment/hooks/useCandidatesKanban';
 import type {
   CandidateViewModel,
   KanbanColumnViewModel,
 } from '../features/recruitment/model/RecruitmentViewModel';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const CandidateCard: React.FC<{ candidate: CandidateViewModel }> = ({ candidate }) => {
   return (
@@ -104,26 +105,26 @@ export const HR09RecruitmentPage: React.FC = () => {
   if (!kanban) {
     return (
       <Card style={{ margin: 24 }}>
-        <Empty description="查無資料" />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="尚無招募資料" />
       </Card>
     );
   }
 
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ marginBottom: 24 }}>
-        <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-          <div>
-            <Title level={2} style={{ margin: 0 }}>
-              應徵者管理
-            </Title>
-            <Text type="secondary">拖曳卡片以更新應徵者狀態</Text>
-          </div>
+      <PageHeader
+        title="招募管理"
+        subtitle="拖曳卡片以更新應徵者狀態"
+        breadcrumbs={[
+          { title: '人才招募' },
+          { title: '招募管理' },
+        ]}
+        extra={
           <Button icon={<ReloadOutlined />} onClick={refresh}>
             重新整理
           </Button>
-        </Space>
-      </div>
+        }
+      />
 
       <Row gutter={16} style={{ marginBottom: 24 }}>
         {kanban.columns.map((column) => (

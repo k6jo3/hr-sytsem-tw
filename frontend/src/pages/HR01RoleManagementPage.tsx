@@ -225,7 +225,7 @@ const HR01RoleManagementPage: React.FC = () => {
                   <Spin />
                 </div>
               ) : roles.length === 0 ? (
-                <Empty description="暫無角色資料" />
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暫無角色資料" />
               ) : (
                 roles.map((role) => (
                   <RoleCard
@@ -318,7 +318,7 @@ const HR01RoleManagementPage: React.FC = () => {
                 </>
               ) : (
                 <div style={{ textAlign: 'center', padding: 80 }}>
-                  <Empty description="請從左側選擇一個角色以檢視詳細資訊" />
+                  <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="請從左側選擇一個角色以檢視詳細資訊" />
                 </div>
               )}
             </Card>

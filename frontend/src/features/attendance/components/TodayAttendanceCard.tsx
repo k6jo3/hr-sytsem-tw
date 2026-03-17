@@ -52,7 +52,7 @@ export const TodayAttendanceCard: React.FC<TodayAttendanceCardProps> = ({
   if (!summary) {
     return (
       <Card>
-        <Empty description="暫無考勤記錄" />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暫無考勤記錄" />
       </Card>
     );
   }

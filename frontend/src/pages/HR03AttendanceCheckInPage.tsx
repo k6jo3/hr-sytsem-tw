@@ -1,10 +1,9 @@
 import { CheckInButton } from '@features/attendance/components/CheckInButton';
 import { TodayAttendanceCard } from '@features/attendance/components/TodayAttendanceCard';
 import { useAttendance } from '@features/attendance/hooks/useAttendance';
-import { Card, Col, Modal, Row, Space, Typography, message } from 'antd';
+import { PageHeader } from '@shared/components/PageHeader';
+import { Card, Col, Modal, Row, Space, message } from 'antd';
 import React from 'react';
-
-const { Title } = Typography;
 
 /**
  * HR03 考勤打卡頁面
@@ -51,9 +50,14 @@ const HR03AttendanceCheckInPage: React.FC = () => {
   return (
     <>
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '24px 0' }}>
-        <Title level={3} style={{ marginBottom: 24 }}>
-          員工自助打卡
-        </Title>
+        <PageHeader
+          title="每日打卡"
+          subtitle="員工自助打卡，記錄上下班時間"
+          breadcrumbs={[
+            { title: '考勤管理' },
+            { title: '每日打卡' },
+          ]}
+        />
 
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           {/* 打卡按鈕卡片 */}

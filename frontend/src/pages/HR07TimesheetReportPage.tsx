@@ -148,7 +148,7 @@ export const HR07TimesheetReportPage: React.FC = () => {
                   }}
                 />
               ) : (
-                <Empty description="選擇區間內無專案工時" />
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="選擇區間內無專案工時" />
               )}
             </Card>
           </Col>
@@ -177,7 +177,7 @@ export const HR07TimesheetReportPage: React.FC = () => {
                   }}
                 />
               ) : (
-                <Empty description="選擇區間內無部門工時" />
+                <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="選擇區間內無部門工時" />
               )}
             </Card>
           </Col>

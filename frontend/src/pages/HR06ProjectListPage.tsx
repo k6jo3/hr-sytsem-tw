@@ -1,11 +1,10 @@
 import { PlusOutlined, TeamOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Input, Radio, Row, Space, Typography } from 'antd';
+import { PageHeader } from '@shared/components/PageHeader';
+import { Button, Card, Col, Input, Radio, Row, Space } from 'antd';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProjectList } from '../features/project/components/ProjectList';
 import { useProjects } from '../features/project/hooks/useProjects';
-
-const { Title } = Typography;
 
 /**
  * HR06-P02: 專案列表頁面
@@ -47,19 +46,22 @@ export const HR06ProjectListPage: React.FC = () => {
   return (
     <div style={{ padding: 24 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Title level={3} style={{ margin: 0 }}>專案管理</Title>
-          </Col>
-          <Col>
+        <PageHeader
+          title="專案列表"
+          subtitle="瀏覽及管理所有專案，依狀態與類型篩選"
+          breadcrumbs={[
+            { title: '專案管理' },
+            { title: '專案列表' },
+          ]}
+          extra={
             <Space>
               <Button icon={<TeamOutlined />} onClick={handleManageCustomers}>客戶管理</Button>
               <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
                 新增專案
               </Button>
             </Space>
-          </Col>
-        </Row>
+          }
+        />
 
         <Card>
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
