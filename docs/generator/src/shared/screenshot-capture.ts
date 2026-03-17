@@ -107,6 +107,25 @@ export class ScreenshotCapture {
       width: this.config.width!,
       height: this.config.height!,
     });
+
+    // 攔截後端 API 請求，回傳空成功回應
+    // 避免因後端未啟動而觸發 401 → 清除 token → 重導登入頁
+    // 只攔截 XHR/Fetch 類型的 /api/ 請求，不攔截 JS/CSS 等靜態資源
+    await this.page.setRequestInterception(true);
+    this.page.on('request', (request) => {
+      const url = request.url();
+      const resourceType = request.resourceType();
+      // 只攔截 XHR/Fetch 類型且路徑包含 /api/ 的請求
+      if ((resourceType === 'xhr' || resourceType === 'fetch') && url.includes('/api/')) {
+        request.respond({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ data: [], items: [], content: [], total: 0, totalElements: 0, success: true, unreadCount: 0, unread_count: 0 }),
+        });
+      } else {
+        request.continue();
+      }
+    });
   }
 
   /** 關閉瀏覽器 */
@@ -121,6 +140,10 @@ export class ScreenshotCapture {
   /**
    * 登入前端系統（直接注入 localStorage 認證狀態）
    * 繞過 Ant Design 表單互動問題，直接設定 Redux authSlice 所需的 localStorage 資料
+   *
+   * 重要：必須先注入 localStorage 再 reload 頁面，因為 Redux authSlice 的
+   * initialState 在模組載入時從 localStorage 讀取。若先載入頁面再注入，
+   * Redux store 已初始化為未認證狀態，後續導航不會重新初始化 store。
    */
   async login(username: string, _password: string = 'Admin@123'): Promise<void> {
     if (!this.page) throw new Error('瀏覽器未啟動');
@@ -132,19 +155,28 @@ export class ScreenshotCapture {
       return;
     }
 
-    // 導航到前端頁面（確保在正確 origin 才能存取 localStorage）
-    await this.page.goto(`${this.config.baseUrl}/login`, {
-      waitUntil: 'networkidle2',
-      timeout: 30000,
-    });
+    // 先導航到前端頁面（確保在正確 origin 才能存取 localStorage）
+    const currentUrl = this.page.url();
+    if (!currentUrl.startsWith(this.config.baseUrl)) {
+      await this.page.goto(`${this.config.baseUrl}/login`, {
+        waitUntil: 'networkidle2',
+        timeout: 30000,
+      });
+    }
 
-    // 直接注入 localStorage 認證狀態
+    // 注入 localStorage 認證狀態
     await this.page.evaluate((profile: MockUserProfile) => {
       localStorage.clear();
       sessionStorage.clear();
       localStorage.setItem('accessToken', 'mock-screenshot-token-' + profile.username);
       localStorage.setItem('user', JSON.stringify(profile));
     }, mockUser);
+
+    // 重新載入頁面，讓 Redux authSlice initialState 從 localStorage 讀取新的認證狀態
+    await this.page.reload({ waitUntil: 'networkidle2', timeout: 30000 });
+
+    // 等待 React 渲染完成
+    await new Promise(r => setTimeout(r, 1500));
 
     this.currentUser = username;
     console.log(`[Screenshot] 已注入登入狀態: ${username} (${mockUser.fullName})`);
