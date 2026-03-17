@@ -259,6 +259,8 @@ services:
       SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
       EUREKA_CLIENT_ENABLED: "false"
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      # 跨服務呼叫：Organization 服務 URL（Docker 內部網路）
+      HRMS_SERVICES_ORGANIZATION_URL: http://hrms-organization:8082
     depends_on:
       postgres:
         condition: service_healthy

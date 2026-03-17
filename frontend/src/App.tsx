@@ -161,7 +161,7 @@ const App: React.FC = () => {
           <Route path="/profile/payslips" element={<ProtectedRoute><HR04PayslipPage /></ProtectedRoute>} />
           <Route path="/admin/payroll/structures" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR', 'FINANCE']}><HR04SalaryStructurePage /></ProtectedRoute>} />
           <Route path="/admin/payroll/items" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR', 'FINANCE']}><HR04PayrollItemPage /></ProtectedRoute>} />
-          <Route path="/admin/payroll/approval" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR', 'FINANCE']}><HR04PayrollApprovalPage /></ProtectedRoute>} />
+          <Route path="/admin/payroll/approvals" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR', 'FINANCE']}><HR04PayrollApprovalPage /></ProtectedRoute>} />
           <Route path="/admin/payroll/bank-transfer" element={<ProtectedRoute requiredRoles={['ADMIN', 'FINANCE']}><HR04BankTransferPage /></ProtectedRoute>} />
           <Route path="/admin/payroll/employees" element={<ProtectedRoute requiredRoles={['ADMIN', 'HR', 'FINANCE']}><HR04PayrollHistoryPage /></ProtectedRoute>} />
 

@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/v1/candidates")
+@RequestMapping("/api/v1/recruitment/candidates")
 @Tag(name = "HR09-Candidate", description = "應徵者管理")
 public class HR09CandidateCmdController extends CommandBaseController {
 

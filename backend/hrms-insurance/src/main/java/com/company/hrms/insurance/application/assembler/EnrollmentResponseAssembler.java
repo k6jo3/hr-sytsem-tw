@@ -43,7 +43,7 @@ public class EnrollmentResponseAssembler {
         return EnrollmentDetailResponse.builder()
                 .enrollmentId(enrollment.getId().getValue())
                 .employeeId(enrollment.getEmployeeId())
-                .employeeName(employeeName)
+                .employeeName(employeeName != null ? employeeName : enrollment.getEmployeeId())
                 .insuranceUnitName(unitName)
                 .levelNumber(levelNumber)
                 .insuranceType(enrollment.getInsuranceType().name())

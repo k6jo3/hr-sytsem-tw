@@ -216,16 +216,16 @@ export class RecruitmentApi {
     return apiClient.post<CreateJobOpeningResponse>('/recruitment/jobs', request);
   }
 
-  // 應徵者: 後端 /api/v1/candidates
+  // 應徵者: 後端 /api/v1/recruitment/candidates
   static async getCandidates(params?: GetCandidatesRequest): Promise<GetCandidatesResponse> {
     if (MockConfig.isEnabled('RECRUITMENT')) return { data: [], total: 0, page: 1, page_size: 10 };
-    const raw = await apiClient.get<any>('/candidates', { params: adaptPageParams(params) });
+    const raw = await apiClient.get<any>('/recruitment/candidates', { params: adaptPageParams(params) });
     return adaptPage(raw, adaptCandidateDto);
   }
 
   static async getCandidateDetail(candidateId: string): Promise<GetCandidateDetailResponse> {
     if (MockConfig.isEnabled('RECRUITMENT')) return { candidate: {} as any, interviews: [], evaluations: [] };
-    const raw = await apiClient.get<any>(`/candidates/${candidateId}`);
+    const raw = await apiClient.get<any>(`/recruitment/candidates/${candidateId}`);
     return {
       candidate: adaptCandidateDto(raw),
       interviews: (raw.interviews ?? []).map(adaptInterviewDto),
@@ -236,7 +236,7 @@ export class RecruitmentApi {
 
   static async createCandidate(request: CreateCandidateRequest): Promise<CreateCandidateResponse> {
     if (MockConfig.isEnabled('RECRUITMENT')) return { candidate_id: 'mock-id', message: 'ok' };
-    return apiClient.post<CreateCandidateResponse>('/candidates', request);
+    return apiClient.post<CreateCandidateResponse>('/recruitment/candidates', request);
   }
 
   static async updateCandidateStatus(
@@ -245,7 +245,7 @@ export class RecruitmentApi {
   ): Promise<UpdateCandidateStatusResponse> {
     if (MockConfig.isEnabled('RECRUITMENT')) return { message: 'ok' };
     return apiClient.put<UpdateCandidateStatusResponse>(
-      `/candidates/${candidateId}/status`,
+      `/recruitment/candidates/${candidateId}/status`,
       request
     );
   }
@@ -256,7 +256,7 @@ export class RecruitmentApi {
   ): Promise<HireCandidateResponse> {
     if (MockConfig.isEnabled('RECRUITMENT')) return { message: 'ok' };
     return apiClient.put<HireCandidateResponse>(
-      `/candidates/${candidateId}/hire`,
+      `/recruitment/candidates/${candidateId}/hire`,
       request || {}
     );
   }

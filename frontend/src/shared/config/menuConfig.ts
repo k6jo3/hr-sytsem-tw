@@ -71,7 +71,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
       { key: '/profile/payslips', label: '我的電子薪資單' },
       { key: '/admin/payroll/structures', label: '薪資結構設定', roles: ['ADMIN', 'HR', 'FINANCE'] },
       { key: '/admin/payroll/items', label: '薪資項目管理', roles: ['ADMIN', 'HR', 'FINANCE'] },
-      { key: '/admin/payroll/approval', label: '薪資審核', roles: ['ADMIN', 'HR', 'FINANCE'] },
+      { key: '/admin/payroll/approvals', label: '薪資審核', roles: ['ADMIN', 'HR', 'FINANCE'] },
       { key: '/admin/payroll/bank-transfer', label: '銀行轉帳', roles: ['ADMIN', 'FINANCE'] },
       { key: '/admin/payroll/employees', label: '員工薪資歷史', roles: ['ADMIN', 'HR', 'FINANCE'] },
     ],

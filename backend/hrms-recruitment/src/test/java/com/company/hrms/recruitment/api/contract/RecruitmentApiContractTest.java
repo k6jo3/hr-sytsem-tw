@@ -221,7 +221,7 @@ public class RecruitmentApiContractTest extends BaseApiContractTest {
                     .thenReturn(new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 10), 0));
 
             // Act
-            MvcResult result = mockMvc.perform(get("/api/v1/candidates?openingId=" + openingId)
+            MvcResult result = mockMvc.perform(get("/api/v1/recruitment/candidates?openingId=" + openingId)
                     .requestAttr("currentUser", mockUser)
                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
