@@ -125,15 +125,15 @@ const App: React.FC = () => {
         },
         components: {
           Layout: {
-            siderBg: '#1a1a2e',
-            headerBg: '#ffffff',
-            bodyBg: '#f0f2f5',
+            siderBg: '#4a5a82',
+            headerBg: '#f5f6fa',
+            bodyBg: '#e8ebf0',
           },
           Menu: {
-            darkItemBg: '#1a1a2e',
-            darkSubMenuItemBg: '#151525',
+            darkItemBg: '#4a5a82',
+            darkSubMenuItemBg: '#3f4f75',
             darkItemSelectedBg: '#667eea',
-            darkItemHoverBg: 'rgba(102, 126, 234, 0.15)',
+            darkItemHoverBg: 'rgba(102, 126, 234, 0.25)',
           },
           Table: {
             rowHoverBg: '#f0f5ff',  // hover 時的背景色（淺藍色）

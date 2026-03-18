@@ -19,9 +19,16 @@ export const HR03ShiftManagementPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await ShiftApi.getShiftList();
-      setShifts(data);
-    } catch (error) {
-      message.error('載入班別失敗');
+      setShifts(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      // 僅在真正的 API 錯誤時顯示錯誤訊息，空資料不算錯誤
+      const status = error?.response?.status;
+      if (status === 404) {
+        setShifts([]);
+      } else {
+        console.error('[ShiftManagement] 載入班別失敗:', error);
+        message.error('載入班別失敗，請檢查網路連線或稍後再試');
+      }
     } finally {
       setLoading(false);
     }
@@ -127,6 +134,7 @@ export const HR03ShiftManagementPage: React.FC = () => {
           rowKey="shiftId"
           loading={loading}
           scroll={{ x: 900 }}
+          locale={{ emptyText: '尚無班別資料，請點擊「新增班別」建立' }}
         />
       </Card>
 

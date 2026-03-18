@@ -17,9 +17,15 @@ export const HR03LeaveTypeManagementPage: React.FC = () => {
     setLoading(true);
     try {
       const data = await LeaveApi.getLeaveTypes();
-      setLeaveTypes(data);
-    } catch (error) {
-      message.error('載入假別列表失敗');
+      setLeaveTypes(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 404) {
+        setLeaveTypes([]);
+      } else {
+        console.error('[LeaveTypeManagement] 載入假別失敗:', error);
+        message.error('載入假別列表失敗，請檢查網路連線或稍後再試');
+      }
     } finally {
       setLoading(false);
     }
@@ -97,7 +103,8 @@ export const HR03LeaveTypeManagementPage: React.FC = () => {
           columns={columns} 
           dataSource={leaveTypes} 
           rowKey="leaveTypeId" 
-          loading={loading} 
+          loading={loading}
+          locale={{ emptyText: '尚無假別資料，請點擊「新增假別」建立' }}
         />
       </Card>
 

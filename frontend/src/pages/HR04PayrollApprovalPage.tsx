@@ -34,8 +34,11 @@ export const HR04PayrollApprovalPage: React.FC = () => {
       // 僅查詢 status 為 COMPLETED (待審核) 的批次
       const res = await PayrollApi.getPayrollRuns({ status: 'COMPLETED' });
       setData(res.items || res.content || []);
-    } catch (error) {
-      message.error('載入待審核批次失敗');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status !== 404) {
+        message.error('載入待審核批次失敗');
+      }
     } finally {
       setLoading(false);
     }

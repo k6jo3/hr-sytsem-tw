@@ -1,6 +1,6 @@
 import { UserOutlined } from '@ant-design/icons';
 import { useAppSelector } from '@store/hooks';
-import { Avatar, Card, Descriptions, Tag, Typography } from 'antd';
+import { Avatar, Card, Descriptions, Spin, Tag, Typography } from 'antd';
 import React from 'react';
 
 const { Title } = Typography;
@@ -13,7 +13,11 @@ export const HR01ProfilePage: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
 
   if (!user) {
-    return null;
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
+        <Spin tip="載入個人資料中..." size="large" />
+      </div>
+    );
   }
 
   return (

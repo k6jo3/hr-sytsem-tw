@@ -126,7 +126,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: '#fff',
+          background: '#f5f6fa',
           padding: '0 24px',
           boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
         }}
@@ -140,7 +140,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
             style={{ fontSize: 18 }}
             aria-label={siderCollapsed ? '展開選單' : '收合選單'}
           />
-          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#1a1a2e' }}>
+          <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#4a5a82' }}>
             HR System 3.0
           </span>
         </div>
@@ -178,7 +178,8 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
           onBreakpoint={handleBreakpoint}
           trigger={null}
           style={{
-            background: '#1a1a2e',
+            background: '#4a5a82',
+            boxShadow: '4px 0 12px rgba(0, 0, 0, 0.08)',
             // 手機展開時以浮動覆蓋方式顯示
             ...(isBelowBreakpoint && !siderCollapsed
               ? { position: 'fixed', height: '100vh', zIndex: 100, top: 64, left: 0 }
@@ -194,7 +195,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
             onClick={handleMenuClick}
             style={{
               borderRight: 0,
-              background: '#1a1a2e',
+              background: '#4a5a82',
             }}
           />
         </Sider>
@@ -210,9 +211,19 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
             }}
           />
         )}
-        <Content style={{ padding: '24px', background: '#f0f2f5', minHeight: 280 }}>
-          {children}
-        </Content>
+        <Layout style={{ background: '#e8ebf0' }}>
+          <Content style={{ padding: '24px', minHeight: 280 }}>
+            {children}
+          </Content>
+          <div style={{
+            textAlign: 'center',
+            padding: '12px 24px',
+            color: '#999',
+            fontSize: 13,
+          }}>
+            © 2026 HR System 3.0 — 台灣科技股份有限公司
+          </div>
+        </Layout>
       </Layout>
     </Layout>
   );

@@ -45,7 +45,11 @@ export class ShiftApi {
    */
   static async getShiftList(params?: any): Promise<ShiftDto[]> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getShifts();
-    const data: any[] = await apiClient.get(this.BASE_PATH, { params });
+    const resp: any = await apiClient.get(this.BASE_PATH, { params });
+    // 後端可能回傳陣列或分頁物件（取 items / content / data）
+    const data: any[] = Array.isArray(resp)
+      ? resp
+      : (resp?.items ?? resp?.content ?? resp?.data ?? []);
     return data.map(adaptShiftDto);
   }
 

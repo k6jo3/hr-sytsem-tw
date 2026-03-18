@@ -1,5 +1,5 @@
-import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from '@ant-design/icons';
-import { Alert, Card, Space, Table, Tag, Typography } from 'antd';
+import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled, FileSearchOutlined } from '@ant-design/icons';
+import { Alert, Card, Empty, Space, Table, Tag, Typography } from 'antd';
 import dayjs from 'dayjs';
 import React from 'react';
 import type { DailyAuditResult, WeeklyAuditSummary } from '../model/TimesheetAuditModel';
@@ -15,36 +15,54 @@ interface TimesheetAuditResultProps {
  * HR07-C01: 工時考勤勾稽結果組件
  */
 export const TimesheetAuditResult: React.FC<TimesheetAuditResultProps> = ({ summary, loading }) => {
-  if (!summary) return null;
+  if (!summary) {
+    return (
+      <Card title="工時與考勤勾稽驗證" size="small">
+        <Empty
+          image={<FileSearchOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />}
+          description="選擇工時週別後顯示勾稽結果"
+        />
+      </Card>
+    );
+  }
 
   const columns = [
     {
       title: '日期',
       dataIndex: 'date',
       key: 'date',
-      render: (date: string) => dayjs(date).format('MM/DD (dd)'),
+      width: 90,
+      render: (date: string) => dayjs(date).format('MM/DD(dd)'),
     },
     {
-      title: '報工時數',
+      title: '報工',
       dataIndex: 'timesheetHours',
       key: 'timesheetHours',
+      width: 50,
+      align: 'center' as const,
       render: (h: number) => `${h}h`,
     },
     {
-      title: '在場時數',
+      title: '在場',
       dataIndex: 'attendanceHours',
       key: 'attendanceHours',
+      width: 50,
+      align: 'center' as const,
       render: (h: number) => `${h}h`,
     },
     {
-      title: '請假時數',
+      title: '請假',
       dataIndex: 'leaveHours',
       key: 'leaveHours',
+      width: 50,
+      align: 'center' as const,
       render: (h: number) => h > 0 ? <Tag color="orange">{h}h</Tag> : '-',
     },
     {
-      title: '檢核結果',
+      title: '結果',
       key: 'status',
+      width: 45,
+      align: 'center' as const,
       render: (_: any, record: DailyAuditResult) => {
         if (record.status === 'OK') {
           return <CheckCircleFilled style={{ color: '#52c41a' }} />;
@@ -59,7 +77,8 @@ export const TimesheetAuditResult: React.FC<TimesheetAuditResultProps> = ({ summ
       title: '說明',
       dataIndex: 'message',
       key: 'message',
-      render: (msg: string) => <Text type="secondary" style={{ fontSize: '12px' }}>{msg}</Text>,
+      ellipsis: true,
+      render: (msg: string) => <Text type="secondary" style={{ fontSize: '12px' }}>{msg || '-'}</Text>,
     },
   ];
 
@@ -88,6 +107,7 @@ export const TimesheetAuditResult: React.FC<TimesheetAuditResultProps> = ({ summ
           pagination={false}
           size="small"
           rowKey="date"
+          scroll={{ x: 'max-content' }}
         />
       </Space>
     </Card>

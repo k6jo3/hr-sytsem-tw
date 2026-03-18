@@ -58,7 +58,11 @@ export class LeaveApi {
    */
   static async getLeaveTypes(): Promise<any[]> {
     if (MockConfig.isEnabled('ATTENDANCE')) return MockAttendanceApi.getLeaveTypes();
-    return apiClient.get(`${this.BASE_PATH}/types`);
+    const resp: any = await apiClient.get(`${this.BASE_PATH}/types`);
+    // 後端可能回傳陣列或分頁物件（取 items / content / data）
+    return Array.isArray(resp)
+      ? resp
+      : (resp?.items ?? resp?.content ?? resp?.data ?? []);
   }
 
   /**

@@ -1,6 +1,7 @@
 import puppeteer, { Browser, Page } from 'puppeteer';
 import fs from 'fs/promises';
 import path from 'path';
+import { getMockResponse } from './screenshot-mock-data.js';
 
 /** 截圖設定 */
 export interface ScreenshotConfig {
@@ -116,11 +117,13 @@ export class ScreenshotCapture {
       const url = request.url();
       const resourceType = request.resourceType();
       // 只攔截 XHR/Fetch 類型且路徑包含 /api/ 的請求
+      // 使用 getMockResponse 回傳對應模組的假資料，讓截圖有實際內容
       if ((resourceType === 'xhr' || resourceType === 'fetch') && url.includes('/api/')) {
+        const mockData = getMockResponse(url);
         request.respond({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ data: [], items: [], content: [], total: 0, totalElements: 0, success: true, unreadCount: 0, unread_count: 0 }),
+          body: JSON.stringify(mockData),
         });
       } else {
         request.continue();

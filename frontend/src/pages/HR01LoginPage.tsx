@@ -91,7 +91,8 @@ export const HR01LoginPage: React.FC = () => {
         <div
           style={{
             flex: '0 0 60%',
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+            background: 'linear-gradient(135deg, #4a5a82 0%, #3a4a6e 50%, #2d3a5c 100%)',
+            boxShadow: '6px 0 20px rgba(0, 0, 0, 0.12)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -190,7 +191,7 @@ export const HR01LoginPage: React.FC = () => {
       >
         <div style={{ maxWidth: 400, width: '100%', margin: '0 auto' }}>
           {/* 歡迎文字 */}
-          <Title level={2} style={{ color: '#1a1a2e', marginBottom: 8 }}>
+          <Title level={2} style={{ color: '#4a5a82', marginBottom: 8 }}>
             歡迎回來
           </Title>
           <Text type="secondary" style={{ display: 'block', marginBottom: 32 }}>

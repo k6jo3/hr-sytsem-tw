@@ -317,7 +317,9 @@ export class PayrollApi {
    */
   static async getPayrollItemDefinitions(): Promise<PayrollItemDefinitionDto[]> {
     if (MockConfig.isEnabled('PAYROLL')) return [] as any;
-    return apiClient.get('/payroll-item-definitions');
+    const resp: any = await apiClient.get('/payroll-item-definitions');
+    // 後端可能回傳陣列或分頁物件
+    return Array.isArray(resp) ? resp : (resp?.items ?? resp?.content ?? resp?.data ?? []);
   }
 
   /**

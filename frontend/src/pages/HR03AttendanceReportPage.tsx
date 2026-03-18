@@ -22,9 +22,26 @@ export const HR03AttendanceReportPage: React.FC = () => {
         month: date.month() + 1,
         departmentId: values.departmentId
       });
-      setReportData(res);
-    } catch (error) {
-      message.error('載入報表失敗');
+      // 確保回應結構完整，避免缺少 summary 時崩潰
+      if (res && res.summary) {
+        setReportData(res);
+      } else {
+        setReportData({
+          year: date.year(),
+          month: date.month() + 1,
+          summary: { totalEmployees: 0, averageAttendanceRate: 0, totalLateCount: 0, totalOvertimeHours: 0 },
+          items: Array.isArray(res?.items) ? res.items : [],
+        } as GetMonthlyReportResponse);
+      }
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 404) {
+        // 無報表資料不算錯誤，顯示空狀態
+        setReportData(null);
+      } else {
+        console.error('[AttendanceReport] 載入報表失敗:', error);
+        message.error('載入報表失敗，請檢查網路連線或稍後再試');
+      }
     } finally {
       setLoading(false);
     }
@@ -96,6 +113,7 @@ export const HR03AttendanceReportPage: React.FC = () => {
               rowKey="employeeId" 
               loading={loading}
               pagination={{ pageSize: 20 }}
+              locale={{ emptyText: '該月份尚無差勤報表資料' }}
             />
           </Card>
         </>

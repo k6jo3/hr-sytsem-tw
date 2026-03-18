@@ -1,11 +1,9 @@
-import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Button, Card, Space, Table, Tag, Typography } from 'antd';
+import { Card, Table, Tag } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { EmployeeViewModel } from '../model/EmployeeViewModel';
 
-const { Title } = Typography;
 
 /**
  * EmployeeList Props
@@ -31,8 +29,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
   total,
   currentPage,
   pageSize: pageSizeProp,
-  onRefresh,
-  onAdd,
+  onRefresh: _onRefresh,
+  onAdd: _onAdd,
   onPageChange,
 }) => {
   const navigate = useNavigate();
@@ -93,26 +91,6 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 16,
-        }}
-      >
-        <Title level={4} style={{ margin: 0 }}>
-          員工列表
-        </Title>
-        <Space>
-          <Button icon={<ReloadOutlined />} onClick={onRefresh}>
-            重新整理
-          </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-            新增員工
-          </Button>
-        </Space>
-      </div>
       <Card>
         <Table
           rowKey="id"

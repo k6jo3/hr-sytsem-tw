@@ -46,7 +46,7 @@ const ROUTE_CAPTURES: RouteCapture[] = [
   { path: '/profile/payslips', filename: 'HR04-P02-Payslips', description: '我的薪資單', loginAs: 'employee' },
   { path: '/admin/payroll/structures', filename: 'HR04-P03-Structures', description: '薪資結構', loginAs: 'hr_admin' },
   { path: '/admin/payroll/items', filename: 'HR04-P04-PayrollItems', description: '薪資項目', loginAs: 'hr_admin' },
-  { path: '/admin/payroll/approval', filename: 'HR04-P05-Approval', description: '薪資審核', loginAs: 'hr_admin' },
+  { path: '/admin/payroll/approvals', filename: 'HR04-P05-Approval', description: '薪資審核', loginAs: 'hr_admin' },
   { path: '/admin/payroll/bank-transfer', filename: 'HR04-P06-BankTransfer', description: '銀行轉帳', loginAs: 'admin' },
   { path: '/admin/payroll/employees', filename: 'HR04-P07-History', description: '薪資歷史', loginAs: 'hr_admin' },
 
@@ -644,7 +644,8 @@ const ROLE_CHAPTERS: RoleChapter[] = [
         title: '組織架構維護',
         summary: '管理公司的部門組織結構與層級關係。',
         steps: [
-          { description: '進入「組織管理」→「組織架構」，以樹狀圖檢視目前的部門結構', screenshotKeys: ['HR02-P01-OrgTree'] },
+          { description: '進入「組織管理」→「部門與編制」。首次使用時系統會顯示空狀態提示，點擊「建立組織」按鈕建立公司根組織', screenshotKeys: ['HR02-P01-OrgTree'] },
+          { description: '建立根組織後，點擊「新增部門」建立部門層級結構，系統將以樹狀圖呈現組織架構', screenshotKeys: [] },
           { description: '點擊部門節點可新增子部門、修改部門名稱或調整上級部門', screenshotKeys: [], tip: '調整組織架構前，請確認相關員工的部門歸屬已妥善處理。' },
         ],
       },

@@ -23,6 +23,7 @@ import {
   CloseCircleOutlined,
 } from '@ant-design/icons';
 import { AuthApi } from '@features/auth/api/AuthApi';
+import { ApiError } from '@shared/api/apiClient';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -89,11 +90,18 @@ const HR01PasswordChangePage: React.FC = () => {
       form.resetFields();
       setNewPassword('');
     } catch (err) {
-      if (err instanceof Error) {
-        if (err.message.includes('incorrect') || err.message.includes('wrong')) {
+      if (err instanceof ApiError) {
+        // 根據 HTTP 狀態碼判斷錯誤類型
+        if (err.status === 400 || err.status === 422) {
+          message.error(err.originalMessage || '密碼格式不符合規則');
+        } else if (err.status === 401) {
           message.error('目前密碼不正確');
+        } else if (err.status === 403) {
+          message.error('權限不足，無法變更密碼');
+        } else if (!err.status) {
+          message.error('無法連線至伺服器，請稍後再試');
         } else {
-          message.error(err.message || '密碼變更失敗');
+          message.error('密碼變更失敗，請稍後再試');
         }
       } else {
         message.error('密碼變更失敗');

@@ -114,9 +114,9 @@ export const HR07TimesheetPage: React.FC = () => {
           </div>
         </Card>
 
-        <Row gutter={[24, 24]}>
-          <Col lg={16} xl={18}>
-            <WeeklyTimesheetView 
+        <Row gutter={[16, 16]}>
+          <Col xs={24} lg={14} xl={15}>
+            <WeeklyTimesheetView
               summary={summary}
               loading={loading}
               onSubmit={handleSubmit}
@@ -124,8 +124,8 @@ export const HR07TimesheetPage: React.FC = () => {
               onDelete={handleDeleteEntry}
             />
           </Col>
-          <Col lg={8} xl={6}>
-            <TimesheetAuditResult 
+          <Col xs={24} lg={10} xl={9}>
+            <TimesheetAuditResult
               summary={auditSummary}
               loading={auditLoading}
             />

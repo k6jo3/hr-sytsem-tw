@@ -41,8 +41,11 @@ export const HR03ApprovalListPage: React.FC = () => {
         const res = await AttendanceApi.getCorrectionApplications({ status: 'PENDING' });
         setPendingCorrections(res.items || []);
       }
-    } catch (error) {
-      message.error('載入資料失敗');
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status !== 404) {
+        message.error('載入資料失敗');
+      }
     } finally {
       setLoading(false);
     }
@@ -195,27 +198,30 @@ export const HR03ApprovalListPage: React.FC = () => {
         <Title level={2}>差勤審核中心</Title>
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           <TabPane tab="請假審核" key="leave">
-            <Table 
-              columns={leaveColumns} 
-              dataSource={pendingLeaves} 
-              rowKey="applicationId" 
+            <Table
+              columns={leaveColumns}
+              dataSource={pendingLeaves}
+              rowKey="applicationId"
               loading={loading}
+              locale={{ emptyText: '目前沒有待審核的請假申請' }}
             />
           </TabPane>
           <TabPane tab="加班審核" key="overtime">
-            <Table 
-              columns={overtimeColumns} 
-              dataSource={pendingOvertimes} 
-              rowKey="applicationId" 
+            <Table
+              columns={overtimeColumns}
+              dataSource={pendingOvertimes}
+              rowKey="applicationId"
               loading={loading}
+              locale={{ emptyText: '目前沒有待審核的加班申請' }}
             />
           </TabPane>
           <TabPane tab="補卡審核" key="correction">
-            <Table 
-              columns={correctionColumns} 
-              dataSource={pendingCorrections} 
-              rowKey="correctionId" 
+            <Table
+              columns={correctionColumns}
+              dataSource={pendingCorrections}
+              rowKey="correctionId"
               loading={loading}
+              locale={{ emptyText: '目前沒有待審核的補卡申請' }}
             />
           </TabPane>
         </Tabs>
