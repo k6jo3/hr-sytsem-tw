@@ -2,37 +2,43 @@
  * Mock 配置
  * 控制各模組使用 Mock API 或真實後端 API。
  *
- * 漸進式切換：將模組設為 false 即切換為真實 API。
- * 當後端服務尚未建置時保持 true 使用 Mock 資料。
+ * 控制方式（優先順序由高到低）：
+ * 1. 環境變數 VITE_MOCK=true → 全部模組啟用 Mock
+ * 2. 環境變數 VITE_MOCK=AUTH,PAYROLL → 僅指定模組啟用 Mock
+ * 3. 環境變數未設定 → 全部使用真實 API
+ *
+ * 使用方式：
+ *   開發時全部 mock:  VITE_MOCK=true npm run dev
+ *   僅 mock 部分模組: VITE_MOCK=AUTH,ORGANIZATION npm run dev
+ *   使用真實 API:     npm run dev （不設定環境變數）
  */
-export const MockConfig = {
-  // 各模組 Mock 開關（false = 使用真實後端 API）
-  modules: {
-    AUTH: false,
-    ORGANIZATION: false,
-    ATTENDANCE: false,
-    PAYROLL: false,
-    INSURANCE: false,
-    PROJECT: false,
-    TIMESHEET: false,
-    PERFORMANCE: false,
-    RECRUITMENT: false,
-    TRAINING: false,
-    WORKFLOW: false,
-    NOTIFICATION: false,
-    DOCUMENT: false,
-    REPORT: false,
-  } as Record<string, boolean>,
 
+/** 從環境變數解析 mock 設定 */
+function parseMockEnv(): { allEnabled: boolean; enabledModules: Set<string> } {
+  const envValue = import.meta.env.VITE_MOCK as string | undefined;
+
+  if (!envValue) {
+    return { allEnabled: false, enabledModules: new Set() };
+  }
+
+  // VITE_MOCK=true → 全部啟用
+  if (envValue === 'true' || envValue === '1') {
+    return { allEnabled: true, enabledModules: new Set() };
+  }
+
+  // VITE_MOCK=AUTH,PAYROLL → 僅指定模組
+  const modules = envValue.split(',').map(m => m.trim().toUpperCase()).filter(Boolean);
+  return { allEnabled: false, enabledModules: new Set(modules) };
+}
+
+const { allEnabled, enabledModules } = parseMockEnv();
+
+export const MockConfig = {
   /**
    * 檢查指定模組是否使用 Mock API
-   * 預設為 false（使用真實 API），避免未定義的模組名稱靜默啟用 Mock
    */
   isEnabled(moduleName: string): boolean {
-    const value = this.modules[moduleName];
-    if (value === undefined) {
-      console.warn(`[MockConfig] 未知模組名稱: "${moduleName}"，預設使用真實 API`);
-    }
-    return value ?? false;
-  }
+    if (allEnabled) return true;
+    return enabledModules.has(moduleName.toUpperCase());
+  },
 };
