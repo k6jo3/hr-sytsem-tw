@@ -53,4 +53,8 @@ USER hrms
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# JVM 記憶體限制：透過環境變數 JAVA_OPTS 覆蓋（預設 -Xmx256m）
+# docker-compose 可設定 JAVA_OPTS="-Xmx512m" 來調整
+ENV JAVA_OPTS="-Xmx256m -Xms128m -XX:+UseG1GC -XX:MaxMetaspaceSize=128m"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
