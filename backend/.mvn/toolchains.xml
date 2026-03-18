@@ -10,7 +10,8 @@
             <vendor>adoptium</vendor>
         </provides>
         <configuration>
-            <jdkHome>C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot</jdkHome>
+            <!-- 使用 JAVA_HOME 環境變數，避免寫死路徑導致跨平台問題 -->
+            <jdkHome>${env.JAVA_HOME}</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
