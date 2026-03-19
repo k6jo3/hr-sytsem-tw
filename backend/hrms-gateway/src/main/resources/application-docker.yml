@@ -3,6 +3,21 @@ spring:
   cloud:
     gateway:
       routes:
+        # === 登入 API 特別限流（防暴力破解）===
+        - id: hrms-iam-login-ratelimit
+          uri: ${ROUTE_IAM_URI:http://hrms-iam:8081}
+          predicates:
+            - Path=/api/v1/auth/login
+            - Method=POST
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 3
+                redis-rate-limiter.burstCapacity: 5
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@ipKeyResolver}"
+                deny-empty-key: false
+
         # HR01 IAM
         - id: hrms-iam
           uri: ${ROUTE_IAM_URI:http://hrms-iam:8081}

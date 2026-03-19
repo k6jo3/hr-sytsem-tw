@@ -64,6 +64,24 @@ document:
     local:
       base-path: ./data/documents
 
+# Actuator 可觀測性配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      show-components: when_authorized
+  health:
+    diskspace:
+      enabled: true
+    db:
+      enabled: true
+    redis:
+      enabled: true
+
 logging:
   level:
     com.company.hrms.document: DEBUG

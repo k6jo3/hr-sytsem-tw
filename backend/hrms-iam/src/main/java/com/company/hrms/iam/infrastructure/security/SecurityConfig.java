@@ -87,10 +87,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**")
                         .permitAll()
 
-                        // Actuator 健康檢查
+                        // Actuator 可觀測性端點（health、info、metrics）
                         .requestMatchers(
-                                "/actuator/health",
-                                "/actuator/info")
+                                "/actuator/**")
                         .permitAll()
 
                         // OPTIONS 請求 (CORS preflight)

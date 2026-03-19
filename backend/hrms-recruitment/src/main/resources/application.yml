@@ -63,6 +63,24 @@ hrms:
   organization:
     url: http://localhost:8082
 
+# Actuator 可觀測性配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      show-components: when_authorized
+  health:
+    diskspace:
+      enabled: true
+    db:
+      enabled: true
+    redis:
+      enabled: true
+
 logging:
   level:
     com.company.hrms.recruitment: DEBUG

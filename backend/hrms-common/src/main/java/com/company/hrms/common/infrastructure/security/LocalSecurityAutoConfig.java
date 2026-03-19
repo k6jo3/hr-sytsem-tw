@@ -59,14 +59,14 @@ public class LocalSecurityAutoConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
-                    // 公開端點
+                    // 公開端點（含 Actuator 可觀測性端點）
                     auth.requestMatchers(
                             "/h2-console/**",
                             "/swagger-ui/**",
                             "/swagger-ui.html",
                             "/api-docs/**",
                             "/v3/api-docs/**",
-                            "/actuator/health")
+                            "/actuator/**")
                         .permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 其他皆需認證（由 MockJwtAuthenticationFilter 自動注入身份）

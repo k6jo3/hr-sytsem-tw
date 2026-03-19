@@ -32,7 +32,7 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
     private final GatewayJwtTokenService jwtService;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    /** 不需要認證的公開路徑 */
+    /** 不需要認證的公開路徑（含 Actuator 可觀測性端點） */
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
@@ -41,8 +41,7 @@ public class JwtAuthenticationGatewayFilter implements GlobalFilter, Ordered {
             "/api/v1/auth/reset-password",
             "/api/v1/auth/oauth/**",
             "/api/v1/auth/sso/**",
-            "/actuator/health",
-            "/actuator/info"
+            "/actuator/**"
     );
 
     private static final String BEARER_PREFIX = "Bearer ";
