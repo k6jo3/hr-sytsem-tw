@@ -35,6 +35,11 @@ spring:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
+  # 測試環境 Mail 配置（指向不存在的 host，但 email.enabled=false 所以不會實際連線）
+  mail:
+    host: localhost
+    port: 1025
+
 eureka:
   client:
     enabled: false
@@ -46,6 +51,13 @@ jwt:
   secret: test-secret-key-for-jwt-token-generation-must-be-long-enough-256-bits
   access-token-expiry: 3600000
   refresh-token-expiry: 604800000
+
+# 測試環境停用 Email 通道，避免嘗試連線 SMTP
+hrms:
+  notification:
+    channel:
+      email:
+        enabled: false
 
 logging:
   level:

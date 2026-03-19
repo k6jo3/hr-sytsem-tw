@@ -59,6 +59,11 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
 
+document:
+  storage:
+    local:
+      base-path: ./data/documents
+
 logging:
   level:
     com.company.hrms.document: DEBUG

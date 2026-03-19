@@ -3,6 +3,7 @@ package com.company.hrms.document.api;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,8 +20,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.common.test.base.BaseApiIntegrationTest;
+import com.company.hrms.document.domain.service.IFileStorageService;
 
 /**
  * Document API 整合測試
@@ -47,6 +51,9 @@ import com.company.hrms.common.test.base.BaseApiIntegrationTest;
 @Sql(scripts = "file:src/test/resources/test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("HR13 文件管理 API 整合測試")
 class DocumentApiIntegrationTest extends BaseApiIntegrationTest {
+
+    @Autowired
+    private IFileStorageService fileStorageService;
 
     @BeforeEach
     void setupSecurity() {
@@ -169,12 +176,13 @@ class DocumentApiIntegrationTest extends BaseApiIntegrationTest {
         @Test
         @DisplayName("DOC_API_007: 下載文件 - 應返回檔案內容")
         void DOC_API_007_downloadDocument_ShouldReturnFileContent() throws Exception {
-            // Given
+            // Given - 在儲存空間中建立測試檔案
             String documentId = "DOC-005"; // 公開政策文件
+            String storagePath = "documents/policies/handbook_2025.pdf";
+            byte[] testContent = "員工手冊測試內容".getBytes(StandardCharsets.UTF_8);
+            fileStorageService.save(storagePath, testContent);
 
             // When & Then
-            // 注意: 由於測試環境中實際檔案不存在，此測試主要驗證 API 端點可達
-            // 實際下載功能需要完整的檔案存儲服務
             performGet("/api/v1/documents/" + documentId + "/download")
                     .andExpect(status().isOk());
         }

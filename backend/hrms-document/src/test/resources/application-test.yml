@@ -23,6 +23,11 @@ eureka:
   client:
     enabled: false
 
+document:
+  storage:
+    local:
+      base-path: ${java.io.tmpdir}/hrms-document-test
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
