@@ -15,6 +15,7 @@ import {
   ProjectOutlined,
 } from '@ant-design/icons';
 import { apiClient } from '@shared/api';
+import { MockConfig } from '../config/MockConfig';
 import { useAppSelector } from '@store/hooks';
 import { Avatar, Card, Col, Empty, List, Modal, Row, Spin, Statistic, Tag, Typography } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -75,7 +76,7 @@ export const HR01DashboardPage: React.FC = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /** 從各 API 取得儀表板資料 */
+  /** 從各 API 取得儀表板資料（mock 模式回傳假資料） */
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     let unreadNotifications = 0;
@@ -83,6 +84,22 @@ export const HR01DashboardPage: React.FC = () => {
     let leaveBalance = 0;
     const todoList: TodoItem[] = [];
     const announcementList: Announcement[] = [];
+
+    // Mock 模式：直接回傳模擬資料，不呼叫 API
+    if (MockConfig.isEnabled('DASHBOARD') || MockConfig.isEnabled('AUTH')) {
+      setStats({ unreadNotifications: 3, attendanceDays: 18, leaveBalance: 7, pendingTodos: 2 });
+      setTodos([
+        { id: 'wf', title: '2 筆簽核待處理', type: '簽核', status: 'pending', path: '/admin/workflow' },
+        { id: 'notif', title: '3 則未讀通知', type: '通知', status: 'warning', path: '/profile/notifications' },
+      ]);
+      setAnnouncements([
+        { id: '1', title: '2026 年第一季考核開始', content: '請各部門主管於 3/31 前完成部屬考核評分。', date: '2026-03-15', tag: '人事公告' },
+        { id: '2', title: '系統維護通知', content: '系統將於 3/22（六）02:00-06:00 進行例行維護。', date: '2026-03-10', tag: '系統通知' },
+        { id: '3', title: '新版請假流程上線', content: '自 3/1 起，請假申請改為線上簽核，紙本表單停用。', date: '2026-03-01', tag: '制度變更' },
+      ]);
+      setLoading(false);
+      return;
+    }
 
     // 平行呼叫各 API，任一失敗不影響其他（靜默模式：不彈錯誤 toast）
     const results = await Promise.allSettled([

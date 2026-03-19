@@ -1,4 +1,5 @@
-import { Card, Table, Tag } from 'antd';
+import { Button, Card, Space, Table, Tag } from 'antd';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -29,8 +30,8 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
   total,
   currentPage,
   pageSize: pageSizeProp,
-  onRefresh: _onRefresh,
-  onAdd: _onAdd,
+  onRefresh,
+  onAdd,
   onPageChange,
 }) => {
   const navigate = useNavigate();
@@ -91,7 +92,19 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
 
   return (
     <div>
-      <Card>
+      <Card
+        title="員工列表"
+        extra={
+          <Space>
+            <Button icon={<ReloadOutlined />} onClick={onRefresh}>
+              重新整理
+            </Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
+              新增員工
+            </Button>
+          </Space>
+        }
+      >
         <Table
           rowKey="id"
           dataSource={employees}

@@ -111,7 +111,9 @@ class ApiClient {
         if (status === 401) {
           // 登入 API 本身的 401 不跳轉，讓呼叫端自行處理
           const isLoginApi = error.config?.url?.includes('/auth/login');
-          if (!isLoginApi) {
+          // Mock 模式下不清除 token、不跳轉（後端未啟動，401 是預期的）
+          const isMockMode = import.meta.env.VITE_MOCK === 'true' || import.meta.env.VITE_MOCK === '1';
+          if (!isLoginApi && !isMockMode) {
             if (!isSilent) antdMessage.error('登入已過期，請重新登入');
             localStorage.removeItem('accessToken');
             window.location.href = '/login';
