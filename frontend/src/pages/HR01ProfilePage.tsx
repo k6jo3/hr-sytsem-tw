@@ -15,7 +15,7 @@ export const HR01ProfilePage: React.FC = () => {
   if (!user) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
-        <Spin tip="載入個人資料中..." size="large" />
+        <Spin size="large" />
       </div>
     );
   }

@@ -207,7 +207,7 @@ export const HR01LoginPage: React.FC = () => {
           />
 
           <ForgotPasswordModal
-            visible={forgotPasswordVisible}
+            open={forgotPasswordVisible}
             onCancel={() => setForgotPasswordVisible(false)}
           />
         </div>

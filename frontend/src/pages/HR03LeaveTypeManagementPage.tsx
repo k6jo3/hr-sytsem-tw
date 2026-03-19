@@ -110,7 +110,7 @@ export const HR03LeaveTypeManagementPage: React.FC = () => {
 
       <Modal
         title={editingType ? '編輯假別' : '新增假別'}
-        visible={modalVisible}
+        open={modalVisible}
         onOk={handleCreateOrUpdate}
         onCancel={() => setModalVisible(false)}
       >

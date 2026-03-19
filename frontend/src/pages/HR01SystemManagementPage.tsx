@@ -32,7 +32,7 @@ export const HR01SystemManagementPage: React.FC = () => {
   if (loading && parameters.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '100px 0' }}>
-        <Spin size="large" tip="載入系統設定中..." />
+        <Spin size="large" />
       </div>
     );
   }

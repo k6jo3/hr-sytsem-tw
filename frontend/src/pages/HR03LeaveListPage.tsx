@@ -155,7 +155,7 @@ export const HR03LeaveListPage: React.FC = () => {
         </Card>
 
         <ApplyLeaveModal
-          visible={modalVisible}
+          open={modalVisible}
           onCancel={() => setModalVisible(false)}
           onSuccess={handleApplySuccess}
         />

@@ -67,7 +67,7 @@ export const HR02EmployeeDetailPage: React.FC = () => {
                     <Alert message={error} type="error" showIcon style={{ marginBottom: 16 }} />
                 ) : loading ? (
                     <div style={{ textAlign: 'center', padding: 50 }}>
-                        <Spin size="large" tip="載入員工資料中..." />
+                        <Spin size="large" />
                     </div>
                 ) : employee ? (
                     <EmployeeDetailView employee={employee} />

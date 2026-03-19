@@ -131,7 +131,7 @@ export const HR04PayslipPage: React.FC = () => {
 
       <Modal
         title={`薪資明細 - ${selectedPayslip?.pay_period_start.substring(0, 7)}`}
-        visible={detailVisible}
+        open={detailVisible}
         onCancel={() => setDetailVisible(false)}
         footer={[
           <Button key="close" onClick={() => setDetailVisible(false)}>關閉</Button>,

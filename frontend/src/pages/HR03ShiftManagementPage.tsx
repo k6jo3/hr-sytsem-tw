@@ -140,7 +140,7 @@ export const HR03ShiftManagementPage: React.FC = () => {
 
       <Modal
         title={editingShift ? '編輯班別' : '新增班別'}
-        visible={modalVisible}
+        open={modalVisible}
         onOk={handleCreateOrUpdate}
         onCancel={() => setModalVisible(false)}
         width={600}

@@ -24,7 +24,7 @@ export const HR04BankTransferPage: React.FC = () => {
 
   useEffect(() => {
     if (error) {
-      message.error(error);
+      message.error(typeof error === 'string' ? error : '載入薪轉資料失敗');
     }
   }, [error]);
 

@@ -18,7 +18,7 @@ export const HR05MyInsurancePage: React.FC = () => {
   // 顯示錯誤訊息
   useEffect(() => {
     if (error) {
-      message.error(error);
+      message.error(typeof error === 'string' ? error : '載入保險資訊失敗');
     }
   }, [error]);
 

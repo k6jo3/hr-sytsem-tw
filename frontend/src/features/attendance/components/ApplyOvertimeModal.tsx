@@ -6,13 +6,13 @@ import type { ApplyOvertimeRequest } from '../api/AttendanceTypes';
 import { OvertimeApi } from '../api/OvertimeApi';
 
 interface ApplyOvertimeModalProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onSuccess: () => void;
 }
 
 export const ApplyOvertimeModal: React.FC<ApplyOvertimeModalProps> = ({
-  visible,
+  open,
   onCancel,
   onSuccess,
 }) => {
@@ -53,7 +53,7 @@ export const ApplyOvertimeModal: React.FC<ApplyOvertimeModalProps> = ({
   return (
     <Modal
       title="申請加班"
-      open={visible}
+      open={open}
       onOk={handleSubmit}
       onCancel={onCancel}
       confirmLoading={loading}

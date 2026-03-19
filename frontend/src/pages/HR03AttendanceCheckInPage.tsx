@@ -15,7 +15,7 @@ const HR03AttendanceCheckInPage: React.FC = () => {
   // 顯示錯誤訊息
   React.useEffect(() => {
     if (error) {
-      message.error(error);
+      message.error(typeof error === 'string' ? error : '載入打卡資訊失敗');
     }
   }, [error]);
 

@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { DepartmentDto, DepartmentRequest } from '../api/OrganizationTypes';
 
 interface DepartmentFormModalProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onSubmit: (values: DepartmentRequest) => Promise<void>;
   initialValues?: DepartmentDto | null;
@@ -19,7 +19,7 @@ interface DepartmentFormModalProps {
 }
 
 export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
-  visible,
+  open,
   onCancel,
   onSubmit,
   initialValues,
@@ -31,7 +31,7 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
   const isEdit = !!initialValues;
 
   useEffect(() => {
-    if (visible) {
+    if (open) {
       if (initialValues) {
         form.setFieldsValue({
           code: initialValues.code,
@@ -47,7 +47,7 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
         });
       }
     }
-  }, [visible, initialValues, form, organizationId, parentId]);
+  }, [open, initialValues, form, organizationId, parentId]);
 
   const handleSubmit = async () => {
     try {
@@ -66,7 +66,7 @@ export const DepartmentFormModal: React.FC<DepartmentFormModalProps> = ({
   return (
     <Modal
       title={isEdit ? "編輯部門" : "新增部門"}
-      open={visible}
+      open={open}
       onCancel={onCancel}
       onOk={handleSubmit}
       confirmLoading={loading}

@@ -6,7 +6,7 @@ import type { ProjectDto, WbsItemDto } from '../api/TimesheetTypes';
 import type { TimesheetEntryViewModel } from '../model/TimesheetViewModel';
 
 interface TimesheetEntryFormProps {
-  visible: boolean;
+  open: boolean;
   initialValues?: Partial<TimesheetEntryViewModel>;
   onCancel: () => void;
   onSave: (values: any) => Promise<void>;
@@ -16,7 +16,7 @@ interface TimesheetEntryFormProps {
  * HR07-M01: 工時填報對話框
  */
 export const TimesheetEntryForm: React.FC<TimesheetEntryFormProps> = ({
-  visible,
+  open,
   initialValues,
   onCancel,
   onSave,
@@ -28,7 +28,7 @@ export const TimesheetEntryForm: React.FC<TimesheetEntryFormProps> = ({
   const [loadingWbs, setLoadingWbs] = useState(false);
 
   useEffect(() => {
-    if (visible) {
+    if (open) {
       fetchProjects();
       if (initialValues) {
         form.setFieldsValue({
@@ -43,7 +43,7 @@ export const TimesheetEntryForm: React.FC<TimesheetEntryFormProps> = ({
         form.resetFields();
       }
     }
-  }, [visible, initialValues, form]);
+  }, [open, initialValues, form]);
 
   const fetchProjects = async () => {
     setLoadingProjects(true);
@@ -99,7 +99,7 @@ export const TimesheetEntryForm: React.FC<TimesheetEntryFormProps> = ({
   return (
     <Modal
       title={initialValues?.id ? '編輯工時' : '新增工時'}
-      open={visible}
+      open={open}
       onOk={handleOk}
       onCancel={onCancel}
       destroyOnClose

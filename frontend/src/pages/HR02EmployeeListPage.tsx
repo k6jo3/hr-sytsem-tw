@@ -29,7 +29,7 @@ const HR02EmployeeListPage: React.FC = () => {
   // 顯示錯誤訊息
   React.useEffect(() => {
     if (error) {
-      message.error(error);
+      message.error(typeof error === 'string' ? error : '載入員工清單失敗');
     }
   }, [error]);
 

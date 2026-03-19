@@ -107,7 +107,7 @@ export const ProjectMembersTab: React.FC<ProjectMembersTabProps> = ({ projectId 
       />
       
       <ProjectMemberModal
-        visible={modalVisible}
+        open={modalVisible}
         onCancel={() => setModalVisible(false)}
         onSubmit={handleAddMember}
         loading={loading}

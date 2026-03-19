@@ -22,7 +22,7 @@ export const ProjectCostTab: React.FC<ProjectCostTabProps> = ({ projectId }) => 
   }, [fetchCostData]);
 
   if (loading && !costData) {
-    return <div style={{ padding: 40, textAlign: 'center' }}><Spin tip="計算成本數據中..." /></div>;
+    return <div style={{ padding: 40, textAlign: 'center' }}><Spin /></div>;
   }
 
   if (!costData) {

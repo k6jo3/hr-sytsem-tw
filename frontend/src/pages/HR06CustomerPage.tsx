@@ -98,7 +98,7 @@ export const HR06CustomerPage: React.FC = () => {
       </Space>
 
       <CustomerModal
-        visible={modalVisible}
+        open={modalVisible}
         initialData={editingCustomer}
         onCancel={() => setModalVisible(false)}
         onSuccess={handleModalSuccess}

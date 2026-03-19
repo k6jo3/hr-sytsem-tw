@@ -9,7 +9,7 @@ import { TimesheetAuditResult } from './TimesheetAuditResult';
 const { Title, Text } = Typography;
 
 interface TimesheetDetailModalProps {
-  visible: boolean;
+  open: boolean;
   timesheetId: string | null;
   employeeId: string | null;
   onCancel: () => void;
@@ -19,7 +19,7 @@ interface TimesheetDetailModalProps {
  * HR07-M03: 工時明細與勾稽詳情對話框
  */
 export const TimesheetDetailModal: React.FC<TimesheetDetailModalProps> = ({
-  visible,
+  open,
   timesheetId,
   employeeId,
   onCancel,
@@ -29,10 +29,10 @@ export const TimesheetDetailModal: React.FC<TimesheetDetailModalProps> = ({
   const { auditSummary, loading: auditLoading, calculateAudit } = useTimesheetAudit();
 
   useEffect(() => {
-    if (visible && timesheetId) {
+    if (open && timesheetId) {
       fetchDetails();
     }
-  }, [visible, timesheetId]);
+  }, [open, timesheetId]);
 
   const fetchDetails = async () => {
     if (!timesheetId) return;
@@ -63,7 +63,7 @@ export const TimesheetDetailModal: React.FC<TimesheetDetailModalProps> = ({
   return (
     <Modal
       title="工時明細與勾稽驗證"
-      open={visible}
+      open={open}
       onCancel={onCancel}
       footer={null}
       width={1000}

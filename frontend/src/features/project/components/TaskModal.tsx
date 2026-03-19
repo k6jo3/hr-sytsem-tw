@@ -6,7 +6,7 @@ import type { TaskViewModel } from '../model/ProjectViewModel';
 const { TextArea } = Input;
 
 interface TaskModalProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onSuccess: () => void;
   projectId: string;
@@ -20,7 +20,7 @@ interface TaskModalProps {
  * HR06-M03: 工項編輯對話框
  */
 export const TaskModal: React.FC<TaskModalProps> = ({
-  visible,
+  open,
   onCancel,
   onSuccess,
   projectId,
@@ -33,7 +33,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const { employees } = useEmployees({ page_size: 100 });
 
   useEffect(() => {
-    if (visible) {
+    if (open) {
       if (editingTask) {
         form.setFieldsValue({
           task_code: editingTask.taskCode,
@@ -51,7 +51,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         });
       }
     }
-  }, [visible, editingTask, form]);
+  }, [open, editingTask, form]);
 
   const handleOk = async () => {
     try {
@@ -74,7 +74,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   return (
     <Modal
       title={editingTask ? '編輯工項' : parentTask ? `新增子工項 (於 ${parentTask.taskName})` : '新增主工項'}
-      open={visible}
+      open={open}
       onCancel={onCancel}
       onOk={handleOk}
       confirmLoading={loading}

@@ -23,7 +23,7 @@ export const HR04PayrollItemPage: React.FC = () => {
 
   useEffect(() => {
     if (error) {
-      message.error(error);
+      message.error(typeof error === 'string' ? error : '載入薪資項目失敗');
     }
   }, [error]);
 

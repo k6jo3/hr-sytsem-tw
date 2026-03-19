@@ -9,12 +9,12 @@ import React, { useState } from 'react';
 import { AuthApi } from '../api/AuthApi'; // Ensure AuthApi is imported correctly
 
 interface ForgotPasswordModalProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
 }
 
 export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
-  visible,
+  open,
   onCancel,
 }) => {
   const [form] = Form.useForm();
@@ -41,7 +41,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
   return (
     <Modal
       title="忘記密碼"
-      open={visible}
+      open={open}
       onCancel={onCancel}
       onOk={form.submit}
       confirmLoading={loading}

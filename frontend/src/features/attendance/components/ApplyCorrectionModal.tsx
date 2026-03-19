@@ -7,7 +7,7 @@ import { AttendanceApi } from '../api/AttendanceApi';
 import type { CreateCorrectionRequest } from '../api/AttendanceTypes';
 
 interface ApplyCorrectionModalProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onSuccess: () => void;
   initialValues?: {
@@ -17,7 +17,7 @@ interface ApplyCorrectionModalProps {
 }
 
 export const ApplyCorrectionModal: React.FC<ApplyCorrectionModalProps> = ({
-  visible,
+  open,
   onCancel,
   onSuccess,
   initialValues,
@@ -27,12 +27,12 @@ export const ApplyCorrectionModal: React.FC<ApplyCorrectionModalProps> = ({
   const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
-    if (visible && initialValues) {
+    if (open && initialValues) {
       form.setFieldsValue({
         correctionDate: initialValues.correctionDate ? dayjs(initialValues.correctionDate) : dayjs(),
       });
     }
-  }, [visible, initialValues, form]);
+  }, [open, initialValues, form]);
 
   const handleSubmit = async () => {
     try {
@@ -68,7 +68,7 @@ export const ApplyCorrectionModal: React.FC<ApplyCorrectionModalProps> = ({
   return (
     <Modal
       title="補卡申請"
-      open={visible}
+      open={open}
       onOk={handleSubmit}
       onCancel={onCancel}
       confirmLoading={loading}

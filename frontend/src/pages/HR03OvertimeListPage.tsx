@@ -127,7 +127,7 @@ export const HR03OvertimeListPage: React.FC = () => {
         </Card>
 
         <ApplyOvertimeModal
-          visible={modalVisible}
+          open={modalVisible}
           onCancel={() => setModalVisible(false)}
           onSuccess={handleApplySuccess}
         />

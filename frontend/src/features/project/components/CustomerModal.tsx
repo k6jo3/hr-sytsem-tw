@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import type { CustomerViewModel } from '../model/CustomerViewModel';
 
 interface CustomerModalProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onSuccess: () => void;
   initialData?: CustomerViewModel | null;
@@ -15,7 +15,7 @@ interface CustomerModalProps {
  * HR06-M01: 客戶編輯對話框
  */
 export const CustomerModal: React.FC<CustomerModalProps> = ({
-  visible,
+  open,
   onCancel,
   onSuccess,
   initialData,
@@ -25,7 +25,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (visible) {
+    if (open) {
       if (initialData) {
         form.setFieldsValue({
           customer_code: initialData.customerCode,
@@ -41,7 +41,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
         form.setFieldsValue({ status: 'ACTIVE' });
       }
     }
-  }, [visible, initialData, form]);
+  }, [open, initialData, form]);
 
   const handleOk = async () => {
     try {
@@ -58,7 +58,7 @@ export const CustomerModal: React.FC<CustomerModalProps> = ({
   return (
     <Modal
       title={initialData ? '編輯客戶' : '新增客戶'}
-      open={visible}
+      open={open}
       onCancel={onCancel}
       onOk={handleOk}
       confirmLoading={loading}

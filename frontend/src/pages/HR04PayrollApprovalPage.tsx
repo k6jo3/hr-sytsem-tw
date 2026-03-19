@@ -209,7 +209,7 @@ export const HR04PayrollApprovalPage: React.FC = () => {
 
       <Modal
         title="退回計薪批次"
-        visible={rejectModalVisible}
+        open={rejectModalVisible}
         onCancel={() => setRejectModalVisible(false)}
         onOk={handleReject}
         okText="確認退回"

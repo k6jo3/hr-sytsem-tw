@@ -105,7 +105,7 @@ const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'));
  */
 const PageLoading: React.FC = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-    <Spin size="large" tip="載入中..." />
+    <Spin size="large" />
   </div>
 );
 

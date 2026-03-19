@@ -6,13 +6,13 @@ import type { ApplyLeaveRequest, LeaveTypeDto } from '../api/AttendanceTypes';
 import { LeaveApi } from '../api/LeaveApi';
 
 interface ApplyLeaveModalProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onSuccess: () => void;
 }
 
 export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
-  visible,
+  open,
   onCancel,
   onSuccess,
 }) => {
@@ -22,7 +22,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
   const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
-    if (visible) {
+    if (open) {
       const fetchLeaveTypes = async () => {
         try {
           const types = await LeaveApi.getLeaveTypes();
@@ -35,7 +35,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
     } else {
       form.resetFields();
     }
-  }, [visible, form]);
+  }, [open, form]);
 
   const handleSubmit = async () => {
     try {
@@ -69,7 +69,7 @@ export const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({
   return (
     <Modal
       title="申請請假"
-      open={visible}
+      open={open}
       onOk={handleSubmit}
       onCancel={onCancel}
       confirmLoading={loading}

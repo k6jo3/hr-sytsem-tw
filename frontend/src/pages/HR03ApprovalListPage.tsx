@@ -229,7 +229,7 @@ export const HR03ApprovalListPage: React.FC = () => {
 
       <Modal
         title="駁回申請"
-        visible={rejectModalVisible}
+        open={rejectModalVisible}
         onOk={handleReject}
         onCancel={() => setRejectModalVisible(false)}
       >

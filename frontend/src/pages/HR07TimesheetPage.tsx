@@ -133,7 +133,7 @@ export const HR07TimesheetPage: React.FC = () => {
         </Row>
 
         <TimesheetEntryForm
-          visible={formVisible}
+          open={formVisible}
           initialValues={editingEntry}
           onCancel={() => setFormVisible(false)}
           onSave={handleSaveEntry}

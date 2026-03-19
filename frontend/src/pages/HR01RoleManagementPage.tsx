@@ -60,7 +60,7 @@ const HR01RoleManagementPage: React.FC = () => {
   // 顯示錯誤訊息
   useEffect(() => {
     if (error) {
-      message.error(error);
+      message.error(typeof error === 'string' ? error : '載入角色資料失敗');
     }
   }, [error]);
 

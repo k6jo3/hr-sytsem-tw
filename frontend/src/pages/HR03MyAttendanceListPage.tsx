@@ -151,7 +151,7 @@ export const HR03MyAttendanceListPage: React.FC = () => {
         </Card>
 
         <ApplyCorrectionModal
-          visible={modalVisible}
+          open={modalVisible}
           onCancel={() => setModalVisible(false)}
           onSuccess={() => {
             setModalVisible(false);

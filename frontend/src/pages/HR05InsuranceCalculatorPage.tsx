@@ -27,7 +27,7 @@ export const HR05InsuranceCalculatorPage: React.FC = () => {
 
   useEffect(() => {
     if (error) {
-      message.error(error);
+      message.error(typeof error === 'string' ? error : '計算保費失敗');
     }
   }, [error]);
 

@@ -49,7 +49,7 @@ export const HR06ProjectDetailPage: React.FC = () => {
   if (loading && !project) {
     return (
       <div style={{ padding: '100px', textAlign: 'center' }}>
-        <Spin size="large" tip="載入中..." />
+        <Spin size="large" />
       </div>
     );
   }

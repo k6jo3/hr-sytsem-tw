@@ -184,7 +184,7 @@ export const HR07TimesheetApprovalPage: React.FC = () => {
       </Space>
 
       <TimesheetDetailModal
-        visible={detailModalVisible}
+        open={detailModalVisible}
         timesheetId={viewingTimesheet?.id || null}
         employeeId={viewingTimesheet?.employeeId || null}
         onCancel={() => setDetailModalVisible(false)}

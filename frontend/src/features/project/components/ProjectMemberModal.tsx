@@ -5,7 +5,7 @@ import { useEmployees } from '../../organization/hooks/useEmployees';
 import type { AddProjectMemberRequest } from '../api/ProjectTypes';
 
 interface ProjectMemberModalProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   onSubmit: (values: AddProjectMemberRequest) => Promise<void>;
   loading?: boolean;
@@ -15,7 +15,7 @@ interface ProjectMemberModalProps {
  * HR06-M02: 新增專案成員對話框
  */
 export const ProjectMemberModal: React.FC<ProjectMemberModalProps> = ({
-  visible,
+  open,
   onCancel,
   onSubmit,
   loading,
@@ -26,13 +26,13 @@ export const ProjectMemberModal: React.FC<ProjectMemberModalProps> = ({
   const { employees } = useEmployees({ page_size: 100 });
 
   useEffect(() => {
-    if (visible) {
+    if (open) {
       form.resetFields();
       form.setFieldsValue({
         join_date: dayjs()
       });
     }
-  }, [visible, form]);
+  }, [open, form]);
 
   const handleOk = async () => {
     try {
@@ -52,7 +52,7 @@ export const ProjectMemberModal: React.FC<ProjectMemberModalProps> = ({
   return (
     <Modal
       title="新增專案成員"
-      open={visible}
+      open={open}
       onCancel={onCancel}
       onOk={handleOk}
       confirmLoading={loading}

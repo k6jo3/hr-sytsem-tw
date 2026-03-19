@@ -380,7 +380,7 @@ export const OrganizationTreeView: React.FC = () => {
 
             {loading ? (
                 <div style={{ textAlign: 'center', padding: 50 }}>
-                    <Spin size="large" tip="載入組織架構中..." />
+                    <Spin size="large" />
                 </div>
             ) : treeData.length > 0 ? (
                 <Row gutter={24}>
@@ -488,7 +488,7 @@ export const OrganizationTreeView: React.FC = () => {
 
             {selectedOrg && (
                 <DepartmentFormModal
-                    visible={modalVisible}
+                    open={modalVisible}
                     onCancel={() => setModalVisible(false)}
                     onSubmit={handleModalSubmit}
                     loading={modalLoading}

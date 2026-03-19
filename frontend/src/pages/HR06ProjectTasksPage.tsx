@@ -31,7 +31,7 @@ export const HR06ProjectTasksPage: React.FC = () => {
 
   useEffect(() => {
     if (error) {
-      message.error(error);
+      message.error(typeof error === 'string' ? error : '載入工項失敗');
     }
   }, [error]);
 
@@ -95,7 +95,7 @@ export const HR06ProjectTasksPage: React.FC = () => {
 
       {id && (
         <TaskModal
-          visible={modalVisible}
+          open={modalVisible}
           projectId={id}
           parentTask={parentTask}
           editingTask={editingTask}
