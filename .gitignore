@@ -47,3 +47,31 @@ coverage/
 .classpath
 .project
 test_output.txt
+
+# 暫存截圖與驗證圖片
+*.png
+!frontend/public/**/*.png
+!docs/generator/screenshots/**/*.png
+!knowledge/**/*.png
+
+# 暫存腳本與日誌
+*.txt
+!docker/**/*.txt
+!README.txt
+*.sh
+*.ps1
+*.sql
+!docker/**/*.sql
+!backend/**/resources/**/*.sql
+
+# 臨時 JS 腳本
+expand-company.js
+phase3-*.js
+setup-*.js
+
+# 報表匯出暫存
+**/temp/exports/
+
+# 雜項
+shift.json
+insurance-level-snapshot.md
