@@ -203,7 +203,8 @@ export const HR03ApprovalListPage: React.FC = () => {
               dataSource={pendingLeaves}
               rowKey="applicationId"
               loading={loading}
-              locale={{ emptyText: '目前沒有待審核的請假申請' }}
+              scroll={{ x: 'max-content' }}
+              locale={{ emptyText: '暫無待審核的請假申請' }}
             />
           </TabPane>
           <TabPane tab="加班審核" key="overtime">
@@ -212,7 +213,8 @@ export const HR03ApprovalListPage: React.FC = () => {
               dataSource={pendingOvertimes}
               rowKey="applicationId"
               loading={loading}
-              locale={{ emptyText: '目前沒有待審核的加班申請' }}
+              scroll={{ x: 'max-content' }}
+              locale={{ emptyText: '暫無待審核的加班申請' }}
             />
           </TabPane>
           <TabPane tab="補卡審核" key="correction">
@@ -221,7 +223,7 @@ export const HR03ApprovalListPage: React.FC = () => {
               dataSource={pendingCorrections}
               rowKey="correctionId"
               loading={loading}
-              locale={{ emptyText: '目前沒有待審核的補卡申請' }}
+              locale={{ emptyText: '暫無待審核的補卡申請' }}
             />
           </TabPane>
         </Tabs>

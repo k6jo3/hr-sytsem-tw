@@ -110,6 +110,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({
           dataSource={employees}
           columns={columns}
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={{
             total,
             current: currentPage,

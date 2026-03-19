@@ -132,7 +132,7 @@ const HR05InsuranceLevelPage: React.FC = () => {
           loading={loading}
           pagination={false}
           size="small"
-          scroll={{ y: 500 }}
+          scroll={{ x: 'max-content', y: 500 }}
         />
       </Card>
 

@@ -244,6 +244,7 @@ export const AnnouncementManager: React.FC = () => {
           columns={columns}
           dataSource={announcements}
           rowKey="announcementId"
+          scroll={{ x: 'max-content' }}
           pagination={{ pageSize: 10 }}
         />
       </Card>

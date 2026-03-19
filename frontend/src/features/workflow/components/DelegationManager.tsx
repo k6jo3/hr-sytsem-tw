@@ -131,7 +131,7 @@ export const DelegationManager: React.FC = () => {
       </div>
 
       {delegations.length === 0 ? (
-        <Empty description="目前沒有代理人設定" />
+        <Empty description="暫無代理人設定" />
       ) : (
         <Table
           columns={columns}

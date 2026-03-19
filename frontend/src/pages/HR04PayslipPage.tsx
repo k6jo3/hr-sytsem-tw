@@ -121,11 +121,12 @@ export const HR04PayslipPage: React.FC = () => {
     <div style={{ padding: '24px' }}>
       <Title level={2}>電子薪資單發布與查詢</Title>
       <Card>
-        <Table 
-          columns={columns} 
-          dataSource={payslips} 
-          rowKey="id" 
+        <Table
+          columns={columns}
+          dataSource={payslips}
+          rowKey="id"
           loading={loading}
+          scroll={{ x: 'max-content' }}
         />
       </Card>
 

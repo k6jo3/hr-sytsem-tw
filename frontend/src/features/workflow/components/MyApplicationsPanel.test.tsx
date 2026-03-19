@@ -76,10 +76,10 @@ describe('MyApplicationsPanel', () => {
 
       render(<MyApplicationsPanel />);
 
-      // 表格欄位標題
-      expect(screen.getByText('申請類型')).toBeInTheDocument();
-      expect(screen.getByText('流程名稱')).toBeInTheDocument();
-      expect(screen.getByText('目前節點')).toBeInTheDocument();
+      // 表格欄位標題（scroll 模式下可能有重複表頭，用 getAllByText）
+      expect(screen.getAllByText('申請類型').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('流程名稱').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('目前節點').length).toBeGreaterThanOrEqual(1);
 
       // 資料列
       expect(screen.getByText('請假申請')).toBeInTheDocument();
@@ -158,7 +158,7 @@ describe('MyApplicationsPanel', () => {
 
       render(<MyApplicationsPanel />);
 
-      expect(screen.getByText('目前沒有申請記錄')).toBeInTheDocument();
+      expect(screen.getByText('暫無申請記錄')).toBeInTheDocument();
     });
   });
 

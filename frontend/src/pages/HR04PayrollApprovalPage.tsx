@@ -196,11 +196,12 @@ export const HR04PayrollApprovalPage: React.FC = () => {
         </Row>
 
         <Card>
-          <Table 
-            columns={columns} 
-            dataSource={data} 
-            rowKey="runId" 
+          <Table
+            columns={columns}
+            dataSource={data}
+            rowKey="runId"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={false}
             locale={{ emptyText: '目前無待核准的批次' }}
           />

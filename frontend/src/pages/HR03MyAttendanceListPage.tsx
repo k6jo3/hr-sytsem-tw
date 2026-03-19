@@ -141,6 +141,7 @@ export const HR03MyAttendanceListPage: React.FC = () => {
             dataSource={data}
             rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
               current: page,
               pageSize: pageSize,

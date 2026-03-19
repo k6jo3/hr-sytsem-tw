@@ -212,6 +212,7 @@ export const DocumentListPanel: React.FC = () => {
         dataSource={data?.documents}
         rowKey="documentId"
         loading={isLoading}
+        scroll={{ x: 'max-content' }}
         pagination={{
           current: currentPage,
           pageSize: 10,

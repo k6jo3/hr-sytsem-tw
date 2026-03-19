@@ -106,7 +106,7 @@ export const WeeklyTimesheetView: React.FC<WeeklyTimesheetViewProps> = ({
         )}
 
         {summary.entries.length === 0 ? (
-          <Empty description="本週尚無工時記錄" />
+          <Empty description="本週暫無工時記錄" />
         ) : (
           <Table
             rowKey="id"

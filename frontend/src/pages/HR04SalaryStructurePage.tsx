@@ -200,11 +200,12 @@ export const HR04SalaryStructurePage: React.FC = () => {
             </Form.Item>
           </Form>
 
-          <Table 
-            columns={columns} 
-            dataSource={structures} 
-            rowKey="id" 
+          <Table
+            columns={columns}
+            dataSource={structures}
+            rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
           />
         </Card>
       </Space>

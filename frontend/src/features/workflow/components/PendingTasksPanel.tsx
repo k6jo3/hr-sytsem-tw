@@ -218,9 +218,9 @@ export const PendingTasksPanel: React.FC = () => {
       )}
 
       {tasks.length === 0 ? (
-        <Empty description="目前沒有待辦任務" style={{ padding: '50px 0' }} />
+        <Empty description="暫無待辦任務" style={{ padding: '50px 0' }} />
       ) : (
-        <Table columns={columns} dataSource={tasks} rowKey="taskId" pagination={{ pageSize: 10 }} />
+        <Table columns={columns} dataSource={tasks} rowKey="taskId" scroll={{ x: 'max-content' }} pagination={{ pageSize: 10 }} />
       )}
 
       <Modal

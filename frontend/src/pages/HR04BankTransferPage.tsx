@@ -145,11 +145,12 @@ export const HR04BankTransferPage: React.FC = () => {
         </Row>
 
         <Card title="薪轉批次清單">
-          <Table 
-            columns={columns} 
-            dataSource={displayData} 
-            rowKey="runId" 
+          <Table
+            columns={columns}
+            dataSource={displayData}
+            rowKey="runId"
             loading={loading}
+            scroll={{ x: 'max-content' }}
           />
         </Card>
       </Space>

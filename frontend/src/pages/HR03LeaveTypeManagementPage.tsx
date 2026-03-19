@@ -99,12 +99,13 @@ export const HR03LeaveTypeManagementPage: React.FC = () => {
         title={<Title level={3}>假別管理</Title>}
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => showModal()}>新增假別</Button>}
       >
-        <Table 
-          columns={columns} 
-          dataSource={leaveTypes} 
-          rowKey="leaveTypeId" 
+        <Table
+          columns={columns}
+          dataSource={leaveTypes}
+          rowKey="leaveTypeId"
           loading={loading}
-          locale={{ emptyText: '尚無假別資料，請點擊「新增假別」建立' }}
+          scroll={{ x: 'max-content' }}
+          locale={{ emptyText: '暫無假別資料，請點擊「新增假別」建立' }}
         />
       </Card>
 

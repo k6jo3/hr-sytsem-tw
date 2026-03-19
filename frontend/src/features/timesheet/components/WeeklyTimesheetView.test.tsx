@@ -171,7 +171,7 @@ describe('WeeklyTimesheetView', () => {
         />
       );
 
-      expect(screen.getByText(/尚無工時記錄/)).toBeInTheDocument();
+      expect(screen.getByText(/暫無工時記錄/)).toBeInTheDocument();
     });
   });
 });

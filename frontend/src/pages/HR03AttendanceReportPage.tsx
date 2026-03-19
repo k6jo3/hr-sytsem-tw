@@ -107,13 +107,14 @@ export const HR03AttendanceReportPage: React.FC = () => {
           </Row>
 
           <Card title={`報表詳情 - ${reportData.year}/${reportData.month}`}>
-            <Table 
-              columns={columns} 
-              dataSource={reportData.items} 
-              rowKey="employeeId" 
+            <Table
+              columns={columns}
+              dataSource={reportData.items}
+              rowKey="employeeId"
               loading={loading}
+              scroll={{ x: 'max-content' }}
               pagination={{ pageSize: 20 }}
-              locale={{ emptyText: '該月份尚無差勤報表資料' }}
+              locale={{ emptyText: '該月份暫無差勤報表資料' }}
             />
           </Card>
         </>

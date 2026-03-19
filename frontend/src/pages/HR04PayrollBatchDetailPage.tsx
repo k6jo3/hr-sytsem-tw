@@ -182,11 +182,12 @@ export const HR04PayrollBatchDetailPage: React.FC = () => {
         )}
 
         <Card title="員工計薪結果清單">
-          <Table 
-            columns={columns} 
-            dataSource={payslips} 
-            rowKey="id" 
+          <Table
+            columns={columns}
+            dataSource={payslips}
+            rowKey="id"
             loading={loading || runLoading}
+            scroll={{ x: 'max-content' }}
             pagination={{ pageSize: 50 }}
           />
         </Card>

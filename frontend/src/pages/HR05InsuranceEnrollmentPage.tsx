@@ -215,11 +215,12 @@ export const HR05InsuranceEnrollmentPage: React.FC = () => {
             </Form.Item>
           </Form>
 
-          <Table 
-            columns={columns} 
-            dataSource={enrollments} 
-            rowKey="id" 
+          <Table
+            columns={columns}
+            dataSource={enrollments}
+            rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{ total }}
           />
         </Card>

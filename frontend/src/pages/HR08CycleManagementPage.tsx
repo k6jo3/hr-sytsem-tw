@@ -211,6 +211,7 @@ export const HR08CycleManagementPage: React.FC = () => {
           dataSource={cycles}
           rowKey="cycleId"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={{ pageSize: 10 }}
         />
       </Card>

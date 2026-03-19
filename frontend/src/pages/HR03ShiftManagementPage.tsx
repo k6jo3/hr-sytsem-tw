@@ -134,7 +134,7 @@ export const HR03ShiftManagementPage: React.FC = () => {
           rowKey="shiftId"
           loading={loading}
           scroll={{ x: 900 }}
-          locale={{ emptyText: '尚無班別資料，請點擊「新增班別」建立' }}
+          locale={{ emptyText: '暫無班別資料，請點擊「新增班別」建立' }}
         />
       </Card>
 

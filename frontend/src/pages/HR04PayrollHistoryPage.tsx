@@ -178,11 +178,12 @@ export const HR04PayrollHistoryPage: React.FC = () => {
         </Card>
 
         <Card>
-          <Table 
-            columns={columns} 
-            dataSource={data} 
-            rowKey="id" 
+          <Table
+            columns={columns}
+            dataSource={data}
+            rowKey="id"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
               current: currentPage,
               pageSize,

@@ -87,7 +87,7 @@ describe('DocumentRequestPanel', () => {
 
       render(<DocumentRequestPanel />);
 
-      expect(screen.getByText('目前沒有可申請的文件類型')).toBeInTheDocument();
+      expect(screen.getByText('暫無可申請的文件類型')).toBeInTheDocument();
     });
   });
 

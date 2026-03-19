@@ -199,6 +199,7 @@ export const ScheduledJobTab: React.FC<ScheduledJobTabProps> = ({
         pagination={false}
         size="small"
         loading={loading}
+        scroll={{ x: 'max-content' }}
       />
     </div>
   );

@@ -227,6 +227,7 @@ export const DocumentTemplateManager: React.FC = () => {
           dataSource={data?.templates}
           rowKey="templateId"
           loading={isLoading}
+          scroll={{ x: 'max-content' }}
           pagination={{
             current: currentPage,
             pageSize: 10,

@@ -146,6 +146,7 @@ export const ReportDataTable: React.FC = () => {
         dataSource={data?.reports}
         rowKey="reportId"
         loading={isLoading}
+        scroll={{ x: 'max-content' }}
         pagination={{
           current: currentPage,
           pageSize: 10,

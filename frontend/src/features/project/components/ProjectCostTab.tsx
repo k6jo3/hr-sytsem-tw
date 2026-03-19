@@ -26,7 +26,7 @@ export const ProjectCostTab: React.FC<ProjectCostTabProps> = ({ projectId }) => 
   }
 
   if (!costData) {
-    return <Empty description="尚無成本數據" />;
+    return <Empty description="暫無成本數據" />;
   }
 
   const columns: ColumnsType<MemberCostViewModel> = [

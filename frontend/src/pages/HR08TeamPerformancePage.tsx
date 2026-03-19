@@ -148,6 +148,7 @@ export const HR08TeamPerformancePage: React.FC = () => {
           dataSource={reviews}
           rowKey="employeeId"
           loading={loading}
+          scroll={{ x: 'max-content' }}
           pagination={{ pageSize: 10 }}
         />
       </Card>

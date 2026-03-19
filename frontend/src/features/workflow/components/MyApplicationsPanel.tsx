@@ -116,12 +116,13 @@ export const MyApplicationsPanel: React.FC = () => {
       </Space>
 
       {filteredApplications.length === 0 ? (
-        <Empty description="目前沒有申請記錄" style={{ padding: '50px 0' }} />
+        <Empty description="暫無申請記錄" style={{ padding: '50px 0' }} />
       ) : (
         <Table
           columns={columns}
           dataSource={filteredApplications}
           rowKey="instanceId"
+          scroll={{ x: 'max-content' }}
           pagination={{ pageSize: 10 }}
         />
       )}

@@ -284,7 +284,7 @@ export const HR01DashboardPage: React.FC = () => {
           {/* 系統公告 */}
           <Card title="系統公告">
             {announcements.length === 0 ? (
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="目前沒有公告" />
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暫無公告" />
             ) : (
               <List
                 dataSource={announcements}
@@ -315,7 +315,7 @@ export const HR01DashboardPage: React.FC = () => {
             {todos.length === 0 ? (
               <Empty
                 image={<InboxOutlined style={{ fontSize: 48, color: '#d9d9d9' }} />}
-                description="目前沒有待辦事項"
+                description="暫無待辦事項"
               />
             ) : (
               <List

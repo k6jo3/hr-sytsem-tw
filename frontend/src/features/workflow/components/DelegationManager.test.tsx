@@ -103,7 +103,7 @@ describe('DelegationManager', () => {
 
       render(<DelegationManager />);
 
-      expect(screen.getByText('目前沒有代理人設定')).toBeInTheDocument();
+      expect(screen.getByText('暫無代理人設定')).toBeInTheDocument();
     });
   });
 

@@ -117,6 +117,7 @@ export const HR03OvertimeListPage: React.FC = () => {
             dataSource={data}
             rowKey="applicationId"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
               current: page,
               pageSize: pageSize,

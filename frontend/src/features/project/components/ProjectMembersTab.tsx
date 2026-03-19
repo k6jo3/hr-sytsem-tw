@@ -98,11 +98,12 @@ export const ProjectMembersTab: React.FC<ProjectMembersTabProps> = ({ projectId 
           新增成員
         </Button>
       </div>
-      <Table 
-        columns={columns} 
-        dataSource={members} 
-        rowKey="employeeId" 
+      <Table
+        columns={columns}
+        dataSource={members}
+        rowKey="employeeId"
         loading={loading}
+        scroll={{ x: 'max-content' }}
         pagination={false}
       />
       

@@ -105,7 +105,7 @@ export const HR09RecruitmentPage: React.FC = () => {
   if (!kanban) {
     return (
       <Card style={{ margin: 24 }}>
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="尚無招募資料" />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暫無招募資料" />
       </Card>
     );
   }

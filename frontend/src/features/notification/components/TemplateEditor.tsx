@@ -229,6 +229,7 @@ export const TemplateEditor: React.FC = () => {
           columns={columns}
           dataSource={templates}
           rowKey="templateId"
+          scroll={{ x: 'max-content' }}
           pagination={{ pageSize: 10 }}
         />
       </Card>

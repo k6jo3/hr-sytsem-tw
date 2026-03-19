@@ -190,11 +190,12 @@ export const HR04PayrollListPage: React.FC = () => {
         </Card>
 
         <Card>
-          <Table 
-            columns={columns} 
-            dataSource={runs} 
-            rowKey="runId" 
+          <Table
+            columns={columns}
+            dataSource={runs}
+            rowKey="runId"
             loading={loading}
+            scroll={{ x: 'max-content' }}
           />
         </Card>
       </Space>

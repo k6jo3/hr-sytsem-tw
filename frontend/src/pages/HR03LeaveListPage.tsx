@@ -145,6 +145,7 @@ export const HR03LeaveListPage: React.FC = () => {
             dataSource={data}
             rowKey="applicationId"
             loading={loading}
+            scroll={{ x: 'max-content' }}
             pagination={{
               current: page,
               pageSize: pageSize,

@@ -46,12 +46,12 @@ describe('EmployeeList', () => {
         />
       );
 
-      // 檢查表格標題
-      expect(screen.getByText('員工編號')).toBeInTheDocument();
-      expect(screen.getByText('姓名')).toBeInTheDocument();
-      expect(screen.getByText('部門')).toBeInTheDocument();
-      expect(screen.getByText('職位')).toBeInTheDocument();
-      expect(screen.getByText('狀態')).toBeInTheDocument();
+      // 檢查表格標題（scroll 模式下可能有重複表頭，用 getAllByText）
+      expect(screen.getAllByText('員工編號').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('姓名').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('部門').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('職位').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('狀態').length).toBeGreaterThanOrEqual(1);
 
       // 檢查員工資料
       expect(screen.getByText('EMP001')).toBeInTheDocument();

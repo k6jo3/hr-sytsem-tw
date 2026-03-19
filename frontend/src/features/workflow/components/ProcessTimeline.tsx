@@ -93,7 +93,7 @@ export const ProcessTimeline: React.FC<ProcessTimelineProps> = ({ instanceId, on
           </div>
 
           {tasks.length === 0 ? (
-            <Empty description="尚無審核紀錄" />
+            <Empty description="暫無審核紀錄" />
           ) : (
             <Steps
               direction="vertical"

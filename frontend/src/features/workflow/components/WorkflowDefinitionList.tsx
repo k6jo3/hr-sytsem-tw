@@ -109,7 +109,7 @@ export const WorkflowDefinitionList: React.FC<WorkflowDefinitionListProps> = ({
       </div>
 
       {definitions.length === 0 ? (
-        <Empty description="目前沒有流程定義" />
+        <Empty description="暫無流程定義" />
       ) : (
         <Table
           columns={columns}

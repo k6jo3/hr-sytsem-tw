@@ -127,7 +127,7 @@ describe('PendingTasksPanel', () => {
 
       render(<PendingTasksPanel />);
 
-      expect(screen.getByText('目前沒有待辦任務')).toBeInTheDocument();
+      expect(screen.getByText('暫無待辦任務')).toBeInTheDocument();
     });
   });
 

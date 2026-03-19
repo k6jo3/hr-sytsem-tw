@@ -212,6 +212,7 @@ export const DocumentAdminTable: React.FC = () => {
           dataSource={data?.documents}
           rowKey="documentId"
           loading={isLoading}
+          scroll={{ x: 'max-content' }}
           pagination={{
             current: currentPage,
             pageSize: 15,

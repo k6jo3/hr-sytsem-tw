@@ -119,7 +119,7 @@ const RequestDocumentSection: React.FC = () => {
           )}
         />
       ) : (
-        <Empty description="目前沒有可申請的文件類型" />
+        <Empty description="暫無可申請的文件類型" />
       )}
     </div>
   );

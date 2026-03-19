@@ -258,7 +258,7 @@ export const NotificationPreferenceForm: React.FC = () => {
 
           <Card title="通知統計">
             <Text type="secondary">
-              最後更新：{preference?.updatedAtDisplay ?? '尚無資料'}
+              最後更新：{preference?.updatedAtDisplay ?? '暫無資料'}
             </Text>
           </Card>
         </Col>

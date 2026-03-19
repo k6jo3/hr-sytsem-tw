@@ -105,7 +105,7 @@ export const TodayAttendanceCard: React.FC<TodayAttendanceCardProps> = ({
             打卡記錄
           </Text>
           {summary.records.length === 0 ? (
-            <Empty description="尚無打卡記錄" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            <Empty description="暫無打卡記錄" image={Empty.PRESENTED_IMAGE_SIMPLE} />
           ) : (
             <Space direction="vertical" size="small" style={{ width: '100%' }}>
               {summary.records.map((record) => (

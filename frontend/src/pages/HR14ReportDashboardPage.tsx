@@ -47,7 +47,7 @@ const DashboardTab: React.FC = () => {
   }
 
   if (!dashboard) {
-    return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="尚無報表資料" />;
+    return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暫無報表資料" />;
   }
 
   return (

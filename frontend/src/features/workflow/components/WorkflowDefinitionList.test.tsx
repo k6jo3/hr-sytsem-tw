@@ -145,7 +145,7 @@ describe('WorkflowDefinitionList', () => {
 
       render(<WorkflowDefinitionList />);
 
-      expect(screen.getByText('目前沒有流程定義')).toBeInTheDocument();
+      expect(screen.getByText('暫無流程定義')).toBeInTheDocument();
     });
   });
 
