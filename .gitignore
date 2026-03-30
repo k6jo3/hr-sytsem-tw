@@ -59,6 +59,7 @@ test_output.txt
 !docker/**/*.txt
 !README.txt
 *.sh
+!scripts/*.sh
 *.ps1
 *.sql
 !docker/**/*.sql
