@@ -30,7 +30,7 @@ public class LeaveBalancePO {
     @Column(name = "leave_type_id", length = 50, nullable = false)
     private String leaveTypeId;
 
-    @Column(name = "year", nullable = false)
+    @Column(name = "\"year\"", nullable = false)
     private Integer year;
 
     @Column(name = "total_days", precision = 5, scale = 2)
