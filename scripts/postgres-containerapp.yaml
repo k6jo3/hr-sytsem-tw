@@ -1,0 +1,34 @@
+type: Microsoft.App/containerApps
+location: eastasia
+properties:
+  environmentId: /subscriptions/9e00ad61-ec8a-4e7a-9b9e-1d61fabfae34/resourceGroups/hrms-demo-rg/providers/Microsoft.App/managedEnvironments/hrms-demo-env
+  configuration:
+    ingress:
+      external: false
+      targetPort: 5432
+      transport: tcp
+    activeRevisionsMode: Single
+  template:
+    containers:
+      - name: hrms-postgres
+        image: postgres:15-alpine
+        resources:
+          cpu: 0.5
+          memory: 1Gi
+        env:
+          - name: POSTGRES_USER
+            value: hrms
+          - name: POSTGRES_PASSWORD
+            value: hrms_demo_2026
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+          - volumeName: pgdata
+            mountPath: /var/lib/postgresql/data
+    scale:
+      minReplicas: 1
+      maxReplicas: 1
+    volumes:
+      - name: pgdata
+        storageName: pgdata
+        storageType: AzureFile

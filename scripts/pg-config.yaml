@@ -1,0 +1,150 @@
+id: /subscriptions/9e00ad61-ec8a-4e7a-9b9e-1d61fabfae34/resourceGroups/hrms-demo-rg/providers/Microsoft.App/containerapps/hrms-postgres
+identity:
+  type: None
+location: East Asia
+name: hrms-postgres
+properties:
+  configuration:
+    activeRevisionsMode: Single
+    dapr: null
+    identitySettings: []
+    ingress:
+      additionalPortMappings: null
+      allowInsecure: false
+      clientCertificateMode: null
+      corsPolicy: null
+      customDomains: null
+      exposedPort: 0
+      external: false
+      fqdn: hrms-postgres.internal.orangesmoke-bcd62134.eastasia.azurecontainerapps.io
+      ipSecurityRestrictions: null
+      stickySessions: null
+      targetPort: 5432
+      traffic:
+      - latestRevision: true
+        weight: 100
+      transport: Tcp
+    maxInactiveRevisions: 100
+    registries:
+    - identity: ''
+      passwordSecretRef: ghcrio-k6jo3
+      server: ghcr.io
+      username: k6jo3
+    runtime: null
+    secrets:
+    - name: ghcrio-k6jo3
+    service: null
+  customDomainVerificationId: 11EBD3561D90191CC30E3F7D05C43764BBB51D09BFC1C98C03503E58EEDC8CF3
+  delegatedIdentities: []
+  environmentId: /subscriptions/9e00ad61-ec8a-4e7a-9b9e-1d61fabfae34/resourceGroups/hrms-demo-rg/providers/Microsoft.App/managedEnvironments/hrms-demo-env
+  eventStreamEndpoint: https://eastasia.azurecontainerapps.dev/subscriptions/9e00ad61-ec8a-4e7a-9b9e-1d61fabfae34/resourceGroups/hrms-demo-rg/containerApps/hrms-postgres/eventstream
+  latestReadyRevisionName: hrms-postgres--zfz47bg
+  latestRevisionFqdn: hrms-postgres--zfz47bg.internal.orangesmoke-bcd62134.eastasia.azurecontainerapps.io
+  latestRevisionName: hrms-postgres--zfz47bg
+  managedEnvironmentId: /subscriptions/9e00ad61-ec8a-4e7a-9b9e-1d61fabfae34/resourceGroups/hrms-demo-rg/providers/Microsoft.App/managedEnvironments/hrms-demo-env
+  outboundIpAddresses:
+  - 20.239.116.82
+  - 20.239.117.15
+  - 20.239.117.29
+  - 20.239.117.113
+  - 20.247.40.35
+  - 20.6.177.176
+  - 20.255.43.216
+  - 20.239.233.12
+  - 20.247.40.168
+  - 20.255.113.126
+  - 20.255.212.172
+  - 20.255.186.215
+  - 20.6.160.45
+  - 20.239.244.204
+  - 4.144.40.7
+  - 20.239.246.61
+  - 20.255.104.137
+  - 20.239.245.49
+  - 20.6.155.117
+  - 4.191.79.216
+  - 4.192.74.154
+  - 4.192.74.189
+  - 4.192.73.235
+  - 20.239.245.239
+  - 20.255.185.135
+  - 4.144.36.9
+  - 4.144.37.120
+  - 4.144.59.105
+  - 20.6.155.178
+  - 4.192.75.21
+  - 20.24.118.146
+  - 20.24.118.114
+  - 20.239.96.151
+  - 20.24.118.177
+  - 4.191.76.61
+  - 4.191.76.1
+  - 4.144.44.222
+  - 4.144.45.4
+  - 20.6.149.223
+  - 20.6.179.93
+  - 20.255.130.69
+  - 20.2.50.68
+  - 4.144.38.77
+  - 20.255.120.249
+  - 20.255.130.110
+  - 20.255.130.116
+  - 20.2.50.109
+  - 20.255.216.151
+  - 4.192.75.28
+  - 4.144.42.55
+  - 20.255.112.178
+  - 20.255.42.70
+  - 20.255.104.232
+  - 20.255.130.200
+  - 20.255.216.201
+  - 20.239.233.121
+  - 4.144.37.131
+  - 20.255.104.166
+  - 20.255.120.242
+  - 4.191.79.31
+  - 20.187.163.205
+  provisioningState: Succeeded
+  runningStatus: Running
+  template:
+    containers:
+    - env:
+      - name: POSTGRES_USER
+        value: hrms
+      - name: POSTGRES_PASSWORD
+        value: hrms_demo_2026
+      - name: PGDATA
+        value: /var/lib/postgresql/data/pgdata
+      image: ghcr.io/k6jo3/hr-sytsem-tw/hrms-postgres:latest
+      name: hrms-postgres
+      resources:
+        cpu: 0.5
+        ephemeralStorage: 2Gi
+        memory: 1Gi
+      volumeMounts:
+      - mountPath: /var/lib/postgresql/data
+        volumeName: pgdata
+    initContainers: null
+    revisionSuffix: ''
+    scale:
+      cooldownPeriod: 300
+      maxReplicas: 1
+      minReplicas: 1
+      pollingInterval: 30
+      rules: null
+    serviceBinds: null
+    terminationGracePeriodSeconds: null
+    volumes:
+    - name: pgdata
+      storageName: pgdata
+      storageType: AzureFile
+  workloadProfileName: Consumption
+resourceGroup: hrms-demo-rg
+systemData:
+  createdAt: '2026-03-30T15:08:11.6235561'
+  createdBy: okla1984@outlook.com
+  createdByType: User
+  lastModifiedAt: '2026-03-30T15:08:11.6235561'
+  lastModifiedBy: okla1984@outlook.com
+  lastModifiedByType: User
+type: Microsoft.App/containerApps
