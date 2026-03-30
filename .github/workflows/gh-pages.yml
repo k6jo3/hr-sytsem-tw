@@ -1,0 +1,59 @@
+# GitHub Pages 部署 — 前端 Mock 模式
+# 將前端以 VITE_MOCK=true 建構後部署到 GitHub Pages，
+# 無需後端服務即可瀏覽完整 UI。
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['frontend/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Build (mock mode)
+        run: cd frontend && VITE_MOCK=true npm run build
+        env:
+          # 讓 vite.config.ts 判斷是否為 GitHub Pages 環境
+          GITHUB_PAGES: 'true'
+
+      - name: Fix SPA routing
+        # GitHub Pages 不支援 SPA fallback，複製 index.html 為 404.html
+        # 讓所有子路由都能正確載入應用程式
+        run: cp frontend/dist/index.html frontend/dist/404.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

@@ -6,8 +6,12 @@ import { defineConfig } from 'vite';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// GitHub Pages 部署時需設定子路徑（透過 CI 環境變數 GITHUB_PAGES=true 啟用）
+const isGitHubPages = process.env.GITHUB_PAGES === 'true';
+
 // https://vite.dev/config/
 export default defineConfig({
+  base: isGitHubPages ? '/hr-sytsem-tw/' : '/',
   plugins: [react()],
   resolve: {
     alias: {
