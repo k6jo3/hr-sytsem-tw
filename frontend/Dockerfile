@@ -20,7 +20,4 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
-# Docker Compose 用 http://hrms-gateway:8080，Azure 用 https://hrms-gateway
-ENV GATEWAY_URL=http://hrms-gateway:8080
-
-CMD ["/bin/sh", "-c", "sed -i \"s|\\${GATEWAY_URL}|$GATEWAY_URL|g\" /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+CMD ["nginx", "-g", "daemon off;"]
