@@ -5,11 +5,15 @@
 #   1. ci-cd.yml 已成功推送 image 到 ghcr.io
 #   2. GitHub Secrets 設定：AZURE_CREDENTIALS, AZURE_RESOURCE_GROUP, AZURE_CAE_NAME
 #
-# 觸發方式：手動（workflow_dispatch）
+# 觸發方式：CI 完成後自動部署 + 手動觸發
 name: Azure CD
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["CI/CD"]
+    types: [completed]
+    branches: [main]
 
 env:
   REGISTRY: ghcr.io
@@ -20,6 +24,8 @@ env:
 jobs:
   deploy:
     name: Deploy to Azure Container Apps
+    # workflow_dispatch 時直接跑；workflow_run 時只在 CI 成功才跑
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
