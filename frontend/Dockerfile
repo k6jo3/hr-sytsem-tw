@@ -20,8 +20,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
-# GATEWAY_PORT 預設 8080（Docker Compose），Azure Container Apps 設為 80
-ENV GATEWAY_PORT=8080
+# Docker Compose 用 http://hrms-gateway:8080，Azure 用 https://hrms-gateway
+ENV GATEWAY_URL=http://hrms-gateway:8080
 
-# 用 sed 替換 nginx.conf 中的 GATEWAY_PORT 後啟動（比 envsubst 安全，不會動到 nginx 的 $host 等變數）
-CMD ["/bin/sh", "-c", "sed -i \"s/\\${GATEWAY_PORT}/$GATEWAY_PORT/g\" /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "sed -i \"s|\\${GATEWAY_URL}|$GATEWAY_URL|g\" /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
