@@ -144,33 +144,3 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REPO }}/frontend:latest
             ${{ env.REGISTRY }}/${{ env.REPO }}/frontend:${{ github.sha }}
 
-  # ===== 部署到 VPS =====
-  deploy:
-    name: Deploy to VPS
-    needs: [docker-build, docker-frontend]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            cd ~/hr-system-2
-
-            # 拉取最新設定
-            git pull origin main
-
-            # 登入 GitHub Container Registry
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # 拉取最新 images 並重啟
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
-
-            # 清理舊 images
-            docker image prune -f
