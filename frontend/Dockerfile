@@ -23,5 +23,5 @@ EXPOSE 80
 # GATEWAY_PORT 預設 8080（Docker Compose），Azure Container Apps 設為 80
 ENV GATEWAY_PORT=8080
 
-# 用 envsubst 替換 nginx.conf 中的環境變數後啟動
-CMD ["/bin/sh", "-c", "envsubst '${GATEWAY_PORT}' < /etc/nginx/conf.d/default.conf > /tmp/default.conf && mv /tmp/default.conf /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
+# 用 sed 替換 nginx.conf 中的 GATEWAY_PORT 後啟動（比 envsubst 安全，不會動到 nginx 的 $host 等變數）
+CMD ["/bin/sh", "-c", "sed -i \"s/\\${GATEWAY_PORT}/$GATEWAY_PORT/g\" /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"]
