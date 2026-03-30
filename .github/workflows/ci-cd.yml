@@ -55,6 +55,20 @@ jobs:
           java-version: 21
           cache: maven
 
+      - name: Generate toolchains.xml
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/toolchains.xml << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <toolchains>
+            <toolchain>
+              <type>jdk</type>
+              <provides><version>21</version></provides>
+              <configuration><jdkHome>${JAVA_HOME}</jdkHome></configuration>
+            </toolchain>
+          </toolchains>
+          EOF
+
       - name: Run tests
         run: mvn test -B -q
 
