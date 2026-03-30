@@ -28,6 +28,18 @@ log "Redis"
 echo "等待基礎設施就緒（30 秒）..."
 sleep 30
 
+# 初始化 Database（已存在的會跳過）
+echo "初始化 Database..."
+DBS=(hrms_iam hrms_organization hrms_attendance hrms_payroll hrms_insurance hrms_project hrms_timesheet hrms_performance hrms_recruitment hrms_training hrms_workflow hrms_notification hrms_document hrms_reporting)
+for DB in "${DBS[@]}"; do
+  az containerapp exec \
+    --name hrms-postgres --resource-group $RG \
+    --command "psql -U hrms -c 'CREATE DATABASE $DB;'" \
+    2>/dev/null || true
+  sleep 3
+done
+log "Database 初始化完成"
+
 # 啟動後端微服務 + Gateway
 SERVICES=(hrms-gateway hrms-iam hrms-organization hrms-attendance hrms-payroll hrms-insurance hrms-project hrms-timesheet hrms-performance hrms-recruitment hrms-training hrms-workflow hrms-notification hrms-document hrms-reporting)
 
