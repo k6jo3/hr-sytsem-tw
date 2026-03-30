@@ -84,6 +84,7 @@ jobs:
     strategy:
       matrix:
         service:
+          - hrms-gateway
           - hrms-iam
           - hrms-organization
           - hrms-attendance
