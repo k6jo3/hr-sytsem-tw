@@ -34,11 +34,17 @@ spring:
       - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.mail.MailHealthContributorAutoConfiguration
 
   # 測試環境 Mail 配置（指向不存在的 host，但 email.enabled=false 所以不會實際連線）
   mail:
     host: localhost
     port: 1025
+
+management:
+  health:
+    mail:
+      enabled: false
 
 eureka:
   client:
