@@ -37,7 +37,7 @@ jobs:
       # 為所有 Container App 設定 ghcr.io registry 認證
       - name: Configure ghcr.io registry
         run: |
-          SERVICES=(hrms-gateway hrms-iam hrms-organization hrms-attendance hrms-payroll hrms-insurance hrms-project hrms-timesheet hrms-performance hrms-recruitment hrms-training hrms-workflow hrms-notification hrms-document hrms-reporting hrms-frontend)
+          SERVICES=(hrms-postgres hrms-gateway hrms-iam hrms-organization hrms-attendance hrms-payroll hrms-insurance hrms-project hrms-timesheet hrms-performance hrms-recruitment hrms-training hrms-workflow hrms-notification hrms-document hrms-reporting hrms-frontend)
           for SERVICE in "${SERVICES[@]}"; do
             az containerapp registry set \
               --name $SERVICE \
@@ -47,6 +47,15 @@ jobs:
               --password ${{ secrets.GITHUB_TOKEN }} \
               --output none 2>/dev/null || true
           done
+
+      # 部署自訂 PostgreSQL（含 init script + seed data）
+      - name: Deploy PostgreSQL
+        run: |
+          az containerapp update \
+            --name hrms-postgres \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --image "${{ env.REGISTRY }}/${{ env.REPO }}/hrms-postgres:latest" \
+            --output none 2>/dev/null || echo "PostgreSQL update failed"
 
       # 部署 Gateway + 後端微服務
       - name: Deploy backend services

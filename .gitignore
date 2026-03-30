@@ -60,6 +60,7 @@ test_output.txt
 !README.txt
 *.sh
 !scripts/*.sh
+!docker/**/*.sh
 *.ps1
 *.sql
 !docker/**/*.sql

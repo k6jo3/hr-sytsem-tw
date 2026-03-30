@@ -118,6 +118,33 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REPO }}/${{ matrix.service }}:latest
             ${{ env.REGISTRY }}/${{ env.REPO }}/${{ matrix.service }}:${{ github.sha }}
 
+  # ===== PostgreSQL 自訂 Image（含 init script + seed data）=====
+  docker-postgres:
+    name: Build PostgreSQL Image
+    needs: [backend-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: docker/postgres
+          file: docker/postgres/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO }}/hrms-postgres:latest
+            ${{ env.REGISTRY }}/${{ env.REPO }}/hrms-postgres:${{ github.sha }}
+
   # ===== 前端 Docker Image =====
   docker-frontend:
     name: Build Frontend Image
