@@ -9,12 +9,6 @@ COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 
 COPY . .
-
-# Azure 部署時透過 build-arg 設定 API base URL 指向 Gateway external URL
-# Docker Compose 不傳此參數，預設為 /api/v1（走 nginx proxy）
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
-
 RUN npm run build
 
 # ===== Stage 2: Nginx =====
@@ -26,4 +20,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+# DEPLOY_ENV: "compose"（預設）或 "azure"
+# azure 模式會把 nginx proxy_pass 改為用 resolver + internal FQDN
+ENV DEPLOY_ENV=compose
+
+CMD ["/bin/sh", "-c", "\
+  if [ \"$DEPLOY_ENV\" = \"azure\" ]; then \
+    sed -i 's|proxy_pass http://hrms-gateway:8080;|resolver 127.0.0.11 valid=5s ipv6=off;\\n        set $backend \"http://hrms-gateway\";\\n        proxy_pass $backend;|' /etc/nginx/conf.d/default.conf; \
+  fi && \
+  nginx -g 'daemon off;'"]
