@@ -167,6 +167,8 @@ jobs:
         with:
           context: frontend
           file: frontend/Dockerfile
+          build-args: |
+            VITE_API_BASE_URL=https://hrms-gateway.orangesmoke-bcd62134.eastasia.azurecontainerapps.io/api/v1
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.REPO }}/frontend:latest

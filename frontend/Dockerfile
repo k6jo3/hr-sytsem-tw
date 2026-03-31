@@ -9,6 +9,12 @@ COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 
 COPY . .
+
+# Azure 部署時透過 build-arg 設定 API base URL 指向 Gateway external URL
+# Docker Compose 不傳此參數，預設為 /api/v1（走 nginx proxy）
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
 RUN npm run build
 
 # ===== Stage 2: Nginx =====
