@@ -20,5 +20,5 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
-# 等待 Gateway DNS 可解析後再啟動 nginx（避免 DNS 快取失敗結果）
-CMD ["/bin/sh", "-c", "echo 'Waiting for gateway DNS...' && for i in $(seq 1 30); do nslookup hrms-gateway >/dev/null 2>&1 && break; echo \"Retry $i...\"; sleep 2; done && echo 'Gateway resolved, starting nginx' && nginx -g 'daemon off;'"]
+# 延遲 5 秒等 DNS resolver ready 後再啟動 nginx
+CMD ["/bin/sh", "-c", "sleep 5 && nginx -g 'daemon off;'"]
