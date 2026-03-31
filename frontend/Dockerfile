@@ -20,5 +20,4 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
-# 延遲 5 秒等 DNS resolver ready 後再啟動 nginx
-CMD ["/bin/sh", "-c", "sleep 5 && nginx -g 'daemon off;'"]
+CMD ["nginx", "-g", "daemon off;"]
