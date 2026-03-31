@@ -29,7 +29,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  * 不適用：hrms-iam（已有自訂 SecurityConfig，使用 @ConditionalOnMissingBean 自動跳過）
  */
 @Configuration
-@Profile("local")
+@Profile({"local", "docker"})
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class LocalSecurityAutoConfig {
