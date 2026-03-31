@@ -23,18 +23,20 @@ EXPOSE 80
 # DEPLOY_ENV: "compose"（預設）或 "azure"
 ENV DEPLOY_ENV=compose
 
-# azure 模式：nginx 的靜態 proxy_pass 用短名稱 hrms-gateway
-# 但系統 DNS（resolv.conf）能解析，nginx 也能
-# 只是需要等 Gateway DNS ready 才啟動 nginx
+# azure 模式：
+# 1. 從 /etc/resolv.conf 讀取 search domain
+# 2. 拼接完整 FQDN（hrms-gateway.<search-domain>）
+# 3. 用 resolver + set 變數讓 nginx 延遲解析（不在啟動時解析）
+# compose 模式：直接用 proxy_pass http://hrms-gateway:8080（docker network）
 CMD ["/bin/sh", "-c", "\
   if [ \"$DEPLOY_ENV\" = \"azure\" ]; then \
-    sed -i 's|http://hrms-gateway:8080|http://hrms-gateway|' /etc/nginx/conf.d/default.conf; \
-    echo 'Waiting for Gateway DNS...'; \
-    for i in $(seq 1 30); do \
-      wget -q -O /dev/null http://hrms-gateway/actuator/health 2>/dev/null && break; \
-      echo \"  Retry $i...\"; \
-      sleep 3; \
-    done; \
-    echo 'Gateway ready, starting nginx'; \
+    SEARCH=$(grep search /etc/resolv.conf | awk '{print $2}'); \
+    FQDN=\"hrms-gateway.${SEARCH:-k8se-apps.svc.cluster.local}\"; \
+    echo \"Gateway FQDN: ${FQDN}\"; \
+    sed -i \"s|proxy_pass http://hrms-gateway:8080;|resolver 127.0.0.11 valid=5s ipv6=off;\\n        set \\$backend \\\"http://${FQDN}\\\";\\n        proxy_pass \\$backend;|\" /etc/nginx/conf.d/default.conf; \
+    sed -i 's|proxy_set_header Host hrms-gateway;|proxy_set_header Host hrms-gateway;|' /etc/nginx/conf.d/default.conf; \
+    echo '--- nginx config ---'; \
+    grep -A3 proxy_pass /etc/nginx/conf.d/default.conf; \
+    echo '---'; \
   fi && \
   nginx -g 'daemon off;'"]
