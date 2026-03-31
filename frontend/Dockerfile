@@ -21,11 +21,11 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
 
 # DEPLOY_ENV: "compose"（預設）或 "azure"
-# azure 模式會把 nginx proxy_pass 改為用 resolver + internal FQDN
+# azure 模式：用 resolver + k8s FQDN 動態解析 Gateway
 ENV DEPLOY_ENV=compose
 
 CMD ["/bin/sh", "-c", "\
   if [ \"$DEPLOY_ENV\" = \"azure\" ]; then \
-    sed -i 's|proxy_pass http://hrms-gateway:8080;|resolver 127.0.0.11 valid=5s ipv6=off;\\n        set $backend \"http://hrms-gateway\";\\n        proxy_pass $backend;|' /etc/nginx/conf.d/default.conf; \
+    sed -i 's|proxy_pass http://hrms-gateway:8080;|resolver 127.0.0.11 valid=5s ipv6=off;\\n        set $backend \"http://hrms-gateway.k8se-apps.svc.cluster.local\";\\n        proxy_pass $backend;|' /etc/nginx/conf.d/default.conf; \
   fi && \
   nginx -g 'daemon off;'"]
