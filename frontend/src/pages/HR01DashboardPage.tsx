@@ -110,11 +110,13 @@ export const HR01DashboardPage: React.FC = () => {
         params: { page: 1, size: 1 },
         silent: true,
       }),
-      // 3. 假別餘額
-      apiClient.get<any>('/leave/balances', { silent: true }).catch(() => null),
+      // 3. 假別餘額（需帶 employeeId）
+      user?.employeeId
+        ? apiClient.get<any>(`/leave/balances/${user.employeeId}`, { silent: true }).catch(() => null)
+        : Promise.resolve(null),
       // 4. 簽核待處理
-      apiClient.get<any>('/workflows/instances', {
-        params: { status: 'PENDING', page: 1, size: 1 },
+      apiClient.get<any>('/workflows/pending-tasks', {
+        params: { page: 1, size: 1 },
         silent: true,
       }).catch(() => null),
       // 5. 公告列表

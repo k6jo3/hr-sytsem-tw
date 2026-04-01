@@ -19,7 +19,7 @@ echo "=========================================="
 
 # 啟動 Azure Database for PostgreSQL
 echo "啟動 PostgreSQL（Azure Flexible Server）..."
-az postgres flexible-server start --name $PG_SERVER --resource-group $RG --output none 2>/dev/null
+az postgres flexible-server start --name $PG_SERVER --resource-group $RG --output none 2>/dev/null || true
 log "PostgreSQL"
 
 # 啟動 Redis
