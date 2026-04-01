@@ -124,7 +124,7 @@ export class AuthApi {
    */
   static async getCurrentUser(): Promise<LoginResponse['user']> {
     if (MockConfig.isEnabled('AUTH')) return MockAuthApi.getCurrentUser();
-    const raw = await apiClient.get(`${this.BASE_PATH}/me`);
+    const raw = await apiClient.get('/profile');
     return adaptUserDto(raw);
   }
 

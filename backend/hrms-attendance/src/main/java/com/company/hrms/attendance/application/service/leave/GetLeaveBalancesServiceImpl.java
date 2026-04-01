@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 查詢員工假別餘額服務實作
  */
-@Service("getLeaveBalancesServiceImpl")
+@Service("getLeaveBalanceServiceImpl")
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
