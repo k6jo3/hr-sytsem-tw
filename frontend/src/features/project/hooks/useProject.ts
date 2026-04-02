@@ -57,11 +57,15 @@ export const useProject = (projectId?: string) => {
   };
 
   const updateTaskProgress = async (taskId: string, progress: number, status?: any) => {
-    // Note: status is optional here but often updated together in UI
+    // 修正：updateTaskProgress 需要 projectId，從 hook 參數取得
+    if (!projectId) {
+      setError('缺少 projectId，無法更新工項進度');
+      return false;
+    }
     setLoading(true);
     try {
-      await ProjectApi.updateTaskProgress(taskId, { progress, status });
-      if (projectId) await fetchTasks(projectId);
+      await ProjectApi.updateTaskProgress(projectId, taskId, { progress, status });
+      await fetchTasks(projectId);
       return true;
     } catch (err: any) {
       setError(err.message || '更新進度失敗');

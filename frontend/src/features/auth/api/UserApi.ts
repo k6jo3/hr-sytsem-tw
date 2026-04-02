@@ -179,17 +179,19 @@ export const UserApi = {
   },
 
   /**
-   * 刪除使用者
+   * 停用使用者（後端沒有 DELETE /users/{userId}，改為呼叫停用 API）
    */
   deleteUser: async (userId: string): Promise<SuccessResponse> => {
-    return apiClient.delete<SuccessResponse>(`${BASE_URL}/${userId}`);
+    // 修正：後端不支援刪除使用者，僅支援停用
+    return apiClient.put<SuccessResponse>(`${BASE_URL}/${userId}/deactivate`, {});
   },
 
   /**
-   * 批次操作使用者
+   * 批次停用使用者
+   * 修正：後端路徑為 PUT /users/batch-deactivate，非 POST /users/batch
    */
   batchAction: async (request: BatchUserActionRequest): Promise<SuccessResponse> => {
-    return apiClient.post<SuccessResponse>(`${BASE_URL}/batch`, request);
+    return apiClient.put<SuccessResponse>(`${BASE_URL}/batch-deactivate`, request);
   },
 
   /**
@@ -207,8 +209,14 @@ export const UserApi = {
 
   /**
    * 解鎖使用者
+   * TODO: 後端尚未實作 PUT /users/{userId}/unlock，待後端補上後移除 try-catch
    */
   unlockUser: async (userId: string): Promise<SuccessResponse> => {
-    return apiClient.put<SuccessResponse>(`${BASE_URL}/${userId}/unlock`, {});
+    try {
+      return await apiClient.put<SuccessResponse>(`${BASE_URL}/${userId}/unlock`, {});
+    } catch (err) {
+      console.warn(`[UserApi] unlockUser: 後端尚未實作此 API (PUT /users/${userId}/unlock)`);
+      throw new Error('功能尚未開放');
+    }
   },
 };

@@ -5,7 +5,7 @@
     <resultMap id="AttendanceRecordResultMap" type="com.company.hrms.attendance.infrastructure.po.AttendanceRecordPO">
         <id column="id" property="id"/>
         <result column="employee_id" property="employeeId"/>
-        <result column="date" property="date"/>
+        <result column="record_date" property="recordDate"/>
         <result column="check_in_time" property="checkInTime"/>
         <result column="check_out_time" property="checkOutTime"/>
         <result column="status" property="status"/>
@@ -22,7 +22,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, employee_id, date, check_in_time, check_out_time, status, 
+        id, employee_id, record_date, check_in_time, check_out_time, status,
         is_late, late_minutes, is_early_leave, early_leave_minutes, anomaly_type, is_corrected,
         created_at, updated_at, created_by, updated_by
     </sql>
@@ -36,22 +36,22 @@
     <select id="selectByEmployeeIdAndDate" resultMap="AttendanceRecordResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM attendance_records
-        WHERE employee_id = #{employeeId} AND date = #{date}
+        WHERE employee_id = #{employeeId} AND record_date = #{recordDate}
     </select>
 
     <select id="selectByEmployeeIdAndDateRange" resultMap="AttendanceRecordResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM attendance_records
-        WHERE employee_id = #{employeeId} AND date BETWEEN #{startDate} AND #{endDate}
+        WHERE employee_id = #{employeeId} AND record_date BETWEEN #{startDate} AND #{endDate}
     </select>
 
     <insert id="insert">
         INSERT INTO attendance_records (
-            id, employee_id, date, check_in_time, check_out_time, status,
+            id, employee_id, record_date, check_in_time, check_out_time, status,
             is_late, late_minutes, is_early_leave, early_leave_minutes, anomaly_type, is_corrected,
             created_at, updated_at, created_by, updated_by
         ) VALUES (
-            #{id}, #{employeeId}, #{date}, #{checkInTime}, #{checkOutTime}, #{status},
+            #{id}, #{employeeId}, #{recordDate}, #{checkInTime}, #{checkOutTime}, #{status},
             #{isLate}, #{lateMinutes}, #{isEarlyLeave}, #{earlyLeaveMinutes}, #{anomalyType}, #{isCorrected},
             #{createdAt}, #{updatedAt}, #{createdBy}, #{updatedBy}
         )
@@ -60,7 +60,7 @@
     <update id="update">
         UPDATE attendance_records SET
             employee_id = #{employeeId},
-            date = #{date},
+            record_date = #{recordDate},
             check_in_time = #{checkInTime},
             check_out_time = #{checkOutTime},
             status = #{status},

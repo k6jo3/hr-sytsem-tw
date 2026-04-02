@@ -336,10 +336,11 @@ export class ProjectApi {
   }
 
   /**
-   * PUT /api/v1/tasks/{id}/progress - 更新工項進度
+   * PUT /api/v1/projects/{projectId}/tasks/{taskId}/progress - 更新工項進度
+   * 修正：原路徑缺少 projectId，後端要求完整路徑含 projectId
    */
-  static async updateTaskProgress(taskId: string, request: UpdateTaskProgressRequest): Promise<void> {
+  static async updateTaskProgress(projectId: string, taskId: string, request: UpdateTaskProgressRequest): Promise<void> {
     // Mock not implemented yet
-    return apiClient.put(`/tasks/${taskId}/progress`, request);
+    return apiClient.put(`${this.BASE_PATH}/${projectId}/tasks/${taskId}/progress`, request);
   }
 }

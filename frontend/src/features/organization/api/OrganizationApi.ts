@@ -110,11 +110,12 @@ export const OrganizationApi = {
   },
 
   /**
-   * 刪除員工
+   * 離職員工（後端沒有 DELETE /employees/{id}，改為呼叫離職 API）
+   * 修正：後端不支援刪除員工，僅支援離職處理
    */
   deleteEmployee: (id: string): Promise<void> => {
     if (MockConfig.isEnabled('ORGANIZATION')) return MockOrganizationApi.deleteEmployee(id);
-    return apiClient.delete(`/employees/${id}`);
+    return apiClient.post(`/employees/${id}/terminate`, {});
   },
 
   // ========== 組織管理 API ==========

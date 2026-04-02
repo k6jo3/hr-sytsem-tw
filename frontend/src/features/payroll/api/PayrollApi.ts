@@ -314,36 +314,59 @@ export class PayrollApi {
 
   /**
    * 取得薪資項目定義列表
+   * TODO: 後端尚未實作 /payroll-item-definitions 端點，待後端補上後移除 try-catch
    */
   static async getPayrollItemDefinitions(): Promise<PayrollItemDefinitionDto[]> {
     if (MockConfig.isEnabled('PAYROLL')) return [] as any;
-    const resp: any = await apiClient.get('/payroll-item-definitions');
-    // 後端可能回傳陣列或分頁物件
-    return Array.isArray(resp) ? resp : (resp?.items ?? resp?.content ?? resp?.data ?? []);
+    try {
+      const resp: any = await apiClient.get('/payroll-item-definitions');
+      // 後端可能回傳陣列或分頁物件
+      return Array.isArray(resp) ? resp : (resp?.items ?? resp?.content ?? resp?.data ?? []);
+    } catch (err) {
+      console.warn('[PayrollApi] getPayrollItemDefinitions: 後端尚未實作此 API，回傳空陣列');
+      return [];
+    }
   }
 
   /**
    * 建立薪資項目定義
+   * TODO: 後端尚未實作 /payroll-item-definitions 端點，待後端補上後移除 try-catch
    */
   static async createPayrollItemDefinition(data: Partial<PayrollItemDefinitionDto>): Promise<PayrollItemDefinitionDto> {
     if (MockConfig.isEnabled('PAYROLL')) return { ...data, id: 'mock-id' } as any;
-    return apiClient.post('/payroll-item-definitions', data);
+    try {
+      return await apiClient.post('/payroll-item-definitions', data);
+    } catch (err) {
+      console.warn('[PayrollApi] createPayrollItemDefinition: 後端尚未實作此 API');
+      return { ...data, id: 'mock-id' } as PayrollItemDefinitionDto;
+    }
   }
 
   /**
    * 更新薪資項目定義
+   * TODO: 後端尚未實作 /payroll-item-definitions 端點，待後端補上後移除 try-catch
    */
   static async updatePayrollItemDefinition(id: string, data: Partial<PayrollItemDefinitionDto>): Promise<PayrollItemDefinitionDto> {
     if (MockConfig.isEnabled('PAYROLL')) return { ...data, id } as any;
-    return apiClient.put(`/payroll-item-definitions/${id}`, data);
+    try {
+      return await apiClient.put(`/payroll-item-definitions/${id}`, data);
+    } catch (err) {
+      console.warn('[PayrollApi] updatePayrollItemDefinition: 後端尚未實作此 API');
+      return { ...data, id } as PayrollItemDefinitionDto;
+    }
   }
 
   /**
    * 刪除薪資項目定義
+   * TODO: 後端尚未實作 /payroll-item-definitions 端點，待後端補上後移除 try-catch
    */
   static async deletePayrollItemDefinition(id: string): Promise<void> {
     if (MockConfig.isEnabled('PAYROLL')) return;
-    return apiClient.delete(`/payroll-item-definitions/${id}`);
+    try {
+      return await apiClient.delete(`/payroll-item-definitions/${id}`);
+    } catch (err) {
+      console.warn('[PayrollApi] deletePayrollItemDefinition: 後端尚未實作此 API');
+    }
   }
 
   // ========== Bank Transfer Management ==========

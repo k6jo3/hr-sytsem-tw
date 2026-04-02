@@ -115,7 +115,8 @@ export class AuthApi {
    */
   static async refreshToken(refreshToken: string): Promise<LoginResponse> {
     // Mock impl skipped
-    const raw = await apiClient.post(`${this.BASE_PATH}/refresh`, { refreshToken });
+    // 修正：後端路徑為 /auth/refresh-token，非 /auth/refresh
+    const raw = await apiClient.post(`${this.BASE_PATH}/refresh-token`, { refreshToken });
     return adaptLoginResponse(raw);
   }
 

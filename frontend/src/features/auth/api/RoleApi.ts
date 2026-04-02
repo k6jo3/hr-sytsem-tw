@@ -174,9 +174,14 @@ export const RoleApi = {
 
   /**
    * 啟用/停用角色
+   * 修正：後端不支援 PATCH /roles/{roleId}，改為根據 isActive 判斷呼叫 activate 或 deactivate
    */
   toggleRoleStatus: async (roleId: string, isActive: boolean): Promise<SuccessResponse> => {
-    return apiClient.patch<SuccessResponse>(`${ROLE_URL}/${roleId}`, { is_active: isActive });
+    if (isActive) {
+      return apiClient.put<SuccessResponse>(`${ROLE_URL}/${roleId}/activate`, {});
+    } else {
+      return apiClient.put<SuccessResponse>(`${ROLE_URL}/${roleId}/deactivate`, {});
+    }
   },
 
   // ========== Permission Query ==========
