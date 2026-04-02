@@ -174,14 +174,24 @@ function adaptDashboardDto(raw: any): RecruitmentDashboardDto {
   };
 }
 
-/** 後端 Spring Page → 前端分頁格式 */
+/** 後端 Spring Page → 前端分頁格式
+ * 相容多種回應結構：
+ *   1. Spring Page 直接回傳：{ content: [], totalElements, number, size }
+ *   2. 包裝在 ApiResponse.data 中：{ data: { content: [], totalElements, ... } }
+ *   3. data 直接是陣列：{ data: [] }
+ */
 function adaptPage<T>(raw: any, adaptFn: (item: any) => T): { data: T[]; total: number; page: number; page_size: number } {
-  const content = raw.content ?? raw.data ?? [];
+  // raw.data 若為 Spring Page 物件（有 content 欄位），則向下再取一層
+  const page = (raw.data && !Array.isArray(raw.data) && raw.data.content !== undefined)
+    ? raw.data
+    : raw;
+  const content = page.content ?? (Array.isArray(raw.data) ? raw.data : null) ?? [];
+  const safeContent = Array.isArray(content) ? content : [];
   return {
-    data: content.map(adaptFn),
-    total: raw.totalElements ?? raw.total ?? content.length,
-    page: (raw.number ?? raw.page ?? 0) + 1,
-    page_size: raw.size ?? raw.page_size ?? content.length,
+    data: safeContent.map(adaptFn),
+    total: page.totalElements ?? raw.total ?? page.total ?? safeContent.length,
+    page: (page.number ?? raw.page ?? 0) + 1,
+    page_size: page.size ?? raw.page_size ?? safeContent.length,
   };
 }
 
