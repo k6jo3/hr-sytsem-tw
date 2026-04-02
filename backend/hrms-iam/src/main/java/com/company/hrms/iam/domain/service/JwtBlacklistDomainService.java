@@ -23,6 +23,7 @@ public class JwtBlacklistDomainService {
 
     /**
      * 將 Token 加入黑名單
+     * Redis 不可用時靜默忽略（允許登出重試）
      *
      * @param token      JWT Token 字串
      * @param expiryTime Token 過期時間 (Unix Timestamp，毫秒)
@@ -33,19 +34,29 @@ public class JwtBlacklistDomainService {
 
         if (ttl > 0) {
             String key = BLACKLIST_PREFIX + token;
-            redisTemplate.opsForValue().set(key, "revoked", ttl, TimeUnit.MILLISECONDS);
-            log.debug("Token added to blacklist: {}, TTL: {} ms", token, ttl);
+            try {
+                redisTemplate.opsForValue().set(key, "revoked", ttl, TimeUnit.MILLISECONDS);
+                log.debug("Token added to blacklist: {}, TTL: {} ms", token, ttl);
+            } catch (Exception e) {
+                log.warn("Redis 不可用，無法將 Token 加入黑名單（已忽略）: {}", e.getMessage());
+            }
         }
     }
 
     /**
      * 檢查 Token 是否在黑名單中
+     * Redis 不可用時回傳 false（允許 Token 繼續使用，避免因 Redis 故障而全面封鎖）
      *
      * @param token JWT Token 字串
-     * @return true 若 Token 在黑名單中
+     * @return true 若 Token 在黑名單中；Redis 不可用時回傳 false
      */
     public boolean isTokenBlacklisted(String token) {
         String key = BLACKLIST_PREFIX + token;
-        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+        try {
+            return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+        } catch (Exception e) {
+            log.warn("Redis 不可用，跳過黑名單檢查（允許 Token 繼續使用）: {}", e.getMessage());
+            return false;
+        }
     }
 }
