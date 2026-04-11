@@ -69,14 +69,16 @@ jobs:
           </toolchains>
           EOF
 
-      - name: Build & install common module
-        run: mvn install -pl hrms-common -B -q
+      - name: Install parent pom & common module
+        run: |
+          mvn install -N -B -q
+          mvn install -pl hrms-common -B -q
 
-      - name: Cache common artifacts
+      - name: Cache HRMS artifacts
         uses: actions/cache/save@v4
         with:
-          path: ~/.m2/repository/com/company/hrms/hrms-common
-          key: hrms-common-${{ github.sha }}
+          path: ~/.m2/repository/com/company/hrms
+          key: hrms-artifacts-${{ github.sha }}
 
   # ===== 後端測試（14 模組並行） =====
   backend-test:
@@ -127,11 +129,11 @@ jobs:
           </toolchains>
           EOF
 
-      - name: Restore common artifacts
+      - name: Restore HRMS artifacts
         uses: actions/cache/restore@v4
         with:
-          path: ~/.m2/repository/com/company/hrms/hrms-common
-          key: hrms-common-${{ github.sha }}
+          path: ~/.m2/repository/com/company/hrms
+          key: hrms-artifacts-${{ github.sha }}
 
       - name: Enable Testcontainers reuse
         run: echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
