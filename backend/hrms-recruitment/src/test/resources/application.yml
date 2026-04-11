@@ -1,15 +1,20 @@
+# Test Configuration for Recruitment Service
+# datasource URL/driver/username/password 由 Testcontainers @DynamicPropertySource 動態覆蓋
 spring:
   application:
     name: hrms-recruitment-test
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driverClassName: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/hrms_test
+    driver-class-name: org.postgresql.Driver
+    username: test
+    password: test
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   cloud:
     discovery:
       enabled: false

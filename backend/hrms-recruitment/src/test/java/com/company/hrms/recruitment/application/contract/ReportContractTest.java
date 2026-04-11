@@ -11,7 +11,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 
 /**
  * 招募報表 API 合約測試
@@ -24,6 +28,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @DisplayName("招募報表 API 合約測試")
 
 public class ReportContractTest {
+
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     @Autowired
     private MockMvc mockMvc;

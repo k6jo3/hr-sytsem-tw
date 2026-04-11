@@ -33,6 +33,7 @@ import com.company.hrms.common.test.base.BaseApiIntegrationTest;
 @AutoConfigureMockMvc(addFilters = false)
 @Transactional
 @Sql(scripts = {
+		"classpath:test-data/schema-test.sql",
 		"classpath:test-data/cleanup.sql",
 		"classpath:test-data/attendance_base_data.sql",
 		"classpath:test-data/overtime_test_data.sql"

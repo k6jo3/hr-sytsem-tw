@@ -15,8 +15,11 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.notification.domain.model.aggregate.Notification;
 import com.company.hrms.notification.domain.model.valueobject.NotificationId;
 import com.company.hrms.notification.domain.model.valueobject.NotificationStatus;
@@ -46,6 +49,11 @@ import com.company.hrms.notification.domain.repository.INotificationRepository;
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("Notification Repository 整合測試")
 class NotificationRepositoryIntegrationTest {
+
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     // 避免 WebSocket 相關 Bean 在測試環境中啟動失敗
     @MockBean

@@ -16,8 +16,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import com.company.hrms.common.query.QueryGroup;
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.common.test.assertion.QueryGroupAssert;
 
 /**
@@ -105,6 +108,12 @@ import com.company.hrms.common.test.assertion.QueryGroupAssert;
 @ActiveProfiles("test")
 
 public abstract class BaseRepositoryTest extends BaseTest {
+
+    // Testcontainers：動態覆蓋 datasource 設定，指向共用 PostgreSQL 容器
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     @Autowired
     protected TestEntityManager entityManager;

@@ -1,7 +1,9 @@
 -- Organization 測試資料
 -- 涵蓋 14 個員工，滿足 OrganizationContractTest 的各種查詢場景
 
--- 1. 清理資料 (已由 cleanup.sql 處理，此處為雙重保險)
+-- 1. 清理資料 (處理循環 FK: departments.manager_id -> employees, employees.department_id -> departments)
+UPDATE departments SET manager_id = NULL WHERE manager_id IS NOT NULL;
+DELETE FROM employee_history;
 DELETE FROM employees;
 DELETE FROM departments;
 

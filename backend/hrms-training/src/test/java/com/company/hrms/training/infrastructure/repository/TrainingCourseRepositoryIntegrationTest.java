@@ -11,8 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.training.domain.model.aggregate.TrainingCourse;
 import com.company.hrms.training.domain.model.valueobject.CourseId;
 import com.company.hrms.training.domain.repository.ITrainingCourseRepository;
@@ -38,6 +41,11 @@ import com.company.hrms.training.domain.repository.ITrainingCourseRepository;
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("TrainingCourse Repository 整合測試")
 class TrainingCourseRepositoryIntegrationTest {
+
+        @DynamicPropertySource
+        static void configureDatabase(DynamicPropertyRegistry registry) {
+            SharedPostgreSQLContainer.registerProperties(registry);
+        }
 
         @Autowired
         private ITrainingCourseRepository trainingCourseRepository;

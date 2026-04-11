@@ -18,8 +18,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.notification.api.request.notification.SendNotificationRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +50,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @DisplayName("HR12NotificationCmdController API 測試")
 
 class HR12NotificationCmdControllerTest {
+
+        @DynamicPropertySource
+        static void configureDatabase(DynamicPropertyRegistry registry) {
+            SharedPostgreSQLContainer.registerProperties(registry);
+        }
 
         @Autowired
         private MockMvc mockMvc;

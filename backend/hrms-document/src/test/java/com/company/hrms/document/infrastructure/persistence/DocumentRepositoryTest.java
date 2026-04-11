@@ -11,8 +11,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.document.domain.model.Document;
@@ -23,6 +26,11 @@ import com.company.hrms.document.domain.model.IDocumentRepository;
 @ActiveProfiles("test")
 @Transactional
 class DocumentRepositoryTest {
+
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     @Autowired
     private IDocumentRepository repository;

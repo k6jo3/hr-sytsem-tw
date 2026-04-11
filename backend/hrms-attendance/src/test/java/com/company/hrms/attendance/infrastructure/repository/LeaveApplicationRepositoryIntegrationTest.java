@@ -19,6 +19,7 @@ import com.company.hrms.attendance.domain.model.aggregate.LeaveApplication;
 import com.company.hrms.attendance.domain.model.valueobject.ApplicationId;
 import com.company.hrms.attendance.domain.model.valueobject.ApplicationStatus;
 import com.company.hrms.attendance.domain.repository.ILeaveApplicationRepository;
+import com.company.hrms.common.test.base.BaseIntegrationTest;
 
 /**
  * LeaveApplication Repository 整合測試
@@ -40,10 +41,13 @@ import com.company.hrms.attendance.domain.repository.ILeaveApplicationRepository
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-@Sql(scripts = "classpath:test-data/leave_application_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {
+        "classpath:test-data/schema-test.sql",
+        "classpath:test-data/leave_application_test_data.sql"
+}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("LeaveApplication Repository 整合測試")
-class LeaveApplicationRepositoryIntegrationTest {
+class LeaveApplicationRepositoryIntegrationTest extends BaseIntegrationTest {
 
         @Autowired
         private ILeaveApplicationRepository leaveApplicationRepository;

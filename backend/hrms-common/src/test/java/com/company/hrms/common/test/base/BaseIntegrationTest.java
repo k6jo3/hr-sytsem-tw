@@ -2,6 +2,10 @@ package com.company.hrms.common.test.base;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 
 /**
  * 整合測試基類
@@ -17,6 +21,12 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("test")
 public abstract class BaseIntegrationTest extends BaseTest {
+
+    // Testcontainers：動態覆蓋 datasource 設定，指向共用 PostgreSQL 容器
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     /**
      * 等待非同步操作完成

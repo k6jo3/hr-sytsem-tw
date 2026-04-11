@@ -49,6 +49,7 @@
         <querydsl.version>5.0.0</querydsl.version>
         <lombok.version>1.18.30</lombok.version>
         <jedis-mock.version>1.1.4</jedis-mock.version>
+        <testcontainers.version>1.19.3</testcontainers.version>
         <h2.scope>test</h2.scope>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -158,6 +159,15 @@
                 <artifactId>mockito-junit-jupiter</artifactId>
                 <version>5.8.0</version>
             </dependency>
+
+            <!-- Testcontainers BOM -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -178,6 +188,28 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testcontainers（所有模組繼承） -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -263,7 +295,7 @@
             <artifactId>maven-compiler-plugin</artifactId>
         </plugin>
 
-        <!-- Maven Surefire Plugin: 實際使用（jvm 設定確保測試用 JDK 21） -->
+        <!-- Maven Surefire Plugin: 測試執行設定 -->
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>

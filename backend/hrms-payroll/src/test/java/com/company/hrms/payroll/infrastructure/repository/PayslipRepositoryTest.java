@@ -13,7 +13,10 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.common.infrastructure.persistence.querydsl.config.QuerydslConfig;
 import com.company.hrms.payroll.domain.model.aggregate.Payslip;
 import com.company.hrms.payroll.domain.model.entity.PayslipItem;
@@ -27,6 +30,11 @@ import com.company.hrms.payroll.domain.repository.IPayslipRepository;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 @ActiveProfiles("test")
 class PayslipRepositoryTest {
+
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     @Autowired
     private IPayslipRepository repository;

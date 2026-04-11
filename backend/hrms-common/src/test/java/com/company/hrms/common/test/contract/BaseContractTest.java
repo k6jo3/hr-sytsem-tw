@@ -22,6 +22,12 @@ import com.company.hrms.common.query.QueryGroup;
 
 public abstract class BaseContractTest {
 
+    // Testcontainers：Spring Context 啟動時需要有效的 datasource
+    @org.springframework.test.context.DynamicPropertySource
+    static void configureDatabase(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.company.hrms.common.test.container.SharedPostgreSQLContainer.registerProperties(registry);
+    }
+
     /** 合約規格根目錄 */
     protected static final String CONTRACT_SPEC_ROOT = "spec/contracts";
 

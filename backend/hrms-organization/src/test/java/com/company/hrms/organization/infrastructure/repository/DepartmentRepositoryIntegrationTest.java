@@ -11,9 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.organization.domain.model.aggregate.Department;
 import com.company.hrms.organization.domain.model.valueobject.DepartmentId;
 import com.company.hrms.organization.domain.model.valueobject.OrganizationId;
@@ -40,10 +43,19 @@ import com.company.hrms.organization.domain.repository.IDepartmentRepository;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-@Sql(scripts = "classpath:test-data/department_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {
+        "classpath:test-data/organization_base_data.sql",
+        "classpath:test-data/department_test_data.sql"
+}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("Department Repository 整合測試")
 class DepartmentRepositoryIntegrationTest {
+
+        // Testcontainers：動態覆蓋 datasource 設定，指向共用 PostgreSQL 容器
+        @DynamicPropertySource
+        static void configureDatabase(DynamicPropertyRegistry registry) {
+                SharedPostgreSQLContainer.registerProperties(registry);
+        }
 
         @Autowired
         private IDepartmentRepository departmentRepository;

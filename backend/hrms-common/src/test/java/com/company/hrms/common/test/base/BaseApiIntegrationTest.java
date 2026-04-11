@@ -12,7 +12,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,6 +115,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Transactional
 
 public abstract class BaseApiIntegrationTest extends BaseTest {
+
+    // Testcontainers：動態覆蓋 datasource 設定，指向共用 PostgreSQL 容器
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     @Autowired
     protected MockMvc mockMvc;
