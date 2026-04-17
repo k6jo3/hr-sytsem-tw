@@ -11,12 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.common.test.base.BaseTest;
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.organization.domain.model.aggregate.Employee;
 import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 
@@ -44,6 +47,12 @@ import com.company.hrms.organization.domain.repository.IEmployeeRepository;
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("Employee Repository 整合測試")
 class EmployeeRepositoryIntegrationTest extends BaseTest {
+
+        // Testcontainers：動態覆蓋 datasource 設定，指向共用 PostgreSQL 容器
+        @DynamicPropertySource
+        static void configureDatabase(DynamicPropertyRegistry registry) {
+                SharedPostgreSQLContainer.registerProperties(registry);
+        }
 
         @Autowired
         private IEmployeeRepository employeeRepository;

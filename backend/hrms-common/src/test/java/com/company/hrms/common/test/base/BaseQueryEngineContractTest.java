@@ -10,7 +10,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
@@ -65,6 +69,12 @@ import com.company.hrms.common.query.QueryGroup;
 @ActiveProfiles("test")
 @Transactional
 public abstract class BaseQueryEngineContractTest<T> extends BaseTest {
+
+    // Testcontainers：動態覆蓋 datasource 設定，指向共用 PostgreSQL 容器
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     /**
      * 取得測試資料 SQL 腳本路徑

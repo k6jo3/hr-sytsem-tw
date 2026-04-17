@@ -5,6 +5,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 
 /**
  * Reporting 服務應用程式啟動測試
@@ -24,6 +28,11 @@ import org.springframework.test.context.ActiveProfiles;
 @DisplayName("Reporting 服務啟動測試")
 @Disabled("需要完整的基礎設施環境，待整合測試環境建立後啟用")
 class ReportingApplicationTest {
+
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     @Test
     @DisplayName("Spring Context 應能正確載入")

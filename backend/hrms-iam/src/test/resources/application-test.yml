@@ -1,32 +1,26 @@
 # Test Configuration for IAM Service
+# datasource URL/driver/username/password 由 Testcontainers @DynamicPropertySource 動態覆蓋
 spring:
   datasource:
-    # 使用 H2 In-Memory Database (PostgreSQL 相容模式)
-    # DATABASE_TO_LOWER=TRUE: 保持欄位名稱小寫（PostgreSQL 預設行為）
-    # CASE_INSENSITIVE_IDENTIFIERS=TRUE: 不區分大小寫
-    # 直接使用 iam_base_data.sql 來初始化（包含 CREATE TABLE + 測試資料）
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    # 預設值（會被 Testcontainers 覆蓋）
+    url: jdbc:postgresql://localhost:5432/hrms_test
+    driver-class-name: org.postgresql.Driver
+    username: test
+    password: test
 
   # 使用 @Sql 註解載入測試資料
   sql:
     init:
       mode: never
 
-  h2:
-    console:
-      enabled: false
-
   jpa:
     hibernate:
-      # 使用 none，因為我們已經有 schema-test.sql
+      # none：schema 由 @Sql 的 SQL script 管理（CREATE TABLE IF NOT EXISTS）
       ddl-auto: none
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
   autoconfigure:

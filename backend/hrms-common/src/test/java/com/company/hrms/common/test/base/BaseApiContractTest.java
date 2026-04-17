@@ -55,6 +55,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class BaseApiContractTest extends BaseContractTest {
 
+    // Testcontainers：雖然合約測試 Mock Repository，但 Spring Context 啟動仍需 datasource
+    @org.springframework.test.context.DynamicPropertySource
+    static void configureDatabase(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.company.hrms.common.test.container.SharedPostgreSQLContainer.registerProperties(registry);
+    }
+
     @Autowired
     protected MockMvc mockMvc;
 

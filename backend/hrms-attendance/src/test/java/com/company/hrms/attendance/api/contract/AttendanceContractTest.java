@@ -56,6 +56,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 @Sql(scripts = {
+                "classpath:test-data/schema-test.sql",
                 "classpath:test-data/attendance_base_data.sql",
                 "classpath:test-data/attendance_test_data.sql"
 }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)

@@ -12,8 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.common.model.JWTModel;
 import com.company.hrms.notification.api.request.notification.SendBatchNotificationRequest;
 import com.company.hrms.notification.api.response.notification.SendBatchNotificationResponse;
@@ -39,6 +42,11 @@ import com.company.hrms.notification.api.response.notification.SendBatchNotifica
 @Transactional
 @DisplayName("SendBatchNotificationService 測試")
 class SendBatchNotificationServiceTest {
+
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        SharedPostgreSQLContainer.registerProperties(registry);
+    }
 
     @Autowired
     private SendBatchNotificationServiceImpl sendBatchNotificationService;

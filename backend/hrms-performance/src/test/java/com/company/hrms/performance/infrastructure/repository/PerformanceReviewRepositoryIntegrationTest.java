@@ -14,8 +14,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
 import com.company.hrms.performance.domain.model.aggregate.PerformanceReview;
@@ -47,6 +50,11 @@ import com.company.hrms.performance.domain.repository.IPerformanceReviewReposito
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("PerformanceReview Repository 整合測試")
 class PerformanceReviewRepositoryIntegrationTest {
+
+        @DynamicPropertySource
+        static void configureDatabase(DynamicPropertyRegistry registry) {
+            SharedPostgreSQLContainer.registerProperties(registry);
+        }
 
         @Autowired
         private IPerformanceReviewRepository performanceReviewRepository;

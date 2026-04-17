@@ -1,20 +1,8 @@
 -- Attendance 測試資料
 -- 用於 Repository 整合測試
+-- 注意: 資料表結構由 schema-test.sql 建立，此處僅負責資料
 
 -- 清除舊資料
-CREATE TABLE IF NOT EXISTS leave_balances (
-    id VARCHAR(50) NOT NULL PRIMARY KEY,
-    employee_id VARCHAR(50) NOT NULL,
-    leave_type_id VARCHAR(50) NOT NULL,
-    "year" INT NOT NULL,
-    total_days DECIMAL(5,2),
-    used_days DECIMAL(5,2),
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP,
-    created_by VARCHAR(50),
-    updated_by VARCHAR(50)
-);
-
 DELETE FROM leave_balances;
 DELETE FROM leave_applications;
 DELETE FROM overtime_applications;

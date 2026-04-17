@@ -47,6 +47,7 @@ import com.company.hrms.common.test.base.BaseApiIntegrationTest;
 @ActiveProfiles("test")
 @Transactional
 @Sql(scripts = {
+		"classpath:test-data/schema-test.sql",
 		"classpath:test-data/attendance_base_data.sql",
 		"classpath:test-data/checkin_test_data.sql"
 }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)

@@ -145,20 +145,18 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- 2. Clear existing test data (H2 相容語法：關閉外鍵檢查 → 刪除資料 → 重啟外鍵檢查)
-SET REFERENTIAL_INTEGRITY FALSE;
-TRUNCATE TABLE password_reset_tokens;
-TRUNCATE TABLE role_permissions;
-TRUNCATE TABLE user_roles;
-TRUNCATE TABLE refresh_tokens;
-TRUNCATE TABLE login_logs;
-TRUNCATE TABLE user_sso_links;
-TRUNCATE TABLE password_history;
-TRUNCATE TABLE users;
-TRUNCATE TABLE permissions;
-TRUNCATE TABLE roles;
-TRUNCATE TABLE tenants;
-SET REFERENTIAL_INTEGRITY TRUE;
+-- 2. Clear existing test data（PostgreSQL 相容語法：TRUNCATE CASCADE）
+TRUNCATE TABLE password_reset_tokens CASCADE;
+TRUNCATE TABLE role_permissions CASCADE;
+TRUNCATE TABLE user_roles CASCADE;
+TRUNCATE TABLE refresh_tokens CASCADE;
+TRUNCATE TABLE login_logs CASCADE;
+TRUNCATE TABLE user_sso_links CASCADE;
+TRUNCATE TABLE password_history CASCADE;
+TRUNCATE TABLE users CASCADE;
+TRUNCATE TABLE permissions CASCADE;
+TRUNCATE TABLE roles CASCADE;
+TRUNCATE TABLE tenants CASCADE;
 
 -- 3. Insert Basic Data (因為已經 TRUNCATE，直接 INSERT)
 INSERT INTO tenants (tenant_id, tenant_name, tenant_code, status) VALUES

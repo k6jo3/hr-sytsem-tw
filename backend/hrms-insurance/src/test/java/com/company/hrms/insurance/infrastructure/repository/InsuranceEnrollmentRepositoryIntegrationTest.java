@@ -13,8 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.insurance.domain.model.aggregate.InsuranceEnrollment;
 import com.company.hrms.insurance.domain.model.valueobject.EnrollmentId;
 import com.company.hrms.insurance.domain.model.valueobject.EnrollmentStatus;
@@ -45,6 +48,11 @@ import com.company.hrms.insurance.domain.repository.IInsuranceEnrollmentReposito
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("InsuranceEnrollment Repository 整合測試")
 class InsuranceEnrollmentRepositoryIntegrationTest {
+
+        @DynamicPropertySource
+        static void configureDatabase(DynamicPropertyRegistry registry) {
+            SharedPostgreSQLContainer.registerProperties(registry);
+        }
 
         @Autowired
         private IInsuranceEnrollmentRepository enrollmentRepository;

@@ -11,9 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.company.hrms.common.test.container.SharedPostgreSQLContainer;
 import com.company.hrms.iam.domain.model.aggregate.Role;
 import com.company.hrms.iam.domain.model.valueobject.RoleId;
 import com.company.hrms.iam.domain.model.valueobject.RoleStatus;
@@ -46,6 +49,11 @@ import com.company.hrms.iam.domain.repository.IRoleRepository;
 @DisplayName("Role Repository 整合測試")
 
 class RoleRepositoryIntegrationTest {
+
+        @DynamicPropertySource
+        static void configureDatabase(DynamicPropertyRegistry registry) {
+                SharedPostgreSQLContainer.registerProperties(registry);
+        }
 
         @Autowired
         private IRoleRepository roleRepository;

@@ -19,7 +19,7 @@ import com.company.hrms.attendance.domain.model.aggregate.AttendanceRecord;
 import com.company.hrms.attendance.domain.repository.IAttendanceRecordRepository;
 import com.company.hrms.common.query.QueryBuilder;
 import com.company.hrms.common.query.QueryGroup;
-import com.company.hrms.common.test.base.BaseTest;
+import com.company.hrms.common.test.base.BaseIntegrationTest;
 
 /**
  * AttendanceRecord Repository 整合測試
@@ -40,10 +40,13 @@ import com.company.hrms.common.test.base.BaseTest;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
-@Sql(scripts = "classpath:test-data/attendance_test_data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {
+        "classpath:test-data/schema-test.sql",
+        "classpath:test-data/attendance_test_data.sql"
+}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = "classpath:test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @DisplayName("AttendanceRecord Repository 整合測試")
-class AttendanceRecordRepositoryIntegrationTest extends BaseTest {
+class AttendanceRecordRepositoryIntegrationTest extends BaseIntegrationTest {
 
         @Autowired
         private IAttendanceRecordRepository attendanceRecordRepository;
